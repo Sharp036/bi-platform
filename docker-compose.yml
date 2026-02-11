@@ -1,0 +1,96 @@
+version: '3.9'
+
+# ══════════════════════════════════════════════════
+#  DataLens BI — Docker Compose
+# ══════════════════════════════════════════════════
+#
+#  Services:
+#    - datalens    : The BI application (Spring Boot)
+#    - postgres    : Metadata store (users, reports, etc.)
+#    - clickhouse  : Sample analytical DB (for development)
+#
+#  Usage:
+#    docker-compose up -d                    # start all
+#    docker-compose up -d datalens postgres  # without ClickHouse
+#    docker-compose logs -f datalens         # follow logs
+#
+# ══════════════════════════════════════════════════
+
+services:
+  # ── DataLens BI Application ──
+  datalens:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datalens-bi
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: datalens
+      DB_USER: datalens
+      DB_PASSWORD: ${DB_PASSWORD:-datalens_secret}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production_at_least_32_characters_long}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@datalens.local}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - datalens-net
+
+  # ── PostgreSQL (Metadata Store) ──
+  postgres:
+    image: postgres:16-alpine
+    container_name: datalens-postgres
+    environment:
+      POSTGRES_DB: datalens
+      POSTGRES_USER: datalens
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-datalens_secret}
+    ports:
+      - "${PG_PORT:-5433}:5432"  # 5433 to avoid conflict with host PG
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datalens"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - datalens-net
+
+  # ── ClickHouse (Sample Analytical DB) ──
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: datalens-clickhouse
+    ports:
+      - "${CH_HTTP_PORT:-8123}:8123"
+      - "${CH_NATIVE_PORT:-9000}:9000"
+    volumes:
+      - ch_data:/var/lib/clickhouse
+      - ./docker/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ${CH_PASSWORD:-clickhouse}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - datalens-net
+
+volumes:
+  pg_data:
+  ch_data:
+
+networks:
+  datalens-net:
+    driver: bridge

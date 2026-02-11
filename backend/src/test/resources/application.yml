@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: test
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:datalens_test}
+    username: ${DB_USER:datalens}
+    password: ${DB_PASSWORD:test}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+datalens:
+  jwt:
+    secret: test_secret_at_least_32_characters_long_for_jwt_signing
+    access-token-expiration: 3600000
+    refresh-token-expiration: 604800000
+  admin:
+    username: admin
+    password: admin
+    email: admin@test.local
