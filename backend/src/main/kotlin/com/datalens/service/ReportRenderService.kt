@@ -34,7 +34,7 @@ class ReportRenderService(
      * Render a full report: execute all visible widget queries and return data.
      */
     @Transactional(readOnly = true)
-    fun renderReport(reportId: Long, request: RenderReportRequest, userId: Long): RenderReportResponse {
+    fun renderReport(reportId: Long, request: RenderReportRequest, username: String): RenderReportResponse {
         val startMs = System.currentTimeMillis()
 
         val report = reportRepo.findById(reportId)
@@ -47,7 +47,7 @@ class ReportRenderService(
         val widgets = widgetRepo.findByReportIdOrderBySortOrder(reportId)
         val renderedWidgets = widgets
             .filter { it.isVisible }
-            .map { widget -> renderWidget(widget, resolvedParams, userId) }
+            .map { widget -> renderWidget(widget, resolvedParams, username) }
 
         val totalMs = System.currentTimeMillis() - startMs
         log.info("Rendered report '{}' (id={}) with {} widgets in {}ms",
@@ -66,12 +66,12 @@ class ReportRenderService(
      * Render and save a snapshot (for scheduling or manual snapshots).
      */
     @Transactional
-    fun renderAndSnapshot(reportId: Long, params: Map<String, Any?>, userId: Long,
+    fun renderAndSnapshot(reportId: Long, params: Map<String, Any?>, username: String,
                           scheduleId: Long? = null, outputFormat: OutputFormat = OutputFormat.JSON): ReportSnapshot {
         val startMs = System.currentTimeMillis()
 
         return try {
-            val renderResult = renderReport(reportId, RenderReportRequest(params), userId)
+            val renderResult = renderReport(reportId, RenderReportRequest(params), username)
 
             val snapshot = ReportSnapshot(
                 reportId = reportId,
@@ -81,7 +81,7 @@ class ReportRenderService(
                 outputFormat = outputFormat,
                 status = "SUCCESS",
                 executionMs = System.currentTimeMillis() - startMs,
-                createdBy = userId
+                createdBy = null
             )
             snapshotRepo.save(snapshot)
         } catch (e: Exception) {
@@ -94,7 +94,7 @@ class ReportRenderService(
                 status = "ERROR",
                 executionMs = System.currentTimeMillis() - startMs,
                 errorMessage = e.message,
-                createdBy = userId
+                createdBy = null
             )
             snapshotRepo.save(snapshot)
         }
@@ -142,10 +142,10 @@ class ReportRenderService(
         return resolved
     }
 
-    private fun renderWidget(widget: ReportWidget, reportParams: Map<String, Any?>, userId: Long): RenderedWidget {
+    private fun renderWidget(widget: ReportWidget, reportParams: Map<String, Any?>, username: String): RenderedWidget {
         return try {
             val widgetParams = mapWidgetParams(widget, reportParams)
-            val data = executeWidgetQuery(widget, widgetParams, userId)
+            val data = executeWidgetQuery(widget, widgetParams, username)
 
             RenderedWidget(
                 widgetId = widget.id,
@@ -207,7 +207,7 @@ class ReportRenderService(
      * Execute the query associated with a widget.
      * Priority: queryId > rawSql > null (TEXT/IMAGE widgets have no data)
      */
-    private fun executeWidgetQuery(widget: ReportWidget, params: Map<String, Any?>, userId: Long): WidgetData? {
+    private fun executeWidgetQuery(widget: ReportWidget, params: Map<String, Any?>, username: String): WidgetData? {
         // Non-data widgets
         if (widget.widgetType in listOf(WidgetType.TEXT, WidgetType.IMAGE)) {
             return null
@@ -221,11 +221,11 @@ class ReportRenderService(
                 val result = savedQueryService.executeSavedQuery(
                     queryId = widget.queryId!!,
                     parameters = params,
-                    userId = userId,
+                    username = username,
                     ipAddress = "system"
                 )
                 return WidgetData(
-                    columns = result.columns,
+                    columns = result.columns.map { it.name },
                     rows = result.rows,
                     rowCount = result.rowCount,
                     executionMs = System.currentTimeMillis() - startMs
@@ -234,15 +234,19 @@ class ReportRenderService(
 
             // Widget with inline SQL
             widget.rawSql != null && widget.datasourceId != null -> {
-                val result = savedQueryService.executeAdHocQuery(
+                val request = QueryExecuteRequest(
                     datasourceId = widget.datasourceId!!,
                     sql = widget.rawSql!!,
                     parameters = params,
-                    userId = userId,
+                    limit = 10000
+                )
+                val result = savedQueryService.executeAdHocQuery(
+                    request = request,
+                    username = username,
                     ipAddress = "system"
                 )
                 return WidgetData(
-                    columns = result.columns,
+                    columns = result.columns.map { it.name },
                     rows = result.rows,
                     rowCount = result.rowCount,
                     executionMs = System.currentTimeMillis() - startMs

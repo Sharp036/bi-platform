@@ -20,7 +20,7 @@ class ReportScheduleService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun createSchedule(request: CreateScheduleRequest, userId: Long): ScheduleResponse {
+    fun createSchedule(request: CreateScheduleRequest, username: String): ScheduleResponse {
         require(reportRepo.existsById(request.reportId)) {
             "Report not found: ${request.reportId}"
         }
@@ -32,7 +32,7 @@ class ReportScheduleService(
             parameters = request.parameters,
             outputFormat = request.outputFormat,
             recipients = request.recipients,
-            createdBy = userId
+            createdBy = null
         )
         val saved = scheduleRepo.save(schedule)
         log.info("Created schedule id={} for report {}, cron='{}'",
@@ -97,7 +97,7 @@ class ReportScheduleService(
      * Renders the report, saves a snapshot, updates schedule status.
      */
     @Transactional
-    fun executeSchedule(scheduleId: Long, userId: Long): ReportSnapshot {
+    fun executeSchedule(scheduleId: Long, username: String): ReportSnapshot {
         val schedule = scheduleRepo.findById(scheduleId)
             .orElseThrow { IllegalArgumentException("Schedule not found: $scheduleId") }
 
@@ -111,7 +111,7 @@ class ReportScheduleService(
         val snapshot = renderService.renderAndSnapshot(
             reportId = schedule.reportId,
             params = params,
-            userId = userId,
+            username = username,
             scheduleId = schedule.id,
             outputFormat = schedule.outputFormat
         )

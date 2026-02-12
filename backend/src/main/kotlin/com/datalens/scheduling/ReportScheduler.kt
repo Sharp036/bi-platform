@@ -23,8 +23,8 @@ class ReportScheduler(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    // System user ID used for scheduled executions
-    private val systemUserId = 0L
+    // System username used for scheduled executions
+    private val systemUsername = "system"
 
     /**
      * Runs every minute. For each active schedule, checks if the
@@ -43,7 +43,7 @@ class ReportScheduler(
                     if (shouldRun(schedule.cronExpression, schedule.lastRunAt, now)) {
                         log.info("Triggering scheduled execution for schedule id={}, report={}",
                             schedule.id, schedule.reportId)
-                        scheduleService.executeSchedule(schedule.id, systemUserId)
+                        scheduleService.executeSchedule(schedule.id, systemUsername)
                     }
                 } catch (e: Exception) {
                     log.error("Error executing schedule id={}: {}", schedule.id, e.message)

@@ -203,7 +203,7 @@ class ReportController(
         auth: Authentication
     ): ResponseEntity<RenderReportResponse> {
         return ResponseEntity.ok(
-            renderService.renderReport(id, request ?: RenderReportRequest(), getUserId(auth))
+            renderService.renderReport(id, request ?: RenderReportRequest(), getUsername(auth))
         )
     }
 
@@ -219,7 +219,7 @@ class ReportController(
         val snapshot = renderService.renderAndSnapshot(
             reportId = id,
             params = request?.parameters ?: emptyMap(),
-            userId = getUserId(auth)
+            username = getUsername(auth)
         )
         return ResponseEntity.status(HttpStatus.CREATED).body(
             SnapshotResponse(
@@ -250,20 +250,18 @@ class ReportController(
         else ResponseEntity.noContent().build()
     }
 
-    // ── Helper ──
+    // ── Helpers ──
+
+    private fun getUsername(auth: Authentication): String {
+        return auth.name
+    }
 
     private fun getUserId(auth: Authentication): Long {
-        // Extract user ID from JWT claims or principal
-        // Phase 3 stores username in principal; look up user ID
         return try {
             val principal = auth.principal
             if (principal is org.springframework.security.core.userdetails.UserDetails) {
-                // In a real implementation, we'd get the ID from a UserService
-                // For now, use a hash of the username as a stable ID
                 principal.username.hashCode().toLong()
-            } else {
-                0L
-            }
+            } else { 0L }
         } catch (_: Exception) { 0L }
     }
 }
@@ -284,9 +282,8 @@ class ReportScheduleController(
         @RequestBody request: CreateScheduleRequest,
         auth: Authentication
     ): ResponseEntity<ScheduleResponse> {
-        val userId = getUserId(auth)
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(scheduleService.createSchedule(request, userId))
+            .body(scheduleService.createSchedule(request, auth.name))
     }
 
     @GetMapping("/{id}")
@@ -325,7 +322,7 @@ class ReportScheduleController(
     @PostMapping("/{id}/execute")
     @PreAuthorize("hasAuthority('SCHEDULE_MANAGE')")
     fun executeNow(@PathVariable id: Long, auth: Authentication): ResponseEntity<Any> {
-        val snapshot = scheduleService.executeSchedule(id, getUserId(auth))
+        val snapshot = scheduleService.executeSchedule(id, auth.name)
         return ResponseEntity.ok(mapOf(
             "snapshotId" to snapshot.id,
             "status" to snapshot.status,
@@ -338,15 +335,6 @@ class ReportScheduleController(
     fun deleteSchedule(@PathVariable id: Long): ResponseEntity<Void> {
         scheduleService.deleteSchedule(id)
         return ResponseEntity.noContent().build()
-    }
-
-    private fun getUserId(auth: Authentication): Long {
-        return try {
-            val principal = auth.principal
-            if (principal is org.springframework.security.core.userdetails.UserDetails) {
-                principal.username.hashCode().toLong()
-            } else { 0L }
-        } catch (_: Exception) { 0L }
     }
 }
 
