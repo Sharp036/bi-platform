@@ -1,8 +1,32 @@
 variables:
   SERVER_IP: $PLAYGROUND_SERVER_IP
+  HARBOR_SERVER_DOMAIN: harbor-dev.rbtdigitalmobile.ru
+  TAG_LATEST: $HARBOR_SERVER_DOMAIN/data/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME:latest
+  HARBOR_USER_CI: robot-data-ci
 
 stages:
+  - build
   - deploy
+
+build:
+  image: docker:24
+  stage: build
+  tags:
+    - deployment4docker
+  services:
+    - name: docker:24-dind
+      alias: dockerhost
+  variables:
+    DOCKER_HOST: tcp://dockerhost:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker build -t $TAG_LATEST .
+    - echo $CI_BUILD_TOKEN | docker login -u $HARBOR_USER_CI --password-stdin $CI_REGISTRY_IMAGE
+    - docker push $TAG_LATEST
+  only:
+    refs:
+      - main
 
 deploy:
   image: docker:24
@@ -25,10 +49,10 @@ deploy:
     - ssh-keyscan $SERVER_IP > ~/.ssh/known_hosts
   script:
     - apk add --no-cache docker-compose
-    - echo "server to deploy is - $SERVER_IP"
-    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && git pull https://oauth2:${CLONE_KEY}@to-gitlab.rbt.ru/rbt-data/bi-platform.git main"
+    - echo $CI_BUILD_TOKEN | docker login -u $HARBOR_USER_CI --password-stdin $CI_REGISTRY_IMAGE
+    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_LATEST"
     - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && docker-compose -f docker-compose.prod.yml down"
-    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && docker-compose -f docker-compose.prod.yml up -d --build"
+    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && docker-compose -f docker-compose.prod.yml up -d"
   only:
     refs:
       - main
