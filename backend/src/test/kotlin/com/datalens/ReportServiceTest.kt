@@ -347,7 +347,7 @@ class ReportScheduleServiceTest {
             outputFormat = OutputFormat.JSON
         )
 
-        val result = scheduleService.createSchedule(request, userId = 1L)
+        val result = scheduleService.createSchedule(request, username = "admin")
 
         assertEquals(1L, result.reportId)
         assertEquals("0 8 * * 1", result.cronExpression)
@@ -364,7 +364,7 @@ class ReportScheduleServiceTest {
         )
 
         assertThrows<IllegalArgumentException> {
-            scheduleService.createSchedule(request, userId = 1L)
+            scheduleService.createSchedule(request, username = "admin")
         }
     }
 
