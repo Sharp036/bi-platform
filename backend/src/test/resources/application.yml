@@ -2,10 +2,9 @@ spring:
   profiles:
     active: test
   datasource:
-    url: jdbc:tc:postgresql:16:///datalens_test
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    username: test
-    password: test
+    url: ${SPRING_DATASOURCE_URL:jdbc:tc:postgresql:16:///datalens_test}
+    username: ${DB_USER:test}
+    password: ${DB_PASSWORD:test}
   jpa:
     hibernate:
       ddl-auto: validate
