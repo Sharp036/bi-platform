@@ -74,6 +74,7 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:1.20.3")
     testImplementation("org.testcontainers:clickhouse:1.20.3")
     testImplementation("org.testcontainers:junit-jupiter:1.20.3")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
 tasks.withType<Test> {
