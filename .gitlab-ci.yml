@@ -2,31 +2,7 @@ variables:
   SERVER_IP: $PLAYGROUND_SERVER_IP
 
 stages:
-  - build
   - deploy
-
-build:
-  image: docker:24
-  stage: build
-  tags:
-    - deployment4docker
-  services:
-    - name: docker:24-dind
-      alias: dockerhost
-  variables:
-    DOCKER_HOST: tcp://dockerhost:2375/
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - docker build -t datalens-bi:latest .
-    - docker save datalens-bi:latest -o datalens-bi.tar
-  artifacts:
-    paths:
-      - datalens-bi.tar
-    expire_in: 1 hour
-  only:
-    refs:
-      - main
 
 deploy:
   image: docker:24
@@ -51,8 +27,8 @@ deploy:
     - apk add --no-cache docker-compose
     - echo "server to deploy is - $SERVER_IP"
     - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && git pull"
-    - docker-compose -f /opt/bi-platform/docker-compose.prod.yml --verbose down --remove-orphans
-    - docker-compose -f /opt/bi-platform/docker-compose.prod.yml --verbose up -d --build
+    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && docker-compose -f docker-compose.prod.yml down"
+    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && docker-compose -f docker-compose.prod.yml up -d --build"
   only:
     refs:
       - main
