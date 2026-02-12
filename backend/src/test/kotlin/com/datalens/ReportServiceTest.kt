@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.*
+import org.mockito.kotlin.anyOrNull
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import java.time.Instant
@@ -133,7 +134,7 @@ class ReportServiceTest {
                 createTestReport(2L, "Report B")
             )
             val page = PageImpl(reports, PageRequest.of(0, 20), 2)
-            whenever(reportRepo.findFiltered(any(), any(), any(), any())).thenReturn(page)
+            whenever(reportRepo.findFiltered(anyOrNull(), anyOrNull(), anyOrNull(), any())).thenReturn(page)
 
             val result = reportService.listReports(pageable = PageRequest.of(0, 20))
 

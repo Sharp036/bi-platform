@@ -2,12 +2,15 @@ spring:
   profiles:
     active: test
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:datalens_test}
-    username: ${DB_USER:datalens}
-    password: ${DB_PASSWORD:test}
+    url: jdbc:tc:postgresql:16:///datalens_test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
   jpa:
     hibernate:
       ddl-auto: validate
+  flyway:
+    enabled: true
 
 datalens:
   jwt:
