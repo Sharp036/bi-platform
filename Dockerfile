@@ -18,7 +18,7 @@ RUN gradle :backend:bootJar --no-daemon -x test
 FROM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY frontend/package*.json ./
-RUN npm ci
+RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
