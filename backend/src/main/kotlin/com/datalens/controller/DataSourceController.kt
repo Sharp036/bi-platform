@@ -64,15 +64,3 @@ class DataSourceController(
         return ResponseEntity.ok(dataSourceService.getSchema(id))
     }
 }
-
-@RestController
-@RequestMapping("/query")
-class QueryController(
-    private val dataSourceService: DataSourceService
-) {
-    @PostMapping("/execute")
-    @PreAuthorize("hasAuthority('QUERY_EXECUTE')")
-    fun execute(@Valid @RequestBody request: QueryExecuteRequest): ResponseEntity<QueryResult> {
-        return ResponseEntity.ok(dataSourceService.executeQuery(request))
-    }
-}
