@@ -1,92 +1,58 @@
-# ══════════════════════════════════════════════
-#  DataLens BI — GitLab CI/CD Pipeline
-# ══════════════════════════════════════════════
+variables:
+  SERVER_IP: $PLAYGROUND_SERVER_IP
 
 stages:
-  - test
   - build
   - deploy
 
-variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  DOCKER_IMAGE: $CI_REGISTRY_IMAGE/datalens-bi
-
-# ── Cache Gradle dependencies ──
-cache:
-  key: "${CI_COMMIT_REF_SLUG}-gradle"
-  paths:
-    - .gradle/caches
-    - .gradle/wrapper
-    - backend/build
-
-# ── Test ──
-test:
-  stage: test
-  image: gradle:8.10-jdk21
-  tags: [deployment4docker] # change according your CI settings
-  services:
-    - name: postgres:16-alpine
-      alias: postgres
-      variables:
-        POSTGRES_DB: datalens_test
-        POSTGRES_USER: datalens
-        POSTGRES_PASSWORD: test
-  variables:
-    DB_HOST: postgres
-    DB_PORT: "5432"
-    DB_NAME: datalens_test
-    DB_USER: datalens
-    DB_PASSWORD: test
-    JWT_SECRET: test_secret_at_least_32_characters_long_for_jwt
-  script:
-    - cd backend
-    - gradle test --no-daemon
-  artifacts:
-    reports:
-      junit: backend/build/test-results/test/*.xml
-    when: always
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-    - if: $CI_COMMIT_BRANCH == "main"
-
-# ── Build Docker Image ──
 build:
-  stage: build
   image: docker:24
-  tags: [deployment4docker] # change according your CI settings
+  stage: build
+  tags:
+    - deployment4docker
   services:
-    - docker:24-dind
+    - name: docker:24-dind
+      alias: dockerhost
+  variables:
+    DOCKER_HOST: tcp://dockerhost:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA -t $DOCKER_IMAGE:latest .
-    - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
-    - docker push $DOCKER_IMAGE:latest
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_TAG
+    - docker build -t datalens-bi:latest .
+    - docker save datalens-bi:latest -o datalens-bi.tar
+  artifacts:
+    paths:
+      - datalens-bi.tar
+    expire_in: 1 hour
+  only:
+    refs:
+      - main
 
-# ── Deploy (example: docker-compose on server) ──
 deploy:
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: dockerhost
   stage: deploy
-  image: alpine:latest
-  tags: [deployment4docker] # change according your CI settings
+  tags:
+    - deployment4docker
+  variables:
+    DOCKER_HOST: ssh://${SERVER_USER}@${SERVER_IP}
+    DOCKER_CLIENT_TIMEOUT: 900
+    COMPOSE_HTTP_TIMEOUT: 900
   before_script:
-    - apk add --no-cache openssh-client
+    - 'command -v ssh-agent >/dev/null || ( apk update && apk add openssh-client)'
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | ssh-add -
-    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - cat "${ID_RSA}" | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $SERVER_IP > ~/.ssh/known_hosts
   script:
-    - |
-      ssh $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
-        cd /opt/datalens-bi
-        docker-compose pull datalens
-        docker-compose up -d datalens
-        docker image prune -f
-      EOF
-  environment:
-    name: production
-    url: https://bi.yourcompany.com
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
+    - apk add --no-cache docker-compose
+    - echo "server to deploy is - $SERVER_IP"
+    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && git pull"
+    - docker-compose -f /opt/bi-platform/docker-compose.prod.yml --verbose down --remove-orphans
+    - docker-compose -f /opt/bi-platform/docker-compose.prod.yml --verbose up -d --build
+  only:
+    refs:
+      - main
