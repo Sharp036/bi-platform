@@ -9,7 +9,7 @@ on:
 env:
   JAVA_VERSION: '21'
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}
 
 jobs:
   # ── Test ──
@@ -84,5 +84,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ghcr.io/${{ steps.lower.outputs.image }}:latest
+            ghcr.io/${{ steps.lower.outputs.image }}:${{ github.sha }}
