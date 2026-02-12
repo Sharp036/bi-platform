@@ -27,7 +27,7 @@ class ParameterResolver(dialectType: DataSourceType) {
      * @throws IllegalArgumentException if a required parameter is missing
      */
     fun resolve(sql: String, parameters: Map<String, Any?>): String {
-        if (parameters.isEmpty() && !sql.contains(Regex(":[a-zA-Z_]"))) return sql
+        if (parameters.isEmpty()) return sql
 
         var resolved = sql
         // Find all :paramName tokens (not inside quotes)
