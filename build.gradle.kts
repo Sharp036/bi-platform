@@ -7,7 +7,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.datalens"
+    group = "com.datorio"
     version = "0.1.0-SNAPSHOT"
 
     repositories {

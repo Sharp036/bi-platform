@@ -1,4 +1,4 @@
-# DataLens BI
+# Datorio
 
 Open-source Business Intelligence platform with support for PostgreSQL and ClickHouse, 
 built-in JavaScript scripting for chart customization, drill-down reports, 
@@ -37,8 +37,8 @@ and role-based access control.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/datalens-bi.git
-cd datalens-bi
+git clone https://github.com/yourusername/datorio.git
+cd datorio
 
 # Copy environment config
 cp .env.example .env
@@ -120,9 +120,9 @@ curl -X POST http://localhost:8080/api/query/execute \
 ## Project Structure
 
 ```
-datalens-bi/
+datorio/
 ├── backend/
-│   └── src/main/kotlin/com/datalens/
+│   └── src/main/kotlin/com/datorio/
 │       ├── config/          # Security, exception handling
 │       ├── controller/      # REST endpoints
 │       ├── datasource/      # Dynamic DB connection manager

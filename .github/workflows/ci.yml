@@ -1,4 +1,4 @@
-name: DataLens BI — CI
+name: Datorio BI — CI
 
 on:
   push:
@@ -19,8 +19,8 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: datalens_test
-          POSTGRES_USER: datalens
+          POSTGRES_DB: datorio_test
+          POSTGRES_USER: datorio
           POSTGRES_PASSWORD: test
         ports:
           - 5432:5432
@@ -44,11 +44,11 @@ jobs:
 
       - name: Run tests
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/datalens_test
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/datorio_test
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_NAME: datalens_test
-          DB_USER: datalens
+          DB_NAME: datorio_test
+          DB_USER: datorio
           DB_PASSWORD: test
           JWT_SECRET: test_secret_at_least_32_characters_long_for_jwt
         run: ./gradlew :backend:test

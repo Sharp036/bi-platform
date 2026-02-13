@@ -1,5 +1,5 @@
 # ══════════════════════════════════════════════
-#  DataLens BI — Multi-Stage Docker Build
+#  Datorio — Multi-Stage Docker Build
 # ══════════════════════════════════════════════
 
 # ── Stage 1: Build Backend ──
@@ -25,7 +25,7 @@ RUN npm run build
 # ── Stage 3: Runtime ──
 FROM eclipse-temurin:21-jre-alpine
 LABEL maintainer="your-email@example.com"
-LABEL description="DataLens BI Platform"
+LABEL description="Datorio Platform"
 
 # Install nginx for serving frontend + reverse proxy
 RUN apk add --no-cache nginx \

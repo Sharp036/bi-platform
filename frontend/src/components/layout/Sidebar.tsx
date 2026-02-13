@@ -27,7 +27,7 @@ export default function Sidebar() {
         <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0">
           <span className="text-white font-bold text-sm">DL</span>
         </div>
-        {!collapsed && <span className="ml-3 font-semibold text-slate-800 dark:text-slate-100">DataLens</span>}
+        {!collapsed && <span className="ml-3 font-semibold text-slate-800 dark:text-slate-100">Datorio</span>}
       </div>
 
       {/* Nav */}

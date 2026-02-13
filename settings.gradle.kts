@@ -1,2 +1,2 @@
-rootProject.name = "datalens-bi"
+rootProject.name = "datorio"
 include("backend")

@@ -2,7 +2,7 @@ spring:
   profiles:
     active: test
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:tc:postgresql:16:///datalens_test}
+    url: ${SPRING_DATASOURCE_URL:jdbc:tc:postgresql:16:///datorio_test}
     username: ${DB_USER:test}
     password: ${DB_PASSWORD:test}
   jpa:
@@ -11,7 +11,7 @@ spring:
   flyway:
     enabled: true
 
-datalens:
+datorio:
   jwt:
     secret: test_secret_at_least_32_characters_long_for_jwt_signing
     access-token-expiration: 3600000
