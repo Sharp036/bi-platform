@@ -19,6 +19,7 @@ import AlertsPage from '@/components/alerts/AlertsPage'
 import MonitoringPage from '@/components/monitoring/MonitoringPage'
 import AdminPage from '@/components/admin/AdminPage'
 import ChangePassword from '@/components/admin/ChangePassword'
+import SharedWithMePage from '@/components/sharing/SharedWithMePage'
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/scripts" element={<ScriptEditorPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/profile/password" element={<ChangePassword />} />
+          <Route path="/shared" element={<SharedWithMePage />} />
         </Route>
       </Route>
 

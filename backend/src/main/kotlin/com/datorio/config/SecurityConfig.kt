@@ -39,6 +39,7 @@ class SecurityConfig(
                     .requestMatchers("/embed/**").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/admin/**").hasAuthority("USER_MANAGE")
+                    .requestMatchers("/sharing/**").authenticated()
                     .requestMatchers("/profile/**").authenticated()
                     // Everything else requires authentication
                     .anyRequest().authenticated()

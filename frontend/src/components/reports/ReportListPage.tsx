@@ -4,9 +4,10 @@ import { reportApi } from '@/api/reports'
 import type { Report } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil } from 'lucide-react'
+import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2 } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
+import ShareDialog from '@/components/sharing/ShareDialog'
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -22,6 +23,7 @@ export default function ReportListPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('')
+  const [shareReport, setShareReport] = useState<Report | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -98,10 +100,19 @@ export default function ReportListPage() {
                 <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs"><Eye className="w-3.5 h-3.5" /></Link>
                 <button onClick={() => { reportApi.duplicate(r.id); toast.success('Duplicated'); load() }} className="btn-ghost p-1.5 text-xs"><Copy className="w-3.5 h-3.5" /></button>
                 <button onClick={() => { reportApi.archive(r.id); toast.success('Archived'); load() }} className="btn-ghost p-1.5 text-xs"><Archive className="w-3.5 h-3.5" /></button>
+                <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs"><Share2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
           ))}
         </div>
+      )}
+      {shareReport && (
+        <ShareDialog
+          objectType="REPORT"
+          objectId={shareReport.id}
+          objectName={shareReport.name}
+          onClose={() => setShareReport(null)}
+        />
       )}
     </div>
   )
