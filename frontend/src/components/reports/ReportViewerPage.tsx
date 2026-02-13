@@ -11,6 +11,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { ArrowLeft, RefreshCw, Clock, Camera } from 'lucide-react'
 import toast from 'react-hot-toast'
+import ExportMenu from './ExportMenu'
 
 export default function ReportViewerPage() {
   const { id } = useParams<{ id: string }>()
@@ -191,6 +192,7 @@ export default function ReportViewerPage() {
           >
             <Camera className="w-4 h-4" /> Snapshot
           </button>
+          <ExportMenu reportId={Number(id)} reportName={report.name} />
         </div>
       </div>
 

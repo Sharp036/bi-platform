@@ -213,3 +213,32 @@ export interface DrillNavigateResponse {
   openMode: 'REPLACE' | 'NEW_TAB'
   breadcrumbLabel: string
 }
+
+// ── Export ──
+export interface ExportStatusResponse {
+  snapshotId: number
+  status: string
+  format: string
+  downloadUrl: string | null
+}
+
+export interface EmailDeliveryResponse {
+  success: boolean
+  recipientCount: number
+  message: string
+}
+
+// ── Embed ──
+export interface EmbedToken {
+  id: number
+  reportId: number
+  reportName: string | null
+  token: string
+  label: string | null
+  parameters: Record<string, unknown>
+  embedUrl: string
+  expiresAt: string | null
+  isActive: boolean
+  allowedDomains: string | null
+  createdAt: string
+}

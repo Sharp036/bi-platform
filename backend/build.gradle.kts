@@ -56,7 +56,8 @@ dependencies {
 
     // ── Export ──
     implementation("org.apache.poi:poi-ooxml:5.3.0")  // Excel
-    // PDF will be added in Phase 10
+    implementation("jakarta.mail:jakarta.mail-api:2.1.3")
+    implementation("org.eclipse.angus:angus-mail:2.0.3")
 
     // ── Caching ──
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")

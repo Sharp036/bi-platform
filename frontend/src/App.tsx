@@ -14,6 +14,7 @@ import QueryListPage from '@/components/queries/QueryListPage'
 import DataSourceListPage from '@/components/datasources/DataSourceListPage'
 import ScriptEditorPage from '@/components/scripts/ScriptEditorPage'
 import ReportDesignerPage from '@/components/designer/ReportDesignerPage'
+import EmbedViewerPage from '@/components/embed/EmbedViewerPage'
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -24,6 +25,7 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/embed/:token" element={<EmbedViewerPage />} />
 
       {/* Protected */}
       <Route element={<ProtectedRoute />}>

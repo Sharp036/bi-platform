@@ -36,6 +36,7 @@ class SecurityConfig(
                     .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/health").permitAll()
                     .requestMatchers("/docs/**").permitAll()
+                    .requestMatchers("/embed/**").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     // Everything else requires authentication
                     .anyRequest().authenticated()
