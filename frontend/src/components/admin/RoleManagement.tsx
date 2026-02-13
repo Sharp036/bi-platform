@@ -85,7 +85,7 @@ const RoleManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (role: RoleListItem) => {
+  const handleDelete = async (role: RoleListItem | RoleDetail) => {
     if (role.isSystem) return;
     if (!confirm(`Delete role "${role.name}"?`)) return;
     try {
