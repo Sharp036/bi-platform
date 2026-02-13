@@ -41,6 +41,8 @@ class SecurityConfig(
                     .requestMatchers("/admin/**").hasAuthority("USER_MANAGE")
                     .requestMatchers("/sharing/**").authenticated()
                     .requestMatchers("/workspace/**").authenticated()
+                    .requestMatchers("/tags/**").authenticated()
+                    .requestMatchers("/search/**").authenticated()
                     .requestMatchers("/profile/**").authenticated()
                     // Everything else requires authentication
                     .anyRequest().authenticated()

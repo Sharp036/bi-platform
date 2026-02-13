@@ -9,6 +9,7 @@ import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
 import FavoriteButton from '@/components/workspace/FavoriteButton'
+import TagManager from '@/components/tags/TagManager'
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -94,6 +95,10 @@ export default function ReportListPage() {
                 <span>{r.parameters?.length || 0} params</span>
                 <span>·</span>
                 <span>{new Date(r.updatedAt).toLocaleDateString()}</span>
+              </div>
+
+              <div className="mb-2">
+                <TagManager objectType="REPORT" objectId={r.id} compact />
               </div>
 
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

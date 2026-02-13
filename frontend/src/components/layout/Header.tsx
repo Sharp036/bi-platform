@@ -2,6 +2,7 @@ import { Sun, Moon, LogOut, User } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { useState, useRef, useEffect } from 'react'
+import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 
 export default function Header() {
   const { user, logout } = useAuthStore()
@@ -20,7 +21,7 @@ export default function Header() {
   return (
     <header className="h-14 flex items-center justify-between px-6 bg-white dark:bg-dark-surface-50
                         border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
-      <div />
+      <GlobalSearchBar />
 
       <div className="flex items-center gap-2">
         {/* Theme toggle */}
