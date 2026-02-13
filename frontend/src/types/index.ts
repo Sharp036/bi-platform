@@ -82,3 +82,85 @@ export interface Schedule {
 export interface PageResponse<T> {
   content: T[]; totalElements: number; totalPages: number; page: number
 }
+
+// ── Scripts ──
+export interface Script {
+  id: number
+  name: string
+  description: string | null
+  scriptType: 'TRANSFORM' | 'FORMAT' | 'EVENT' | 'LIBRARY'
+  code: string
+  isActive: boolean
+  isLibrary: boolean
+  tags: string[]
+  config: Record<string, unknown>
+  createdBy: number | null
+  updatedBy: number | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ScriptSummary {
+  id: number
+  name: string
+  description: string | null
+  scriptType: 'TRANSFORM' | 'FORMAT' | 'EVENT' | 'LIBRARY'
+  isActive: boolean
+  isLibrary: boolean
+  tags: string[]
+  updatedAt: string
+}
+
+export interface ScriptCreateRequest {
+  name: string
+  description?: string
+  scriptType: Script['scriptType']
+  code: string
+  isLibrary?: boolean
+  tags?: string[]
+}
+
+export interface ScriptUpdateRequest {
+  name?: string
+  description?: string
+  scriptType?: Script['scriptType']
+  code?: string
+  isActive?: boolean
+  isLibrary?: boolean
+  tags?: string[]
+}
+
+export interface ScriptExecuteRequest {
+  scriptId?: number
+  code?: string
+  input?: {
+    columns: string[]
+    rows: unknown[][]
+    parameters: Record<string, unknown>
+  }
+  libraries?: number[]
+}
+
+export interface ScriptExecuteResponse {
+  output: unknown
+  columns: string[] | null
+  rows: unknown[][] | null
+  logs: string[]
+  executionMs: number
+  status: 'SUCCESS' | 'ERROR' | 'TIMEOUT'
+}
+
+export interface ScriptExecution {
+  id: number
+  scriptId: number | null
+  scriptName: string | null
+  contextType: string | null
+  contextId: number | null
+  status: 'SUCCESS' | 'ERROR' | 'TIMEOUT'
+  executionMs: number | null
+  inputRows: number | null
+  outputRows: number | null
+  errorMessage: string | null
+  executedBy: string | null
+  createdAt: string
+}

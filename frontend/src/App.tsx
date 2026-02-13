@@ -12,6 +12,7 @@ import ReportListPage from '@/components/reports/ReportListPage'
 import ReportViewerPage from '@/components/reports/ReportViewerPage'
 import QueryListPage from '@/components/queries/QueryListPage'
 import DataSourceListPage from '@/components/datasources/DataSourceListPage'
+import ScriptEditorPage from '@/components/scripts/ScriptEditorPage'
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/queries" element={<QueryListPage />} />
           <Route path="/datasources" element={<DataSourceListPage />} />
           <Route path="/schedules" element={<ScheduleListPage />} />
+          <Route path="/scripts" element={<ScriptEditorPage />} />
         </Route>
       </Route>
 
