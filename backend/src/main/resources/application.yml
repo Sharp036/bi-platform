@@ -57,16 +57,28 @@ datalens:
     timeout-ms: 5000
     max-memory-mb: 64
     max-statements: 100000
+  
+  cache:
+      enabled: true
+      query-ttl-seconds: 300
+      query-max-size: 500
+      schema-ttl-seconds: 600
 
 # ── Actuator (health checks) ──
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 # ── OpenAPI / Swagger ──
 springdoc:
