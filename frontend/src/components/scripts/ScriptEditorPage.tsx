@@ -422,7 +422,7 @@ export default function ScriptEditorPage() {
                             )}
                           </div>
                         )}
-                        {result.output && !result.columns && (
+                        {!!result.output && !result.columns && (
                           <pre className="whitespace-pre-wrap text-slate-700 dark:text-slate-300">
                             {String(typeof result.output === 'string' ? result.output : JSON.stringify(result.output, null, 2))}
                           </pre>
