@@ -17,7 +17,8 @@ interface Props {
 
 export default function WidgetRenderer({
   widget, layers = [], layerData = {},
-  onChartClick, highlightField, highlightValue
+  onChartClick, highlightField, highlightValue,
+  drillActions, onDrillDown
 }: Props) {
   if (widget.error) {
     return (

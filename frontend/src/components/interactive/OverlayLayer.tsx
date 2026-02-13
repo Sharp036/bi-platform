@@ -49,11 +49,11 @@ export default function OverlayLayer({ overlays, editable = false, onUpdate, onD
             height: overlay.height,
             opacity: overlay.opacity,
             zIndex: overlay.zIndex,
-            ...(overlay.style?.borderRadius ? { borderRadius: overlay.style.borderRadius } : {}),
-            ...(overlay.style?.border ? { border: overlay.style.border } : {}),
-            ...(overlay.style?.boxShadow ? { boxShadow: overlay.style.boxShadow } : {}),
-            ...(overlay.style?.background ? { background: overlay.style.background as string } : {}),
-            ...(overlay.style?.padding ? { padding: overlay.style.padding } : {}),
+            ...(overlay.style?.borderRadius ? { borderRadius: String(overlay.style.borderRadius) } : {}),
+            ...(overlay.style?.border ? { border: String(overlay.style.border) } : {}),
+            ...(overlay.style?.boxShadow ? { boxShadow: String(overlay.style.boxShadow) } : {}),
+            ...(overlay.style?.background ? { background: String(overlay.style.background) } : {}),
+            ...(overlay.style?.padding ? { padding: String(overlay.style.padding) } : {}),
             cursor: editable ? 'move' : (overlay.linkUrl ? 'pointer' : 'default'),
           }}
           onMouseDown={(e) => handleMouseDown(overlay.id, e)}
