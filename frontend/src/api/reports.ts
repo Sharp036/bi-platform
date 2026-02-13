@@ -36,6 +36,15 @@ export const reportApi = {
   addWidget: (reportId: number, data: Record<string, unknown>) =>
     api.post(`/reports/${reportId}/widgets`, data).then(r => r.data),
 
+  setParameters: (reportId: number, params: Array<Record<string, unknown>>) =>
+    api.put(`/reports/${reportId}/parameters`, params).then(r => r.data),
+
+  deleteWidget: (widgetId: number) =>
+    api.delete(`/reports/widgets/${widgetId}`),
+
+  updateWidget: (widgetId: number, data: Record<string, unknown>) =>
+    api.put(`/reports/widgets/${widgetId}`, data).then(r => r.data),
+
   // Parameters
   getParameters: (reportId: number) =>
     api.get(`/reports/${reportId}/parameters`).then(r => r.data),

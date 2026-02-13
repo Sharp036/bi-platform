@@ -4,7 +4,7 @@ import { reportApi } from '@/api/reports'
 import type { Report } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { FileBarChart, Plus, Eye, Copy, Archive, Search } from 'lucide-react'
+import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -94,6 +94,7 @@ export default function ReportListPage() {
               </div>
 
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs"><Pencil className="w-3.5 h-3.5" /></Link>
                 <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs"><Eye className="w-3.5 h-3.5" /></Link>
                 <button onClick={() => { reportApi.duplicate(r.id); toast.success('Duplicated'); load() }} className="btn-ghost p-1.5 text-xs"><Copy className="w-3.5 h-3.5" /></button>
                 <button onClick={() => { reportApi.archive(r.id); toast.success('Archived'); load() }} className="btn-ghost p-1.5 text-xs"><Archive className="w-3.5 h-3.5" /></button>
