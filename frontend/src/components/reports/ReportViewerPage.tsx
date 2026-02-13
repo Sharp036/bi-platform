@@ -12,6 +12,7 @@ import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { ArrowLeft, RefreshCw, Clock, Camera } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ExportMenu from './ExportMenu'
+import BookmarkBar from './BookmarkBar'
 
 export default function ReportViewerPage() {
   const { id } = useParams<{ id: string }>()
@@ -201,6 +202,16 @@ export default function ReportViewerPage() {
 
       {/* Parameters */}
       <ParameterPanel parameters={report.parameters} onApply={handleRender} loading={rendering} />
+
+      {/* Bookmarks */}
+      <BookmarkBar
+        reportId={currentReportId || Number(id)}
+        currentParameters={currentParams}
+        onApplyBookmark={(params) => {
+          setCurrentParams(params)
+          handleRender(params)
+        }}
+      />
 
       {/* Execution stats */}
       {renderResult && (

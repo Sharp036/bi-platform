@@ -242,3 +242,127 @@ export interface EmbedToken {
   allowedDomains: string | null
   createdAt: string
 }
+
+// ── Calculated Fields ──
+export interface CalcField {
+  id: number
+  reportId: number
+  name: string
+  label: string | null
+  expression: string
+  resultType: 'NUMBER' | 'STRING' | 'DATE' | 'BOOLEAN'
+  formatPattern: string | null
+  sortOrder: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CalcFieldCreateRequest {
+  reportId: number
+  name: string
+  label?: string
+  expression: string
+  resultType?: CalcField['resultType']
+  formatPattern?: string
+}
+
+export interface CalcFieldUpdateRequest {
+  name?: string
+  label?: string
+  expression?: string
+  resultType?: CalcField['resultType']
+  isActive?: boolean
+}
+
+// ── Data Alerts ──
+export interface DataAlert {
+  id: number
+  name: string
+  description: string | null
+  reportId: number
+  widgetId: number | null
+  conditionType: 'THRESHOLD' | 'CHANGE_PERCENT' | 'ANOMALY' | 'ROW_COUNT'
+  fieldName: string
+  operator: 'GT' | 'GTE' | 'LT' | 'LTE' | 'EQ' | 'NEQ' | 'BETWEEN'
+  thresholdValue: number | null
+  thresholdHigh: number | null
+  notificationType: 'IN_APP' | 'EMAIL' | 'WEBHOOK'
+  recipients: string | null
+  webhookUrl: string | null
+  isActive: boolean
+  lastCheckedAt: string | null
+  lastTriggeredAt: string | null
+  lastValue: number | null
+  consecutiveTriggers: number
+  checkIntervalMin: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AlertCreateRequest {
+  name: string
+  description?: string
+  reportId: number
+  widgetId?: number
+  fieldName: string
+  operator?: DataAlert['operator']
+  thresholdValue?: number
+  thresholdHigh?: number
+  checkIntervalMin?: number
+}
+
+export interface AlertUpdateRequest {
+  name?: string
+  operator?: DataAlert['operator']
+  thresholdValue?: number
+  isActive?: boolean
+}
+
+export interface AlertCheckResult {
+  alertId: number
+  triggered: boolean
+  currentValue: number | null
+  message: string
+}
+
+export interface AlertEvent {
+  id: number
+  alertId: number
+  eventType: string
+  fieldValue: number | null
+  thresholdValue: number | null
+  message: string | null
+  notified: boolean
+  createdAt: string
+}
+
+// ── Bookmarks ──
+export interface BookmarkItem {
+  id: number
+  reportId: number
+  name: string
+  description: string | null
+  parameters: Record<string, unknown>
+  filters: Record<string, unknown>
+  isDefault: boolean
+  isShared: boolean
+  createdBy: number | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BookmarkCreateRequest {
+  reportId: number
+  name: string
+  parameters?: Record<string, unknown>
+  filters?: Record<string, unknown>
+  isShared?: boolean
+}
+
+export interface BookmarkUpdateRequest {
+  name?: string
+  parameters?: Record<string, unknown>
+  isDefault?: boolean
+  isShared?: boolean
+}
