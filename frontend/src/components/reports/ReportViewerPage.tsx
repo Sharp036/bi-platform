@@ -17,6 +17,8 @@ import OverlayLayer from '@/components/interactive/OverlayLayer'
 import { useActionStore } from '@/store/useActionStore'
 import { interactiveApi } from '@/api/interactive'
 import type { InteractiveMeta } from '@/types'
+import { workspaceApi } from '@/api/workspace'
+import FavoriteButton from '@/components/workspace/FavoriteButton'
 
 export default function ReportViewerPage() {
   const { id } = useParams<{ id: string }>()
@@ -41,6 +43,7 @@ export default function ReportViewerPage() {
     reportApi.get(reportId)
       .then(r => {
         setReport(r)
+        workspaceApi.trackView('REPORT', reportId).catch(() => {})
         setCurrentReportId(reportId)
         if (!initializedRef.current) {
           setNavStack([{ reportId, reportName: r.name, parameters: {}, label: r.name }])
@@ -179,6 +182,7 @@ export default function ReportViewerPage() {
             <h1 className="text-xl font-bold text-slate-800 dark:text-white">{report.name}</h1>
             {report.description && <p className="text-sm text-slate-500 dark:text-slate-400">{report.description}</p>}
           </div>
+          <FavoriteButton objectType="REPORT" objectId={Number(id)} size={20} />
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">

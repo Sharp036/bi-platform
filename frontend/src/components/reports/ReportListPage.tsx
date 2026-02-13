@@ -8,6 +8,7 @@ import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2 } from '
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
+import FavoriteButton from '@/components/workspace/FavoriteButton'
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -96,6 +97,7 @@ export default function ReportListPage() {
               </div>
 
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <FavoriteButton objectType="REPORT" objectId={r.id} size={14} />
                 <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs"><Pencil className="w-3.5 h-3.5" /></Link>
                 <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs"><Eye className="w-3.5 h-3.5" /></Link>
                 <button onClick={() => { reportApi.duplicate(r.id); toast.success('Duplicated'); load() }} className="btn-ghost p-1.5 text-xs"><Copy className="w-3.5 h-3.5" /></button>

@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, ChevronLeft, ChevronRight, Bell, Activity, Settings, KeyRound, Share2 } from 'lucide-react'
+import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, ChevronLeft, ChevronRight, Bell, Activity, Settings, KeyRound, Share2, Home } from 'lucide-react'
 import { useState } from 'react'
 import clsx from 'clsx'
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboards' },
+  { to: '/', icon: Home, label: 'Home' },
   { to: '/reports', icon: FileBarChart, label: 'Reports' },
   { to: '/queries', icon: Code2, label: 'Queries' },
   { to: '/scripts', icon: Braces, label: 'Scripts' },

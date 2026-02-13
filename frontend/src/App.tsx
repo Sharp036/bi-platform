@@ -20,6 +20,7 @@ import MonitoringPage from '@/components/monitoring/MonitoringPage'
 import AdminPage from '@/components/admin/AdminPage'
 import ChangePassword from '@/components/admin/ChangePassword'
 import SharedWithMePage from '@/components/sharing/SharedWithMePage'
+import WorkspacePage from '@/components/workspace/WorkspacePage'
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -35,7 +36,7 @@ export default function App() {
       {/* Protected */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<WorkspacePage />} />
           <Route path="/reports" element={<ReportListPage />} />
           <Route path="/reports/new" element={<ReportDesignerPage />} />
           <Route path="/reports/:id/edit" element={<ReportDesignerPage />} />
