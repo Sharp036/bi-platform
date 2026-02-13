@@ -1,7 +1,7 @@
 import ReactECharts from 'echarts-for-react'
 import type { WidgetData } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
-import { useRef, useCallback } from 'react'
+import { useRef } from 'react'
 
 interface Props {
   data: WidgetData
@@ -55,14 +55,11 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
   const option = buildOption(data, config)
   const chartRef = useRef<ReactECharts>(null)
 
-  const onEvents = useCallback(() => {
-    if (!onChartClick) return {}
-    return {
-      click: (params: Record<string, unknown>) => {
-        onChartClick(params)
-      }
+  const onEvents = onChartClick ? {
+    click: (params: Record<string, unknown>) => {
+      onChartClick(params)
     }
-  }, [onChartClick])
+  } : undefined
 
   return (
     <div className="h-full flex flex-col">
@@ -74,7 +71,7 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
           theme={isDark ? 'dark' : undefined}
           style={{ height: '100%', width: '100%' }}
           opts={{ renderer: 'canvas' }}
-          onEvents={onEvents()}
+          onEvents={onEvents}
         />
       </div>
     </div>
