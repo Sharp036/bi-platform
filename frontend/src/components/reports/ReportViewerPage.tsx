@@ -13,6 +13,10 @@ import { ArrowLeft, RefreshCw, Clock, Camera } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ExportMenu from './ExportMenu'
 import BookmarkBar from './BookmarkBar'
+import OverlayLayer from '@/components/interactive/OverlayLayer'
+import { useActionStore } from '@/store/useActionStore'
+import { interactiveApi } from '@/api/interactive'
+import type { InteractiveMeta } from '@/types'
 
 export default function ReportViewerPage() {
   const { id } = useParams<{ id: string }>()
@@ -27,6 +31,7 @@ export default function ReportViewerPage() {
   const [navStack, setNavStack] = useState<BreadcrumbEntry[]>([])
   const [currentReportId, setCurrentReportId] = useState<number | null>(null)
   const [currentParams, setCurrentParams] = useState<Record<string, unknown>>({})
+  const [interactiveMeta, setInteractiveMeta] = useState<InteractiveMeta | null>(null)
   const initializedRef = useRef(false)
 
   // Load initial report
@@ -67,6 +72,12 @@ export default function ReportViewerPage() {
       const result = await reportApi.render(rId, mergedParams)
       setRenderResult(result)
       await loadDrillActions(rId)
+      // Load interactive meta
+      const widgetIds = result.widgets.map((w: any) => w.widgetId)
+      interactiveApi.getMeta(rId, widgetIds).then(meta => {
+        setInteractiveMeta(meta)
+        useActionStore.getState().setActions(meta.actions)
+      }).catch(() => {})
     } catch { toast.error('Failed to render report') }
     finally { setRendering(false) }
   }, [currentReportId, id, currentParams, loadDrillActions])
@@ -250,12 +261,23 @@ export default function ReportViewerPage() {
                   widget={w}
                   drillActions={widgetDrillActions}
                   onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
+                  layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}
+                  onChartClick={(data) => {
+                    useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
+                  }}
                 />
               </div>
             )
           })}
         </div>
       ) : null}
+
+      {/* Floating overlays (logos, images) */}
+      {interactiveMeta?.overlays && interactiveMeta.overlays.length > 0 && (
+        <div className="relative">
+          <OverlayLayer overlays={interactiveMeta.overlays} />
+        </div>
+      )}
     </div>
   )
 }

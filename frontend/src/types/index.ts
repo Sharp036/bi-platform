@@ -366,3 +366,75 @@ export interface BookmarkUpdateRequest {
   isDefault?: boolean
   isShared?: boolean
 }
+
+// ── Interactive Dashboard ──
+export interface ChartLayerItem {
+  id: number; widgetId: number; name: string; label?: string
+  queryId?: number; datasourceId?: number; rawSql?: string
+  chartType: string; axis: string; color?: string; opacity: number
+  isVisible: boolean; sortOrder: number
+  seriesConfig: Record<string, unknown>; categoryField?: string; valueField?: string
+  createdAt: string
+}
+export interface ChartLayerRequest {
+  widgetId: number; name: string; label?: string
+  queryId?: number; datasourceId?: number; rawSql?: string
+  chartType?: string; axis?: string; color?: string; opacity?: number
+  isVisible?: boolean; sortOrder?: number
+  seriesConfig?: Record<string, unknown>; categoryField?: string; valueField?: string
+  paramMapping?: Record<string, unknown>
+}
+
+export interface DashboardActionItem {
+  id: number; reportId: number; name: string
+  actionType: string; triggerType: string
+  sourceWidgetId?: number; targetWidgetIds?: string
+  sourceField?: string; targetField?: string
+  targetReportId?: number; urlTemplate?: string
+  isActive: boolean; sortOrder: number
+  config: Record<string, unknown>; createdAt: string
+}
+export interface DashboardActionRequest {
+  reportId: number; name: string
+  actionType?: string; triggerType?: string
+  sourceWidgetId?: number; targetWidgetIds?: string
+  sourceField?: string; targetField?: string
+  targetReportId?: number; urlTemplate?: string
+  config?: Record<string, unknown>
+}
+
+export interface VisibilityRuleItem {
+  id: number; widgetId: number; ruleType: string
+  parameterName?: string; operator: string; expectedValue?: string
+  isActive: boolean; createdAt: string
+}
+export interface VisibilityRuleRequest {
+  widgetId: number; ruleType?: string
+  parameterName?: string; operator?: string; expectedValue?: string
+}
+
+export interface OverlayItem {
+  id: number; reportId: number; overlayType: string
+  content?: string | null
+  positionX: number; positionY: number; width: number; height: number
+  opacity: number; zIndex: number; linkUrl?: string | null
+  isVisible: boolean; style: Record<string, unknown>; createdAt: string
+}
+export interface OverlayRequest {
+  reportId: number; overlayType?: string
+  content?: string | null
+  positionX?: number; positionY?: number; width?: number; height?: number
+  opacity?: number; zIndex?: number; linkUrl?: string | null
+  isVisible?: boolean; style?: Record<string, unknown>
+}
+
+export interface InteractiveMeta {
+  actions: DashboardActionItem[]
+  visibilityRules: Record<number, VisibilityRuleItem[]>
+  overlays: OverlayItem[]
+  chartLayers: Record<number, ChartLayerItem[]>
+}
+
+export interface WidgetListItem {
+  id: number; title?: string; widgetType: string
+}

@@ -1,16 +1,24 @@
-import type { RenderedWidget, DrillAction } from '@/types'
-import EChartWidget from '@/components/charts/EChartWidget'
+import type { RenderedWidget, ChartLayerItem, WidgetData } from '@/types'
+import MultiLayerChart from '@/components/charts/MultiLayerChart'
 import TableWidget from '@/components/charts/TableWidget'
 import KpiCard from '@/components/charts/KpiCard'
 import { AlertTriangle } from 'lucide-react'
 
 interface Props {
   widget: RenderedWidget
-  drillActions?: DrillAction[]
-  onDrillDown?: (clickedData: Record<string, unknown>) => void
+  layers?: ChartLayerItem[]
+  layerData?: Record<number, WidgetData>
+  onChartClick?: (data: Record<string, unknown>) => void
+  highlightField?: string
+  highlightValue?: unknown
+  drillActions?: any[]
+  onDrillDown?: (data: Record<string, unknown>) => void
 }
 
-export default function WidgetRenderer({ widget, drillActions, onDrillDown }: Props) {
+export default function WidgetRenderer({
+  widget, layers = [], layerData = {},
+  onChartClick, highlightField, highlightValue
+}: Props) {
   if (widget.error) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-red-500 dark:text-red-400 text-sm">
@@ -29,60 +37,39 @@ export default function WidgetRenderer({ widget, drillActions, onDrillDown }: Pr
         </div>
       )
     }
-    return <div className="h-full flex items-center justify-center text-slate-400 text-sm">No data</div>
-  }
-
-  const hasDrill = !!onDrillDown && drillActions && drillActions.length > 0
-
-  // Table row click handler
-  const handleRowClick = (row: Record<string, unknown>) => {
-    if (onDrillDown) onDrillDown(row)
-  }
-
-  // Chart click handler
-  const handleChartClick = (params: Record<string, unknown>) => {
-    if (onDrillDown) {
-      const clickedData: Record<string, unknown> = {
-        name: params.name,
-        value: params.value,
-        seriesName: params.seriesName,
-        dataIndex: params.dataIndex,
-        ...((params.data && typeof params.data === 'object') ? params.data as Record<string, unknown> : {})
-      }
-      onDrillDown(clickedData)
+    if (widget.widgetType === 'IMAGE') {
+      const config = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
+      return (
+        <div className="h-full flex items-center justify-center p-2">
+          <img src={config.src || ''} alt={widget.title || ''} className="max-w-full max-h-full object-contain" />
+        </div>
+      )
     }
+    return <div className="h-full flex items-center justify-center text-slate-400 text-sm">No data</div>
   }
 
   switch (widget.widgetType) {
     case 'CHART':
       return (
-        <EChartWidget
+        <MultiLayerChart
           data={widget.data}
           chartConfig={widget.chartConfig}
           title={widget.title}
-          onChartClick={hasDrill ? handleChartClick : undefined}
-          clickable={hasDrill}
+          layers={layers}
+          layerData={layerData}
+          onChartClick={(data) => {
+            onChartClick?.(data)
+            if (onDrillDown) onDrillDown(data)
+          }}
+          highlightField={highlightField}
+          highlightValue={highlightValue}
         />
       )
     case 'TABLE':
-      return (
-        <TableWidget
-          data={widget.data}
-          title={widget.title}
-          onRowClick={hasDrill ? handleRowClick : undefined}
-          clickable={hasDrill}
-        />
-      )
+      return <TableWidget data={widget.data} title={widget.title} />
     case 'KPI':
       return <KpiCard data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
     default:
-      return (
-        <TableWidget
-          data={widget.data}
-          title={widget.title}
-          onRowClick={hasDrill ? handleRowClick : undefined}
-          clickable={hasDrill}
-        />
-      )
+      return <TableWidget data={widget.data} title={widget.title} />
   }
 }
