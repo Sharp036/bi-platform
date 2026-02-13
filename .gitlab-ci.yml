@@ -22,8 +22,9 @@ build:
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
   script:
-    - docker build -t $TAG_LATEST .
     - echo $CI_BUILD_TOKEN | docker login -u $HARBOR_USER_CI --password-stdin $CI_REGISTRY_IMAGE
+    - docker pull $TAG_LATEST || true
+    - docker build --cache-from $TAG_LATEST -t $TAG_LATEST .
     - docker push $TAG_LATEST
   only:
     refs:
