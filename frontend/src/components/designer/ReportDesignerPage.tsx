@@ -45,8 +45,8 @@ export default function ReportDesignerPage() {
           name: data.name,
           description: data.description || '',
           status: data.status,
-          widgets: data.widgets as Array<Record<string, unknown>>,
-          parameters: data.parameters as Array<Record<string, unknown>>,
+          widgets: data.widgets as unknown as Array<Record<string, unknown>>,
+          parameters: data.parameters as unknown as Array<Record<string, unknown>>,
         })
       })
       .catch(() => toast.error('Failed to load report'))
