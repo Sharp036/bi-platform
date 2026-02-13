@@ -33,7 +33,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-brand-600 flex items-center justify-center mb-3">
-            <span className="text-white font-bold text-xl">DL</span>
+            <span className="text-white font-bold text-xl">DTR</span>
           </div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Datorio</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to your account</p>
