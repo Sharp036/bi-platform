@@ -17,6 +17,8 @@ import ReportDesignerPage from '@/components/designer/ReportDesignerPage'
 import EmbedViewerPage from '@/components/embed/EmbedViewerPage'
 import AlertsPage from '@/components/alerts/AlertsPage'
 import MonitoringPage from '@/components/monitoring/MonitoringPage'
+import AdminPage from '@/components/admin/AdminPage'
+import ChangePassword from '@/components/admin/ChangePassword'
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -43,6 +45,8 @@ export default function App() {
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/scripts" element={<ScriptEditorPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/profile/password" element={<ChangePassword />} />
         </Route>
       </Route>
 

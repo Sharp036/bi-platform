@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, ChevronLeft, ChevronRight, Bell, Activity } from 'lucide-react'
+import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, ChevronLeft, ChevronRight, Bell, Activity, Settings, KeyRound } from 'lucide-react'
 import { useState } from 'react'
 import clsx from 'clsx'
 
@@ -12,6 +12,8 @@ const navItems = [
   { to: '/schedules', icon: CalendarClock, label: 'Schedules' },
   { to: '/alerts', icon: Bell, label: 'Alerts' },
   { to: '/monitoring', icon: Activity, label: 'Monitoring' },
+  { to: '/admin', icon: Settings, label: 'Administration' },
+  { to: '/profile/password', icon: KeyRound, label: 'Password' },
 ]
 
 export default function Sidebar() {

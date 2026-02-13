@@ -38,6 +38,8 @@ class SecurityConfig(
                     .requestMatchers("/docs/**").permitAll()
                     .requestMatchers("/embed/**").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers("/admin/**").hasAuthority("USER_MANAGE")
+                    .requestMatchers("/profile/**").authenticated()
                     // Everything else requires authentication
                     .anyRequest().authenticated()
             }

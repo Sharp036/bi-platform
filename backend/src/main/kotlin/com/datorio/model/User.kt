@@ -14,7 +14,7 @@ data class User(
     val username: String,
 
     @Column(nullable = false, unique = true, length = 255)
-    val email: String,
+    var email: String,
 
     @Column(name = "password_hash", nullable = false, length = 255)
     var passwordHash: String,

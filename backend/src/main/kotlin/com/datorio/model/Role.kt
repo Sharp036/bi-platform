@@ -11,7 +11,7 @@ data class Role(
     val id: Long = 0,
 
     @Column(nullable = false, unique = true, length = 100)
-    val name: String,
+    var name: String,
 
     @Column(columnDefinition = "TEXT")
     var description: String? = null,
