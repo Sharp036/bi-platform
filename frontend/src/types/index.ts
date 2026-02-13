@@ -164,3 +164,52 @@ export interface ScriptExecution {
   executedBy: string | null
   createdAt: string
 }
+
+// ── Drill-Down ──
+export interface DrillAction {
+  id: number
+  sourceWidgetId: number
+  targetReportId: number
+  targetReportName: string | null
+  actionType: 'DRILL_DOWN' | 'DRILL_THROUGH' | 'CROSS_LINK'
+  label: string | null
+  description: string | null
+  paramMapping: Record<string, { source: string; value: string }>
+  triggerType: 'ROW_CLICK' | 'CHART_CLICK' | 'BUTTON'
+  openMode: 'REPLACE' | 'NEW_TAB'
+  isActive: boolean
+  sortOrder: number
+  config: Record<string, unknown>
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DrillActionCreateRequest {
+  sourceWidgetId: number
+  targetReportId: number
+  actionType?: DrillAction['actionType']
+  label?: string
+  description?: string
+  paramMapping?: Record<string, { source: string; value: string }>
+  triggerType?: DrillAction['triggerType']
+  openMode?: DrillAction['openMode']
+  sortOrder?: number
+}
+
+export interface DrillActionUpdateRequest {
+  targetReportId?: number
+  actionType?: DrillAction['actionType']
+  label?: string
+  paramMapping?: Record<string, { source: string; value: string }>
+  triggerType?: DrillAction['triggerType']
+  openMode?: DrillAction['openMode']
+  isActive?: boolean
+}
+
+export interface DrillNavigateResponse {
+  targetReportId: number
+  targetReportName: string
+  resolvedParameters: Record<string, unknown>
+  openMode: 'REPLACE' | 'NEW_TAB'
+  breadcrumbLabel: string
+}

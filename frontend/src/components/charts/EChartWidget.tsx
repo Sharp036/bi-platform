@@ -1,11 +1,14 @@
 import ReactECharts from 'echarts-for-react'
 import type { WidgetData } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
+import { useRef, useCallback } from 'react'
 
 interface Props {
   data: WidgetData
   chartConfig?: string
   title?: string
+  onChartClick?: (params: Record<string, unknown>) => void
+  clickable?: boolean
 }
 
 function parseConfig(raw?: string): Record<string, unknown> {
@@ -46,20 +49,32 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   }
 }
 
-export default function EChartWidget({ data, chartConfig, title }: Props) {
+export default function EChartWidget({ data, chartConfig, title, onChartClick, clickable }: Props) {
   const isDark = useThemeStore(s => s.isDark)
   const config = parseConfig(chartConfig)
   const option = buildOption(data, config)
+  const chartRef = useRef<ReactECharts>(null)
+
+  const onEvents = useCallback(() => {
+    if (!onChartClick) return {}
+    return {
+      click: (params: Record<string, unknown>) => {
+        onChartClick(params)
+      }
+    }
+  }, [onChartClick])
 
   return (
     <div className="h-full flex flex-col">
       {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
-      <div className="flex-1 min-h-0">
+      <div className={`flex-1 min-h-0 ${clickable ? 'cursor-pointer' : ''}`}>
         <ReactECharts
+          ref={chartRef}
           option={option}
           theme={isDark ? 'dark' : undefined}
           style={{ height: '100%', width: '100%' }}
           opts={{ renderer: 'canvas' }}
+          onEvents={onEvents()}
         />
       </div>
     </div>

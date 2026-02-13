@@ -1,8 +1,13 @@
 import type { WidgetData } from '@/types'
 
-interface Props { data: WidgetData; title?: string }
+interface Props {
+  data: WidgetData
+  title?: string
+  onRowClick?: (row: Record<string, unknown>) => void
+  clickable?: boolean
+}
 
-export default function TableWidget({ data, title }: Props) {
+export default function TableWidget({ data, title, onRowClick, clickable }: Props) {
   const cols = data.columns || []
   const rows = data.rows || []
 
@@ -22,7 +27,13 @@ export default function TableWidget({ data, title }: Props) {
           </thead>
           <tbody className="divide-y divide-surface-200 dark:divide-dark-surface-100">
             {rows.map((row, i) => (
-              <tr key={i} className="hover:bg-surface-50 dark:hover:bg-dark-surface-50/50 transition-colors">
+              <tr
+                key={i}
+                onClick={onRowClick ? () => onRowClick(row as Record<string, unknown>) : undefined}
+                className={`hover:bg-surface-50 dark:hover:bg-dark-surface-50/50 transition-colors ${
+                  clickable ? 'cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-900/20' : ''
+                }`}
+              >
                 {cols.map((col) => (
                   <td key={col} className="px-3 py-2 whitespace-nowrap text-slate-700 dark:text-slate-300">
                     {row[col] != null ? String(row[col]) : <span className="text-slate-400">null</span>}
