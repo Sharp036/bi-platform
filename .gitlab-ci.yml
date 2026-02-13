@@ -11,7 +11,7 @@ stages:
 build:
   image: docker:24
   stage: build
-  timeout: 30m
+  timeout: 60m
   tags:
     - deployment4docker
   services:
