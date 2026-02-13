@@ -255,7 +255,7 @@ export default function ScriptEditorPage() {
 
           <div className="flex-1 overflow-y-auto space-y-1">
             {loading ? <LoadingSpinner /> : scripts.length === 0 ? (
-              <EmptyState icon={<Code2 className="w-8 h-8" />} message="No scripts yet" />
+              <EmptyState icon={<Code2 className="w-8 h-8" />} title="No scripts yet" />
             ) : scripts.map(s => (
               <button
                 key={s.id}
@@ -424,7 +424,7 @@ export default function ScriptEditorPage() {
                         )}
                         {result.output && !result.columns && (
                           <pre className="whitespace-pre-wrap text-slate-700 dark:text-slate-300">
-                            {typeof result.output === 'string' ? result.output : JSON.stringify(result.output, null, 2)}
+                            {typeof result.output === 'string' ? result.output : JSON.stringify(result.output, null, 2) as string}
                           </pre>
                         )}
                       </div>
@@ -442,7 +442,7 @@ export default function ScriptEditorPage() {
           <div className="flex-1 flex items-center justify-center">
             <EmptyState
               icon={<Code2 className="w-12 h-12" />}
-              message="Select a script or create a new one"
+              title="Select a script or create a new one"
             />
           </div>
         )}
