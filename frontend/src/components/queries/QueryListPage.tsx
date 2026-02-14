@@ -6,7 +6,7 @@ import type { SavedQuery, QueryResult, DataSource } from '@/types'
 import TableWidget from '@/components/charts/TableWidget'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { Code2, Play, Star } from 'lucide-react'
+import { Code2, Play, Save, Star, Trash2, Edit3, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function QueryListPage() {
@@ -21,9 +21,23 @@ export default function QueryListPage() {
   const [executing, setExecuting] = useState(false)
   const [result, setResult] = useState<QueryResult | null>(null)
 
+  // Save dialog state
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [saveName, setSaveName] = useState('')
+  const [saveDesc, setSaveDesc] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  // Edit dialog state
+  const [editingQuery, setEditingQuery] = useState<SavedQuery | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editDesc, setEditDesc] = useState('')
+
+  const loadQueries = () =>
+    queryApi.list({ size: 50 }).then(d => setQueries(d.content || [])).catch(() => {})
+
   useEffect(() => {
     Promise.all([
-      queryApi.list({ size: 50 }).then(d => setQueries(d.content || [])),
+      loadQueries(),
       datasourceApi.list().then(d => { setDatasources(d || []); if (d.length > 0 && !dsId) setDsId(d[0].id) }),
     ]).catch(() => toast.error(t('common.failed_to_load'))).finally(() => setLoading(false))
   }, [])
@@ -50,6 +64,67 @@ export default function QueryListPage() {
     finally { setExecuting(false) }
   }
 
+  const handleSave = async () => {
+    if (!dsId || !sql.trim() || !saveName.trim()) return
+    setSaving(true)
+    try {
+      await queryApi.create({ name: saveName.trim(), datasourceId: dsId, sqlText: sql, description: saveDesc.trim() || undefined })
+      toast.success(t('queries.saved_success'))
+      setShowSaveDialog(false)
+      setSaveName('')
+      setSaveDesc('')
+      loadQueries()
+    } catch {
+      toast.error(t('queries.save_failed'))
+    } finally { setSaving(false) }
+  }
+
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(t('queries.delete_confirm', { name }))) return
+    try {
+      await queryApi.delete(id)
+      toast.success(t('queries.deleted'))
+      setQueries(prev => prev.filter(q => q.id !== id))
+    } catch {
+      toast.error(t('queries.delete_failed'))
+    }
+  }
+
+  const handleToggleFavorite = async (id: number) => {
+    try {
+      const { isFavorite } = await queryApi.toggleFavorite(id)
+      setQueries(prev => prev.map(q => q.id === id ? { ...q, isFavorite } : q))
+    } catch {
+      toast.error(t('common.error'))
+    }
+  }
+
+  const handleEditSave = async () => {
+    if (!editingQuery || !editName.trim()) return
+    setSaving(true)
+    try {
+      await queryApi.update(editingQuery.id, { name: editName.trim(), description: editDesc.trim() || undefined })
+      toast.success(t('queries.updated'))
+      setEditingQuery(null)
+      loadQueries()
+    } catch {
+      toast.error(t('queries.update_failed'))
+    } finally { setSaving(false) }
+  }
+
+  const openEdit = (q: SavedQuery) => {
+    setEditingQuery(q)
+    setEditName(q.name)
+    setEditDesc(q.description || '')
+  }
+
+  const handleLoadSaved = (q: SavedQuery) => {
+    setSql(q.sqlText)
+    const ds = datasources.find(d => d.id === q.datasourceId)
+    if (ds) setDsId(ds.id)
+    toast.success(t('queries.loaded_to_editor'))
+  }
+
   if (loading) return <LoadingSpinner />
 
   return (
@@ -68,12 +143,90 @@ export default function QueryListPage() {
             rows={3} className="input font-mono text-sm flex-1" placeholder="SELECT ..."
             onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleExecute() }}
           />
-          <button onClick={handleExecute} disabled={executing || !dsId} className="btn-primary flex-shrink-0 self-end">
-            <Play className="w-4 h-4" /> {executing ? t('queries.running') : t('queries.run')}
-          </button>
+          <div className="flex flex-col gap-2 flex-shrink-0">
+            <button onClick={handleExecute} disabled={executing || !dsId} className="btn-primary">
+              <Play className="w-4 h-4" /> {executing ? t('queries.running') : t('queries.run')}
+            </button>
+            <button
+              onClick={() => { setSaveName(''); setSaveDesc(''); setShowSaveDialog(true) }}
+              disabled={!dsId || !sql.trim()}
+              className="btn-secondary"
+            >
+              <Save className="w-4 h-4" /> {t('queries.save')}
+            </button>
+          </div>
         </div>
         <p className="text-xs text-slate-400 mt-1">{t('queries.ctrl_enter_hint')}</p>
       </div>
+
+      {/* Save dialog */}
+      {showSaveDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowSaveDialog(false)}>
+          <div className="bg-white dark:bg-dark-surface rounded-xl shadow-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-white">{t('queries.save_query')}</h3>
+              <button onClick={() => setShowSaveDialog(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="text" value={saveName} onChange={e => setSaveName(e.target.value)}
+                placeholder={t('queries.name_placeholder')}
+                className="input w-full" autoFocus
+                onKeyDown={e => { if (e.key === 'Enter') handleSave() }}
+              />
+              <textarea
+                value={saveDesc} onChange={e => setSaveDesc(e.target.value)}
+                placeholder={t('queries.desc_placeholder')}
+                className="input w-full" rows={2}
+              />
+              <pre className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 text-xs font-mono text-slate-600 dark:text-slate-300 max-h-32 overflow-auto">
+                {sql}
+              </pre>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setShowSaveDialog(false)} className="btn-secondary">{t('common.cancel')}</button>
+              <button onClick={handleSave} disabled={saving || !saveName.trim()} className="btn-primary">
+                <Save className="w-4 h-4" /> {saving ? t('common.saving') : t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit dialog */}
+      {editingQuery && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setEditingQuery(null)}>
+          <div className="bg-white dark:bg-dark-surface rounded-xl shadow-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-white">{t('queries.edit_query')}</h3>
+              <button onClick={() => setEditingQuery(null)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="text" value={editName} onChange={e => setEditName(e.target.value)}
+                placeholder={t('queries.name_placeholder')}
+                className="input w-full" autoFocus
+                onKeyDown={e => { if (e.key === 'Enter') handleEditSave() }}
+              />
+              <textarea
+                value={editDesc} onChange={e => setEditDesc(e.target.value)}
+                placeholder={t('queries.desc_placeholder')}
+                className="input w-full" rows={2}
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setEditingQuery(null)} className="btn-secondary">{t('common.cancel')}</button>
+              <button onClick={handleEditSave} disabled={saving || !editName.trim()} className="btn-primary">
+                <Save className="w-4 h-4" /> {saving ? t('common.saving') : t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Query result */}
       {result && (
@@ -90,16 +243,26 @@ export default function QueryListPage() {
         <div className="space-y-2">
           {queries.map(q => (
             <div key={q.id} className="card px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
-                {q.isFavorite && <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />}
-                <div className="min-w-0">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <button onClick={() => handleToggleFavorite(q.id)} className="flex-shrink-0">
+                  <Star className={`w-4 h-4 ${q.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-slate-300 hover:text-amber-400'}`} />
+                </button>
+                <div className="min-w-0 flex-1 cursor-pointer" onClick={() => handleLoadSaved(q)}>
                   <p className="text-sm font-medium text-slate-800 dark:text-white truncate">{q.name}</p>
                   <p className="text-xs text-slate-400">{q.datasourceName} · {q.queryMode} · {t('queries.runs', { count: q.executionCount })}</p>
                 </div>
               </div>
-              <button onClick={() => handleExecuteSaved(q.id)} disabled={executing} className="btn-secondary text-xs">
-                <Play className="w-3.5 h-3.5" /> {t('queries.run')}
-              </button>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button onClick={() => handleExecuteSaved(q.id)} disabled={executing} className="btn-secondary text-xs">
+                  <Play className="w-3.5 h-3.5" /> {t('queries.run')}
+                </button>
+                <button onClick={() => openEdit(q)} className="p-1.5 text-slate-400 hover:text-brand-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" title={t('common.edit')}>
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => handleDelete(q.id, q.name)} className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title={t('common.delete')}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

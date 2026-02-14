@@ -8,6 +8,18 @@ export const queryApi = {
   get: (id: number) =>
     api.get<SavedQuery>(`/queries/${id}`).then(r => r.data),
 
+  create: (data: { name: string; datasourceId: number; sqlText: string; description?: string }) =>
+    api.post<SavedQuery>('/queries', { ...data, queryMode: 'RAW' }).then(r => r.data),
+
+  update: (id: number, data: { name?: string; sqlText?: string; description?: string }) =>
+    api.put<SavedQuery>(`/queries/${id}`, data).then(r => r.data),
+
+  delete: (id: number) =>
+    api.delete(`/queries/${id}`).then(r => r.data),
+
+  toggleFavorite: (id: number) =>
+    api.post<{ isFavorite: boolean }>(`/queries/${id}/favorite`).then(r => r.data),
+
   execute: (id: number, parameters?: Record<string, unknown>) =>
     api.post<QueryResult>(`/queries/${id}/execute`, { parameters }).then(r => r.data),
 
