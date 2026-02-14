@@ -21,9 +21,12 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const cols = data.columns || []
   const rows = data.rows || []
 
-  // Default: first column = category, rest = series
-  const categoryCol = cols[0]
-  const seriesCols = cols.slice(1)
+  // Use configured fields or fall back to defaults
+  const categoryCol = (config.categoryField as string) || cols[0]
+  const configuredValues = config.valueFields as string[] | undefined
+  const seriesCols = configuredValues && configuredValues.length > 0
+    ? configuredValues.filter(f => cols.includes(f))
+    : cols.filter(c => c !== categoryCol)
 
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
   const series = seriesCols.map(col => ({

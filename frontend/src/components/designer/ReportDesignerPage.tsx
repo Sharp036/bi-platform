@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
@@ -16,10 +16,11 @@ import toast from 'react-hot-toast'
 import { useState } from 'react'
 
 export default function ReportDesignerPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isNew = !id || id === 'new'
+  const nameEditedRef = useRef(false)
 
   const {
     reportId, reportName, reportDescription, reportStatus,
@@ -37,8 +38,10 @@ export default function ReportDesignerPage() {
     if (isNew) {
       reset()
       setReportMeta(t('designer.new_report_name'), '')
+      nameEditedRef.current = false
       return
     }
+    nameEditedRef.current = true
     setLoading(true)
     reportApi.get(Number(id))
       .then(data => {
@@ -54,6 +57,13 @@ export default function ReportDesignerPage() {
       .catch(() => toast.error(t('designer.failed_load')))
       .finally(() => setLoading(false))
   }, [id, isNew]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update default title on language change (only for new unsaved reports)
+  useEffect(() => {
+    if (isNew && !nameEditedRef.current) {
+      setReportMeta(t('designer.new_report_name'), reportDescription)
+    }
+  }, [i18n.language]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -123,8 +133,9 @@ export default function ReportDesignerPage() {
         toast.success(t('designer.report_saved'))
         setDirty(false)
       }
-    } catch {
-      toast.error(t('designer.failed_save'))
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || t('designer.failed_save'))
     } finally {
       setSaving(false)
     }
@@ -150,7 +161,7 @@ export default function ReportDesignerPage() {
 
         <input
           value={reportName}
-          onChange={e => setReportMeta(e.target.value, reportDescription)}
+          onChange={e => { nameEditedRef.current = true; setReportMeta(e.target.value, reportDescription) }}
           className="text-lg font-bold bg-transparent border-none outline-none text-slate-800 dark:text-white min-w-0 flex-1"
           placeholder={t('designer.report_name_placeholder')}
         />
