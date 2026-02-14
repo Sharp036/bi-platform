@@ -26,7 +26,8 @@ class ReportRenderService(
     private val widgetRepo: ReportWidgetRepository,
     private val savedQueryService: SavedQueryService,
     private val snapshotRepo: ReportSnapshotRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val liveDataService: LiveDataService
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -53,13 +54,18 @@ class ReportRenderService(
         log.info("Rendered report '{}' (id={}) with {} widgets in {}ms",
             report.name, reportId, renderedWidgets.size, totalMs)
 
-        return RenderReportResponse(
+        val response = RenderReportResponse(
             reportId = report.id,
             reportName = report.name,
             parameters = resolvedParams,
             widgets = renderedWidgets,
             executionMs = totalMs
         )
+
+        // Push to live subscribers
+        try { liveDataService.notifyReportUpdate(reportId, response) } catch (_: Exception) {}
+
+        return response
     }
 
     /**

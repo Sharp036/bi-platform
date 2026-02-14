@@ -39,8 +39,13 @@ class JwtAuthenticationFilter(
 
     private fun extractToken(request: HttpServletRequest): String? {
         val header = request.getHeader("Authorization")
-        return if (header != null && header.startsWith("Bearer ")) {
-            header.substring(7)
-        } else null
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7)
+        }
+        // Fallback: token as query parameter (for SSE EventSource)
+        if (request.requestURI.startsWith("/live/")) {
+            return request.getParameter("token")
+        }
+        return null
     }
 }

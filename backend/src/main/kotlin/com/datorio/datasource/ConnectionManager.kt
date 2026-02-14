@@ -175,9 +175,9 @@ class ConnectionManager {
     private fun extractValue(rs: ResultSet, index: Int): Any? {
         return try {
             val value = rs.getObject(index)
-            if (rs.wasNull()) null else value?.toString()
+            value?.toString()
         } catch (e: Exception) {
-            try { rs.getString(index) } catch (_: Exception) { "???" }
+            try { rs.getString(index) } catch (_: Exception) { null }
         }
     }
 }

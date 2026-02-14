@@ -19,6 +19,8 @@ import { interactiveApi } from '@/api/interactive'
 import type { InteractiveMeta } from '@/types'
 import { workspaceApi } from '@/api/workspace'
 import FavoriteButton from '@/components/workspace/FavoriteButton'
+import { useLiveData } from '@/hooks/useLiveData'
+import LiveIndicator from './LiveIndicator'
 
 export default function ReportViewerPage() {
   const { id } = useParams<{ id: string }>()
@@ -35,6 +37,13 @@ export default function ReportViewerPage() {
   const [currentParams, setCurrentParams] = useState<Record<string, unknown>>({})
   const [interactiveMeta, setInteractiveMeta] = useState<InteractiveMeta | null>(null)
   const initializedRef = useRef(false)
+
+  const [liveEnabled, setLiveEnabled] = useState(false)
+  const { status: liveStatus, lastUpdate: liveLastUpdate, reconnect: liveReconnect } = useLiveData({
+    enabled: liveEnabled,
+    reportId: currentReportId,
+    onReportUpdate: () => handleRender(),
+  })
 
   // Load initial report
   useEffect(() => {
@@ -186,6 +195,13 @@ export default function ReportViewerPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
+            <LiveIndicator
+              status={liveStatus}
+              lastUpdate={liveLastUpdate}
+              enabled={liveEnabled}
+              onToggle={setLiveEnabled}
+              onReconnect={liveReconnect}
+            />
             <Clock className="w-4 h-4 text-slate-400" />
             <select
               value={autoRefresh || ''}

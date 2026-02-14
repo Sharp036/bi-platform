@@ -6,7 +6,7 @@ import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
 import { Trash2, Copy, Eye, EyeOff } from 'lucide-react'
 
-const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel']
+const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
 
 export default function PropertyPanel() {
   const selected = useDesignerStore(s => s.selectedWidgetId)
