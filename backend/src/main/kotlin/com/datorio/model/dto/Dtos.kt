@@ -51,7 +51,7 @@ data class DataSourceCreateRequest(
     val type: DataSourceType,
     @field:NotBlank val host: String,
     val port: Int,
-    @field:NotBlank val databaseName: String,
+    val databaseName: String = "",
     val username: String? = null,
     val password: String? = null,
     val extraParams: Map<String, Any> = emptyMap()
