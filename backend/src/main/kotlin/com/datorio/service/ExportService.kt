@@ -150,8 +150,8 @@ class ExportService(
 
             // Rows
             for (row in rows) {
-                val values = cols.mapIndexed { colIdx, _ ->
-                    val value = row.getOrNull(colIdx)
+                val values = cols.map { col ->
+                    val value = row[col]
                     escapeCsv(value?.toString() ?: "")
                 }
                 sb.appendLine(values.joinToString(","))
@@ -235,9 +235,9 @@ class ExportService(
         // Data rows
         for (row in data.rows) {
             val excelRow = sheet.createRow(rowIdx++)
-            data.columns.forEachIndexed { colIdx, _ ->
+            data.columns.forEachIndexed { colIdx, col ->
                 val cell = excelRow.createCell(colIdx)
-                val value = row.getOrNull(colIdx)
+                val value = row[col]
                 when (value) {
                     null -> cell.setBlank()
                     is Number -> cell.setCellValue(value.toDouble())
@@ -317,8 +317,8 @@ class ExportService(
             sb.appendLine("<tbody>")
             for (row in data.rows) {
                 sb.appendLine("<tr>")
-                for ((colIdx, _) in data.columns.withIndex()) {
-                    val value = row.getOrNull(colIdx)
+                for (col in data.columns) {
+                    val value = row[col]
                     sb.appendLine("<td>${escapeHtml(value?.toString() ?: "")}</td>")
                 }
                 sb.appendLine("</tr>")

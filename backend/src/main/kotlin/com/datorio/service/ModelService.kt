@@ -300,9 +300,7 @@ class ModelService(
         val elapsed = System.currentTimeMillis() - startTime
 
         val colNames = result.columns.map { it.name }
-        val mappedRows = result.rows.map { row ->
-            colNames.mapIndexed { i, name -> name to row.getOrNull(i) }.toMap()
-        }
+        val mappedRows = result.rows
 
         return ExploreResponse(
             sql = sql,

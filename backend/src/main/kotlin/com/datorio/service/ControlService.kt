@@ -151,8 +151,9 @@ class ControlService(
 
         return try {
             val result = connectionManager.executeQuery(ds, query, 500)
+            val firstCol = result.columns.firstOrNull()?.name
             val options = result.rows.map { row ->
-                row.firstOrNull()?.toString() ?: ""
+                (if (firstCol != null) row[firstCol] else null)?.toString() ?: ""
             }.filter { it.isNotBlank() }.distinct()
             ParameterOptionsResponse(parameterName, options)
         } catch (e: Exception) {
