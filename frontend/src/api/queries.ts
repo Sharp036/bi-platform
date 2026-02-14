@@ -12,7 +12,7 @@ export const queryApi = {
     api.post<QueryResult>(`/queries/${id}/execute`, { parameters }).then(r => r.data),
 
   executeAdHoc: (data: { datasourceId: number; sql: string; parameters?: Record<string, unknown>; limit?: number }) =>
-    api.post<QueryResult>('/queries/execute', data).then(r => r.data),
+    api.post<QueryResult>('/query/execute', data).then(r => r.data),
 
   search: (term: string) =>
     api.get<SavedQuery[]>('/queries/search', { params: { term } }).then(r => r.data),
