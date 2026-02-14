@@ -49,7 +49,7 @@ export function useLiveData(options: UseLiveDataOptions) {
   callbacksRef.current = { onReportUpdate, onWidgetUpdate, onEvent }
 
   const getToken = useCallback(() => {
-    return useAuthStore.getState().token
+    return localStorage.getItem('accessToken')
   }, [])
 
   const connect = useCallback(async () => {
