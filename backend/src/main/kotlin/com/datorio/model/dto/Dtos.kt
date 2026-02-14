@@ -89,7 +89,7 @@ data class QueryExecuteRequest(
 
 data class QueryResult(
     val columns: List<ColumnMeta>,
-    val rows: List<List<Any?>>,
+    val rows: List<Map<String, Any?>>,
     val rowCount: Int,
     val executionTimeMs: Long,
     val truncated: Boolean = false

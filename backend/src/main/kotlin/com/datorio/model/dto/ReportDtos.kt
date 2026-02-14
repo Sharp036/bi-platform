@@ -153,7 +153,7 @@ data class RenderedWidget(
 
 data class WidgetData(
     val columns: List<String>,
-    val rows: List<List<Any?>>,
+    val rows: List<Map<String, Any?>>, 
     val rowCount: Int,
     val executionMs: Long
 )

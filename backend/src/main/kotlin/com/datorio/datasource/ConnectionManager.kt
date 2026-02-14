@@ -62,8 +62,9 @@ class ConnectionManager {
     }
 
     /**
-     * Execute a SQL query against a data source.
-     */
+    * Execute a SQL query against a data source.
+    * Returns rows as List<Map<String, Any?>> for frontend compatibility.
+    */
     fun executeQuery(ds: DataSource, sql: String, limit: Int = 1000): QueryResult {
         val start = System.currentTimeMillis()
         val pool = getPool(ds)
@@ -82,10 +83,15 @@ class ConnectionManager {
                     )
                 }
 
-                val rows = mutableListOf<List<Any?>>()
+                val columnNames = columns.map { it.name }
+                val rows = mutableListOf<Map<String, Any?>>()
                 var count = 0
                 while (rs.next() && count < limit) {
-                    rows.add((1..meta.columnCount).map { i -> extractValue(rs, i) })
+                    val row = mutableMapOf<String, Any?>()
+                    columnNames.forEachIndexed { index, colName ->
+                        row[colName] = extractValue(rs, index + 1)
+                    }
+                    rows.add(row)
                     count++
                 }
 
@@ -174,10 +180,9 @@ class ConnectionManager {
 
     private fun extractValue(rs: ResultSet, index: Int): Any? {
         return try {
-            val value = rs.getObject(index)
-            value?.toString()
+            rs.getString(index)
         } catch (e: Exception) {
-            try { rs.getString(index) } catch (_: Exception) { null }
+            try { rs.getObject(index)?.toString() } catch (_: Exception) { null }
         }
     }
 }

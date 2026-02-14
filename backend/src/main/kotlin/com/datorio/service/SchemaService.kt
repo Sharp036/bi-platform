@@ -168,13 +168,15 @@ class SchemaService(
         return try {
             val sql = when (ds.type) {
                 DataSourceType.POSTGRESQL ->
-                    "SELECT reltuples::BIGINT FROM pg_class WHERE relname = '${sanitizeIdentifier(table)}'"
+                    "SELECT reltuples::BIGINT AS row_count FROM pg_class WHERE relname = '${sanitizeIdentifier(table)}'"
                 DataSourceType.CLICKHOUSE ->
-                    "SELECT total_rows FROM system.tables WHERE database = '${ds.databaseName}' AND name = '${sanitizeIdentifier(table)}'"
+                    "SELECT total_rows AS row_count FROM system.tables WHERE database = '${ds.databaseName}' AND name = '${sanitizeIdentifier(table)}'"
             }
             val result = connectionManager.executeQuery(ds, sql, 1)
             if (result.rows.isNotEmpty()) {
-                result.rows[0][0]?.toString()?.toLongOrNull()
+                val firstRow = result.rows[0]
+                val columnName = result.columns.firstOrNull()?.name ?: "row_count"
+                firstRow[columnName]?.toString()?.toLongOrNull()
             } else null
         } catch (e: Exception) {
             log.debug("Could not estimate row count for {}.{}: {}", schema, table, e.message)
