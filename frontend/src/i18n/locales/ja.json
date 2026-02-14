@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— 自動（最初の列）—",
   "designer.value_fields": "値（Y軸 / シリーズ）",
   "designer.value_fields_hint": "全選択 = 全列使用",
+  "designer.select_all": "全選択",
+  "designer.deselect_all": "全解除",
+  "designer.invert": "反転",
+  "designer.load_preview": "プレビュー",
+  "designer.preview_failed": "プレビュー失敗",
 
   "queries.title": "クエリ",
   "queries.adhoc_title": "アドホッククエリ",

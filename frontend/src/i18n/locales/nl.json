@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (eerste kolom) —",
   "designer.value_fields": "Waarden (Y-as / reeksen)",
   "designer.value_fields_hint": "Alles aangevinkt = alle kolommen",
+  "designer.select_all": "Alles",
+  "designer.deselect_all": "Niets",
+  "designer.invert": "Omkeren",
+  "designer.load_preview": "Voorbeeld laden",
+  "designer.preview_failed": "Voorbeeld mislukt",
 
   "queries.title": "Query's",
   "queries.adhoc_title": "Ad-hoc query",

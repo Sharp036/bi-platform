@@ -24,7 +24,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   // Use configured fields or fall back to defaults
   const categoryCol = (config.categoryField as string) || cols[0]
   const configuredValues = config.valueFields as string[] | undefined
-  const seriesCols = configuredValues && configuredValues.length > 0
+  const seriesCols = Array.isArray(configuredValues)
     ? configuredValues.filter(f => cols.includes(f))
     : cols.filter(c => c !== categoryCol)
 

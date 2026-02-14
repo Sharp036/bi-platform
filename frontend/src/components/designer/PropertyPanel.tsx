@@ -5,7 +5,7 @@ import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
-import { Trash2, Copy, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft } from 'lucide-react'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
 
@@ -173,13 +173,21 @@ export default function PropertyPanel() {
         const valFields = cc.valueFields as string[] || []
         const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
+        const allNonCat = availableCols.filter(c => c !== (catField || availableCols[0]))
+        const isAllSelected = !Array.isArray(cc.valueFields)
+        const effectiveFields = isAllSelected ? allNonCat : valFields
+
         const handleToggleValue = (col: string) => {
-          const allNonCat = availableCols.filter(c => c !== (catField || availableCols[0]))
-          const current = valFields.length > 0 ? valFields : allNonCat
+          const current = isAllSelected ? [...allNonCat] : [...valFields]
           const next = current.includes(col)
             ? current.filter(c => c !== col)
             : [...current, col]
-          update({ chartConfig: { ...cc, valueFields: next.length === allNonCat.length ? [] : next } })
+          if (next.length === allNonCat.length) {
+            const { valueFields: _, ...rest } = cc
+            update({ chartConfig: rest })
+          } else {
+            update({ chartConfig: { ...cc, valueFields: next } })
+          }
         }
 
         return (
@@ -191,7 +199,7 @@ export default function PropertyPanel() {
                 className="input text-sm"
               >
                 {CHART_TYPES.map(ct => (
-                  <option key={ct} value={ct}>{ct.charAt(0).toUpperCase() + ct.slice(1)}</option>
+                  <option key={ct} value={ct}>{t(`charts.type.${ct}`, ct.charAt(0).toUpperCase() + ct.slice(1))}</option>
                 ))}
               </select>
             </Field>
@@ -215,7 +223,10 @@ export default function PropertyPanel() {
                 <Field label={t('designer.category_field')}>
                   <select
                     value={catField}
-                    onChange={e => update({ chartConfig: { ...cc, categoryField: e.target.value || undefined, valueFields: [] } })}
+                    onChange={e => {
+                      const { valueFields: _, ...rest } = cc
+                      update({ chartConfig: { ...rest, categoryField: e.target.value || undefined } })
+                    }}
                     className="input text-sm"
                   >
                     <option value="">{t('designer.auto_first_column')}</option>
@@ -224,14 +235,40 @@ export default function PropertyPanel() {
                 </Field>
 
                 <Field label={t('designer.value_fields')}>
+                  <div className="flex items-center gap-1 mb-1">
+                    <button
+                      onClick={() => { const { valueFields: _, ...rest } = cc; update({ chartConfig: rest }) }}
+                      className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.select_all')}
+                    >
+                      <CheckSquare className="w-3 h-3" /> {t('designer.select_all')}
+                    </button>
+                    <button
+                      onClick={() => update({ chartConfig: { ...cc, valueFields: [] } })}
+                      className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.deselect_all')}
+                    >
+                      <Square className="w-3 h-3" /> {t('designer.deselect_all')}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const inverted = allNonCat.filter(c => !effectiveFields.includes(c))
+                        if (inverted.length === allNonCat.length) {
+                          const { valueFields: _, ...rest } = cc
+                          update({ chartConfig: rest })
+                        } else {
+                          update({ chartConfig: { ...cc, valueFields: inverted } })
+                        }
+                      }}
+                      className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.invert')}
+                    >
+                      <ToggleLeft className="w-3 h-3" /> {t('designer.invert')}
+                    </button>
+                  </div>
                   <div className="space-y-1 max-h-36 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                    {availableCols
-                      .filter(c => c !== (catField || availableCols[0]))
-                      .map(col => (
+                    {allNonCat.map(col => (
                         <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
                           <input
                             type="checkbox"
-                            checked={valFields.length === 0 || valFields.includes(col)}
+                            checked={isAllSelected || valFields.includes(col)}
                             onChange={() => handleToggleValue(col)}
                             className="rounded border-slate-300"
                           />

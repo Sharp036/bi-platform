@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— स्वतः (पहला कॉलम) —",
   "designer.value_fields": "मान (Y-अक्ष / श्रृंखला)",
   "designer.value_fields_hint": "सभी चयनित = सभी कॉलम",
+  "designer.select_all": "सभी",
+  "designer.deselect_all": "कोई नहीं",
+  "designer.invert": "उलटा",
+  "designer.load_preview": "पूर्वावलोकन",
+  "designer.preview_failed": "पूर्वावलोकन विफल",
 
   "queries.title": "क्वेरी",
   "queries.adhoc_title": "एड-हॉक क्वेरी",

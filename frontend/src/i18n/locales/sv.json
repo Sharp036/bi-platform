@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (första kolumnen) —",
   "designer.value_fields": "Värden (Y-axel / serier)",
   "designer.value_fields_hint": "Alla markerade = alla kolumner",
+  "designer.select_all": "Alla",
+  "designer.deselect_all": "Inga",
+  "designer.invert": "Invertera",
+  "designer.load_preview": "Forhandsgranska",
+  "designer.preview_failed": "Forhandsgranskning misslyckades",
 
   "queries.title": "Frågor",
   "queries.adhoc_title": "Ad-hoc-fråga",

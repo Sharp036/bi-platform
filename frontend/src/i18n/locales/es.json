@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (primera columna) —",
   "designer.value_fields": "Valores (eje Y / series)",
   "designer.value_fields_hint": "Todos marcados = todas las columnas",
+  "designer.select_all": "Todos",
+  "designer.deselect_all": "Ninguno",
+  "designer.invert": "Invertir",
+  "designer.load_preview": "Vista previa",
+  "designer.preview_failed": "Error en vista previa",
 
   "queries.title": "Consultas",
   "queries.adhoc_title": "Consulta ad hoc",

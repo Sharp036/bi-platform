@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (erste Spalte) —",
   "designer.value_fields": "Werte (Y-Achse / Serien)",
   "designer.value_fields_hint": "Alle markiert = alle Spalten",
+  "designer.select_all": "Alle",
+  "designer.deselect_all": "Keine",
+  "designer.invert": "Umkehren",
+  "designer.load_preview": "Vorschau laden",
+  "designer.preview_failed": "Vorschau fehlgeschlagen",
 
   "queries.title": "Abfragen",
   "queries.adhoc_title": "Ad-hoc-Abfrage",

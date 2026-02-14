@@ -2,6 +2,7 @@ package com.datorio.controller
 
 import com.datorio.model.*
 import com.datorio.model.dto.*
+import com.datorio.repository.UserRepository
 import com.datorio.service.*
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -18,7 +19,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/reports")
 class ReportController(
     private val reportService: ReportService,
-    private val renderService: ReportRenderService
+    private val renderService: ReportRenderService,
+    private val userRepository: UserRepository
 ) {
 
     @PostMapping
@@ -258,10 +260,10 @@ class ReportController(
 
     private fun getUserId(auth: Authentication): Long {
         return try {
-            val principal = auth.principal
-            if (principal is org.springframework.security.core.userdetails.UserDetails) {
-                principal.username.hashCode().toLong()
-            } else { 0L }
+            val username = auth.name
+            userRepository.findByUsername(username)
+                .map { it.id }
+                .orElse(0L)
         } catch (_: Exception) { 0L }
     }
 }

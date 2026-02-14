@@ -1,8 +1,12 @@
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { DesignerWidget } from '@/store/useDesignerStore'
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff } from 'lucide-react'
+import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play } from 'lucide-react'
+import { queryApi } from '@/api/queries'
+import EChartWidget from '@/components/charts/EChartWidget'
+import type { WidgetData } from '@/types'
 import clsx from 'clsx'
+import { useState, useCallback } from 'react'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   CHART: BarChart3, TABLE: Table, KPI: Hash,
@@ -75,6 +79,40 @@ function WidgetBlock({
   const Icon = ICON_MAP[widget.widgetType] || BarChart3
   const colWidth = 100 / COLS
 
+  const [previewData, setPreviewData] = useState<WidgetData | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+
+  const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
+
+  const loadPreview = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!hasDataSource) return
+    setPreviewLoading(true)
+    setPreviewError(null)
+    try {
+      let res
+      if (widget.queryId) {
+        res = await queryApi.execute(widget.queryId, undefined, 100)
+      } else if (widget.datasourceId && widget.rawSql?.trim()) {
+        res = await queryApi.executeAdHoc({ datasourceId: widget.datasourceId, sql: widget.rawSql, limit: 100 })
+      }
+      if (res) {
+        const cols = res.columns?.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name) || []
+        setPreviewData({
+          columns: cols,
+          rows: res.rows || [],
+          rowCount: res.rowCount || res.rows?.length || 0,
+          executionMs: res.executionTimeMs || 0,
+        })
+      }
+    } catch {
+      setPreviewError(t('designer.preview_failed'))
+    } finally {
+      setPreviewLoading(false)
+    }
+  }, [widget.queryId, widget.datasourceId, widget.rawSql, hasDataSource, t])
+
   const style: React.CSSProperties = {
     position: 'absolute',
     left: `${widget.position.x * colWidth}%`,
@@ -87,6 +125,9 @@ function WidgetBlock({
   if (!widget.isVisible && !previewMode) {
     // Show as ghost in design mode
   }
+
+  const showChart = widget.widgetType === 'CHART' && previewData
+  const chartConfigStr = showChart ? JSON.stringify(widget.chartConfig) : undefined
 
   return (
     <div style={style} onClick={(e) => { e.stopPropagation(); onSelect() }}>
@@ -104,12 +145,26 @@ function WidgetBlock({
           <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
             {widget.title || widget.widgetType}
           </span>
+          {hasDataSource && !previewData && (
+            <button
+              onClick={loadPreview}
+              disabled={previewLoading}
+              className="p-0.5 rounded hover:bg-brand-100 dark:hover:bg-brand-900/30 text-brand-500"
+              title={t('designer.load_preview')}
+            >
+              <Play className={`w-3 h-3 ${previewLoading ? 'animate-pulse' : ''}`} />
+            </button>
+          )}
           {!widget.isVisible && <EyeOff className="w-3 h-3 text-slate-400" />}
         </div>
 
         {/* Body */}
         <div className="flex-1 flex items-center justify-center p-2 min-h-0">
-          {widget.widgetType === 'TEXT' ? (
+          {showChart ? (
+            <div className="w-full h-full">
+              <EChartWidget data={previewData} chartConfig={chartConfigStr} />
+            </div>
+          ) : widget.widgetType === 'TEXT' ? (
             <div className="text-xs text-slate-500 dark:text-slate-400 overflow-hidden line-clamp-4 w-full"
                  dangerouslySetInnerHTML={{ __html: widget.title || '<p>Text content</p>' }} />
           ) : widget.widgetType === 'IMAGE' && (widget.chartConfig as Record<string, unknown>).url ? (
@@ -118,12 +173,23 @@ function WidgetBlock({
               alt={widget.title}
               className="max-h-full max-w-full object-contain"
             />
+          ) : previewError ? (
+            <p className="text-[10px] text-red-400">{previewError}</p>
           ) : (
             <div className="text-center">
               <Icon className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-1" />
               <p className="text-[10px] text-slate-400 dark:text-slate-500">
                 {widget.queryId ? `Query #${widget.queryId}` : widget.rawSql ? t('designer.inline_sql_badge') : t('designer.no_data_bound')}
               </p>
+              {hasDataSource && (
+                <button
+                  onClick={loadPreview}
+                  disabled={previewLoading}
+                  className="mt-1 text-[10px] text-brand-500 hover:text-brand-600 flex items-center gap-0.5 mx-auto"
+                >
+                  <Play className="w-3 h-3" /> {previewLoading ? t('designer.loading_columns') : t('designer.load_preview')}
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— אוטומטי (עמודה ראשונה) —",
   "designer.value_fields": "ערכים (ציר Y / סדרות)",
   "designer.value_fields_hint": "הכל מסומן = כל העמודות",
+  "designer.select_all": "הכל",
+  "designer.deselect_all": "כלום",
+  "designer.invert": "הפוך",
+  "designer.load_preview": "תצוגה מקדימה",
+  "designer.preview_failed": "תצוגה מקדימה נכשלה",
 
   "queries.title": "שאילתות",
   "queries.adhoc_title": "שאילתה חד-פעמית",

@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (prima colonna) —",
   "designer.value_fields": "Valori (asse Y / serie)",
   "designer.value_fields_hint": "Tutto selezionato = tutte le colonne",
+  "designer.select_all": "Tutti",
+  "designer.deselect_all": "Nessuno",
+  "designer.invert": "Inverti",
+  "designer.load_preview": "Anteprima",
+  "designer.preview_failed": "Anteprima fallita",
 
   "queries.title": "Query",
   "queries.adhoc_title": "Query ad-hoc",

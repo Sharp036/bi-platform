@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Αυτόματο (πρώτη στήλη) —",
   "designer.value_fields": "Τιμές (άξονας Y / σειρές)",
   "designer.value_fields_hint": "Όλα επιλεγμένα = όλες οι στήλες",
+  "designer.select_all": "Ολα",
+  "designer.deselect_all": "Κανενα",
+  "designer.invert": "Αντιστροφη",
+  "designer.load_preview": "Προεπισκοπηση",
+  "designer.preview_failed": "Αποτυχια προεπισκοπησης",
 
   "queries.title": "Ερωτήματα",
   "queries.adhoc_title": "Ad-hoc ερώτημα",

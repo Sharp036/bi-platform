@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (prima coloană) —",
   "designer.value_fields": "Valori (axa Y / serii)",
   "designer.value_fields_hint": "Toate bifate = toate coloanele",
+  "designer.select_all": "Toate",
+  "designer.deselect_all": "Nimic",
+  "designer.invert": "Inverseaza",
+  "designer.load_preview": "Previzualizare",
+  "designer.preview_failed": "Previzualizare esuata",
 
   "queries.title": "Interogări",
   "queries.adhoc_title": "Interogare ad-hoc",

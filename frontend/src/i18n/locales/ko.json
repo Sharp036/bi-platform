@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— 자동 (첫 번째 열) —",
   "designer.value_fields": "값 (Y축 / 시리즈)",
   "designer.value_fields_hint": "모두 선택 = 모든 열 사용",
+  "designer.select_all": "모두 선택",
+  "designer.deselect_all": "선택 해제",
+  "designer.invert": "반전",
+  "designer.load_preview": "미리보기",
+  "designer.preview_failed": "미리보기 실패",
 
   "queries.title": "쿼리",
   "queries.adhoc_title": "임시 쿼리",

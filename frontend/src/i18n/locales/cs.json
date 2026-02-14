@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (první sloupec) —",
   "designer.value_fields": "Hodnoty (osa Y / série)",
   "designer.value_fields_hint": "Vše zaškrtnuto = všechny sloupce",
+  "designer.select_all": "Vse",
+  "designer.deselect_all": "Nic",
+  "designer.invert": "Invertovat",
+  "designer.load_preview": "Nahled",
+  "designer.preview_failed": "Nahled selhal",
 
   "queries.title": "Dotazy",
   "queries.adhoc_title": "Ad-hoc dotaz",

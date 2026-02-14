@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (première colonne) —",
   "designer.value_fields": "Valeurs (axe Y / séries)",
   "designer.value_fields_hint": "Tout coché = toutes les colonnes",
+  "designer.select_all": "Tout",
+  "designer.deselect_all": "Aucun",
+  "designer.invert": "Inverser",
+  "designer.load_preview": "Apercu",
+  "designer.preview_failed": "Echec de l'apercu",
 
   "queries.title": "Requêtes",
   "queries.adhoc_title": "Requête ad hoc",

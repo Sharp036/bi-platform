@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (first column) —",
   "designer.value_fields": "Values (Y-axis / Series)",
   "designer.value_fields_hint": "All checked = use all columns",
+  "designer.select_all": "All",
+  "designer.deselect_all": "None",
+  "designer.invert": "Invert",
+  "designer.load_preview": "Preview data",
+  "designer.preview_failed": "Preview failed",
 
   "queries.title": "Queries",
   "queries.adhoc_title": "Ad-hoc Query",

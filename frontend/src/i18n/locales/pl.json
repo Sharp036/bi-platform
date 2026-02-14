@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (pierwsza kolumna) —",
   "designer.value_fields": "Wartości (oś Y / serie)",
   "designer.value_fields_hint": "Wszystkie zaznaczone = wszystkie kolumny",
+  "designer.select_all": "Wszystko",
+  "designer.deselect_all": "Nic",
+  "designer.invert": "Odwroc",
+  "designer.load_preview": "Podglad",
+  "designer.preview_failed": "Blad podgladu",
 
   "queries.title": "Zapytania",
   "queries.adhoc_title": "Zapytanie ad-hoc",

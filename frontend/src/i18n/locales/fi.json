@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Automaattinen (ensimmäinen sarake) —",
   "designer.value_fields": "Arvot (Y-akseli / sarjat)",
   "designer.value_fields_hint": "Kaikki valittu = kaikki sarakkeet",
+  "designer.select_all": "Kaikki",
+  "designer.deselect_all": "Ei mitaan",
+  "designer.invert": "Kaanna",
+  "designer.load_preview": "Esikatselu",
+  "designer.preview_failed": "Esikatselu epaonnistui",
 
   "queries.title": "Kyselyt",
   "queries.adhoc_title": "Ad-hoc-kysely",

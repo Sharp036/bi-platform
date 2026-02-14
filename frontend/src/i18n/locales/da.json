@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Auto (første kolonne) —",
   "designer.value_fields": "Værdier (Y-akse / serier)",
   "designer.value_fields_hint": "Alle markeret = alle kolonner",
+  "designer.select_all": "Alle",
+  "designer.deselect_all": "Ingen",
+  "designer.invert": "Inverter",
+  "designer.load_preview": "Forhåndsvisning",
+  "designer.preview_failed": "Forhåndsvisning mislykkedes",
 
   "queries.title": "Forespørgsler",
   "queries.adhoc_title": "Ad-hoc-forespørgsel",

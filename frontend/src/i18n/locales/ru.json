@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Авто (первый столбец) —",
   "designer.value_fields": "Значения (ось Y / серии)",
   "designer.value_fields_hint": "Все отмечены = все столбцы",
+  "designer.select_all": "Все",
+  "designer.deselect_all": "Ничего",
+  "designer.invert": "Инвертировать",
+  "designer.load_preview": "Предпросмотр",
+  "designer.preview_failed": "Ошибка предпросмотра",
 
   "queries.title": "Запросы",
   "queries.adhoc_title": "Произвольный запрос",

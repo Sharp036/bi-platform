@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Otomatik (ilk sütun) —",
   "designer.value_fields": "Değerler (Y ekseni / seriler)",
   "designer.value_fields_hint": "Tümü seçili = tüm sütunlar",
+  "designer.select_all": "Tumunu sec",
+  "designer.deselect_all": "Hicbiri",
+  "designer.invert": "Ters cevir",
+  "designer.load_preview": "On izleme",
+  "designer.preview_failed": "On izleme basarisiz",
 
   "queries.title": "Sorgular",
   "queries.adhoc_title": "Ad-hoc Sorgu",

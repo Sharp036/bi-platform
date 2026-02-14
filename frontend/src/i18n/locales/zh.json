@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— 自动（第一列）—",
   "designer.value_fields": "数值（Y轴 / 系列）",
   "designer.value_fields_hint": "全选 = 使用所有列",
+  "designer.select_all": "全选",
+  "designer.deselect_all": "全不选",
+  "designer.invert": "反选",
+  "designer.load_preview": "预览数据",
+  "designer.preview_failed": "预览失败",
 
   "queries.title": "查询",
   "queries.adhoc_title": "即席查询",

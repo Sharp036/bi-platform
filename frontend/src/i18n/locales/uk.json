@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Авто (перший стовпець) —",
   "designer.value_fields": "Значення (вісь Y / серії)",
   "designer.value_fields_hint": "Усі позначені = усі стовпці",
+  "designer.select_all": "Всі",
+  "designer.deselect_all": "Жодного",
+  "designer.invert": "Інвертувати",
+  "designer.load_preview": "Попередній перегляд",
+  "designer.preview_failed": "Помилка перегляду",
 
   "queries.title": "Запити",
   "queries.adhoc_title": "Спеціальний запит",

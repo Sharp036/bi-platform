@@ -213,6 +213,11 @@
   "designer.auto_first_column": "— Automatikus (első oszlop) —",
   "designer.value_fields": "Értékek (Y tengely / sorozatok)",
   "designer.value_fields_hint": "Mind kijelölve = összes oszlop",
+  "designer.select_all": "Mind",
+  "designer.deselect_all": "Egyik sem",
+  "designer.invert": "Megfordit",
+  "designer.load_preview": "Elonezet",
+  "designer.preview_failed": "Elonezet sikertelen",
 
   "queries.title": "Lekérdezések",
   "queries.adhoc_title": "Ad-hoc lekérdezés",
