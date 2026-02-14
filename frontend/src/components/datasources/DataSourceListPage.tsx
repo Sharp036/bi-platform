@@ -3,7 +3,7 @@ import { datasourceApi } from '@/api/datasources'
 import type { DataSource, DataSourceForm } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { Database, Plus, Trash2, Zap, X } from 'lucide-react'
+import { Database, Plus, Trash2, Zap, X, Pencil } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const emptyForm: DataSourceForm = {
@@ -17,6 +17,7 @@ export default function DataSourceListPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<DataSourceForm>(emptyForm)
   const [saving, setSaving] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -34,6 +35,34 @@ export default function DataSourceListPage() {
       setForm(emptyForm)
       load()
     } catch { toast.error('Failed to create') }
+    finally { setSaving(false) }
+  }
+
+  const handleEdit = (ds: DataSource) => {
+    setEditingId(ds.id)
+    setForm({
+      name: ds.name,
+      type: ds.type,
+      host: ds.host,
+      port: ds.port,
+      databaseName: ds.databaseName,
+      username: ds.username || '',
+      password: '',
+    })
+    setShowForm(true)
+  }
+
+  const handleUpdate = async () => {
+    if (!editingId) return
+    setSaving(true)
+    try {
+      await datasourceApi.update(editingId, form)
+      toast.success('Data source updated')
+      setShowForm(false)
+      setEditingId(null)
+      setForm(emptyForm)
+      load()
+    } catch { toast.error('Failed to update') }
     finally { setSaving(false) }
   }
 
@@ -55,7 +84,7 @@ export default function DataSourceListPage() {
     <div className="max-w-[900px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Data Sources</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary"><Plus className="w-4 h-4" /> Add Source</button>
+        <button onClick={() => { setEditingId(null); setForm(emptyForm); setShowForm(true) }} className="btn-primary"><Plus className="w-4 h-4" /> Add Source</button>
       </div>
 
       {/* Create form modal */}
@@ -63,7 +92,7 @@ export default function DataSourceListPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="card w-full max-w-md p-6 mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-white">New Data Source</h2>
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-white">{editingId ? 'Edit Data Source' : 'New Data Source'}</h2>
               <button onClick={() => setShowForm(false)} className="btn-ghost p-1"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-3">
@@ -83,9 +112,9 @@ export default function DataSourceListPage() {
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-5">
-              <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleCreate} disabled={saving || !form.name || !form.databaseName} className="btn-primary">
-                {saving ? 'Creating...' : 'Create'}
+              <button onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm) }} className="btn-secondary">Cancel</button>
+              <button onClick={editingId ? handleUpdate : handleCreate} disabled={saving || !form.name || !form.databaseName} className="btn-primary">
+                {saving ? 'Saving...' : editingId ? 'Save' : 'Create'}
               </button>
             </div>
           </div>
@@ -111,6 +140,7 @@ export default function DataSourceListPage() {
               </div>
               <div className="flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full mr-2 ${ds.isActive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                <button onClick={() => handleEdit(ds)} className="btn-ghost p-2 text-xs"><Pencil className="w-4 h-4" /></button>
                 <button onClick={() => handleTest(ds.id)} className="btn-ghost p-2 text-xs"><Zap className="w-4 h-4" /></button>
                 <button onClick={() => handleDelete(ds.id)} className="btn-ghost p-2 text-xs text-red-500"><Trash2 className="w-4 h-4" /></button>
               </div>

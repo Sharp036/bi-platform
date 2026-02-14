@@ -28,7 +28,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="flex items-center h-14 px-4 border-b border-surface-200 dark:border-dark-surface-100">
         <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0">
-          <span className="text-white font-bold text-sm">DL</span>
+          <span className="text-white font-bold text-sm">DTR</span>
         </div>
         {!collapsed && <span className="ml-3 font-semibold text-slate-800 dark:text-slate-100">Datorio</span>}
       </div>
