@@ -36,3 +36,4 @@ docker/volumes/
 # ── OS ──
 .DS_Store
 Thumbs.db
+nul
