@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { modelingApi, type DataModelDetail, type ModelFieldItem, type ExploreResult } from '@/api/modeling'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import TableWidget from '@/components/charts/TableWidget'
@@ -25,6 +26,7 @@ interface ExploreSortState {
 }
 
 export default function ExplorePage() {
+  const { t } = useTranslation()
   const { modelId } = useParams<{ modelId: string }>()
   const mid = Number(modelId)
 
@@ -44,7 +46,7 @@ export default function ExplorePage() {
       const m = await modelingApi.getModel(mid)
       setModel(m)
       setExpandedTables(new Set(m.tables.map(t => t.id)))
-    } catch { toast.error('Failed to load model') }
+    } catch { toast.error(t('common.failed_to_load')) }
     finally { setLoading(false) }
   }, [mid])
 
@@ -52,8 +54,8 @@ export default function ExplorePage() {
 
   // All visible fields
   const allFields: (ModelFieldItem & { _tableName: string })[] = model
-    ? model.tables.flatMap(t =>
-        t.fields.filter(f => !f.hidden).map(f => ({ ...f, _tableName: t.label || t.tableName }))
+    ? model.tables.flatMap(tbl =>
+        tbl.fields.filter(f => !f.hidden).map(f => ({ ...f, _tableName: tbl.label || tbl.tableName }))
       )
     : []
 
@@ -96,7 +98,7 @@ export default function ExplorePage() {
   }
 
   const handleRun = async () => {
-    if (selectedFieldIds.length === 0) { toast.error('Select at least one field'); return }
+    if (selectedFieldIds.length === 0) { toast.error(t('models.no_fields_selected')); return }
     setRunning(true)
     try {
       const res = await modelingApi.explore({
@@ -109,7 +111,7 @@ export default function ExplorePage() {
       })
       setResult(res)
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Query failed'
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || t('common.operation_failed')
       toast.error(msg)
     } finally { setRunning(false) }
   }
@@ -122,14 +124,14 @@ export default function ExplorePage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
           <Boxes className="w-5 h-5 text-violet-500" />
-          Explore: {model.name}
+          {t('models.explore_title', { name: model.name })}
         </h1>
         <div className="flex items-center gap-2">
           <input type="number" value={limit} onChange={e => setLimit(Number(e.target.value))}
                  className="input w-24 text-sm" min={1} max={50000} />
           <span className="text-xs text-slate-400">rows</span>
           <button onClick={handleRun} disabled={running || selectedFieldIds.length === 0} className="btn-primary">
-            <Play className="w-4 h-4" /> {running ? 'Running...' : 'Run'}
+            <Play className="w-4 h-4" /> {running ? t('scripts.running') : t('models.run_query')}
           </button>
         </div>
       </div>
@@ -137,7 +139,7 @@ export default function ExplorePage() {
       <div className="flex gap-4 flex-1 min-h-0">
         {/* Left: field picker */}
         <div className="w-64 flex-shrink-0 overflow-y-auto space-y-2">
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">Fields</h3>
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">{t('models.fields')}</h3>
           {model.tables.map(table => (
             <div key={table.id}>
               <button onClick={() => {
@@ -177,9 +179,9 @@ export default function ExplorePage() {
         <div className="flex-1 flex flex-col min-w-0 gap-4">
           {/* Selected fields */}
           <div className="card p-3">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Selected Columns</h3>
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">{t('models.select_fields')}</h3>
             {selectedFieldIds.length === 0 ? (
-              <p className="text-sm text-slate-400">Click fields on the left to add columns</p>
+              <p className="text-sm text-slate-400">{t('models.no_fields_selected')}</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {selectedFieldIds.map(fid => {

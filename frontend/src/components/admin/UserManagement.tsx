@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   adminUserApi, adminRoleApi,
   AdminUser, RoleListItem, PageResponse
@@ -19,6 +20,7 @@ const emptyForm: UserFormData = {
 };
 
 const UserManagement: React.FC = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(0);
@@ -43,7 +45,7 @@ const UserManagement: React.FC = () => {
       setUsers(data.content);
       setTotalPages(data.totalPages);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to load users');
+      setError(e.response?.data?.message || t('admin.failed_load_users'));
     } finally {
       setLoading(false);
     }
@@ -95,7 +97,7 @@ const UserManagement: React.FC = () => {
       setShowModal(false);
       loadUsers();
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Operation failed');
+      setError(e.response?.data?.message || t('common.operation_failed'));
     }
   };
 
@@ -104,17 +106,17 @@ const UserManagement: React.FC = () => {
       await adminUserApi.toggleActive(user.id);
       loadUsers();
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to toggle user status');
+      setError(e.response?.data?.message || t('admin.failed_toggle'));
     }
   };
 
   const handleDelete = async (user: AdminUser) => {
-    if (!confirm(`Delete user "${user.username}"? This cannot be undone.`)) return;
+    if (!confirm(t('admin.delete_user_confirm', { name: user.username }))) return;
     try {
       await adminUserApi.delete(user.id);
       loadUsers();
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to delete user');
+      setError(e.response?.data?.message || t('admin.failed_delete'));
     }
   };
 
@@ -125,7 +127,7 @@ const UserManagement: React.FC = () => {
       setResetUserId(null);
       setNewPassword('');
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to reset password');
+      setError(e.response?.data?.message || t('admin.failed_reset'));
     }
   };
 
@@ -141,9 +143,9 @@ const UserManagement: React.FC = () => {
   return (
     <div className="admin-users">
       <div className="admin-header">
-        <h2>User Management</h2>
+        <h2>{t('admin.user_management')}</h2>
         <button className="btn btn-primary" onClick={handleCreate}>
-          + New User
+          {t('admin.new_user')}
         </button>
       </div>
 
@@ -157,7 +159,7 @@ const UserManagement: React.FC = () => {
       <div className="search-bar">
         <input
           type="text"
-          placeholder="Search by username or email..."
+          placeholder={t('admin.search_users')}
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(0); }}
         />
@@ -168,20 +170,20 @@ const UserManagement: React.FC = () => {
         <table>
           <thead>
             <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Display Name</th>
-              <th>Roles</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th>{t('admin.col.username')}</th>
+              <th>{t('admin.col.email')}</th>
+              <th>{t('admin.col.display_name')}</th>
+              <th>{t('admin.col.roles')}</th>
+              <th>{t('admin.col.status')}</th>
+              <th>{t('admin.col.created')}</th>
+              <th>{t('admin.col.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center">Loading...</td></tr>
+              <tr><td colSpan={7} className="text-center">{t('common.loading')}</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan={7} className="text-center">No users found</td></tr>
+              <tr><td colSpan={7} className="text-center">{t('admin.no_users')}</td></tr>
             ) : users.map(user => (
               <tr key={user.id} className={!user.isActive ? 'row-inactive' : ''}>
                 <td className="font-mono">{user.username}</td>
@@ -196,7 +198,7 @@ const UserManagement: React.FC = () => {
                 </td>
                 <td>
                   <span className={`status-dot ${user.isActive ? 'active' : 'inactive'}`} />
-                  {user.isActive ? 'Active' : 'Disabled'}
+                  {user.isActive ? t('common.status.active') : t('common.status.disabled')}
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td className="actions">
@@ -210,7 +212,7 @@ const UserManagement: React.FC = () => {
                     🔑
                   </button>
                   <button className="btn btn-sm" onClick={() => handleToggleActive(user)}
-                    title={user.isActive ? 'Deactivate' : 'Activate'}>
+                    title={user.isActive ? t('admin.deactivate') : t('admin.activate')}>
                     {user.isActive ? '🚫' : '✅'}
                   </button>
                   {user.username !== 'admin' && (
@@ -228,9 +230,9 @@ const UserManagement: React.FC = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="pagination">
-          <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>← Prev</button>
-          <span>Page {page + 1} / {totalPages}</span>
-          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next →</button>
+          <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>{t('common.pagination.prev')}</button>
+          <span>{t('common.pagination.page_of', { current: page + 1, total: totalPages })}</span>
+          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>{t('common.pagination.next')}</button>
         </div>
       )}
 
@@ -238,9 +240,9 @@ const UserManagement: React.FC = () => {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <h3>{editingUser ? `Edit User: ${editingUser.username}` : 'Create New User'}</h3>
+            <h3>{editingUser ? t('admin.edit_user', { name: editingUser.username }) : t('admin.create_user')}</h3>
             <div className="form-group">
-              <label>Username</label>
+              <label>{t('admin.field.username')}</label>
               <input
                 type="text"
                 value={form.username}
@@ -250,7 +252,7 @@ const UserManagement: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Email</label>
+              <label>{t('admin.field.email')}</label>
               <input
                 type="email"
                 value={form.email}
@@ -260,17 +262,17 @@ const UserManagement: React.FC = () => {
             </div>
             {!editingUser && (
               <div className="form-group">
-                <label>Password</label>
+                <label>{t('admin.field.password')}</label>
                 <input
                   type="password"
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
-                  placeholder="min 6 characters"
+                  placeholder={t('admin.password_placeholder')}
                 />
               </div>
             )}
             <div className="form-group">
-              <label>Display Name</label>
+              <label>{t('admin.field.display_name')}</label>
               <input
                 type="text"
                 value={form.displayName}
@@ -279,7 +281,7 @@ const UserManagement: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Roles</label>
+              <label>{t('admin.field.roles')}</label>
               <div className="checkbox-group">
                 {roles.map(role => (
                   <label key={role.id} className="checkbox-label">
@@ -289,7 +291,7 @@ const UserManagement: React.FC = () => {
                       onChange={() => toggleRole(role.id)}
                     />
                     <span className={`badge badge-${role.name.toLowerCase()}`}>{role.name}</span>
-                    {role.isSystem && <small>(system)</small>}
+                    {role.isSystem && <small>{t('admin.system_role')}</small>}
                   </label>
                 ))}
               </div>
@@ -301,13 +303,13 @@ const UserManagement: React.FC = () => {
                   checked={form.isActive}
                   onChange={e => setForm({ ...form, isActive: e.target.checked })}
                 />
-                Active
+                {t('admin.field.active')}
               </label>
             </div>
             <div className="modal-actions">
-              <button className="btn" onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="btn" onClick={() => setShowModal(false)}>{t('common.cancel')}</button>
               <button className="btn btn-primary" onClick={handleSubmit}>
-                {editingUser ? 'Save Changes' : 'Create User'}
+                {editingUser ? t('admin.save_changes') : t('admin.create_user_btn')}
               </button>
             </div>
           </div>
@@ -318,21 +320,21 @@ const UserManagement: React.FC = () => {
       {resetUserId !== null && (
         <div className="modal-overlay" onClick={() => setResetUserId(null)}>
           <div className="modal modal-sm" onClick={e => e.stopPropagation()}>
-            <h3>Reset Password</h3>
+            <h3>{t('admin.reset_password')}</h3>
             <div className="form-group">
-              <label>New Password</label>
+              <label>{t('admin.new_password')}</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
-                placeholder="min 6 characters"
+                placeholder={t('admin.password_placeholder')}
               />
             </div>
             <div className="modal-actions">
-              <button className="btn" onClick={() => setResetUserId(null)}>Cancel</button>
+              <button className="btn" onClick={() => setResetUserId(null)}>{t('common.cancel')}</button>
               <button className="btn btn-primary" onClick={handleResetPassword}
                 disabled={newPassword.length < 6}>
-                Reset Password
+                {t('admin.reset_password')}
               </button>
             </div>
           </div>

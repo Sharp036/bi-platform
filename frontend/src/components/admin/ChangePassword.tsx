@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { profileApi } from '@/api/admin';
 
 const ChangePassword: React.FC = () => {
+  const { t } = useTranslation();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,23 +17,23 @@ const ChangePassword: React.FC = () => {
     setMessage('');
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwords_no_match'));
       return;
     }
     if (newPassword.length < 6) {
-      setError('New password must be at least 6 characters');
+      setError(t('auth.password_min_length'));
       return;
     }
 
     setLoading(true);
     try {
       await profileApi.changePassword(currentPassword, newPassword);
-      setMessage('Password changed successfully');
+      setMessage(t('auth.password_changed'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to change password');
+      setError(e.response?.data?.message || t('auth.password_change_failed'));
     } finally {
       setLoading(false);
     }
@@ -39,14 +41,14 @@ const ChangePassword: React.FC = () => {
 
   return (
     <div className="change-password">
-      <h3>Change Password</h3>
+      <h3>{t('auth.change_password')}</h3>
 
       {message && <div className="alert alert-success">{message}</div>}
       {error && <div className="alert alert-error">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Current Password</label>
+          <label>{t('auth.current_password')}</label>
           <input
             type="password"
             value={currentPassword}
@@ -55,7 +57,7 @@ const ChangePassword: React.FC = () => {
           />
         </div>
         <div className="form-group">
-          <label>New Password</label>
+          <label>{t('auth.new_password')}</label>
           <input
             type="password"
             value={newPassword}
@@ -65,7 +67,7 @@ const ChangePassword: React.FC = () => {
           />
         </div>
         <div className="form-group">
-          <label>Confirm New Password</label>
+          <label>{t('auth.confirm_password')}</label>
           <input
             type="password"
             value={confirmPassword}
@@ -74,7 +76,7 @@ const ChangePassword: React.FC = () => {
           />
         </div>
         <button className="btn btn-primary" type="submit" disabled={loading}>
-          {loading ? 'Changing...' : 'Change Password'}
+          {loading ? t('auth.changing') : t('auth.change_password')}
         </button>
       </form>
     </div>

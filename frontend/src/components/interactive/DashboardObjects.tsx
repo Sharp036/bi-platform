@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 
 // ═══════════════════════════════════════════
@@ -11,10 +12,11 @@ interface WebPageWidgetProps {
 }
 
 export function WebPageWidget({ url, title, allowFullscreen = true }: WebPageWidgetProps) {
+  const { t } = useTranslation()
   if (!url) {
     return (
       <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-        No URL configured
+        {t('interactive.dashboard.no_url')}
       </div>
     )
   }
@@ -29,7 +31,7 @@ export function WebPageWidget({ url, title, allowFullscreen = true }: WebPageWid
       <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-surface-200 dark:border-dark-surface-100">
         <iframe
           src={url}
-          title={title || 'Embedded content'}
+          title={title || t('interactive.dashboard.embedded_content')}
           className="w-full h-full border-0"
           sandbox="allow-scripts allow-same-origin allow-popups"
           allowFullScreen={allowFullscreen}

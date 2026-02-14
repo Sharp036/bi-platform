@@ -1,4 +1,5 @@
 import type { RenderedWidget, ChartLayerItem, WidgetData } from '@/types'
+import { useTranslation } from 'react-i18next'
 import MultiLayerChart from '@/components/charts/MultiLayerChart'
 import TableWidget from '@/components/charts/TableWidget'
 import KpiCard from '@/components/charts/KpiCard'
@@ -31,6 +32,7 @@ export default function WidgetRenderer({
   reportId, onToggleWidgets, onApplyFilter,
   annotations, tooltipConfig
 }: Props) {
+  const { t } = useTranslation()
   if (widget.error) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-red-500 dark:text-red-400 text-sm">
@@ -82,7 +84,7 @@ export default function WidgetRenderer({
       const config = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
       return <ImageWidget src={config.src || ''} alt={widget.title} linkUrl={config.linkUrl} fit={config.fit} borderRadius={config.borderRadius} />
     }
-    return <div className="h-full flex items-center justify-center text-slate-400 text-sm">No data</div>
+    return <div className="h-full flex items-center justify-center text-slate-400 text-sm">{t('common.no_data')}</div>
   }
 
   switch (widget.widgetType) {

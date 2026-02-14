@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { performanceApi } from '@/api/performance'
 import type { SystemHealth, ExplainResult } from '@/api/performance'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
@@ -7,6 +8,7 @@ import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
 export default function MonitoringPage() {
+  const { t } = useTranslation()
   const [health, setHealth] = useState<SystemHealth | null>(null)
   const [loading, setLoading] = useState(true)
   const [explainSql, setExplainSql] = useState('')
@@ -17,7 +19,7 @@ export default function MonitoringPage() {
     setLoading(true)
     performanceApi.getSystemHealth()
       .then(setHealth)
-      .catch(() => toast.error('Failed to load health data'))
+      .catch(() => toast.error(t('common.failed_to_load')))
       .finally(() => setLoading(false))
   }
 
@@ -32,26 +34,26 @@ export default function MonitoringPage() {
   const handleClearCache = async () => {
     try {
       await performanceApi.invalidateCache()
-      toast.success('Cache cleared')
+      toast.success(t('monitoring.cache_cleared'))
       load()
-    } catch { toast.error('Failed to clear cache') }
+    } catch { toast.error(t('common.operation_failed')) }
   }
 
   const handleToggleCache = async () => {
     if (!health) return
     try {
       await performanceApi.toggleCache(!health.cache.enabled)
-      toast.success(health.cache.enabled ? 'Cache disabled' : 'Cache enabled')
+      toast.success(health.cache.enabled ? t('monitoring.cache_disabled') : t('monitoring.cache_enabled'))
       load()
-    } catch { toast.error('Failed to toggle cache') }
+    } catch { toast.error(t('common.operation_failed')) }
   }
 
   const handleExplain = async () => {
-    if (!explainSql.trim() || !explainDs) { toast.error('Enter SQL and select datasource'); return }
+    if (!explainSql.trim() || !explainDs) { toast.error(t('common.operation_failed')); return }
     try {
       const result = await performanceApi.explain(Number(explainDs), explainSql)
       setExplainResult(result)
-    } catch { toast.error('EXPLAIN failed') }
+    } catch { toast.error(t('common.operation_failed')) }
   }
 
   if (loading && !health) return <LoadingSpinner />
@@ -62,20 +64,20 @@ export default function MonitoringPage() {
   return (
     <div className="max-w-[1200px] mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">System Monitoring</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('monitoring.title')}</h1>
         <button onClick={load} className="btn-secondary text-sm">
-          <RefreshCw className="w-4 h-4" /> Refresh
+          <RefreshCw className="w-4 h-4" /> {t('common.refresh')}
         </button>
       </div>
 
       {/* Top stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={Activity} label="Uptime" value={health?.uptime || '—'} color="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30" />
-        <StatCard icon={HardDrive} label="JVM Heap" value={`${health?.jvmHeapUsedMb || 0} / ${health?.jvmHeapMaxMb || 0} MB`}
+        <StatCard icon={Activity} label={t('monitoring.uptime')} value={health?.uptime || '—'} color="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30" />
+        <StatCard icon={HardDrive} label={t('monitoring.jvm_heap')} value={`${health?.jvmHeapUsedMb || 0} / ${health?.jvmHeapMaxMb || 0} MB`}
           color={heapPct > 80 ? "text-red-600 bg-red-50 dark:bg-red-900/30" : "text-brand-600 bg-brand-50 dark:bg-brand-900/30"} />
-        <StatCard icon={Zap} label="Cache Hit Rate" value={cache ? `${(cache.hitRate * 100).toFixed(1)}%` : '—'}
+        <StatCard icon={Zap} label={t('monitoring.cache_hit_rate')} value={cache ? `${(cache.hitRate * 100).toFixed(1)}%` : '—'}
           color="text-amber-600 bg-amber-50 dark:bg-amber-900/30" />
-        <StatCard icon={Database} label="Cache Entries" value={String(cache?.entryCount || 0)}
+        <StatCard icon={Database} label={t('monitoring.cache_entries')} value={String(cache?.entryCount || 0)}
           color="text-purple-600 bg-purple-50 dark:bg-purple-900/30" />
       </div>
 
@@ -83,14 +85,14 @@ export default function MonitoringPage() {
         {/* Query Cache */}
         <div className="card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-slate-700 dark:text-slate-200">Query Cache</h2>
+            <h2 className="font-semibold text-slate-700 dark:text-slate-200">{t('monitoring.query_cache')}</h2>
             <div className="flex items-center gap-2">
-              <button onClick={handleToggleCache} className="btn-ghost p-1.5" title={cache?.enabled ? 'Disable cache' : 'Enable cache'}>
+              <button onClick={handleToggleCache} className="btn-ghost p-1.5" title={cache?.enabled ? t('monitoring.cache_disabled') : t('monitoring.cache_enabled')}>
                 {cache?.enabled
                   ? <ToggleRight className="w-5 h-5 text-emerald-500" />
                   : <ToggleLeft className="w-5 h-5 text-slate-400" />}
               </button>
-              <button onClick={handleClearCache} className="btn-ghost p-1.5 text-red-500" title="Clear cache">
+              <button onClick={handleClearCache} className="btn-ghost p-1.5 text-red-500" title={t('monitoring.clear_cache')}>
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -98,23 +100,23 @@ export default function MonitoringPage() {
 
           {cache && (
             <div className="space-y-3">
-              <MetricRow label="Status" value={cache.enabled ? 'Enabled' : 'Disabled'}
+              <MetricRow label={t('monitoring.metric.status')} value={cache.enabled ? t('common.status.enabled') : t('common.status.disabled')}
                 valueClass={cache.enabled ? 'text-emerald-500' : 'text-red-500'} />
-              <MetricRow label="Hit Rate" value={`${(cache.hitRate * 100).toFixed(1)}%`} />
-              <MetricRow label="Hits / Misses" value={`${cache.hitCount} / ${cache.missCount}`} />
-              <MetricRow label="Evictions" value={String(cache.evictionCount)} />
-              <MetricRow label="Entries" value={String(cache.entryCount)} />
-              <MetricRow label="Est. Size" value={`${(cache.estimatedSizeBytes / 1024).toFixed(0)} KB`} />
+              <MetricRow label={t('monitoring.metric.hit_rate')} value={`${(cache.hitRate * 100).toFixed(1)}%`} />
+              <MetricRow label={t('monitoring.metric.hits_misses')} value={`${cache.hitCount} / ${cache.missCount}`} />
+              <MetricRow label={t('monitoring.metric.evictions')} value={String(cache.evictionCount)} />
+              <MetricRow label={t('monitoring.metric.entries')} value={String(cache.entryCount)} />
+              <MetricRow label={t('monitoring.metric.est_size')} value={`${(cache.estimatedSizeBytes / 1024).toFixed(0)} KB`} />
             </div>
           )}
         </div>
 
         {/* Connection Pools */}
         <div className="card p-5">
-          <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">Connection Pools</h2>
+          <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">{t('monitoring.connection_pools')}</h2>
 
           {!health?.connectionPools?.length ? (
-            <p className="text-sm text-slate-400">No active pools</p>
+            <p className="text-sm text-slate-400">{t('monitoring.no_pools')}</p>
           ) : (
             <div className="space-y-4">
               {health.connectionPools.map(pool => {
@@ -135,10 +137,10 @@ export default function MonitoringPage() {
                       />
                     </div>
                     <div className="flex justify-between text-xs text-slate-400">
-                      <span>Active: {pool.activeConnections} / {pool.maxPoolSize}</span>
-                      <span>Idle: {pool.idleConnections}</span>
+                      <span>{t('monitoring.pool.active')} {pool.activeConnections} / {pool.maxPoolSize}</span>
+                      <span>{t('monitoring.pool.idle')} {pool.idleConnections}</span>
                       {pool.waitingThreads > 0 && (
-                        <span className="text-red-500">Waiting: {pool.waitingThreads}</span>
+                        <span className="text-red-500">{t('monitoring.pool.waiting')} {pool.waitingThreads}</span>
                       )}
                     </div>
                   </div>
@@ -151,7 +153,7 @@ export default function MonitoringPage() {
 
       {/* Query Optimizer */}
       <div className="card p-5">
-        <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">Query Optimization Advisor</h2>
+        <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">{t('monitoring.query_advisor')}</h2>
 
         <div className="flex gap-3 mb-3">
           <input
@@ -166,7 +168,7 @@ export default function MonitoringPage() {
             />
           </div>
           <button onClick={handleExplain} className="btn-primary text-sm self-start">
-            <Search className="w-4 h-4" /> EXPLAIN
+            <Search className="w-4 h-4" /> {t('monitoring.explain')}
           </button>
         </div>
 
@@ -192,7 +194,7 @@ export default function MonitoringPage() {
             {/* Warnings */}
             {explainResult.warnings.length > 0 && (
               <div>
-                <h4 className="text-xs font-medium text-red-500 mb-1">Warnings</h4>
+                <h4 className="text-xs font-medium text-red-500 mb-1">{t('monitoring.warnings')}</h4>
                 {explainResult.warnings.map((w, i) => (
                   <p key={i} className="text-sm text-red-600 dark:text-red-400">⚠ {w}</p>
                 ))}
@@ -202,7 +204,7 @@ export default function MonitoringPage() {
             {/* Suggestions */}
             {explainResult.suggestions.length > 0 && (
               <div>
-                <h4 className="text-xs font-medium text-emerald-500 mb-1">Suggestions</h4>
+                <h4 className="text-xs font-medium text-emerald-500 mb-1">{t('monitoring.suggestions')}</h4>
                 {explainResult.suggestions.map((s, i) => (
                   <p key={i} className="text-sm text-emerald-600 dark:text-emerald-400">💡 {s}</p>
                 ))}

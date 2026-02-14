@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ButtonConfig } from '@/api/controls'
 import { exportApi } from '@/api/export'
 import {
@@ -31,6 +32,7 @@ interface ButtonWidgetProps {
 export default function ButtonWidget({
   config, reportId, onToggleWidgets, onApplyFilter
 }: ButtonWidgetProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const handleClick = () => {
@@ -59,8 +61,8 @@ export default function ButtonWidget({
       case 'EXPORT':
         if (config.exportFormat) {
           exportApi.exportAndSave(reportId, config.exportFormat)
-            .then(() => toast.success(`${config.exportFormat} export started`))
-            .catch(() => toast.error('Export failed'))
+            .then(() => toast.success(t('interactive.button.export_started', { format: config.exportFormat })))
+            .catch(() => toast.error(t('interactive.button.export_failed')))
         }
         break
 
@@ -94,7 +96,7 @@ export default function ButtonWidget({
         }}
       >
         <Icon className="w-4 h-4" />
-        {config.label || 'Button'}
+        {config.label || t('interactive.button.default_label')}
       </button>
     </div>
   )

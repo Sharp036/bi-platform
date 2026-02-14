@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
 import type { ContainerItem } from '@/api/visualization'
@@ -9,10 +10,11 @@ interface TabContainerProps {
 }
 
 export default function TabContainer({ container, children }: TabContainerProps) {
+  const { t } = useTranslation()
   const [activeIdx, setActiveIdx] = useState(container.activeTab || 0)
   const [expandedSet, setExpandedSet] = useState<Set<number>>(new Set([0]))
 
-  const labels = children.map((_, i) => `Tab ${i + 1}`)
+  const labels = children.map((_, i) => t('interactive.tab_default', { number: i + 1 }))
 
   if (container.containerType === 'TABS') {
     return (

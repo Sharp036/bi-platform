@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Select-Object FullName)",
+      "Bash(npm install:*)",
+      "Bash(echo:*)",
+      "Bash(npx vite build:*)"
+    ]
+  }
+}

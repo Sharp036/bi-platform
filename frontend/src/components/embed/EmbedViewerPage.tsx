@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { RenderReportResponse } from '@/types'
 import WidgetRenderer from '@/components/reports/WidgetRenderer'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
@@ -10,6 +11,7 @@ import axios from 'axios'
  * No authentication required. Route: /embed/:token
  */
 export default function EmbedViewerPage() {
+  const { t } = useTranslation()
   const { token } = useParams<{ token: string }>()
   const [searchParams] = useSearchParams()
   const [renderResult, setRenderResult] = useState<RenderReportResponse | null>(null)
@@ -28,7 +30,7 @@ export default function EmbedViewerPage() {
     axios.get(`${baseUrl}/embed/${token}`, { params })
       .then(r => setRenderResult(r.data))
       .catch(err => {
-        const msg = err.response?.data?.message || err.response?.statusText || 'Failed to load report'
+        const msg = err.response?.data?.message || err.response?.statusText || t('embed.error')
         setError(msg)
       })
       .finally(() => setLoading(false))
@@ -46,7 +48,7 @@ export default function EmbedViewerPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900">
         <div className="text-center">
-          <p className="text-red-500 text-lg mb-2">Unable to load report</p>
+          <p className="text-red-500 text-lg mb-2">{t('embed.error')}</p>
           <p className="text-slate-400 text-sm">{error}</p>
         </div>
       </div>

@@ -41,7 +41,8 @@ class AuthService(
         return TokenResponse(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            expiresIn = jwtTokenProvider.getAccessTokenExpirationMs() / 1000
+            expiresIn = jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
+            language = user.language
         )
     }
 
@@ -82,7 +83,8 @@ class AuthService(
         return TokenResponse(
             accessToken = jwtTokenProvider.generateAccessToken(username, roles),
             refreshToken = jwtTokenProvider.generateRefreshToken(username),
-            expiresIn = jwtTokenProvider.getAccessTokenExpirationMs() / 1000
+            expiresIn = jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
+            language = user.language
         )
     }
 
@@ -98,6 +100,7 @@ class AuthService(
         email = email,
         displayName = displayName,
         roles = roles.map { it.name },
-        permissions = roles.flatMap { r -> r.permissions.map { it.code } }.distinct()
+        permissions = roles.flatMap { r -> r.permissions.map { it.code } }.distinct(),
+        language = language
     )
 }

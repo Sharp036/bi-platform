@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import UserManagement from './UserManagement';
 import RoleManagement from './RoleManagement';
 import AuditLog from './AuditLog';
@@ -7,6 +8,7 @@ import './admin.css';
 type AdminTab = 'users' | 'roles' | 'audit';
 
 const AdminPage: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
 
   return (
@@ -16,19 +18,19 @@ const AdminPage: React.FC = () => {
           className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
-          👥 Users
+          {t('admin.users_tab')}
         </button>
         <button
           className={`admin-tab ${activeTab === 'roles' ? 'active' : ''}`}
           onClick={() => setActiveTab('roles')}
         >
-          🛡️ Roles
+          {t('admin.roles_tab')}
         </button>
         <button
           className={`admin-tab ${activeTab === 'audit' ? 'active' : ''}`}
           onClick={() => setActiveTab('audit')}
         >
-          📋 Audit Log
+          {t('admin.audit_tab')}
         </button>
       </div>
 

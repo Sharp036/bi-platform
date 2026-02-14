@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { SavedQuery, DataSource } from '@/types'
@@ -9,6 +10,7 @@ import { Trash2, Copy, Eye, EyeOff } from 'lucide-react'
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
 
 export default function PropertyPanel() {
+  const { t } = useTranslation()
   const selected = useDesignerStore(s => s.selectedWidgetId)
   const widgets = useDesignerStore(s => s.widgets)
   const updateWidget = useDesignerStore(s => s.updateWidget)
@@ -28,7 +30,7 @@ export default function PropertyPanel() {
   if (!widget) {
     return (
       <div className="p-4 text-center text-sm text-slate-400 dark:text-slate-500">
-        Select a widget to edit its properties
+        {t('designer.select_widget')}
       </div>
     )
   }
@@ -39,18 +41,18 @@ export default function PropertyPanel() {
     <div className="p-3 space-y-4 overflow-y-auto">
       {/* Actions */}
       <div className="flex items-center gap-1">
-        <button onClick={() => duplicateWidget(widget.id)} className="btn-ghost p-1.5" title="Duplicate">
+        <button onClick={() => duplicateWidget(widget.id)} className="btn-ghost p-1.5" title={t('common.duplicate')}>
           <Copy className="w-4 h-4" />
         </button>
         <button
           onClick={() => update({ isVisible: !widget.isVisible })}
-          className="btn-ghost p-1.5" title={widget.isVisible ? 'Hide' : 'Show'}
+          className="btn-ghost p-1.5" title={widget.isVisible ? t('designer.hide') : t('designer.show')}
         >
           {widget.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
         <button
-          onClick={() => { if (confirm('Delete widget?')) removeWidget(widget.id) }}
-          className="btn-ghost p-1.5 text-red-500" title="Delete"
+          onClick={() => { if (confirm(t('designer.delete_widget_confirm'))) removeWidget(widget.id) }}
+          className="btn-ghost p-1.5 text-red-500" title={t('common.delete')}
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -60,15 +62,15 @@ export default function PropertyPanel() {
       </div>
 
       {/* Title */}
-      <Field label="Title">
+      <Field label={t('designer.widget_title')}>
         <input
           value={widget.title} onChange={e => update({ title: e.target.value })}
-          className="input text-sm" placeholder="Widget title"
+          className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
         />
       </Field>
 
       {/* Position & Size */}
-      <Field label="Layout (grid: 12 columns)">
+      <Field label={t('designer.layout')}>
         <div className="grid grid-cols-4 gap-2">
           <div>
             <label className="text-[10px] text-slate-400">X</label>
@@ -104,7 +106,7 @@ export default function PropertyPanel() {
       {/* Data Binding */}
       {widget.widgetType !== 'TEXT' && widget.widgetType !== 'IMAGE' && (
         <>
-          <Field label="Data Source">
+          <Field label={t('designer.data_source')}>
             <select
               value={widget.queryId || ''}
               onChange={e => {
@@ -114,20 +116,20 @@ export default function PropertyPanel() {
               }}
               className="input text-sm"
             >
-              <option value="">— Select saved query —</option>
+              <option value="">{t('designer.select_query')}</option>
               {queries.map(q => (
                 <option key={q.id} value={q.id}>{q.name} ({q.datasourceName})</option>
               ))}
             </select>
           </Field>
 
-          <Field label="Or inline SQL">
+          <Field label={t('designer.inline_sql')}>
             <select
               value={widget.datasourceId || ''}
               onChange={e => update({ datasourceId: e.target.value ? Number(e.target.value) : null })}
               className="input text-sm mb-2"
             >
-              <option value="">— Datasource —</option>
+              <option value="">{t('designer.select_datasource')}</option>
               {datasources.map(ds => (
                 <option key={ds.id} value={ds.id}>{ds.name} ({ds.type})</option>
               ))}
@@ -135,7 +137,7 @@ export default function PropertyPanel() {
             <textarea
               value={widget.rawSql}
               onChange={e => update({ rawSql: e.target.value })}
-              placeholder="SELECT * FROM ..."
+              placeholder={t('designer.sql_placeholder')}
               className="input text-xs font-mono h-20 resize-none"
             />
           </Field>
@@ -144,14 +146,14 @@ export default function PropertyPanel() {
 
       {/* Chart Config */}
       {widget.widgetType === 'CHART' && (
-        <Field label="Chart Type">
+        <Field label={t('charts.select_type')}>
           <select
             value={(widget.chartConfig as Record<string, unknown>).type as string || 'bar'}
             onChange={e => update({ chartConfig: { ...widget.chartConfig, type: e.target.value } })}
             className="input text-sm"
           >
-            {CHART_TYPES.map(t => (
-              <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+            {CHART_TYPES.map(ct => (
+              <option key={ct} value={ct}>{ct.charAt(0).toUpperCase() + ct.slice(1)}</option>
             ))}
           </select>
         </Field>
@@ -160,28 +162,28 @@ export default function PropertyPanel() {
       {/* KPI Config */}
       {widget.widgetType === 'KPI' && (
         <>
-          <Field label="Number Format">
+          <Field label={t('designer.number_format')}>
             <select
               value={(widget.chartConfig as Record<string, unknown>).format as string || 'number'}
               onChange={e => update({ chartConfig: { ...widget.chartConfig, format: e.target.value } })}
               className="input text-sm"
             >
-              <option value="number">Number</option>
-              <option value="currency">Currency ($)</option>
-              <option value="percent">Percent (%)</option>
+              <option value="number">{t('designer.format.number')}</option>
+              <option value="currency">{t('designer.format.currency')}</option>
+              <option value="percent">{t('designer.format.percent')}</option>
             </select>
           </Field>
-          <Field label="Prefix / Suffix">
+          <Field label={t('designer.prefix_suffix')}>
             <div className="flex gap-2">
               <input
                 value={(widget.chartConfig as Record<string, unknown>).prefix as string || ''}
                 onChange={e => update({ chartConfig: { ...widget.chartConfig, prefix: e.target.value } })}
-                placeholder="Prefix" className="input text-sm flex-1"
+                placeholder={t('designer.prefix')} className="input text-sm flex-1"
               />
               <input
                 value={(widget.chartConfig as Record<string, unknown>).suffix as string || ''}
                 onChange={e => update({ chartConfig: { ...widget.chartConfig, suffix: e.target.value } })}
-                placeholder="Suffix" className="input text-sm flex-1"
+                placeholder={t('designer.suffix')} className="input text-sm flex-1"
               />
             </div>
           </Field>
@@ -190,19 +192,19 @@ export default function PropertyPanel() {
 
       {/* Text content */}
       {widget.widgetType === 'TEXT' && (
-        <Field label="Content (HTML)">
+        <Field label={t('designer.content_html')}>
           <textarea
             value={widget.title}
             onChange={e => update({ title: e.target.value })}
             className="input text-sm h-32 resize-none font-mono"
-            placeholder="<h2>Title</h2><p>Content...</p>"
+            placeholder={t('designer.html_placeholder')}
           />
         </Field>
       )}
 
       {/* Image */}
       {widget.widgetType === 'IMAGE' && (
-        <Field label="Image URL">
+        <Field label={t('designer.image_url')}>
           <input
             value={(widget.chartConfig as Record<string, unknown>).url as string || ''}
             onChange={e => update({ chartConfig: { ...widget.chartConfig, url: e.target.value } })}

@@ -1,4 +1,5 @@
 import { CHART_TYPE_OPTIONS } from '@/components/charts/chartTypeBuilders'
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export default function ChartTypePicker({ value, onChange, compact }: Props) {
+  const { t } = useTranslation()
+
   if (compact) {
     return (
       <select
@@ -17,7 +20,7 @@ export default function ChartTypePicker({ value, onChange, compact }: Props) {
       >
         {CHART_TYPE_OPTIONS.map(opt => (
           <option key={opt.value} value={opt.value}>
-            {opt.icon} {opt.label}
+            {opt.icon} {t(opt.i18nKey)}
           </option>
         ))}
       </select>
@@ -38,7 +41,7 @@ export default function ChartTypePicker({ value, onChange, compact }: Props) {
           )}
         >
           <span className="text-lg">{opt.icon}</span>
-          <span className="font-medium truncate w-full text-center">{opt.label}</span>
+          <span className="font-medium truncate w-full text-center">{t(opt.i18nKey)}</span>
         </button>
       ))}
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { controlsApi, GlobalFilterConfig } from '@/api/controls'
 import { Filter, Plus, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
 import type { Widget } from '@/types'
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
+  const { t } = useTranslation()
   const [configs, setConfigs] = useState<GlobalFilterConfig[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -17,7 +19,7 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
     setLoading(true)
     controlsApi.getFilters(reportId)
       .then(setConfigs)
-      .catch(() => toast.error('Failed to load filter config'))
+      .catch(() => toast.error(t('interactive.filter.failed_load')))
       .finally(() => setLoading(false))
   }
 
@@ -37,7 +39,7 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
         })
         load()
       } catch {
-        toast.error('Failed to update')
+        toast.error(t('common.failed_to_update'))
       }
     } else {
       try {
@@ -49,7 +51,7 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
         })
         load()
       } catch {
-        toast.error('Failed to create')
+        toast.error(t('common.failed_to_create'))
       }
     }
   }
@@ -68,7 +70,7 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
       })
       load()
     } catch {
-      toast.error('Failed to update')
+      toast.error(t('common.failed_to_update'))
     }
   }
 
@@ -86,7 +88,7 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
       })
       load()
     } catch {
-      toast.error('Failed to update')
+      toast.error(t('common.failed_to_update'))
     }
   }
 
@@ -95,14 +97,14 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
       await controlsApi.deleteFilter(reportId, widgetId)
       load()
     } catch {
-      toast.error('Failed to remove')
+      toast.error(t('common.failed_to_delete'))
     }
   }
 
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-        <Filter className="w-4 h-4 text-brand-500" /> Global Filter Configuration
+        <Filter className="w-4 h-4 text-brand-500" /> {t('interactive.filter.config_title')}
       </h3>
 
       <div className="space-y-2">
@@ -132,15 +134,15 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
                   <input
                     value={config.filterField || ''}
                     onChange={e => updateField(w.widgetId, e.target.value)}
-                    placeholder="Filter field..."
+                    placeholder={t('interactive.filter.field_placeholder')}
                     className="input text-xs w-32 py-1"
                   />
                   <input
                     value={config.excludedTargets || ''}
                     onChange={e => updateExcluded(w.widgetId, e.target.value)}
-                    placeholder="Exclude IDs..."
+                    placeholder={t('interactive.filter.exclude_placeholder')}
                     className="input text-xs w-28 py-1"
-                    title="Comma-separated widget IDs to exclude from filtering"
+                    title={t('interactive.filter.exclude_tooltip')}
                   />
                   <button onClick={() => remove(w.widgetId)}
                     className="p-1 text-slate-400 hover:text-red-500">

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { authApi } from '@/api/auth'
+import i18n from '@/i18n'
 import type { LoginRequest, User } from '@/types'
 
 interface AuthState {
@@ -20,8 +21,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     const res = await authApi.login(data)
     localStorage.setItem('accessToken', res.accessToken)
     localStorage.setItem('refreshToken', res.refreshToken)
+    if (res.language) {
+      i18n.changeLanguage(res.language)
+      localStorage.setItem('language', res.language)
+    }
     set({
-      user: { username: res.username, roles: res.roles, permissions: [] },
+      user: { username: res.username, roles: res.roles, permissions: [], language: res.language || 'en' },
       isAuthenticated: true,
     })
   },
@@ -29,6 +34,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    localStorage.removeItem('language')
     set({ user: null, isAuthenticated: false })
   },
 
@@ -40,6 +46,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
     try {
       const user = await authApi.me()
+      if (user.language) {
+        i18n.changeLanguage(user.language)
+        localStorage.setItem('language', user.language)
+      }
       set({ user, isAuthenticated: true, isLoading: false })
     } catch {
       localStorage.removeItem('accessToken')

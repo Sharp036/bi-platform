@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink } from 'lucide-react'
 import type { DashboardActionItem, DashboardActionRequest, WidgetListItem } from '@/types'
 import { interactiveApi } from '@/api/interactive'
@@ -10,16 +11,25 @@ interface Props {
   widgets: WidgetListItem[]
 }
 
-const actionTypeConfig = [
-  { type: 'FILTER', icon: Filter, label: 'Cross-Filter', desc: 'Filter other widgets on click' },
-  { type: 'HIGHLIGHT', icon: Pointer, label: 'Highlight', desc: 'Highlight related data' },
-  { type: 'NAVIGATE', icon: Navigation, label: 'Navigate', desc: 'Go to another report' },
-  { type: 'URL', icon: ExternalLink, label: 'Open URL', desc: 'Open a web page' },
-]
+const actionTypeIcons = {
+  FILTER: Filter,
+  HIGHLIGHT: Pointer,
+  NAVIGATE: Navigation,
+  URL: ExternalLink,
+}
 
 const triggerTypes = ['CLICK', 'HOVER', 'SELECT']
 
 export default function ActionConfigPanel({ reportId, widgets }: Props) {
+  const { t } = useTranslation()
+
+  const actionTypeConfig = [
+    { type: 'FILTER', icon: Filter, label: t('interactive.action.cross_filter'), desc: t('interactive.action.cross_filter_desc') },
+    { type: 'HIGHLIGHT', icon: Pointer, label: t('interactive.action.highlight'), desc: t('interactive.action.highlight_desc') },
+    { type: 'NAVIGATE', icon: Navigation, label: t('interactive.action.navigate'), desc: t('interactive.action.navigate_desc') },
+    { type: 'URL', icon: ExternalLink, label: t('interactive.action.open_url'), desc: t('interactive.action.open_url_desc') },
+  ]
+
   const [actions, setActions] = useState<DashboardActionItem[]>([])
   const [showAdd, setShowAdd] = useState(false)
   const [form, setForm] = useState<Partial<DashboardActionRequest>>({
@@ -31,7 +41,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
   }, [reportId])
 
   const handleSave = async () => {
-    if (!form.name?.trim()) { toast.error('Name is required'); return }
+    if (!form.name?.trim()) { toast.error(t('interactive.action.name_required')); return }
     try {
       const req: DashboardActionRequest = {
         reportId,
@@ -49,16 +59,16 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
       const created = await interactiveApi.createAction(req)
       setActions(prev => [...prev, created])
       setShowAdd(false)
-      toast.success('Action created')
-    } catch { toast.error('Failed to create action') }
+      toast.success(t('interactive.action.created'))
+    } catch { toast.error(t('interactive.action.failed_create')) }
   }
 
   const handleDelete = async (id: number) => {
     try {
       await interactiveApi.deleteAction(id)
       setActions(prev => prev.filter(a => a.id !== id))
-      toast.success('Action deleted')
-    } catch { toast.error('Failed to delete') }
+      toast.success(t('interactive.action.deleted'))
+    } catch { toast.error(t('interactive.action.failed_delete')) }
   }
 
   return (
@@ -66,7 +76,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
           <Zap className="w-4 h-4 text-amber-500" />
-          Dashboard Actions
+          {t('interactive.action.title')}
         </h3>
         <button onClick={() => setShowAdd(!showAdd)} className="btn-ghost p-1">
           <Plus className="w-4 h-4" />
@@ -87,8 +97,8 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
               <div className="text-slate-400">
                 {sourceWidget?.title || `Widget #${action.sourceWidgetId}`}
                 {' → '}
-                {action.targetWidgetIds === '*' ? 'All' : action.targetWidgetIds}
-                {' on '}{action.triggerType.toLowerCase()}
+                {action.targetWidgetIds === '*' ? t('common.all') : action.targetWidgetIds}
+                {' '}{t('common.on')}{' '}{action.triggerType.toLowerCase()}
               </div>
             </div>
             <span className={clsx(
@@ -105,7 +115,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
       })}
 
       {actions.length === 0 && !showAdd && (
-        <p className="text-xs text-slate-400 text-center py-2">No actions configured</p>
+        <p className="text-xs text-slate-400 text-center py-2">{t('interactive.action.no_actions')}</p>
       )}
 
       {/* Add form */}
@@ -114,7 +124,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
           <input
             value={form.name || ''}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            placeholder="Action name"
+            placeholder={t('interactive.action.action_name')}
             className="input text-xs w-full"
           />
 
@@ -138,18 +148,18 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
 
           {/* Trigger */}
           <div className="flex gap-2">
-            {triggerTypes.map(t => (
+            {triggerTypes.map(trigger => (
               <button
-                key={t}
-                onClick={() => setForm(f => ({ ...f, triggerType: t }))}
+                key={trigger}
+                onClick={() => setForm(f => ({ ...f, triggerType: trigger }))}
                 className={clsx(
                   'px-3 py-1 rounded text-xs border',
-                  form.triggerType === t
+                  form.triggerType === trigger
                     ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600'
                     : 'border-surface-200 dark:border-dark-surface-100 text-slate-500'
                 )}
               >
-                {t.toLowerCase()}
+                {trigger.toLowerCase()}
               </button>
             ))}
           </div>
@@ -160,7 +170,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
             onChange={e => setForm(f => ({ ...f, sourceWidgetId: Number(e.target.value) || undefined }))}
             className="input text-xs w-full"
           >
-            <option value="">Source widget...</option>
+            <option value="">{t('interactive.action.source_widget')}</option>
             {widgets.map(w => (
               <option key={w.id} value={w.id}>{w.title || `Widget #${w.id}`} ({w.widgetType})</option>
             ))}
@@ -172,20 +182,20 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
               <input
                 value={form.targetWidgetIds || ''}
                 onChange={e => setForm(f => ({ ...f, targetWidgetIds: e.target.value }))}
-                placeholder="Target widget IDs (e.g. 2,3 or * for all)"
+                placeholder={t('interactive.action.target_widgets')}
                 className="input text-xs w-full"
               />
               <div className="grid grid-cols-2 gap-2">
                 <input
                   value={form.sourceField || ''}
                   onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
-                  placeholder="Source field"
+                  placeholder={t('interactive.action.source_field')}
                   className="input text-xs"
                 />
                 <input
                   value={form.targetField || ''}
                   onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
-                  placeholder="Target field"
+                  placeholder={t('interactive.action.target_field')}
                   className="input text-xs"
                 />
               </div>
@@ -197,7 +207,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
               type="number"
               value={form.targetReportId || ''}
               onChange={e => setForm(f => ({ ...f, targetReportId: Number(e.target.value) || undefined }))}
-              placeholder="Target Report ID"
+              placeholder={t('interactive.action.target_report')}
               className="input text-xs w-full"
             />
           )}
@@ -206,14 +216,14 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
             <input
               value={form.urlTemplate || ''}
               onChange={e => setForm(f => ({ ...f, urlTemplate: e.target.value }))}
-              placeholder="https://example.com/detail?id={customer_id}"
+              placeholder={t('interactive.action.url_template_placeholder')}
               className="input text-xs w-full"
             />
           )}
 
           <div className="flex justify-end gap-2">
-            <button onClick={() => setShowAdd(false)} className="btn-secondary text-xs">Cancel</button>
-            <button onClick={handleSave} className="btn-primary text-xs">Create</button>
+            <button onClick={() => setShowAdd(false)} className="btn-secondary text-xs">{t('common.cancel')}</button>
+            <button onClick={handleSave} className="btn-primary text-xs">{t('common.create')}</button>
           </div>
         </div>
       )}

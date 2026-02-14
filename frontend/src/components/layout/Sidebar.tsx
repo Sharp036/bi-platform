@@ -1,26 +1,28 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, ChevronLeft, ChevronRight, Bell, Activity, Settings, KeyRound, Share2, Home, Boxes, LayoutTemplate } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 
 const navItems = [
-  { to: '/', icon: Home, label: 'Home' },
-  { to: '/reports', icon: FileBarChart, label: 'Reports' },
-  { to: '/queries', icon: Code2, label: 'Queries' },
-  { to: '/scripts', icon: Braces, label: 'Scripts' },
-  { to: '/datasources', icon: Database, label: 'Data Sources' },
-  { to: '/models', icon: Boxes, label: 'Models' },
-  { to: '/templates', icon: LayoutTemplate, label: 'Templates' },
-  { to: '/schedules', icon: CalendarClock, label: 'Schedules' },
-  { to: '/alerts', icon: Bell, label: 'Alerts' },
-  { to: '/monitoring', icon: Activity, label: 'Monitoring' },
-  { to: '/shared', icon: Share2, label: 'Shared with Me' },
-  { to: '/admin', icon: Settings, label: 'Administration' },
-  { to: '/profile/password', icon: KeyRound, label: 'Password' },
+  { to: '/', icon: Home, i18nKey: 'nav.home' },
+  { to: '/reports', icon: FileBarChart, i18nKey: 'nav.reports' },
+  { to: '/queries', icon: Code2, i18nKey: 'nav.queries' },
+  { to: '/scripts', icon: Braces, i18nKey: 'nav.scripts' },
+  { to: '/datasources', icon: Database, i18nKey: 'nav.datasources' },
+  { to: '/models', icon: Boxes, i18nKey: 'nav.models' },
+  { to: '/templates', icon: LayoutTemplate, i18nKey: 'nav.templates' },
+  { to: '/schedules', icon: CalendarClock, i18nKey: 'nav.schedules' },
+  { to: '/alerts', icon: Bell, i18nKey: 'nav.alerts' },
+  { to: '/monitoring', icon: Activity, i18nKey: 'nav.monitoring' },
+  { to: '/shared', icon: Share2, i18nKey: 'nav.shared' },
+  { to: '/admin', icon: Settings, i18nKey: 'nav.admin' },
+  { to: '/profile/password', icon: KeyRound, i18nKey: 'nav.password' },
 ]
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
+  const { t } = useTranslation()
 
   return (
     <aside className={clsx(
@@ -37,7 +39,7 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 py-3 space-y-1 px-2 overflow-y-auto">
-        {navItems.map(({ to, icon: Icon, label }) => (
+        {navItems.map(({ to, icon: Icon, i18nKey }) => (
           <NavLink
             key={to}
             to={to}
@@ -50,7 +52,7 @@ export default function Sidebar() {
             )}
           >
             <Icon className="w-5 h-5 flex-shrink-0" />
-            {!collapsed && <span>{label}</span>}
+            {!collapsed && <span>{t(i18nKey)}</span>}
           </NavLink>
         ))}
       </nav>

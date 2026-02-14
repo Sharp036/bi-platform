@@ -32,4 +32,15 @@ class ProfileService(
 
         auditService.log(username, "PASSWORD_CHANGE", "USER", user.id)
     }
+
+    @Transactional
+    fun updateLanguage(username: String, language: String) {
+        require(language.length in 2..10) { "Invalid language code" }
+        val user = userRepository.findByUsername(username)
+            .orElseThrow { NoSuchElementException("User not found: $username") }
+        user.language = language
+        user.updatedAt = OffsetDateTime.now()
+        userRepository.save(user)
+        auditService.log(username, "LANGUAGE_CHANGE", "USER", user.id)
+    }
 }

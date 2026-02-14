@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { sharingApi, ShareEntry } from '@/api/sharing'
 import { adminUserApi, adminRoleApi, AdminUser, RoleListItem } from '@/api/admin'
 import { X, UserPlus, Shield, Trash2, Share2 } from 'lucide-react'
@@ -25,6 +26,7 @@ const accessBadgeColor: Record<string, string> = {
 }
 
 export default function ShareDialog({ objectType, objectId, objectName, onClose }: ShareDialogProps) {
+  const { t } = useTranslation()
   const [shares, setShares] = useState<ShareEntry[]>([])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [roles, setRoles] = useState<RoleListItem[]>([])
@@ -44,7 +46,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
       setShares(sharesData)
       setUsers(usersData.content)
       setRoles(rolesData)
-    }).catch(() => toast.error('Failed to load sharing info'))
+    }).catch(() => toast.error(t('common.failed_to_load')))
       .finally(() => setLoading(false))
   }, [objectType, objectId])
 
@@ -65,9 +67,9 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
         return [...filtered, entry]
       })
       setSelectedId('')
-      toast.success('Access granted')
+      toast.success(t('sharing.share_added'))
     } catch {
-      toast.error('Failed to grant access')
+      toast.error(t('sharing.failed_share'))
     }
   }
 
@@ -80,9 +82,9 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
         roleId: share.roleId ?? undefined,
       })
       setShares(prev => prev.filter(s => s.id !== share.id))
-      toast.success('Access revoked')
+      toast.success(t('sharing.share_removed'))
     } catch {
-      toast.error('Failed to revoke access')
+      toast.error(t('common.operation_failed'))
     }
   }
 
@@ -97,7 +99,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
       })
       setShares(prev => prev.map(s => s.id === share.id ? updated : s))
     } catch {
-      toast.error('Failed to update access level')
+      toast.error(t('common.operation_failed'))
     }
   }
 
@@ -119,7 +121,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-brand-600" />
             <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
-              Share: {objectName}
+              {t('sharing.share_title', { name: objectName })}
             </h2>
           </div>
           <button onClick={onClose} className="p-1 rounded hover:bg-surface-100 dark:hover:bg-dark-surface-100">
@@ -138,7 +140,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
                   : 'text-slate-500 hover:bg-surface-100 dark:hover:bg-dark-surface-100'
               )}
             >
-              <UserPlus className="w-4 h-4" /> User
+              <UserPlus className="w-4 h-4" /> {t('common.user')}
             </button>
             <button
               onClick={() => { setShareType('role'); setSelectedId('') }}
@@ -158,7 +160,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
               onChange={e => setSelectedId(e.target.value ? Number(e.target.value) : '')}
               className="input flex-1"
             >
-              <option value="">Select {shareType}...</option>
+              <option value="">{t('sharing.add_user_or_role')}</option>
               {shareType === 'user'
                 ? availableUsers.map(u => (
                     <option key={u.id} value={u.id}>
@@ -180,7 +182,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
               disabled={!selectedId}
               className="btn-primary px-4 disabled:opacity-50"
             >
-              Share
+              {t('common.share')}
             </button>
           </div>
         </div>
@@ -188,13 +190,13 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
         {/* Current shares */}
         <div className="px-6 py-4 max-h-80 overflow-y-auto">
           <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">
-            People & roles with access
+            {t('sharing.access_level')}
           </h3>
 
           {loading ? (
-            <p className="text-sm text-slate-400">Loading...</p>
+            <p className="text-sm text-slate-400">{t('common.loading')}</p>
           ) : shares.length === 0 ? (
-            <p className="text-sm text-slate-400">Not shared with anyone yet</p>
+            <p className="text-sm text-slate-400">{t('sharing.no_shares')}</p>
           ) : (
             <div className="space-y-2">
               {shares.map(share => (
@@ -219,7 +221,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
                         }
                       </p>
                       <p className="text-xs text-slate-400">
-                        {share.userId ? 'User' : 'Role'}
+                        {share.userId ? t('common.user') : 'Role'}
                       </p>
                     </div>
                   </div>
@@ -239,7 +241,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
                     <button
                       onClick={() => handleRevoke(share)}
                       className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      title="Remove access"
+                      title={t('sharing.revoke')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -252,7 +254,7 @@ export default function ShareDialog({ objectType, objectId, objectName, onClose 
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-surface-200 dark:border-dark-surface-100 flex justify-end">
-          <button onClick={onClose} className="btn-secondary">Done</button>
+          <button onClick={onClose} className="btn-secondary">{t('common.close')}</button>
         </div>
       </div>
     </div>

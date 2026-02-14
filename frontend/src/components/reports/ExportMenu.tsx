@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { exportApi } from '@/api/export'
 import { Download, FileSpreadsheet, FileText, FileDown, Mail, X } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function ExportMenu({ reportId, reportName, parameters = {} }: Props) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [showEmail, setShowEmail] = useState(false)
   const [emailRecipients, setEmailRecipients] = useState('')
@@ -30,7 +32,7 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
 
   const handleDownload = async (format: string) => {
     setOpen(false)
-    toast.loading(`Exporting as ${format}...`, { id: 'export' })
+    toast.loading(t('export.exporting_as', { format }), { id: 'export' })
     try {
       const blob = await exportApi.download(reportId, format, parameters)
       const ext = format === 'EXCEL' ? 'xlsx' : format.toLowerCase()
@@ -45,15 +47,15 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
       a.remove()
       window.URL.revokeObjectURL(url)
 
-      toast.success(`Downloaded ${filename}`, { id: 'export' })
+      toast.success(t('export.downloaded', { filename }), { id: 'export' })
     } catch {
-      toast.error('Export failed', { id: 'export' })
+      toast.error(t('export.export_failed'), { id: 'export' })
     }
   }
 
   const handleEmail = async () => {
     const recipients = emailRecipients.split(/[,;\s]+/).filter(Boolean)
-    if (recipients.length === 0) { toast.error('Enter at least one email'); return }
+    if (recipients.length === 0) { toast.error(t('export.enter_email')); return }
 
     setSending(true)
     try {
@@ -70,7 +72,7 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
         toast.error(result.message)
       }
     } catch {
-      toast.error('Failed to send email')
+      toast.error(t('export.email_failed'))
     } finally {
       setSending(false)
     }
@@ -82,7 +84,7 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
         onClick={() => setOpen(!open)}
         className="btn-secondary text-sm"
       >
-        <Download className="w-4 h-4" /> Export
+        <Download className="w-4 h-4" /> {t('export.title')}
       </button>
 
       {open && (
@@ -92,21 +94,21 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-surface-50 dark:hover:bg-dark-surface-100"
           >
             <FileText className="w-4 h-4 text-emerald-500" />
-            CSV
+            {t('export.csv')}
           </button>
           <button
             onClick={() => handleDownload('EXCEL')}
             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-surface-50 dark:hover:bg-dark-surface-100"
           >
             <FileSpreadsheet className="w-4 h-4 text-green-600" />
-            Excel (.xlsx)
+            {t('export.excel')}
           </button>
           <button
             onClick={() => handleDownload('PDF')}
             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-surface-50 dark:hover:bg-dark-surface-100"
           >
             <FileDown className="w-4 h-4 text-red-500" />
-            PDF
+            {t('export.pdf')}
           </button>
 
           <div className="border-t border-surface-200 dark:border-dark-surface-100 my-1" />
@@ -116,7 +118,7 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-surface-50 dark:hover:bg-dark-surface-100"
           >
             <Mail className="w-4 h-4 text-brand-500" />
-            Email report...
+            {t('export.email_report')}
           </button>
         </div>
       )}
@@ -129,7 +131,7 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Email Report</h3>
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-white">{t('export.email_title')}</h3>
               <button onClick={() => setShowEmail(false)} className="btn-ghost p-1">
                 <X className="w-4 h-4" />
               </button>
@@ -137,7 +139,7 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Recipients (comma-separated)</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">{t('export.recipients')}</label>
                 <textarea
                   value={emailRecipients}
                   onChange={e => setEmailRecipients(e.target.value)}
@@ -147,19 +149,19 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Format</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">{t('export.format')}</label>
                 <select value={emailFormat} onChange={e => setEmailFormat(e.target.value)} className="input text-sm">
-                  <option value="CSV">CSV</option>
-                  <option value="EXCEL">Excel</option>
-                  <option value="PDF">PDF</option>
+                  <option value="CSV">{t('export.csv')}</option>
+                  <option value="EXCEL">{t('export.excel')}</option>
+                  <option value="PDF">{t('export.pdf')}</option>
                 </select>
               </div>
             </div>
 
             <div className="flex justify-end gap-2 mt-5">
-              <button onClick={() => setShowEmail(false)} className="btn-secondary text-sm">Cancel</button>
+              <button onClick={() => setShowEmail(false)} className="btn-secondary text-sm">{t('common.cancel')}</button>
               <button onClick={handleEmail} disabled={sending} className="btn-primary text-sm">
-                <Mail className="w-4 h-4" /> {sending ? 'Sending...' : 'Send'}
+                <Mail className="w-4 h-4" /> {sending ? t('export.sending') : t('export.send')}
               </button>
             </div>
           </div>

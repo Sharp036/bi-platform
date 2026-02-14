@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { workspaceApi } from '@/api/workspace'
 import { Star } from 'lucide-react'
 import clsx from 'clsx'
@@ -11,6 +12,7 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({ objectType, objectId, className, size = 16 }: FavoriteButtonProps) {
+  const { t } = useTranslation()
   const [isFav, setIsFav] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -42,7 +44,7 @@ export default function FavoriteButton({ objectType, objectId, className, size =
           : 'text-slate-300 hover:text-amber-400 dark:text-slate-600 dark:hover:text-amber-400',
         className
       )}
-      title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+      title={isFav ? t('workspace.remove_favorite') : t('workspace.add_favorite')}
     >
       <Star
         className={clsx('transition-all', loading && 'animate-pulse')}

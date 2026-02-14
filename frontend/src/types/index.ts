@@ -1,7 +1,7 @@
 // ── Auth ──
 export interface LoginRequest { username: string; password: string }
-export interface AuthResponse { accessToken: string; refreshToken: string; username: string; roles: string[] }
-export interface User { username: string; roles: string[]; permissions: string[] }
+export interface AuthResponse { accessToken: string; refreshToken: string; username: string; roles: string[]; language: string }
+export interface User { username: string; roles: string[]; permissions: string[]; language: string }
 
 // ── DataSource ──
 export interface DataSource {

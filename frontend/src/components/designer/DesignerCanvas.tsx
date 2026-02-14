@@ -1,5 +1,6 @@
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { DesignerWidget } from '@/store/useDesignerStore'
+import { useTranslation } from 'react-i18next'
 import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -12,6 +13,7 @@ const ROW_HEIGHT = 70   // px per grid row unit
 const COLS = 12
 
 export default function DesignerCanvas() {
+  const { t } = useTranslation()
   const widgets = useDesignerStore(s => s.widgets)
   const selectedId = useDesignerStore(s => s.selectedWidgetId)
   const selectWidget = useDesignerStore(s => s.selectWidget)
@@ -53,7 +55,7 @@ export default function DesignerCanvas() {
         <div className="absolute inset-0 flex items-center justify-center text-slate-400 dark:text-slate-500">
           <div className="text-center">
             <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-40" />
-            <p className="text-sm">Click a component on the left to add it</p>
+            <p className="text-sm">{t('designer.canvas_hint')}</p>
           </div>
         </div>
       )}
@@ -69,6 +71,7 @@ function WidgetBlock({
   onSelect: () => void
   previewMode: boolean
 }) {
+  const { t } = useTranslation()
   const Icon = ICON_MAP[widget.widgetType] || BarChart3
   const colWidth = 100 / COLS
 
@@ -119,7 +122,7 @@ function WidgetBlock({
             <div className="text-center">
               <Icon className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-1" />
               <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                {widget.queryId ? `Query #${widget.queryId}` : widget.rawSql ? 'Inline SQL' : 'No data bound'}
+                {widget.queryId ? `Query #${widget.queryId}` : widget.rawSql ? t('designer.inline_sql_badge') : t('designer.no_data_bound')}
               </p>
             </div>
           )}

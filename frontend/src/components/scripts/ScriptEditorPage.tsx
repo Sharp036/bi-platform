@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Code2, Play, Save, Plus, Trash2, BookOpen, Clock, CheckCircle2, XCircle, ChevronDown } from 'lucide-react'
 import { scriptApi } from '@/api/scripts'
 import type { Script, ScriptSummary, ScriptExecuteResponse } from '@/types'
@@ -78,6 +79,7 @@ function avg(arr, key) {
 }
 
 export default function ScriptEditorPage() {
+  const { t } = useTranslation()
   const [scripts, setScripts] = useState<ScriptSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -108,7 +110,7 @@ export default function ScriptEditorPage() {
       })
       setScripts(data.content)
     } catch {
-      toast.error('Failed to load scripts')
+      toast.error(t('common.failed_to_load'))
     } finally {
       setLoading(false)
     }
@@ -129,7 +131,7 @@ export default function ScriptEditorPage() {
       setIsNew(false)
       setResult(null)
     } catch {
-      toast.error('Failed to load script')
+      toast.error(t('common.failed_to_load'))
     }
   }
 
@@ -146,8 +148,8 @@ export default function ScriptEditorPage() {
   }
 
   const handleSave = async () => {
-    if (!name.trim()) { toast.error('Name is required'); return }
-    if (!code.trim()) { toast.error('Code is required'); return }
+    if (!name.trim()) { toast.error(t('common.operation_failed')); return }
+    if (!code.trim()) { toast.error(t('common.operation_failed')); return }
 
     setSaving(true)
     try {
@@ -158,7 +160,7 @@ export default function ScriptEditorPage() {
           isLibrary,
           tags: []
         })
-        toast.success('Script created')
+        toast.success(t('common.created'))
         setSelectedId(created.id)
         setIsNew(false)
         setScript(created)
@@ -168,12 +170,12 @@ export default function ScriptEditorPage() {
           scriptType: scriptType as Script['scriptType'],
           isLibrary
         })
-        toast.success('Script saved')
+        toast.success(t('scripts.saved'))
         setScript(updated)
       }
       loadScripts()
     } catch {
-      toast.error('Failed to save script')
+      toast.error(t('scripts.failed_save'))
     } finally {
       setSaving(false)
     }
@@ -181,16 +183,16 @@ export default function ScriptEditorPage() {
 
   const handleDelete = async () => {
     if (!selectedId) return
-    if (!confirm('Delete this script?')) return
+    if (!confirm(t('common.confirm_delete'))) return
     try {
       await scriptApi.delete(selectedId)
-      toast.success('Script deleted')
+      toast.success(t('common.deleted'))
       setSelectedId(null)
       setScript(null)
       setIsNew(false)
       loadScripts()
     } catch {
-      toast.error('Failed to delete')
+      toast.error(t('common.failed_to_delete'))
     }
   }
 
@@ -209,10 +211,10 @@ export default function ScriptEditorPage() {
         input
       })
       setResult(res)
-      if (res.status === 'SUCCESS') toast.success(`Done in ${res.executionMs}ms`)
-      else toast.error(res.logs?.[0] || 'Execution failed')
+      if (res.status === 'SUCCESS') toast.success(t('scripts.execution_time', { ms: res.executionMs }))
+      else toast.error(res.logs?.[0] || t('scripts.execution_failed'))
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Execution failed'
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || t('scripts.execution_failed')
       toast.error(msg)
     } finally {
       setRunning(false)
@@ -230,9 +232,9 @@ export default function ScriptEditorPage() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Scripts</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('scripts.title')}</h1>
         <button onClick={handleNew} className="btn-primary">
-          <Plus className="w-4 h-4" /> New Script
+          <Plus className="w-4 h-4" /> {t('scripts.new_script')}
         </button>
       </div>
 
@@ -241,13 +243,13 @@ export default function ScriptEditorPage() {
         <div className="w-72 flex-shrink-0 flex flex-col card p-3">
           <input
             type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search scripts..." className="input mb-2 text-sm"
+            placeholder={t('common.search')} className="input mb-2 text-sm"
           />
           <select
             value={filterType} onChange={e => setFilterType(e.target.value)}
             className="input mb-2 text-sm"
           >
-            <option value="">All types</option>
+            <option value="">{t('sharing.all_types')}</option>
             {SCRIPT_TYPES.map(t => (
               <option key={t.value} value={t.value}>{t.label}</option>
             ))}
@@ -255,7 +257,7 @@ export default function ScriptEditorPage() {
 
           <div className="flex-1 overflow-y-auto space-y-1">
             {loading ? <LoadingSpinner /> : scripts.length === 0 ? (
-              <EmptyState icon={<Code2 className="w-8 h-8" />} title="No scripts yet" />
+              <EmptyState icon={<Code2 className="w-8 h-8" />} title={t('scripts.no_scripts')} />
             ) : scripts.map(s => (
               <button
                 key={s.id}
@@ -293,7 +295,7 @@ export default function ScriptEditorPage() {
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               <input
                 type="text" value={name} onChange={e => setName(e.target.value)}
-                placeholder="Script name" className="input flex-1 min-w-48"
+                placeholder={t('scripts.script_name')} className="input flex-1 min-w-48"
               />
               <select
                 value={scriptType} onChange={e => handleTypeChange(e.target.value)}
@@ -304,10 +306,10 @@ export default function ScriptEditorPage() {
                 ))}
               </select>
               <button onClick={handleRun} disabled={running || !code.trim()} className="btn-primary">
-                <Play className="w-4 h-4" /> {running ? 'Running...' : 'Run'}
+                <Play className="w-4 h-4" /> {running ? t('scripts.running') : t('scripts.run')}
               </button>
               <button onClick={handleSave} disabled={saving} className="btn-secondary">
-                <Save className="w-4 h-4" /> Save
+                <Save className="w-4 h-4" /> {t('scripts.save')}
               </button>
               {selectedId && (
                 <button onClick={handleDelete} className="btn-danger">
@@ -319,7 +321,7 @@ export default function ScriptEditorPage() {
             {/* Description */}
             <input
               type="text" value={description} onChange={e => setDescription(e.target.value)}
-              placeholder="Description (optional)" className="input mb-3 text-sm"
+              placeholder={t('common.description')} className="input mb-3 text-sm"
             />
 
             {/* Code editor + test panels */}
@@ -372,7 +374,7 @@ export default function ScriptEditorPage() {
 
                 <div className="flex-1 flex flex-col">
                   <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
-                    Output
+                    {t('scripts.output')}
                   </label>
                   <div className="flex-1 overflow-auto rounded-lg border border-slate-200 dark:border-dark-surface-3
                     bg-slate-50 dark:bg-dark-surface-1 p-2">
@@ -430,7 +432,7 @@ export default function ScriptEditorPage() {
                       </div>
                     ) : (
                       <div className="text-xs text-slate-400 flex items-center justify-center h-full">
-                        Run script to see output
+                        {t('scripts.run_to_see_output')}
                       </div>
                     )}
                   </div>
@@ -442,7 +444,7 @@ export default function ScriptEditorPage() {
           <div className="flex-1 flex items-center justify-center">
             <EmptyState
               icon={<Code2 className="w-12 h-12" />}
-              title="Select a script or create a new one"
+              title={t('scripts.create_first')}
             />
           </div>
         )}

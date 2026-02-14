@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { sharingApi, SharedObjectItem } from '@/api/sharing'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
@@ -26,6 +27,7 @@ const accessColor: Record<string, string> = {
 }
 
 export default function SharedWithMePage() {
+  const { t } = useTranslation()
   const [items, setItems] = useState<SharedObjectItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -34,7 +36,7 @@ export default function SharedWithMePage() {
   useEffect(() => {
     sharingApi.sharedWithMe()
       .then(setItems)
-      .catch(() => toast.error('Failed to load shared objects'))
+      .catch(() => toast.error(t('common.failed_to_load')))
       .finally(() => setLoading(false))
   }, [])
 
@@ -47,7 +49,7 @@ export default function SharedWithMePage() {
   return (
     <div className="max-w-[1000px] mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Shared with Me</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('sharing.title')}</h1>
       </div>
 
       {/* Filters */}
@@ -56,22 +58,22 @@ export default function SharedWithMePage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search..." className="input pl-9"
+            placeholder={t('common.search')} className="input pl-9"
           />
         </div>
         <select value={filterType} onChange={e => setFilterType(e.target.value)} className="input w-40">
-          <option value="">All types</option>
-          <option value="REPORT">Reports</option>
-          <option value="DATASOURCE">Data Sources</option>
-          <option value="DASHBOARD">Dashboards</option>
+          <option value="">{t('sharing.all_types')}</option>
+          <option value="REPORT">{t('sharing.type.reports')}</option>
+          <option value="DATASOURCE">{t('sharing.type.datasources')}</option>
+          <option value="DASHBOARD">{t('sharing.type.dashboards')}</option>
         </select>
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
         <EmptyState
           icon={<Share2 className="w-12 h-12" />}
-          title="Nothing shared yet"
-          description="Objects shared with you will appear here"
+          title={t('sharing.empty')}
+          description={t('sharing.empty_desc')}
         />
       ) : (
         <div className="space-y-2">
@@ -96,7 +98,7 @@ export default function SharedWithMePage() {
                     {item.objectName}
                   </p>
                   <p className="text-xs text-slate-400">
-                    {item.objectType} {item.sharedBy && `· shared by ${item.sharedBy}`}
+                    {item.objectType} {item.sharedBy && `· ${t('sharing.shared_by', { name: item.sharedBy })}`}
                   </p>
                 </div>
 

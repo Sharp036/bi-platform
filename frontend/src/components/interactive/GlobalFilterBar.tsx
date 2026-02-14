@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { X, Filter } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -15,13 +16,15 @@ interface GlobalFilterBarProps {
 }
 
 export default function GlobalFilterBar({ filters, onClearFilter, onClearAll }: GlobalFilterBarProps) {
+  const { t } = useTranslation()
+
   if (filters.length === 0) return null
 
   return (
     <div className="card px-4 py-2 mb-3 flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mr-1">
         <Filter className="w-3.5 h-3.5" />
-        Active Filters:
+        {t('interactive.active_filters')}
       </div>
 
       {filters.map(f => (
@@ -48,7 +51,7 @@ export default function GlobalFilterBar({ filters, onClearFilter, onClearAll }: 
           onClick={onClearAll}
           className="text-xs text-slate-400 hover:text-red-500 ml-1 transition-colors"
         >
-          Clear all
+          {t('interactive.clear_all')}
         </button>
       )}
     </div>

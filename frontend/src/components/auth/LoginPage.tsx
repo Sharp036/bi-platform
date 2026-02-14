@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { LogIn, Eye, EyeOff } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { SUPPORTED_LANGUAGES } from '@/i18n'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -11,16 +13,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const login = useAuthStore(s => s.login)
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
       await login({ username, password })
-      toast.success('Welcome back!')
+      toast.success(t('auth.welcome_back'))
       navigate('/')
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Invalid credentials'
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || t('auth.invalid_credentials')
       toast.error(msg)
     } finally {
       setLoading(false)
@@ -36,13 +39,13 @@ export default function LoginPage() {
             <span className="text-white font-bold text-xl">DTR</span>
           </div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Datorio</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to your account</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('auth.sign_in_subtitle')}</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="card p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Username</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('auth.username')}</label>
             <input
               type="text" value={username} onChange={e => setUsername(e.target.value)}
               className="input" placeholder="admin" autoFocus required
@@ -50,7 +53,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('auth.password')}</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'} value={password}
@@ -68,9 +71,23 @@ export default function LoginPage() {
 
           <button type="submit" disabled={loading || !username || !password} className="btn-primary w-full">
             <LogIn className="w-4 h-4" />
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? t('auth.signing_in') : t('auth.sign_in')}
           </button>
         </form>
+
+        {/* Language selector */}
+        <select
+          value={i18n.language}
+          onChange={e => {
+            i18n.changeLanguage(e.target.value)
+            localStorage.setItem('language', e.target.value)
+          }}
+          className="mt-4 mx-auto block text-sm text-slate-500 dark:text-slate-400 bg-transparent border border-surface-200 dark:border-dark-surface-100 rounded-lg px-3 py-1.5 cursor-pointer"
+        >
+          {SUPPORTED_LANGUAGES.map(lang => (
+            <option key={lang.code} value={lang.code}>{lang.nativeName}</option>
+          ))}
+        </select>
       </div>
     </div>
   )

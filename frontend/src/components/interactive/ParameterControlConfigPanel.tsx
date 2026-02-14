@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { controlsApi, ParameterControlConfig } from '@/api/controls'
 import type { ReportParameter } from '@/types'
 import { Settings, Trash2 } from 'lucide-react'
@@ -10,15 +11,16 @@ interface Props {
 }
 
 const CONTROL_TYPES = [
-  { value: 'INPUT', label: 'Text Input' },
-  { value: 'DROPDOWN', label: 'Dropdown' },
-  { value: 'SLIDER', label: 'Slider' },
-  { value: 'RADIO', label: 'Radio Buttons' },
-  { value: 'DATE_PICKER', label: 'Date Picker' },
-  { value: 'MULTI_CHECKBOX', label: 'Multi Checkbox' },
+  { value: 'INPUT', labelKey: 'interactive.control.text_input' },
+  { value: 'DROPDOWN', labelKey: 'interactive.control.dropdown' },
+  { value: 'SLIDER', labelKey: 'interactive.control.slider' },
+  { value: 'RADIO', labelKey: 'interactive.control.radio' },
+  { value: 'DATE_PICKER', labelKey: 'interactive.control.date_picker' },
+  { value: 'MULTI_CHECKBOX', labelKey: 'interactive.control.multi_checkbox' },
 ]
 
 export default function ParameterControlConfigPanel({ reportId, parameters }: Props) {
+  const { t } = useTranslation()
   const [controls, setControls] = useState<ParameterControlConfig[]>([])
 
   const load = () => {
@@ -44,9 +46,9 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
         sortOrder: update.sortOrder ?? existing?.sortOrder ?? 0,
       })
       load()
-      toast.success('Saved')
+      toast.success(t('interactive.control.saved'))
     } catch {
-      toast.error('Failed to save')
+      toast.error(t('interactive.control.failed_save'))
     }
   }
 
@@ -55,14 +57,14 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
       await controlsApi.deleteParameterControl(reportId, paramName)
       load()
     } catch {
-      toast.error('Failed to remove')
+      toast.error(t('interactive.control.failed_remove'))
     }
   }
 
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-        <Settings className="w-4 h-4 text-brand-500" /> Parameter Controls
+        <Settings className="w-4 h-4 text-brand-500" /> {t('interactive.parameter_controls')}
       </h3>
 
       <div className="space-y-3">
@@ -85,14 +87,14 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
 
               <div className="flex flex-wrap gap-3">
                 <div>
-                  <label className="text-xs text-slate-500 block mb-0.5">Control Type</label>
+                  <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.control_type')}</label>
                   <select
                     value={ctrl?.controlType || 'INPUT'}
                     onChange={e => save(p.name, { controlType: e.target.value })}
                     className="input text-xs py-1 w-36"
                   >
-                    {CONTROL_TYPES.map(t => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
+                    {CONTROL_TYPES.map(ct => (
+                      <option key={ct.value} value={ct.value}>{t(ct.labelKey)}</option>
                     ))}
                   </select>
                 </div>
@@ -100,19 +102,19 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
                 {(ctrl?.controlType === 'SLIDER') && (
                   <>
                     <div>
-                      <label className="text-xs text-slate-500 block mb-0.5">Min</label>
+                      <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.min')}</label>
                       <input type="number" value={ctrl?.sliderMin ?? 0}
                         onChange={e => save(p.name, { sliderMin: Number(e.target.value) })}
                         className="input text-xs py-1 w-20" />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500 block mb-0.5">Max</label>
+                      <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.max')}</label>
                       <input type="number" value={ctrl?.sliderMax ?? 100}
                         onChange={e => save(p.name, { sliderMax: Number(e.target.value) })}
                         className="input text-xs py-1 w-20" />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500 block mb-0.5">Step</label>
+                      <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.step')}</label>
                       <input type="number" value={ctrl?.sliderStep ?? 1}
                         onChange={e => save(p.name, { sliderStep: Number(e.target.value) })}
                         className="input text-xs py-1 w-20" />
@@ -123,18 +125,18 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
                 {(ctrl?.controlType === 'DROPDOWN' || ctrl?.controlType === 'RADIO' || ctrl?.controlType === 'MULTI_CHECKBOX') && (
                   <>
                     <div>
-                      <label className="text-xs text-slate-500 block mb-0.5">Options SQL</label>
+                      <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.options_sql')}</label>
                       <input value={ctrl?.optionsQuery || ''}
                         onChange={e => save(p.name, { optionsQuery: e.target.value })}
-                        placeholder="SELECT DISTINCT col FROM table"
+                        placeholder={t('interactive.control.sql_placeholder')}
                         className="input text-xs py-1 w-64" />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500 block mb-0.5">Cascade Parent</label>
+                      <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.cascade_parent')}</label>
                       <select value={ctrl?.cascadeParent || ''}
                         onChange={e => save(p.name, { cascadeParent: e.target.value || undefined })}
                         className="input text-xs py-1 w-36">
-                        <option value="">None</option>
+                        <option value="">{t('common.none')}</option>
                         {parameters.filter(pp => pp.name !== p.name).map(pp => (
                           <option key={pp.name} value={pp.name}>{pp.label || pp.name}</option>
                         ))}

@@ -1,30 +1,32 @@
 import { BarChart3, Table, Hash, Type, Filter, ImageIcon } from 'lucide-react'
 import { useDesignerStore } from '@/store/useDesignerStore'
+import { useTranslation } from 'react-i18next'
 import type { DesignerWidget } from '@/store/useDesignerStore'
 
 const COMPONENTS: Array<{
   type: DesignerWidget['widgetType']
-  label: string
+  i18nKey: string
   icon: React.ElementType
-  desc: string
+  descKey: string
 }> = [
-  { type: 'CHART', label: 'Chart', icon: BarChart3, desc: 'Bar, line, pie, area' },
-  { type: 'TABLE', label: 'Table', icon: Table, desc: 'Data grid with sorting' },
-  { type: 'KPI', label: 'KPI Card', icon: Hash, desc: 'Single metric display' },
-  { type: 'TEXT', label: 'Text', icon: Type, desc: 'Rich text / markdown' },
-  { type: 'FILTER', label: 'Filter', icon: Filter, desc: 'Interactive filter control' },
-  { type: 'IMAGE', label: 'Image', icon: ImageIcon, desc: 'Static image / logo' },
+  { type: 'CHART', i18nKey: 'widgets.type.chart', icon: BarChart3, descKey: 'widgets.desc.chart' },
+  { type: 'TABLE', i18nKey: 'widgets.type.table', icon: Table, descKey: 'widgets.desc.table' },
+  { type: 'KPI', i18nKey: 'widgets.type.kpi', icon: Hash, descKey: 'widgets.desc.kpi' },
+  { type: 'TEXT', i18nKey: 'widgets.type.text', icon: Type, descKey: 'widgets.desc.text' },
+  { type: 'FILTER', i18nKey: 'widgets.type.filter', icon: Filter, descKey: 'widgets.desc.filter' },
+  { type: 'IMAGE', i18nKey: 'widgets.type.image', icon: ImageIcon, descKey: 'widgets.desc.image' },
 ]
 
 export default function ComponentPalette() {
   const addWidget = useDesignerStore(s => s.addWidget)
+  const { t } = useTranslation()
 
   return (
     <div className="space-y-1">
       <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 px-1">
-        Components
+        {t('widgets.components')}
       </h3>
-      {COMPONENTS.map(({ type, label, icon: Icon, desc }) => (
+      {COMPONENTS.map(({ type, i18nKey, icon: Icon, descKey }) => (
         <button
           key={type}
           onClick={() => addWidget(type)}
@@ -36,8 +38,8 @@ export default function ComponentPalette() {
             <Icon className="w-4 h-4 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
-            <div className="font-medium">{label}</div>
-            <div className="text-xs text-slate-400 dark:text-slate-500">{desc}</div>
+            <div className="font-medium">{t(i18nKey)}</div>
+            <div className="text-xs text-slate-400 dark:text-slate-500">{t(descKey)}</div>
           </div>
         </button>
       ))}

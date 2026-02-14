@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { auditLogApi, AuditLogEntry, PageResponse } from '@/api/admin';
 
 const ACTION_COLORS: Record<string, string> = {
@@ -16,6 +17,7 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 const AuditLog: React.FC = () => {
+  const { t } = useTranslation();
   const [entries, setEntries] = useState<AuditLogEntry[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -58,13 +60,13 @@ const AuditLog: React.FC = () => {
   return (
     <div className="admin-audit">
       <div className="admin-header">
-        <h2>Audit Log</h2>
+        <h2>{t('admin.audit_log')}</h2>
       </div>
 
       {/* Filters */}
       <div className="filter-bar">
         <select value={filterAction} onChange={e => { setFilterAction(e.target.value); setPage(0); }}>
-          <option value="">All Actions</option>
+          <option value="">{t('admin.audit.all_actions')}</option>
           <option value="USER_CREATE">User Created</option>
           <option value="USER_UPDATE">User Updated</option>
           <option value="USER_DELETE">User Deleted</option>
@@ -78,7 +80,7 @@ const AuditLog: React.FC = () => {
           <option value="LOGIN">Login</option>
         </select>
         <select value={filterObjectType} onChange={e => { setFilterObjectType(e.target.value); setPage(0); }}>
-          <option value="">All Objects</option>
+          <option value="">{t('admin.audit.all_types')}</option>
           <option value="USER">User</option>
           <option value="ROLE">Role</option>
           <option value="DATASOURCE">Data Source</option>
@@ -92,19 +94,19 @@ const AuditLog: React.FC = () => {
         <table>
           <thead>
             <tr>
-              <th>Time</th>
-              <th>User</th>
-              <th>Action</th>
-              <th>Object</th>
-              <th>Details</th>
+              <th>{t('admin.audit.timestamp')}</th>
+              <th>{t('admin.audit.user')}</th>
+              <th>{t('admin.audit.action')}</th>
+              <th>{t('admin.audit.object_type')}</th>
+              <th>{t('admin.audit.details')}</th>
               <th>IP</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="text-center">Loading...</td></tr>
+              <tr><td colSpan={6} className="text-center">{t('common.loading')}</td></tr>
             ) : entries.length === 0 ? (
-              <tr><td colSpan={6} className="text-center">No entries found</td></tr>
+              <tr><td colSpan={6} className="text-center">{t('admin.audit.no_entries')}</td></tr>
             ) : entries.map(entry => (
               <tr key={entry.id}>
                 <td className="nowrap">{formatDate(entry.createdAt)}</td>
@@ -133,9 +135,9 @@ const AuditLog: React.FC = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="pagination">
-          <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>← Prev</button>
-          <span>Page {page + 1} / {totalPages}</span>
-          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next →</button>
+          <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>{t('common.pagination.prev')}</button>
+          <span>{t('common.pagination.page_of', { current: page + 1, total: totalPages })}</span>
+          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>{t('common.pagination.next')}</button>
         </div>
       )}
     </div>

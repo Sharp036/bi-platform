@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { tagApi, TagDto, ObjectTagDto } from '@/api/tagsearch'
 import { Plus, X, Tag } from 'lucide-react'
 import clsx from 'clsx'
@@ -11,6 +12,7 @@ interface TagManagerProps {
 }
 
 export default function TagManager({ objectType, objectId, compact = false }: TagManagerProps) {
+  const { t } = useTranslation()
   const [tags, setTags] = useState<ObjectTagDto[]>([])
   const [allTags, setAllTags] = useState<TagDto[]>([])
   const [showPicker, setShowPicker] = useState(false)
@@ -27,7 +29,7 @@ export default function TagManager({ objectType, objectId, compact = false }: Ta
       setAllTags(all)
       setShowPicker(true)
     } catch {
-      toast.error('Failed to load tags')
+      toast.error(t('tags.failed_load'))
     }
   }
 
@@ -48,7 +50,7 @@ export default function TagManager({ objectType, objectId, compact = false }: Ta
         return [...prev, assigned]
       })
     } catch {
-      toast.error('Failed to assign tag')
+      toast.error(t('tags.failed_assign'))
     }
   }
 
@@ -57,7 +59,7 @@ export default function TagManager({ objectType, objectId, compact = false }: Ta
       await tagApi.removeTag(objectType, objectId, tagId)
       setTags(prev => prev.filter(t => t.tagId !== tagId))
     } catch {
-      toast.error('Failed to remove tag')
+      toast.error(t('tags.failed_remove'))
     }
   }
 
@@ -69,7 +71,7 @@ export default function TagManager({ objectType, objectId, compact = false }: Ta
       setNewTagName('')
       setAllTags(prev => [...prev, tag])
     } catch {
-      toast.error('Failed to create tag')
+      toast.error(t('tags.failed_create'))
     }
   }
 
@@ -109,7 +111,7 @@ export default function TagManager({ objectType, objectId, compact = false }: Ta
         )}
       >
         <Plus style={{ width: compact ? 10 : 12, height: compact ? 10 : 12 }} />
-        {!compact && 'Tag'}
+        {!compact && t('tags.tag_label')}
       </button>
 
       {showPicker && (
@@ -121,20 +123,20 @@ export default function TagManager({ objectType, objectId, compact = false }: Ta
               value={newTagName}
               onChange={e => setNewTagName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && createAndAssign()}
-              placeholder="New tag..."
+              placeholder={t('tags.new_placeholder')}
               className="input text-xs flex-1 py-1"
               autoFocus
             />
             {newTagName.trim() && (
               <button onClick={createAndAssign} className="btn-primary text-xs px-2 py-1">
-                Add
+                {t('common.add')}
               </button>
             )}
           </div>
           <div className="max-h-40 overflow-y-auto space-y-0.5">
             {availableTags.length === 0 ? (
               <p className="text-xs text-slate-400 py-1 px-1">
-                {allTags.length === 0 ? 'No tags yet' : 'All tags assigned'}
+                {allTags.length === 0 ? t('tags.no_tags') : t('tags.all_assigned')}
               </p>
             ) : availableTags.map(t => (
               <button

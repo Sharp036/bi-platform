@@ -158,4 +158,14 @@ class ProfileController(
         profileService.changePassword(user.username, request)
         return ResponseEntity.ok(mapOf("message" to "Password changed successfully"))
     }
+
+    @PutMapping("/language")
+    fun updateLanguage(
+        @RequestBody body: Map<String, String>,
+        @AuthenticationPrincipal user: UserDetails
+    ): ResponseEntity<Map<String, String>> {
+        val lang = body["language"] ?: throw IllegalArgumentException("language is required")
+        profileService.updateLanguage(user.username, lang)
+        return ResponseEntity.ok(mapOf("language" to lang))
+    }
 }

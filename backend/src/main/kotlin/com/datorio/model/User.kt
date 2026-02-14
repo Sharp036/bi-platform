@@ -25,6 +25,9 @@ data class User(
     @Column(name = "is_active", nullable = false)
     var isActive: Boolean = true,
 
+    @Column(name = "language", nullable = false, length = 10)
+    var language: String = "en",
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "dl_user_role",

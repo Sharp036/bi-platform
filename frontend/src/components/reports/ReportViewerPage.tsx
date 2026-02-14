@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import { drillApi } from '@/api/drilldown'
 import type { Report, RenderReportResponse, DrillAction, DrillNavigateResponse } from '@/types'
@@ -23,6 +24,7 @@ import { useLiveData } from '@/hooks/useLiveData'
 import LiveIndicator from './LiveIndicator'
 
 export default function ReportViewerPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const [report, setReport] = useState<Report | null>(null)
   const [renderResult, setRenderResult] = useState<RenderReportResponse | null>(null)
@@ -59,7 +61,7 @@ export default function ReportViewerPage() {
           initializedRef.current = true
         }
       })
-      .catch(() => toast.error('Failed to load report'))
+      .catch(() => toast.error(t('reports.failed_to_load')))
       .finally(() => setLoading(false))
   }, [id])
 
@@ -90,7 +92,7 @@ export default function ReportViewerPage() {
         setInteractiveMeta(meta)
         useActionStore.getState().setActions(meta.actions)
       }).catch(() => {})
-    } catch { toast.error('Failed to render report') }
+    } catch { toast.error(t('reports.failed_to_render')) }
     finally { setRendering(false) }
   }, [currentReportId, id, currentParams, loadDrillActions])
 
@@ -147,9 +149,9 @@ export default function ReportViewerPage() {
       const newReport = await reportApi.get(navResult.targetReportId)
       setReport(newReport)
 
-      toast.success(`Drill down → ${navResult.targetReportName}`)
+      toast.success(t('reports.drill_down_to', { name: navResult.targetReportName }))
     } catch {
-      toast.error('Drill-down navigation failed')
+      toast.error(t('reports.drill_failed'))
     }
   }, [drillActions, currentParams])
 
@@ -167,14 +169,14 @@ export default function ReportViewerPage() {
       const newReport = await reportApi.get(entry.reportId)
       setReport(newReport)
     } catch {
-      toast.error('Failed to navigate back')
+      toast.error(t('reports.failed_to_navigate'))
     }
   }, [navStack])
 
   // ── Render ──
 
   if (loading) return <LoadingSpinner />
-  if (!report) return <div className="text-center py-12 text-slate-500">Report not found</div>
+  if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
 
   const parsePosition = (pos?: string) => {
     if (!pos) return { x: 0, y: 0, w: 12, h: 4 }
@@ -208,7 +210,7 @@ export default function ReportViewerPage() {
               onChange={e => setAutoRefresh(e.target.value ? Number(e.target.value) : null)}
               className="input text-xs w-24 py-1"
             >
-              <option value="">Off</option>
+              <option value="">{t('common.off')}</option>
               <option value="10">10s</option>
               <option value="30">30s</option>
               <option value="60">1m</option>
@@ -216,13 +218,13 @@ export default function ReportViewerPage() {
             </select>
           </div>
           <button onClick={() => handleRender()} disabled={rendering} className="btn-secondary text-sm">
-            <RefreshCw className={`w-4 h-4 ${rendering ? 'animate-spin' : ''}`} /> Refresh
+            <RefreshCw className={`w-4 h-4 ${rendering ? 'animate-spin' : ''}`} /> {t('common.refresh')}
           </button>
           <button
-            onClick={() => { reportApi.createSnapshot(Number(id)); toast.success('Snapshot created') }}
+            onClick={() => { reportApi.createSnapshot(Number(id)); toast.success(t('reports.snapshot_created')) }}
             className="btn-secondary text-sm"
           >
-            <Camera className="w-4 h-4" /> Snapshot
+            <Camera className="w-4 h-4" /> {t('reports.snapshot')}
           </button>
           <ExportMenu reportId={Number(id)} reportName={report.name} />
         </div>
@@ -247,7 +249,7 @@ export default function ReportViewerPage() {
       {/* Execution stats */}
       {renderResult && (
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
-          Rendered {renderResult.widgets.length} widget{renderResult.widgets.length !== 1 ? 's' : ''} in {renderResult.executionMs}ms
+          {t('reports.rendered_stats', { count: renderResult.widgets.length, ms: renderResult.executionMs })}
         </p>
       )}
 
@@ -274,7 +276,7 @@ export default function ReportViewerPage() {
                 {hasDrill && (
                   <div className="text-[10px] text-brand-500 dark:text-brand-400 mb-1 flex items-center gap-1">
                     <span>⤵</span>
-                    <span>Click to drill → {widgetDrillActions[0].targetReportName}</span>
+                    <span>{t('reports.drill_to', { name: widgetDrillActions[0].targetReportName })}</span>
                   </div>
                 )}
                 <WidgetRenderer

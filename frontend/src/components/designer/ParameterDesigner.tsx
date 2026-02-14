@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import { Plus, Trash2 } from 'lucide-react'
 
 const PARAM_TYPES = ['STRING', 'NUMBER', 'DATE', 'DATE_RANGE', 'SELECT', 'MULTI_SELECT', 'BOOLEAN']
 
 export default function ParameterDesigner() {
+  const { t } = useTranslation()
   const parameters = useDesignerStore(s => s.parameters)
   const setParameters = useDesignerStore(s => s.setParameters)
 
@@ -31,43 +33,43 @@ export default function ParameterDesigner() {
     <div>
       <div className="flex items-center justify-between mb-2">
         <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-          Parameters ({parameters.length})
+          {t('designer.parameters', { count: parameters.length })}
         </label>
         <button onClick={addParam} className="btn-ghost text-xs p-1">
-          <Plus className="w-3.5 h-3.5" /> Add
+          <Plus className="w-3.5 h-3.5" /> {t('designer.add')}
         </button>
       </div>
 
       {parameters.length === 0 ? (
-        <p className="text-xs text-slate-400">No parameters defined</p>
+        <p className="text-xs text-slate-400">{t('designer.no_parameters')}</p>
       ) : (
         <div className="space-y-2">
           {parameters.map((p, i) => (
             <div key={i} className="flex items-center gap-2 bg-white dark:bg-dark-surface-50 rounded-lg p-2 border border-surface-200 dark:border-dark-surface-100">
               <input
                 value={p.name} onChange={e => updateParam(i, { name: e.target.value })}
-                className="input text-xs flex-1 py-1" placeholder="name"
+                className="input text-xs flex-1 py-1" placeholder={t('designer.param_name')}
               />
               <input
                 value={p.label} onChange={e => updateParam(i, { label: e.target.value })}
-                className="input text-xs flex-1 py-1" placeholder="label"
+                className="input text-xs flex-1 py-1" placeholder={t('designer.param_label')}
               />
               <select
                 value={p.paramType} onChange={e => updateParam(i, { paramType: e.target.value })}
                 className="input text-xs w-28 py-1"
               >
-                {PARAM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {PARAM_TYPES.map(pt => <option key={pt} value={pt}>{pt}</option>)}
               </select>
               <input
                 value={p.defaultValue} onChange={e => updateParam(i, { defaultValue: e.target.value })}
-                className="input text-xs w-24 py-1" placeholder="default"
+                className="input text-xs w-24 py-1" placeholder={t('designer.param_default')}
               />
               <label className="flex items-center gap-1 text-xs text-slate-500 flex-shrink-0">
                 <input
                   type="checkbox" checked={p.isRequired}
                   onChange={e => updateParam(i, { isRequired: e.target.checked })}
                 />
-                Req
+                {t('designer.param_required')}
               </label>
               <button onClick={() => removeParam(i)} className="btn-ghost p-1 text-red-500 flex-shrink-0">
                 <Trash2 className="w-3.5 h-3.5" />

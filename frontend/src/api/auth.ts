@@ -10,4 +10,7 @@ export const authApi = {
 
   me: () =>
     api.get('/auth/me').then(r => r.data),
+
+  updateLanguage: (language: string) =>
+    api.put('/profile/language', { language }).then(r => r.data),
 }

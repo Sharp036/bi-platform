@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   adminRoleApi,
   RoleListItem, RoleDetail, PermissionItem
 } from '@/api/admin';
 
 const RoleManagement: React.FC = () => {
+  const { t } = useTranslation();
   const [roles, setRoles] = useState<RoleListItem[]>([]);
   const [permissions, setPermissions] = useState<PermissionItem[]>([]);
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null);
@@ -28,7 +30,7 @@ const RoleManagement: React.FC = () => {
       setRoles(rolesData);
       setPermissions(permsData);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to load roles');
+      setError(e.response?.data?.message || t('admin.failed_load_roles'));
     } finally {
       setLoading(false);
     }
@@ -41,7 +43,7 @@ const RoleManagement: React.FC = () => {
       const detail = await adminRoleApi.get(id);
       setSelectedRole(detail);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to load role');
+      setError(e.response?.data?.message || t('common.failed_to_load'));
     }
   };
 
@@ -81,19 +83,19 @@ const RoleManagement: React.FC = () => {
       loadRoles();
       if (selectedRole) selectRole(selectedRole.id);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Operation failed');
+      setError(e.response?.data?.message || t('common.operation_failed'));
     }
   };
 
   const handleDelete = async (role: RoleListItem | RoleDetail) => {
     if (role.isSystem) return;
-    if (!confirm(`Delete role "${role.name}"?`)) return;
+    if (!confirm(t('admin.delete_role_confirm', { name: role.name }))) return;
     try {
       await adminRoleApi.delete(role.id);
       if (selectedRole?.id === role.id) setSelectedRole(null);
       loadRoles();
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Failed to delete role');
+      setError(e.response?.data?.message || t('common.failed_to_delete'));
     }
   };
 
@@ -114,8 +116,8 @@ const RoleManagement: React.FC = () => {
   return (
     <div className="admin-roles">
       <div className="admin-header">
-        <h2>Role Management</h2>
-        <button className="btn btn-primary" onClick={handleCreate}>+ New Role</button>
+        <h2>{t('admin.role_management')}</h2>
+        <button className="btn btn-primary" onClick={handleCreate}>{t('admin.new_role')}</button>
       </div>
 
       {error && (
@@ -125,7 +127,7 @@ const RoleManagement: React.FC = () => {
       <div className="roles-layout">
         {/* Role List */}
         <div className="roles-list">
-          {loading ? <p>Loading...</p> : roles.map(role => (
+          {loading ? <p>{t('common.loading')}</p> : roles.map(role => (
             <div
               key={role.id}
               className={`role-card ${selectedRole?.id === role.id ? 'selected' : ''}`}
@@ -136,7 +138,7 @@ const RoleManagement: React.FC = () => {
                 {role.isSystem && <small className="system-tag">System</small>}
               </div>
               <p className="role-desc">{role.description || 'No description'}</p>
-              <small>{role.permissionCount} permissions</small>
+              <small>{role.permissionCount} {t('admin.permissions').toLowerCase()}</small>
             </div>
           ))}
         </div>
@@ -150,9 +152,9 @@ const RoleManagement: React.FC = () => {
                 <div>
                   {!selectedRole.isSystem && (
                     <>
-                      <button className="btn btn-sm" onClick={handleEdit}>✏️ Edit</button>
+                      <button className="btn btn-sm" onClick={handleEdit}>✏️ {t('common.edit')}</button>
                       <button className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(selectedRole)}>🗑️ Delete</button>
+                        onClick={() => handleDelete(selectedRole)}>🗑️ {t('common.delete')}</button>
                     </>
                   )}
                 </div>
@@ -160,7 +162,7 @@ const RoleManagement: React.FC = () => {
               <p>{selectedRole.description || 'No description'}</p>
               <p className="user-count">{selectedRole.userCount} user(s) assigned</p>
 
-              <h4>Permissions ({selectedRole.permissions.length})</h4>
+              <h4>{t('admin.permissions')} ({selectedRole.permissions.length})</h4>
               <div className="perm-list">
                 {selectedRole.permissions.map(p => (
                   <div key={p.id} className="perm-item">
@@ -172,7 +174,7 @@ const RoleManagement: React.FC = () => {
             </>
           ) : (
             <div className="empty-state">
-              <p>Select a role to view details</p>
+              <p>{t('admin.no_roles_found')}</p>
             </div>
           )}
         </div>
@@ -182,9 +184,9 @@ const RoleManagement: React.FC = () => {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
-            <h3>{editMode ? 'Edit Role' : 'Create New Role'}</h3>
+            <h3>{editMode ? t('admin.edit_role', { name: selectedRole?.name }) : t('admin.create_role')}</h3>
             <div className="form-group">
-              <label>Role Name</label>
+              <label>{t('admin.role_name')}</label>
               <input
                 type="text"
                 value={formName}
@@ -193,7 +195,7 @@ const RoleManagement: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Description</label>
+              <label>{t('common.description')}</label>
               <input
                 type="text"
                 value={formDesc}
@@ -202,7 +204,7 @@ const RoleManagement: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Permissions</label>
+              <label>{t('admin.permissions')}</label>
               <div className="perm-grid">
                 {Object.entries(permGroups).map(([group, perms]) => (
                   <div key={group} className="perm-group">
@@ -222,10 +224,10 @@ const RoleManagement: React.FC = () => {
               </div>
             </div>
             <div className="modal-actions">
-              <button className="btn" onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="btn" onClick={() => setShowModal(false)}>{t('common.cancel')}</button>
               <button className="btn btn-primary" onClick={handleSubmit}
                 disabled={!formName.trim()}>
-                {editMode ? 'Save' : 'Create'}
+                {editMode ? t('common.save') : t('common.create')}
               </button>
             </div>
           </div>

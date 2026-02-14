@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { searchApi, SearchResult } from '@/api/tagsearch'
 import { Search, FileBarChart, Database, Code2, X } from 'lucide-react'
 import clsx from 'clsx'
@@ -20,6 +21,7 @@ const typeLink = (r: SearchResult) => {
 }
 
 export default function GlobalSearchBar() {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [open, setOpen] = useState(false)
@@ -103,7 +105,7 @@ export default function GlobalSearchBar() {
           onChange={e => setQuery(e.target.value)}
           onFocus={() => { if (results.length > 0) setOpen(true) }}
           onKeyDown={handleKeyDown}
-          placeholder="Search... (Ctrl+K)"
+          placeholder={t('search.placeholder')}
           className="w-64 lg:w-80 pl-9 pr-8 py-1.5 rounded-lg text-sm
             bg-surface-100 dark:bg-dark-surface-100
             border border-surface-200 dark:border-dark-surface-100
@@ -125,9 +127,9 @@ export default function GlobalSearchBar() {
       {open && (
         <div className="absolute top-full left-0 right-0 mt-1 card shadow-xl z-50 overflow-hidden max-h-96">
           {loading && results.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-slate-400">Searching...</div>
+            <div className="px-4 py-3 text-sm text-slate-400">{t('search.searching')}</div>
           ) : results.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-slate-400">No results for "{query}"</div>
+            <div className="px-4 py-3 text-sm text-slate-400">{t('search.no_results', { query })}</div>
           ) : (
             <div className="py-1">
               {results.map((r, idx) => {
@@ -157,14 +159,14 @@ export default function GlobalSearchBar() {
                     </span>
                     {r.tags.length > 0 && (
                       <div className="flex gap-1 flex-shrink-0">
-                        {r.tags.slice(0, 2).map(t => (
-                          <span key={t.tagId}
+                        {r.tags.slice(0, 2).map(tg => (
+                          <span key={tg.tagId}
                             className="text-[10px] px-1.5 py-0.5 rounded-full"
                             style={{
-                              backgroundColor: t.tagColor ? `${t.tagColor}20` : '#e2e8f0',
-                              color: t.tagColor || '#64748b'
+                              backgroundColor: tg.tagColor ? `${tg.tagColor}20` : '#e2e8f0',
+                              color: tg.tagColor || '#64748b'
                             }}>
-                            {t.tagName}
+                            {tg.tagName}
                           </span>
                         ))}
                       </div>

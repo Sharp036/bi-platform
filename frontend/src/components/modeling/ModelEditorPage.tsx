@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { modelingApi, type DataModelDetail, type ModelTableItem, type ModelFieldItem, type ModelRelationshipItem } from '@/api/modeling'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
@@ -17,6 +18,7 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 export default function ModelEditorPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const modelId = Number(id)
@@ -39,7 +41,7 @@ export default function ModelEditorPage() {
       if (expandedTables.size === 0) {
         setExpandedTables(new Set(m.tables.map(t => t.id)))
       }
-    } catch { toast.error('Failed to load model') }
+    } catch { toast.error(t('common.failed_to_load')) }
     finally { setLoading(false) }
   }, [modelId])
 
@@ -53,7 +55,7 @@ export default function ModelEditorPage() {
       const existing = new Set(model.tables.map(t => t.tableName))
       setSchemaTables(res.tables.map((t: { name: string }) => t.name).filter((n: string) => !existing.has(n)))
       setShowImport(true)
-    } catch { toast.error('Failed to load schema') }
+    } catch { toast.error(t('common.failed_to_load')) }
   }
 
   const handleImport = async () => {
@@ -67,15 +69,15 @@ export default function ModelEditorPage() {
       toast.success(`Imported ${selectedImport.size} table(s)`)
       setShowImport(false); setSelectedImport(new Set())
       load()
-    } catch { toast.error('Import failed') }
+    } catch { toast.error(t('common.operation_failed')) }
     finally { setImporting(false) }
   }
 
   // ─── Table actions ───
   const handleRemoveTable = async (tableId: number) => {
-    if (!confirm('Remove this table and all its fields?')) return
-    try { await modelingApi.removeTable(tableId); toast.success('Table removed'); load() }
-    catch { toast.error('Failed to remove') }
+    if (!confirm(t('common.confirm_delete'))) return
+    try { await modelingApi.removeTable(tableId); toast.success(t('common.deleted')); load() }
+    catch { toast.error(t('common.failed_to_delete')) }
   }
 
   // ─── Field actions ───
@@ -91,7 +93,7 @@ export default function ModelEditorPage() {
         hidden: !field.hidden,
       })
       load()
-    } catch { toast.error('Failed to update') }
+    } catch { toast.error(t('common.failed_to_update')) }
   }
 
   const handleChangeRole = async (field: ModelFieldItem, newRole: string) => {
@@ -106,7 +108,7 @@ export default function ModelEditorPage() {
         hidden: field.hidden,
       })
       load()
-    } catch { toast.error('Failed to update') }
+    } catch { toast.error(t('common.failed_to_update')) }
   }
 
   const handleChangeAggregation = async (field: ModelFieldItem, agg: string) => {
@@ -121,13 +123,13 @@ export default function ModelEditorPage() {
         hidden: field.hidden,
       })
       load()
-    } catch { toast.error('Failed to update') }
+    } catch { toast.error(t('common.failed_to_update')) }
   }
 
   // ─── Relationship actions ───
   const handleRemoveRelationship = async (relId: number) => {
-    try { await modelingApi.removeRelationship(relId); toast.success('Removed'); load() }
-    catch { toast.error('Failed to remove') }
+    try { await modelingApi.removeRelationship(relId); toast.success(t('common.deleted')); load() }
+    catch { toast.error(t('common.failed_to_delete')) }
   }
 
   const toggleTable = (tableId: number) => {
@@ -150,21 +152,21 @@ export default function ModelEditorPage() {
             {model.name}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {model.datasourceName} · {model.tables.length} tables · {model.relationships.length} relationships
+            {model.datasourceName} · {model.tables.length} {t('models.tables').toLowerCase()} · {model.relationships.length} {t('models.relationships').toLowerCase()}
           </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={loadSchema} className="btn-secondary"><Download className="w-4 h-4" /> Import Tables</button>
-          <button onClick={() => navigate(`/explore/${modelId}`)} className="btn-primary"><Play className="w-4 h-4" /> Explore</button>
+          <button onClick={loadSchema} className="btn-secondary"><Download className="w-4 h-4" /> {t('models.add_table')}</button>
+          <button onClick={() => navigate(`/explore/${modelId}`)} className="btn-primary"><Play className="w-4 h-4" /> {t('models.explore')}</button>
         </div>
       </div>
 
       {/* Import modal */}
       {showImport && (
         <div className="card p-4 mb-6 border-2 border-violet-200 dark:border-violet-800">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Select tables to import</h3>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('models.select_fields')}</h3>
           {schemaTables.length === 0 ? (
-            <p className="text-sm text-slate-500">All tables already imported</p>
+            <p className="text-sm text-slate-500">{t('common.no_results')}</p>
           ) : (
             <>
               <div className="flex flex-wrap gap-2 mb-3 max-h-48 overflow-y-auto">
@@ -190,9 +192,9 @@ export default function ModelEditorPage() {
                 <button onClick={() => setSelectedImport(new Set(schemaTables))} className="btn-ghost text-xs">Select All</button>
                 <button onClick={() => setSelectedImport(new Set())} className="btn-ghost text-xs">Deselect All</button>
                 <div className="flex-1" />
-                <button onClick={() => setShowImport(false)} className="btn-secondary text-xs">Cancel</button>
+                <button onClick={() => setShowImport(false)} className="btn-secondary text-xs">{t('common.cancel')}</button>
                 <button onClick={handleImport} disabled={importing || selectedImport.size === 0} className="btn-primary text-xs">
-                  {importing ? 'Importing...' : `Import ${selectedImport.size} table(s)`}
+                  {importing ? t('common.loading') : `Import ${selectedImport.size} table(s)`}
                 </button>
               </div>
             </>
@@ -203,11 +205,11 @@ export default function ModelEditorPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Tables & Fields (2 cols) */}
         <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tables & Fields</h2>
+          <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('models.tables')} & {t('models.fields')}</h2>
 
           {model.tables.length === 0 ? (
             <div className="card p-6 text-center text-slate-500">
-              No tables yet. Click "Import Tables" to add tables from your datasource.
+              {t('models.no_fields_selected')}
             </div>
           ) : model.tables.map(table => (
             <div key={table.id} className="card overflow-hidden">
@@ -222,7 +224,7 @@ export default function ModelEditorPage() {
                   {table.isPrimary && <span className="text-xs bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 px-1.5 py-0.5 rounded">primary</span>}
                 </div>
                 <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                  <span className="text-xs text-slate-400 mr-2">{table.fields.length} fields</span>
+                  <span className="text-xs text-slate-400 mr-2">{table.fields.length} {t('models.fields').toLowerCase()}</span>
                   <button onClick={() => handleRemoveTable(table.id)} className="btn-ghost p-1 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
@@ -264,7 +266,7 @@ export default function ModelEditorPage() {
                           </select>
                         )}
                         <span className="text-xs text-slate-400 w-16 text-right">{field.dataType}</span>
-                        <button onClick={() => handleToggleHidden(field)} className="btn-ghost p-1" title={field.hidden ? 'Show' : 'Hide'}>
+                        <button onClick={() => handleToggleHidden(field)} className="btn-ghost p-1" title={field.hidden ? t('designer.show') : t('designer.hide')}>
                           {field.hidden ? <EyeOff className="w-3.5 h-3.5 text-slate-400" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
                         </button>
                       </div>
@@ -278,12 +280,12 @@ export default function ModelEditorPage() {
 
         {/* Relationships (1 col) */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Relationships</h2>
+          <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('models.relationships')}</h2>
 
           {model.relationships.length === 0 ? (
             <div className="card p-4 text-center text-sm text-slate-500">
               <Unlink className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-              No relationships. Import tables with foreign keys to auto-detect.
+              {t('common.no_results')}
             </div>
           ) : model.relationships.map(rel => (
             <div key={rel.id} className="card p-3">

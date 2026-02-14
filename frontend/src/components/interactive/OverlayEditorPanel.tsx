@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Image, Type, Minus, Plus, Trash2, Move, Link2, Square } from 'lucide-react'
 import type { OverlayItem, OverlayRequest } from '@/types'
 import { interactiveApi } from '@/api/interactive'
@@ -14,6 +15,7 @@ interface Props {
 type OverlayType = 'IMAGE' | 'TEXT' | 'SHAPE' | 'DIVIDER'
 
 export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Props) {
+  const { t } = useTranslation()
   const [showAdd, setShowAdd] = useState(false)
   const [editId, setEditId] = useState<number | null>(null)
   const [form, setForm] = useState<Partial<OverlayRequest>>({
@@ -22,10 +24,10 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
   })
 
   const overlayTypes: { type: OverlayType; icon: React.ElementType; label: string }[] = [
-    { type: 'IMAGE', icon: Image, label: 'Image / Logo' },
-    { type: 'TEXT', icon: Type, label: 'Text' },
-    { type: 'SHAPE', icon: Square, label: 'Shape (SVG)' },
-    { type: 'DIVIDER', icon: Minus, label: 'Divider' },
+    { type: 'IMAGE', icon: Image, label: t('interactive.overlay.image_logo') },
+    { type: 'TEXT', icon: Type, label: t('interactive.overlay.text') },
+    { type: 'SHAPE', icon: Square, label: t('interactive.overlay.shape') },
+    { type: 'DIVIDER', icon: Minus, label: t('interactive.overlay.divider') },
   ]
 
   const handleSave = async () => {
@@ -50,14 +52,14 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
 
       if (editId) {
         await interactiveApi.updateOverlay(editId, req)
-        toast.success('Overlay updated')
+        toast.success(t('interactive.overlay.updated'))
       } else {
         await interactiveApi.createOverlay(req)
-        toast.success('Overlay added')
+        toast.success(t('interactive.overlay.added'))
       }
       setShowAdd(false); setEditId(null)
       onRefresh()
-    } catch { toast.error('Failed to save overlay') }
+    } catch { toast.error(t('interactive.overlay.failed_save')) }
   }
 
   const handleEdit = (overlay: OverlayItem) => {
@@ -77,19 +79,19 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this overlay?')) return
+    if (!confirm(t('interactive.overlay.delete_confirm'))) return
     try {
       await interactiveApi.deleteOverlay(id)
-      toast.success('Overlay deleted')
+      toast.success(t('interactive.overlay.deleted'))
       onRefresh()
-    } catch { toast.error('Failed to delete') }
+    } catch { toast.error(t('interactive.overlay.failed_delete')) }
   }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-          Overlays
+          {t('interactive.overlays')}
         </h3>
         <button
           onClick={() => { setShowAdd(!showAdd); setEditId(null); setForm({ overlayType: 'IMAGE', content: '', positionX: 20, positionY: 20, width: 120, height: 60, opacity: 1.0, zIndex: 100 }) }}
@@ -114,7 +116,7 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
             )}
           </div>
           <span className="text-slate-400">{o.positionX},{o.positionY}</span>
-          <button onClick={() => handleEdit(o)} className="text-brand-500 hover:text-brand-600">Edit</button>
+          <button onClick={() => handleEdit(o)} className="text-brand-500 hover:text-brand-600">{t('common.edit')}</button>
           <button onClick={() => handleDelete(o.id)} className="text-red-400 hover:text-red-600">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -125,7 +127,7 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
       {showAdd && (
         <div className="bg-surface-50 dark:bg-dark-surface-100 rounded-lg p-3 space-y-3 border border-surface-200 dark:border-dark-surface-100">
           <h4 className="text-xs font-semibold text-slate-500">
-            {editId ? 'Edit Overlay' : 'Add Overlay'}
+            {editId ? t('interactive.overlay.edit_title') : t('interactive.overlay.add_title')}
           </h4>
 
           {/* Type selector */}
@@ -151,12 +153,12 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
           {form.overlayType !== 'DIVIDER' && (
             <div>
               <label className="text-xs text-slate-500 mb-1 block">
-                {form.overlayType === 'IMAGE' ? 'Image URL' : form.overlayType === 'TEXT' ? 'HTML Content' : 'SVG Content'}
+                {form.overlayType === 'IMAGE' ? t('interactive.overlay.image_url') : form.overlayType === 'TEXT' ? t('interactive.overlay.html_content') : t('interactive.overlay.svg_content')}
               </label>
               <textarea
                 value={form.content || ''}
                 onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                placeholder={form.overlayType === 'IMAGE' ? 'https://example.com/logo.png' : 'Enter content...'}
+                placeholder={form.overlayType === 'IMAGE' ? t('interactive.overlay.image_placeholder') : t('interactive.overlay.content_placeholder')}
                 className="input text-xs font-mono h-16 resize-none w-full"
               />
             </div>
@@ -164,36 +166,36 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
 
           {/* Position & size */}
           <div className="grid grid-cols-4 gap-2">
-            <Field label="X" value={form.positionX || 0} onChange={v => setForm(f => ({ ...f, positionX: v }))} />
-            <Field label="Y" value={form.positionY || 0} onChange={v => setForm(f => ({ ...f, positionY: v }))} />
-            <Field label="W" value={form.width || 100} onChange={v => setForm(f => ({ ...f, width: v }))} />
-            <Field label="H" value={form.height || 50} onChange={v => setForm(f => ({ ...f, height: v }))} />
+            <Field label={t('interactive.overlay.x')} value={form.positionX || 0} onChange={v => setForm(f => ({ ...f, positionX: v }))} />
+            <Field label={t('interactive.overlay.y')} value={form.positionY || 0} onChange={v => setForm(f => ({ ...f, positionY: v }))} />
+            <Field label={t('interactive.overlay.w')} value={form.width || 100} onChange={v => setForm(f => ({ ...f, width: v }))} />
+            <Field label={t('interactive.overlay.h')} value={form.height || 50} onChange={v => setForm(f => ({ ...f, height: v }))} />
           </div>
 
           {/* Opacity & z-index */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-slate-500">Opacity</label>
+              <label className="text-[10px] text-slate-500">{t('interactive.overlay.opacity')}</label>
               <input
                 type="range" min="0" max="1" step="0.05"
                 value={form.opacity || 1}
                 onChange={e => setForm(f => ({ ...f, opacity: Number(e.target.value) }))}
                 className="w-full"
               />
-              <span className="text-[10px] text-slate-400">{((form.opacity || 1) * 100).toFixed(0)}%</span>
+              <span className="text-[10px] text-slate-400">{((form.opacity || 1) * 100).toFixed(0)}{t('interactive.overlay.percent')}</span>
             </div>
-            <Field label="Z-Index" value={form.zIndex || 100} onChange={v => setForm(f => ({ ...f, zIndex: v }))} />
+            <Field label={t('interactive.overlay.z_index')} value={form.zIndex || 100} onChange={v => setForm(f => ({ ...f, zIndex: v }))} />
           </div>
 
           {/* Link URL */}
           <div>
             <label className="text-xs text-slate-500 mb-1 flex items-center gap-1">
-              <Link2 className="w-3 h-3" /> Click URL (optional)
+              <Link2 className="w-3 h-3" /> {t('interactive.overlay.click_url')}
             </label>
             <input
               value={form.linkUrl || ''}
               onChange={e => setForm(f => ({ ...f, linkUrl: e.target.value }))}
-              placeholder="https://..."
+              placeholder={t('interactive.overlay.url_placeholder')}
               className="input text-xs w-full"
             />
           </div>
@@ -201,10 +203,10 @@ export default function OverlayEditorPanel({ reportId, overlays, onRefresh }: Pr
           {/* Buttons */}
           <div className="flex justify-end gap-2">
             <button onClick={() => { setShowAdd(false); setEditId(null) }} className="btn-secondary text-xs">
-              Cancel
+              {t('common.cancel')}
             </button>
             <button onClick={handleSave} className="btn-primary text-xs">
-              {editId ? 'Update' : 'Add'}
+              {editId ? t('common.update') : t('common.add')}
             </button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import type { Report } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
@@ -21,6 +22,7 @@ const statusBadge = (status: string) => {
 }
 
 export default function ReportListPage() {
+  const { t } = useTranslation()
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -33,7 +35,7 @@ export default function ReportListPage() {
     if (filterStatus) params.status = filterStatus
     reportApi.list(params as { status?: string; page?: number; size?: number }).then((data) => {
       setReports(data.content || [])
-    }).catch(() => toast.error('Failed to load reports')).finally(() => setLoading(false))
+    }).catch(() => toast.error(t('reports.failed_to_load'))).finally(() => setLoading(false))
   }
 
   useEffect(load, [filterStatus])
@@ -42,11 +44,20 @@ export default function ReportListPage() {
     ? reports.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
     : reports
 
+  const statusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      DRAFT: t('common.status.draft'),
+      PUBLISHED: t('common.status.published'),
+      ARCHIVED: t('common.status.archived'),
+    }
+    return labels[status] || status
+  }
+
   return (
     <div className="max-w-[1200px] mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Reports</h1>
-        <Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> New Report</Link>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('reports.title')}</h1>
+        <Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.new_report')}</Link>
       </div>
 
       {/* Filters */}
@@ -55,23 +66,23 @@ export default function ReportListPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search reports..." className="input pl-9"
+            placeholder={t('reports.search_placeholder')} className="input pl-9"
           />
         </div>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="input w-40">
-          <option value="">All statuses</option>
-          <option value="DRAFT">Draft</option>
-          <option value="PUBLISHED">Published</option>
-          <option value="ARCHIVED">Archived</option>
+          <option value="">{t('reports.all_statuses')}</option>
+          <option value="DRAFT">{t('common.status.draft')}</option>
+          <option value="PUBLISHED">{t('common.status.published')}</option>
+          <option value="ARCHIVED">{t('common.status.archived')}</option>
         </select>
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
         <EmptyState
           icon={<FileBarChart className="w-12 h-12" />}
-          title="No reports yet"
-          description="Create your first report to visualize data"
-          action={<Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> Create Report</Link>}
+          title={t('reports.no_reports')}
+          description={t('reports.create_first')}
+          action={<Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.create_report')}</Link>}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -82,17 +93,17 @@ export default function ReportListPage() {
                   <Link to={`/reports/${r.id}`} className="text-base font-semibold text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
                     {r.name}
                   </Link>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{r.description || 'No description'}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{r.description || t('reports.no_description')}</p>
                 </div>
                 <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium ml-2 flex-shrink-0', statusBadge(r.status))}>
-                  {r.status}
+                  {statusLabel(r.status)}
                 </span>
               </div>
 
               <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mb-3">
-                <span>{r.widgets?.length || 0} widgets</span>
+                <span>{t('reports.widgets_count', { count: r.widgets?.length || 0 })}</span>
                 <span>·</span>
-                <span>{r.parameters?.length || 0} params</span>
+                <span>{t('reports.params_count', { count: r.parameters?.length || 0 })}</span>
                 <span>·</span>
                 <span>{new Date(r.updatedAt).toLocaleDateString()}</span>
               </div>
@@ -105,8 +116,8 @@ export default function ReportListPage() {
                 <FavoriteButton objectType="REPORT" objectId={r.id} size={14} />
                 <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs"><Pencil className="w-3.5 h-3.5" /></Link>
                 <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs"><Eye className="w-3.5 h-3.5" /></Link>
-                <button onClick={() => { reportApi.duplicate(r.id); toast.success('Duplicated'); load() }} className="btn-ghost p-1.5 text-xs"><Copy className="w-3.5 h-3.5" /></button>
-                <button onClick={() => { reportApi.archive(r.id); toast.success('Archived'); load() }} className="btn-ghost p-1.5 text-xs"><Archive className="w-3.5 h-3.5" /></button>
+                <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs"><Copy className="w-3.5 h-3.5" /></button>
+                <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs"><Archive className="w-3.5 h-3.5" /></button>
                 <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs"><Share2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>

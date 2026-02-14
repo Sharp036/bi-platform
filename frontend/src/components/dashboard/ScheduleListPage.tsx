@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { scheduleApi } from '@/api/reports'
 import type { Schedule } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
@@ -7,19 +8,20 @@ import { CalendarClock, Play, ToggleLeft, ToggleRight, Trash2 } from 'lucide-rea
 import toast from 'react-hot-toast'
 
 export default function ScheduleListPage() {
+  const { t } = useTranslation()
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [loading, setLoading] = useState(true)
 
   const load = () => {
     setLoading(true)
-    scheduleApi.list().then(setSchedules).catch(() => toast.error('Failed to load')).finally(() => setLoading(false))
+    scheduleApi.list().then(setSchedules).catch(() => toast.error(t('common.failed_to_load'))).finally(() => setLoading(false))
   }
 
   useEffect(load, [])
 
   const handleToggle = async (id: number) => {
     try { await scheduleApi.toggle(id); load() }
-    catch { toast.error('Failed to toggle') }
+    catch { toast.error(t('common.operation_failed')) }
   }
 
   const handleRunNow = async (id: number) => {
@@ -27,23 +29,23 @@ export default function ScheduleListPage() {
       const res = await scheduleApi.executeNow(id)
       toast.success(`Executed: ${res.status} (${res.executionMs}ms)`)
       load()
-    } catch { toast.error('Execution failed') }
+    } catch { toast.error(t('common.operation_failed')) }
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete schedule?')) return
-    try { await scheduleApi.delete(id); toast.success('Deleted'); load() }
-    catch { toast.error('Failed to delete') }
+    if (!confirm(t('schedules.delete_confirm'))) return
+    try { await scheduleApi.delete(id); toast.success(t('schedules.deleted')); load() }
+    catch { toast.error(t('schedules.failed_delete')) }
   }
 
   if (loading) return <LoadingSpinner />
 
   return (
     <div className="max-w-[900px] mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Schedules</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">{t('schedules.title')}</h1>
 
       {schedules.length === 0 ? (
-        <EmptyState icon={<CalendarClock className="w-12 h-12" />} title="No schedules" description="Create report schedules from the report viewer" />
+        <EmptyState icon={<CalendarClock className="w-12 h-12" />} title={t('schedules.no_schedules')} description={t('schedules.description')} />
       ) : (
         <div className="space-y-3">
           {schedules.map(s => (
@@ -53,7 +55,7 @@ export default function ScheduleListPage() {
                 <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
                   <code className="bg-surface-100 dark:bg-dark-surface-100 px-1.5 py-0.5 rounded">{s.cronExpression}</code>
                   <span>{s.outputFormat}</span>
-                  {s.lastRunAt && <span>Last: {new Date(s.lastRunAt).toLocaleString()}</span>}
+                  {s.lastRunAt && <span>{t('schedules.last_run')} {new Date(s.lastRunAt).toLocaleString()}</span>}
                   {s.lastStatus && (
                     <span className={s.lastStatus === 'SUCCESS' ? 'text-emerald-600' : 'text-red-600'}>{s.lastStatus}</span>
                   )}

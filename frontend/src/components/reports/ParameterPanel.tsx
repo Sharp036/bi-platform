@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ReportParameter } from '@/types'
 import { Play } from 'lucide-react'
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ParameterPanel({ parameters, onApply, loading }: Props) {
+  const { t } = useTranslation()
   const [values, setValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
     parameters.forEach(p => {
@@ -56,8 +58,8 @@ export default function ParameterPanel({ parameters, onApply, loading }: Props) 
                 className="input text-sm"
               >
                 <option value="">—</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
+                <option value="true">{t('common.yes')}</option>
+                <option value="false">{t('common.no')}</option>
               </select>
             ) : p.paramType === 'SELECT' ? (
               <select
@@ -65,7 +67,7 @@ export default function ParameterPanel({ parameters, onApply, loading }: Props) 
                 onChange={e => setValues({ ...values, [p.name]: e.target.value })}
                 className="input text-sm"
               >
-                <option value="">All</option>
+                <option value="">{t('common.all')}</option>
                 {(p.config?.options as string[] || []).map(opt => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
@@ -84,7 +86,7 @@ export default function ParameterPanel({ parameters, onApply, loading }: Props) 
 
         <button onClick={handleApply} disabled={loading} className="btn-primary h-[38px]">
           <Play className="w-4 h-4" />
-          Apply
+          {t('common.apply')}
         </button>
       </div>
     </div>

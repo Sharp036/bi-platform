@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { workspaceApi, WorkspaceOverview, FolderDto, FolderItemDto } from '@/api/workspace'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
@@ -24,6 +25,7 @@ const typeLink = (objectType: string, objectId: number) => {
 }
 
 export default function WorkspacePage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<WorkspaceOverview | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -37,7 +39,7 @@ export default function WorkspacePage() {
     setLoading(true)
     workspaceApi.overview()
       .then(setData)
-      .catch(() => toast.error('Failed to load workspace'))
+      .catch(() => toast.error(t('common.failed_to_load')))
       .finally(() => setLoading(false))
   }
 
@@ -49,7 +51,7 @@ export default function WorkspacePage() {
       const items = await workspaceApi.getFolderContents(folderId)
       setFolderItems(items)
     } catch {
-      toast.error('Failed to load folder')
+      toast.error(t('common.failed_to_load'))
     }
   }
 
@@ -60,21 +62,21 @@ export default function WorkspacePage() {
       setNewFolderName('')
       setShowNewFolder(false)
       load()
-      toast.success('Folder created')
+      toast.success(t('workspace.folder_created'))
     } catch {
-      toast.error('Failed to create folder')
+      toast.error(t('workspace.failed_create_folder'))
     }
   }
 
   const deleteFolder = async (id: number) => {
-    if (!confirm('Delete this folder?')) return
+    if (!confirm(t('workspace.delete_folder_confirm'))) return
     try {
       await workspaceApi.deleteFolder(id)
       if (openFolder === id) { setOpenFolder(null); setFolderItems([]) }
       load()
-      toast.success('Folder deleted')
+      toast.success(t('workspace.folder_deleted'))
     } catch {
-      toast.error('Failed to delete folder')
+      toast.error(t('common.failed_to_delete'))
     }
   }
 
@@ -88,7 +90,7 @@ export default function WorkspacePage() {
       {data.favorites.length > 0 && (
         <section>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-white mb-4">
-            <Star className="w-5 h-5 text-amber-400" fill="currentColor" /> Favorites
+            <Star className="w-5 h-5 text-amber-400" fill="currentColor" /> {t('workspace.favorites')}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {data.favorites.map(fav => {
@@ -117,7 +119,7 @@ export default function WorkspacePage() {
       {data.recentItems.length > 0 && (
         <section>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-white mb-4">
-            <Clock className="w-5 h-5 text-slate-400" /> Recent
+            <Clock className="w-5 h-5 text-slate-400" /> {t('workspace.recent')}
           </h2>
           <div className="space-y-1">
             {data.recentItems.map(item => {
@@ -144,10 +146,10 @@ export default function WorkspacePage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-white">
-            <FolderOpen className="w-5 h-5 text-brand-500" /> Folders
+            <FolderOpen className="w-5 h-5 text-brand-500" /> {t('workspace.folders')}
           </h2>
           <button onClick={() => setShowNewFolder(true)} className="btn-secondary text-sm">
-            <Plus className="w-4 h-4" /> New Folder
+            <Plus className="w-4 h-4" /> {t('workspace.new_folder')}
           </button>
         </div>
 
@@ -157,18 +159,18 @@ export default function WorkspacePage() {
               value={newFolderName}
               onChange={e => setNewFolderName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && createFolder()}
-              placeholder="Folder name..."
+              placeholder={t('workspace.folder_name_placeholder')}
               className="input flex-1 max-w-xs"
               autoFocus
             />
-            <button onClick={createFolder} className="btn-primary text-sm" disabled={!newFolderName.trim()}>Create</button>
-            <button onClick={() => { setShowNewFolder(false); setNewFolderName('') }} className="btn-secondary text-sm">Cancel</button>
+            <button onClick={createFolder} className="btn-primary text-sm" disabled={!newFolderName.trim()}>{t('common.create')}</button>
+            <button onClick={() => { setShowNewFolder(false); setNewFolderName('') }} className="btn-secondary text-sm">{t('common.cancel')}</button>
           </div>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {data.folders.length === 0 && !showNewFolder ? (
-            <p className="text-sm text-slate-400 col-span-full">No folders yet. Create one to organize your work.</p>
+            <p className="text-sm text-slate-400 col-span-full">{t('workspace.no_folders')}</p>
           ) : data.folders.map(folder => (
             <div
               key={folder.id}
@@ -203,13 +205,13 @@ export default function WorkspacePage() {
           <div className="mt-4 card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                Folder Contents
+                {t('workspace.folder_contents')}
               </h3>
               <button onClick={() => { setOpenFolder(null); setFolderItems([]) }}
-                className="text-xs text-slate-400 hover:text-slate-600">Close</button>
+                className="text-xs text-slate-400 hover:text-slate-600">{t('common.close')}</button>
             </div>
             {folderItems.length === 0 ? (
-              <p className="text-sm text-slate-400">Empty folder. Add items via the report actions menu.</p>
+              <p className="text-sm text-slate-400">{t('workspace.empty_folder')}</p>
             ) : (
               <div className="space-y-1">
                 {folderItems.map(item => {

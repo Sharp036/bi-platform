@@ -25,7 +25,8 @@ data class TokenResponse(
     val accessToken: String,
     val refreshToken: String,
     val tokenType: String = "Bearer",
-    val expiresIn: Long
+    val expiresIn: Long,
+    val language: String = "en"
 )
 
 data class RefreshTokenRequest(
@@ -38,7 +39,8 @@ data class UserResponse(
     val email: String,
     val displayName: String?,
     val roles: List<String>,
-    val permissions: List<String>
+    val permissions: List<String>,
+    val language: String = "en"
 )
 
 // ════════════════════════════════════════════

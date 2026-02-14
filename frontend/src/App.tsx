@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
@@ -25,6 +26,18 @@ import ModelListPage from '@/components/modeling/ModelListPage'
 import ModelEditorPage from '@/components/modeling/ModelEditorPage'
 import ExplorePage from '@/components/modeling/ExplorePage'
 import TemplateGalleryPage from '@/components/templates/TemplateGalleryPage'
+
+function NotFoundPage() {
+  const { t } = useTranslation()
+  return (
+    <div className="min-h-screen flex items-center justify-center text-slate-500">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold mb-4">404</h1>
+        <p>{t('common.not_found.message')}</p>
+      </div>
+    </div>
+  )
+}
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -62,14 +75,7 @@ export default function App() {
       </Route>
 
       {/* 404 */}
-      <Route path="*" element={
-        <div className="min-h-screen flex items-center justify-center text-slate-500">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold mb-4">404</h1>
-            <p>Page not found</p>
-          </div>
-        </div>
-      } />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
