@@ -3,6 +3,9 @@ import ReactECharts from 'echarts-for-react'
 import type { WidgetData, ChartLayerItem } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
 import LayerTogglePanel from '@/components/interactive/LayerTogglePanel'
+import { mergeAnnotationsIntoOption } from '@/components/charts/buildAnnotationOptions'
+import { buildRichTooltip } from '@/components/charts/buildRichTooltip'
+import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
 
 interface Props {
   data: WidgetData
@@ -13,6 +16,8 @@ interface Props {
   onChartClick?: (data: Record<string, unknown>) => void
   highlightField?: string
   highlightValue?: unknown
+  annotations?: AnnotationItem[]
+  tooltipConfig?: TooltipConfigItem
 }
 
 function parseConfig(raw?: string): Record<string, unknown> {
@@ -22,7 +27,8 @@ function parseConfig(raw?: string): Record<string, unknown> {
 
 export default function MultiLayerChart({
   data, chartConfig, title, layers = [], layerData = {},
-  onChartClick, highlightField, highlightValue
+  onChartClick, highlightField, highlightValue,
+  annotations, tooltipConfig
 }: Props) {
   const isDark = useThemeStore(s => s.isDark)
   const config = parseConfig(chartConfig)
@@ -141,8 +147,12 @@ export default function MultiLayerChart({
 
     const isPie = chartType === 'pie' || layersWithVisibility.some(l => l.chartType === 'pie')
 
-    return {
-      tooltip: { trigger: isPie ? 'item' : 'axis', confine: true },
+    const tooltipOpts = tooltipConfig
+      ? buildRichTooltip(tooltipConfig)
+      : { tooltip: { trigger: isPie ? 'item' : 'axis', confine: true } }
+
+    let result = {
+      ...tooltipOpts,
       legend: series.length > 1 ? { bottom: 0, type: 'scroll' } : undefined,
       grid: {
         left: '3%',
@@ -158,7 +168,13 @@ export default function MultiLayerChart({
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),
     }
-  }, [data, config, layersWithVisibility, layerData, highlightField, highlightValue])
+
+    if (annotations && annotations.length > 0) {
+      result = mergeAnnotationsIntoOption(result, annotations)
+    }
+
+    return result
+  }, [data, config, layersWithVisibility, layerData, highlightField, highlightValue, annotations, tooltipConfig])
 
   const handleClick = useCallback((params: any) => {
     if (!onChartClick) return

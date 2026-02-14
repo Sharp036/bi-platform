@@ -5,6 +5,8 @@ import KpiCard from '@/components/charts/KpiCard'
 import { AlertTriangle } from 'lucide-react'
 import ButtonWidget from '@/components/interactive/ButtonWidget'
 import type { ButtonConfig } from '@/api/controls'
+import { WebPageWidget, SpacerWidget, DividerWidget, RichTextWidget, ImageWidget } from '@/components/interactive/DashboardObjects'
+import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
 
 interface Props {
   widget: RenderedWidget
@@ -18,13 +20,16 @@ interface Props {
   reportId?: number
   onToggleWidgets?: (widgetIds: number[]) => void
   onApplyFilter?: (field: string, value: string) => void
+  annotations?: AnnotationItem[]
+  tooltipConfig?: TooltipConfigItem
 }
 
 export default function WidgetRenderer({
   widget, layers = [], layerData = {},
   onChartClick, highlightField, highlightValue,
   drillActions, onDrillDown,
-  reportId, onToggleWidgets, onApplyFilter
+  reportId, onToggleWidgets, onApplyFilter,
+  annotations, tooltipConfig
 }: Props) {
   if (widget.error) {
     return (
@@ -35,7 +40,7 @@ export default function WidgetRenderer({
     )
   }
 
-if (widget.widgetType === 'BUTTON') {
+  if (widget.widgetType === 'BUTTON') {
     const btnConfig: ButtonConfig = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
     return (
       <ButtonWidget
@@ -47,22 +52,35 @@ if (widget.widgetType === 'BUTTON') {
     )
   }
 
+  if (widget.widgetType === 'WEBPAGE') {
+    const config = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
+    return <WebPageWidget url={config.url || ''} title={widget.title} />
+  }
+
+  if (widget.widgetType === 'SPACER') {
+    const config = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
+    return <SpacerWidget height={config.height} color={config.color} />
+  }
+
+  if (widget.widgetType === 'DIVIDER') {
+    const config = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
+    return <DividerWidget
+      orientation={config.orientation}
+      color={config.color}
+      thickness={config.thickness}
+      style={config.style}
+      label={config.label}
+    />
+  }
+
   if (!widget.data) {
     if (widget.widgetType === 'TEXT') {
-      return (
-        <div className="h-full flex items-center p-4">
-          <div className="prose dark:prose-invert text-sm"
-               dangerouslySetInnerHTML={{ __html: widget.title || '' }} />
-        </div>
-      )
+      const styleConfig = widget.style ? JSON.parse(widget.style) : {}
+      return <RichTextWidget content={widget.title || ''} style={styleConfig} />
     }
     if (widget.widgetType === 'IMAGE') {
       const config = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
-      return (
-        <div className="h-full flex items-center justify-center p-2">
-          <img src={config.src || ''} alt={widget.title || ''} className="max-w-full max-h-full object-contain" />
-        </div>
-      )
+      return <ImageWidget src={config.src || ''} alt={widget.title} linkUrl={config.linkUrl} fit={config.fit} borderRadius={config.borderRadius} />
     }
     return <div className="h-full flex items-center justify-center text-slate-400 text-sm">No data</div>
   }
@@ -82,6 +100,8 @@ if (widget.widgetType === 'BUTTON') {
           }}
           highlightField={highlightField}
           highlightValue={highlightValue}
+          annotations={annotations}
+          tooltipConfig={tooltipConfig}
         />
       )
     case 'TABLE':

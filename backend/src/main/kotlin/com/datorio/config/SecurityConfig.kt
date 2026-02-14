@@ -44,6 +44,7 @@ class SecurityConfig(
                     .requestMatchers("/tags/**").authenticated()
                     .requestMatchers("/search/**").authenticated()
                     .requestMatchers("/controls/**").authenticated()
+                    .requestMatchers("/visualization/**").authenticated()
                     .requestMatchers("/profile/**").authenticated()
                     // Everything else requires authentication
                     .anyRequest().authenticated()
