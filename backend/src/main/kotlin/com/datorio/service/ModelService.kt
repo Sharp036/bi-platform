@@ -299,10 +299,15 @@ class ModelService(
         val result = connectionManager.executeQuery(ds, sql, req.limit)
         val elapsed = System.currentTimeMillis() - startTime
 
+        val colNames = result.columns.map { it.name }
+        val mappedRows = result.rows.map { row ->
+            colNames.mapIndexed { i, name -> name to row.getOrNull(i) }.toMap()
+        }
+
         return ExploreResponse(
             sql = sql,
-            columns = result.columns.map { it.name },
-            rows = result.rows,
+            columns = colNames,
+            rows = mappedRows,
             rowCount = result.rowCount,
             executionMs = elapsed
         )

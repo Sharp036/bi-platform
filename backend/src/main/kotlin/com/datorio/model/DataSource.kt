@@ -65,7 +65,7 @@ data class DataSource(
         DataSourceType.POSTGRESQL ->
             "jdbc:postgresql://$host:$port/$databaseName"
         DataSourceType.CLICKHOUSE ->
-            "jdbc:clickhouse://$host:$port/$databaseName"
+            "jdbc:clickhouse://$host:$port/${databaseName.ifBlank { "default" }}?compress=0"
     }
 }
 

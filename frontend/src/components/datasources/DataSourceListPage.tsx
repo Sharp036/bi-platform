@@ -113,7 +113,7 @@ export default function DataSourceListPage() {
             </div>
             <div className="flex justify-end gap-2 mt-5">
               <button onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm) }} className="btn-secondary">Cancel</button>
-              <button onClick={editingId ? handleUpdate : handleCreate} disabled={saving || !form.name || !form.databaseName} className="btn-primary">
+              <button onClick={editingId ? handleUpdate : handleCreate} disabled={saving || !form.name || (form.type !== 'CLICKHOUSE' && !form.databaseName)} className="btn-primary">
                 {saving ? 'Saving...' : editingId ? 'Save' : 'Create'}
               </button>
             </div>
