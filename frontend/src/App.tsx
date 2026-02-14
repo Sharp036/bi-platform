@@ -21,6 +21,9 @@ import AdminPage from '@/components/admin/AdminPage'
 import ChangePassword from '@/components/admin/ChangePassword'
 import SharedWithMePage from '@/components/sharing/SharedWithMePage'
 import WorkspacePage from '@/components/workspace/WorkspacePage'
+import ModelListPage from '@/components/modeling/ModelListPage'
+import ModelEditorPage from '@/components/modeling/ModelEditorPage'
+import ExplorePage from '@/components/modeling/ExplorePage'
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -50,6 +53,9 @@ export default function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/profile/password" element={<ChangePassword />} />
           <Route path="/shared" element={<SharedWithMePage />} />
+          <Route path="/models" element={<ModelListPage />} />
+          <Route path="/models/:id" element={<ModelEditorPage />} />
+          <Route path="/explore/:modelId" element={<ExplorePage />} />
         </Route>
       </Route>
 
