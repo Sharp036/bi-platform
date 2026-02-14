@@ -232,6 +232,7 @@
   "queries.deleted": "查询已删除",
   "queries.delete_failed": "删除查询失败",
   "queries.loaded_to_editor": "已加载到编辑器",
+  "queries.showing_rows": "第 {{from}}-{{to}} 行，共 {{total}} 行",
 
   "datasources.title": "数据源",
   "datasources.add_source": "添加数据源",

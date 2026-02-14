@@ -232,6 +232,7 @@
   "queries.deleted": "Fr\u00e5ga borttagen",
   "queries.delete_failed": "Kunde inte ta bort fr\u00e5gan",
   "queries.loaded_to_editor": "Laddad i redigeraren",
+  "queries.showing_rows": "Rader {{from}}-{{to}} av {{total}}",
 
   "datasources.title": "Datakällor",
   "datasources.add_source": "Lägg till källa",

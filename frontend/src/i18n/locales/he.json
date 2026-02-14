@@ -232,6 +232,7 @@
   "queries.deleted": "השאילתה נמחקה",
   "queries.delete_failed": "מחיקת השאילתה נכשלה",
   "queries.loaded_to_editor": "נטען לעורך",
+  "queries.showing_rows": "שורות {{from}}-{{to}} מתוך {{total}}",
 
   "datasources.title": "מקורות נתונים",
   "datasources.add_source": "הוסף מקור",

@@ -232,6 +232,7 @@
   "queries.deleted": "Kysely poistettu",
   "queries.delete_failed": "Kyselyn poistaminen epäonnistui",
   "queries.loaded_to_editor": "Ladattu editoriin",
+  "queries.showing_rows": "Rivit {{from}}-{{to}} / {{total}}",
 
   "datasources.title": "Tietolähteet",
   "datasources.add_source": "Lisää lähde",

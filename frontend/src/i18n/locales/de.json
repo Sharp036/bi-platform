@@ -232,6 +232,7 @@
   "queries.deleted": "Abfrage gelöscht",
   "queries.delete_failed": "Abfrage konnte nicht gelöscht werden",
   "queries.loaded_to_editor": "In Editor geladen",
+  "queries.showing_rows": "Zeilen {{from}}-{{to}} von {{total}}",
 
   "datasources.title": "Datenquellen",
   "datasources.add_source": "Quelle hinzufügen",

@@ -232,6 +232,7 @@
   "queries.deleted": "Interogare stearsa",
   "queries.delete_failed": "Stergerea interogarii a esuat",
   "queries.loaded_to_editor": "Incarcat in editor",
+  "queries.showing_rows": "Randuri {{from}}-{{to}} din {{total}}",
 
   "datasources.title": "Surse de date",
   "datasources.add_source": "Adaugă sursă",

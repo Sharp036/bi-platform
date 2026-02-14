@@ -232,6 +232,7 @@
   "queries.deleted": "Spørring slettet",
   "queries.delete_failed": "Kunne ikke slette spørring",
   "queries.loaded_to_editor": "Lastet inn i editor",
+  "queries.showing_rows": "Rader {{from}}-{{to}} av {{total}}",
 
   "datasources.title": "Datakilder",
   "datasources.add_source": "Legg til kilde",

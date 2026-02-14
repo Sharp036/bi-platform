@@ -232,6 +232,7 @@
   "queries.deleted": "Query verwijderd",
   "queries.delete_failed": "Query verwijderen mislukt",
   "queries.loaded_to_editor": "Geladen in editor",
+  "queries.showing_rows": "Rijen {{from}}-{{to}} van {{total}}",
 
   "datasources.title": "Gegevensbronnen",
   "datasources.add_source": "Bron toevoegen",

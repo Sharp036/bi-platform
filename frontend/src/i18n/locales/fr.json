@@ -232,6 +232,7 @@
   "queries.deleted": "Requête supprimée",
   "queries.delete_failed": "Échec de la suppression",
   "queries.loaded_to_editor": "Chargé dans l'éditeur",
+  "queries.showing_rows": "Lignes {{from}}-{{to}} sur {{total}}",
 
   "datasources.title": "Sources de données",
   "datasources.add_source": "Ajouter une source",

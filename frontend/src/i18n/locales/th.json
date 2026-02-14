@@ -232,6 +232,7 @@
   "queries.deleted": "ลบคิวรีแล้ว",
   "queries.delete_failed": "ลบคิวรีล้มเหลว",
   "queries.loaded_to_editor": "โหลดลงในตัวแก้ไขแล้ว",
+  "queries.showing_rows": "แถว {{from}}-{{to}} จาก {{total}}",
 
   "datasources.title": "แหล่งข้อมูล",
   "datasources.add_source": "เพิ่มแหล่งข้อมูล",

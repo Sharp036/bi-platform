@@ -232,6 +232,7 @@
   "queries.deleted": "Zapytanie usuni\u0119te",
   "queries.delete_failed": "Nie uda\u0142o si\u0119 usun\u0105\u0107 zapytania",
   "queries.loaded_to_editor": "Za\u0142adowano do edytora",
+  "queries.showing_rows": "Wiersze {{from}}-{{to}} z {{total}}",
 
   "datasources.title": "Źródła danych",
   "datasources.add_source": "Dodaj źródło",

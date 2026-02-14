@@ -232,6 +232,7 @@
   "queries.deleted": "Truy v\u1ea5n \u0111\u00e3 x\u00f3a",
   "queries.delete_failed": "X\u00f3a truy v\u1ea5n th\u1ea5t b\u1ea1i",
   "queries.loaded_to_editor": "\u0110\u00e3 t\u1ea3i v\u00e0o tr\u00ecnh so\u1ea1n th\u1ea3o",
+  "queries.showing_rows": "Hàng {{from}}-{{to}} / {{total}}",
 
   "datasources.title": "Nguồn dữ liệu",
   "datasources.add_source": "Thêm nguồn",

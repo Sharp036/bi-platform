@@ -232,6 +232,7 @@
   "queries.deleted": "Query deleted",
   "queries.delete_failed": "Failed to delete query",
   "queries.loaded_to_editor": "Loaded to editor",
+  "queries.showing_rows": "Rows {{from}}-{{to}} of {{total}}",
 
   "datasources.title": "Data Sources",
   "datasources.add_source": "Add Source",

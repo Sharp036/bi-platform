@@ -232,6 +232,7 @@
   "queries.deleted": "Ερώτημα διαγράφηκε",
   "queries.delete_failed": "Αποτυχία διαγραφής ερωτήματος",
   "queries.loaded_to_editor": "Φορτώθηκε στον επεξεργαστή",
+  "queries.showing_rows": "Γραμμές {{from}}-{{to}} από {{total}}",
 
   "datasources.title": "Πηγές δεδομένων",
   "datasources.add_source": "Προσθήκη πηγής",

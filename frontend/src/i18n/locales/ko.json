@@ -232,6 +232,7 @@
   "queries.deleted": "쿼리가 삭제됨",
   "queries.delete_failed": "쿼리 삭제 실패",
   "queries.loaded_to_editor": "에디터에 로드됨",
+  "queries.showing_rows": "{{from}}-{{to}}행 / {{total}}행",
 
   "datasources.title": "데이터 소스",
   "datasources.add_source": "소스 추가",

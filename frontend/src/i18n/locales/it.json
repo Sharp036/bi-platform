@@ -232,6 +232,7 @@
   "queries.deleted": "Query eliminata",
   "queries.delete_failed": "Eliminazione query fallita",
   "queries.loaded_to_editor": "Caricato nell'editor",
+  "queries.showing_rows": "Righe {{from}}-{{to}} di {{total}}",
 
   "datasources.title": "Origini dati",
   "datasources.add_source": "Aggiungi origine",

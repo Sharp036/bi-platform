@@ -232,6 +232,7 @@
   "queries.deleted": "Запрос удалён",
   "queries.delete_failed": "Не удалось удалить запрос",
   "queries.loaded_to_editor": "Загружено в редактор",
+  "queries.showing_rows": "Строки {{from}}-{{to}} из {{total}}",
 
   "datasources.title": "Источники данных",
   "datasources.add_source": "Добавить источник",

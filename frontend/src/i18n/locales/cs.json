@@ -232,6 +232,7 @@
   "queries.deleted": "Dotaz smaz\u00e1n",
   "queries.delete_failed": "Nepoda\u0159ilo se smazat dotaz",
   "queries.loaded_to_editor": "Na\u010dteno do editoru",
+  "queries.showing_rows": "Řádky {{from}}-{{to}} z {{total}}",
 
   "datasources.title": "Zdroje dat",
   "datasources.add_source": "Přidat zdroj",

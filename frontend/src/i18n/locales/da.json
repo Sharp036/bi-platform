@@ -232,6 +232,7 @@
   "queries.deleted": "Forespørgsel slettet",
   "queries.delete_failed": "Kunne ikke slette forespørgsel",
   "queries.loaded_to_editor": "Indlæst i editor",
+  "queries.showing_rows": "Rækker {{from}}-{{to}} af {{total}}",
 
   "datasources.title": "Datakilder",
   "datasources.add_source": "Tilføj kilde",

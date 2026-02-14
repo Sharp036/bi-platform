@@ -232,6 +232,7 @@
   "queries.deleted": "Kueri dihapus",
   "queries.delete_failed": "Gagal menghapus kueri",
   "queries.loaded_to_editor": "Dimuat ke editor",
+  "queries.showing_rows": "Baris {{from}}-{{to}} dari {{total}}",
 
   "datasources.title": "Sumber Data",
   "datasources.add_source": "Tambah Sumber",

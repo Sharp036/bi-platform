@@ -232,6 +232,7 @@
   "queries.deleted": "Lekerdezes torolve",
   "queries.delete_failed": "Lekerdezes torlese sikertelen",
   "queries.loaded_to_editor": "Betoltve a szerkesztobe",
+  "queries.showing_rows": "Sorok: {{from}}-{{to}} / {{total}}",
 
   "datasources.title": "Adatforrások",
   "datasources.add_source": "Forrás hozzáadása",

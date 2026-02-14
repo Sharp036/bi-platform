@@ -232,6 +232,7 @@
   "queries.deleted": "クエリを削除しました",
   "queries.delete_failed": "クエリの削除に失敗",
   "queries.loaded_to_editor": "エディタに読み込みました",
+  "queries.showing_rows": "{{from}}-{{to}} 行 / {{total}} 行",
 
   "datasources.title": "データソース",
   "datasources.add_source": "ソースを追加",

@@ -232,6 +232,7 @@
   "queries.deleted": "Sorgu silindi",
   "queries.delete_failed": "Sorgu silinemedi",
   "queries.loaded_to_editor": "Edit\u00f6re y\u00fcklendi",
+  "queries.showing_rows": "Satırlar {{from}}-{{to}} / {{total}}",
 
   "datasources.title": "Veri Kaynakları",
   "datasources.add_source": "Kaynak Ekle",

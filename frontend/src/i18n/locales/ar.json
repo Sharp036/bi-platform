@@ -232,6 +232,7 @@
   "queries.deleted": "تم حذف الاستعلام",
   "queries.delete_failed": "فشل في حذف الاستعلام",
   "queries.loaded_to_editor": "تم التحميل في المحرر",
+  "queries.showing_rows": "الصفوف {{from}}-{{to}} من {{total}}",
 
   "datasources.title": "مصادر البيانات",
   "datasources.add_source": "إضافة مصدر",

@@ -232,6 +232,7 @@
   "queries.deleted": "Consulta excluída",
   "queries.delete_failed": "Falha ao excluir consulta",
   "queries.loaded_to_editor": "Carregado no editor",
+  "queries.showing_rows": "Linhas {{from}}-{{to}} de {{total}}",
 
   "datasources.title": "Fontes de Dados",
   "datasources.add_source": "Adicionar Fonte",

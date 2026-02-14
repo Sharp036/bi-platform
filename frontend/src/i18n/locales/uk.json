@@ -232,6 +232,7 @@
   "queries.deleted": "Запит видалено",
   "queries.delete_failed": "Не вдалося видалити запит",
   "queries.loaded_to_editor": "Завантажено в редактор",
+  "queries.showing_rows": "Рядки {{from}}-{{to}} з {{total}}",
 
   "datasources.title": "Джерела даних",
   "datasources.add_source": "Додати джерело",

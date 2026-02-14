@@ -232,6 +232,7 @@
   "queries.deleted": "क्वेरी हटाई गई",
   "queries.delete_failed": "क्वेरी हटाने में विफल",
   "queries.loaded_to_editor": "एडिटर में लोड किया गया",
+  "queries.showing_rows": "पंक्तियाँ {{from}}-{{to}} / {{total}}",
 
   "datasources.title": "डेटा स्रोत",
   "datasources.add_source": "स्रोत जोड़ें",

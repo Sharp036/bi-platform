@@ -6,8 +6,10 @@ import type { SavedQuery, QueryResult, DataSource } from '@/types'
 import TableWidget from '@/components/charts/TableWidget'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { Code2, Play, Save, Star, Trash2, Edit3, X } from 'lucide-react'
+import { Code2, Play, Save, Star, Trash2, Edit3, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
+
+const PAGE_SIZE = 50
 
 export default function QueryListPage() {
   const { t } = useTranslation()
@@ -20,6 +22,7 @@ export default function QueryListPage() {
   const [dsId, setDsId] = useState<number | null>(null)
   const [executing, setExecuting] = useState(false)
   const [result, setResult] = useState<QueryResult | null>(null)
+  const [resultPage, setResultPage] = useState(0)
 
   // Save dialog state
   const [showSaveDialog, setShowSaveDialog] = useState(false)
@@ -48,6 +51,7 @@ export default function QueryListPage() {
     try {
       const res = await queryApi.executeAdHoc({ datasourceId: dsId, sql, limit: 1000 })
       setResult(res)
+      setResultPage(0)
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || t('queries.query_failed')
       toast.error(msg)
@@ -59,6 +63,7 @@ export default function QueryListPage() {
     try {
       const res = await queryApi.execute(id)
       setResult(res)
+      setResultPage(0)
       toast.success(t('queries.executed_in', { ms: res.executionTimeMs }))
     } catch { toast.error(t('queries.execution_failed')) }
     finally { setExecuting(false) }
@@ -229,11 +234,49 @@ export default function QueryListPage() {
       )}
 
       {/* Query result */}
-      {result && (
-        <div className="card p-4 mb-6" style={{ maxHeight: '400px' }}>
-          <TableWidget data={{ columns: result.columns.map(c => c.name), rows: result.rows, rowCount: result.rowCount, executionMs: result.executionTimeMs }} />
-        </div>
-      )}
+      {result && (() => {
+        const allRows = result.rows
+        const totalRows = allRows.length
+        const totalPages = Math.ceil(totalRows / PAGE_SIZE)
+        const pagedRows = allRows.slice(resultPage * PAGE_SIZE, (resultPage + 1) * PAGE_SIZE)
+        return (
+          <div className="card p-4 mb-6 flex flex-col" style={{ maxHeight: 'min(60vh, 500px)' }}>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <TableWidget data={{ columns: result.columns.map(c => c.name), rows: pagedRows, rowCount: result.rowCount, executionMs: result.executionTimeMs }} />
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700 mt-2 flex-shrink-0">
+                <span className="text-xs text-slate-400">
+                  {t('queries.showing_rows', {
+                    from: resultPage * PAGE_SIZE + 1,
+                    to: Math.min((resultPage + 1) * PAGE_SIZE, totalRows),
+                    total: totalRows
+                  })}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setResultPage(p => Math.max(0, p - 1))}
+                    disabled={resultPage === 0}
+                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-slate-500" />
+                  </button>
+                  <span className="text-xs text-slate-500 min-w-[60px] text-center">
+                    {resultPage + 1} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setResultPage(p => Math.min(totalPages - 1, p + 1))}
+                    disabled={resultPage >= totalPages - 1}
+                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30"
+                  >
+                    <ChevronRight className="w-4 h-4 text-slate-500" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Saved queries list */}
       <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-3">{t('queries.saved_queries')}</h2>
