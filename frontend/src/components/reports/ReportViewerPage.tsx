@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { reportApi } from '@/api/reports'
 import { drillApi } from '@/api/drilldown'
 import type { Report, RenderReportResponse, DrillAction, DrillNavigateResponse } from '@/types'
-import ParameterPanel from './ParameterPanel'
+import EnhancedParameterPanel from './EnhancedParameterPanel'
 import WidgetRenderer from './WidgetRenderer'
 import DrillDownBreadcrumb from './DrillDownBreadcrumb'
 import type { BreadcrumbEntry } from './DrillDownBreadcrumb'
@@ -216,7 +216,7 @@ export default function ReportViewerPage() {
       <DrillDownBreadcrumb stack={navStack} onNavigate={handleBreadcrumbNavigate} />
 
       {/* Parameters */}
-      <ParameterPanel parameters={report.parameters} onApply={handleRender} loading={rendering} />
+      <EnhancedParameterPanel reportId={Number(id)} parameters={report.parameters} onApply={handleRender} loading={rendering} />
 
       {/* Bookmarks */}
       <BookmarkBar

@@ -9,7 +9,7 @@ import java.time.Instant
 
 enum class ReportType { STANDARD, TEMPLATE, SCHEDULED }
 enum class ReportStatus { DRAFT, PUBLISHED, ARCHIVED }
-enum class WidgetType { CHART, TABLE, KPI, TEXT, FILTER, IMAGE }
+enum class WidgetType { CHART, TABLE, KPI, TEXT, FILTER, IMAGE, BUTTON }
 enum class ParamType { STRING, NUMBER, DATE, DATE_RANGE, SELECT, MULTI_SELECT, BOOLEAN }
 enum class OutputFormat { JSON, PDF, CSV, EXCEL }
 enum class ScheduleStatus { SUCCESS, ERROR }

@@ -43,7 +43,7 @@ export interface ReportParameter {
   defaultValue?: string; isRequired: boolean; config?: Record<string, unknown>
 }
 export interface Widget {
-  widgetId: number; widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE'
+  widgetId: number; widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE' | 'BUTTON'
   title?: string; chartConfig?: string; position?: string; style?: string
   queryId?: number; datasourceId?: number; rawSql?: string
 }

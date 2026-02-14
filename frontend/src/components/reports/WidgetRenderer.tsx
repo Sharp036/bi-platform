@@ -3,6 +3,8 @@ import MultiLayerChart from '@/components/charts/MultiLayerChart'
 import TableWidget from '@/components/charts/TableWidget'
 import KpiCard from '@/components/charts/KpiCard'
 import { AlertTriangle } from 'lucide-react'
+import ButtonWidget from '@/components/interactive/ButtonWidget'
+import type { ButtonConfig } from '@/api/controls'
 
 interface Props {
   widget: RenderedWidget
@@ -13,12 +15,16 @@ interface Props {
   highlightValue?: unknown
   drillActions?: any[]
   onDrillDown?: (data: Record<string, unknown>) => void
+  reportId?: number
+  onToggleWidgets?: (widgetIds: number[]) => void
+  onApplyFilter?: (field: string, value: string) => void
 }
 
 export default function WidgetRenderer({
   widget, layers = [], layerData = {},
   onChartClick, highlightField, highlightValue,
-  drillActions, onDrillDown
+  drillActions, onDrillDown,
+  reportId, onToggleWidgets, onApplyFilter
 }: Props) {
   if (widget.error) {
     return (
@@ -26,6 +32,18 @@ export default function WidgetRenderer({
         <AlertTriangle className="w-6 h-6 mb-2" />
         <p>{widget.error}</p>
       </div>
+    )
+  }
+
+if (widget.widgetType === 'BUTTON') {
+    const btnConfig: ButtonConfig = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
+    return (
+      <ButtonWidget
+        config={btnConfig}
+        reportId={reportId || 0}
+        onToggleWidgets={onToggleWidgets}
+        onApplyFilter={onApplyFilter}
+      />
     )
   }
 

@@ -43,6 +43,7 @@ class SecurityConfig(
                     .requestMatchers("/workspace/**").authenticated()
                     .requestMatchers("/tags/**").authenticated()
                     .requestMatchers("/search/**").authenticated()
+                    .requestMatchers("/controls/**").authenticated()
                     .requestMatchers("/profile/**").authenticated()
                     // Everything else requires authentication
                     .anyRequest().authenticated()
