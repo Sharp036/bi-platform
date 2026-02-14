@@ -152,7 +152,7 @@ class ControlService(
         return try {
             val result = connectionManager.executeQuery(ds, query, 500)
             val options = result.rows.map { row ->
-                row.values.firstOrNull()?.toString() ?: ""
+                row.firstOrNull()?.toString() ?: ""
             }.filter { it.isNotBlank() }.distinct()
             ParameterOptionsResponse(parameterName, options)
         } catch (e: Exception) {
