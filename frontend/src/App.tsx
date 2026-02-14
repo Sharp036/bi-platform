@@ -24,6 +24,7 @@ import WorkspacePage from '@/components/workspace/WorkspacePage'
 import ModelListPage from '@/components/modeling/ModelListPage'
 import ModelEditorPage from '@/components/modeling/ModelEditorPage'
 import ExplorePage from '@/components/modeling/ExplorePage'
+import TemplateGalleryPage from '@/components/templates/TemplateGalleryPage'
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/models" element={<ModelListPage />} />
           <Route path="/models/:id" element={<ModelEditorPage />} />
           <Route path="/explore/:modelId" element={<ExplorePage />} />
+          <Route path="/templates" element={<TemplateGalleryPage />} />
         </Route>
       </Route>
 

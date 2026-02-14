@@ -45,6 +45,12 @@ class Report(
     @Column(name = "thumbnail_url", length = 500)
     var thumbnailUrl: String? = null,
 
+    @Column(name = "template_category", length = 100)
+    var templateCategory: String? = null,
+
+    @Column(name = "template_preview", columnDefinition = "TEXT")
+    var templatePreview: String? = null,
+
     @Column(name = "folder_id")
     var folderId: Long? = null,
 

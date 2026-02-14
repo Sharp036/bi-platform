@@ -34,6 +34,12 @@ class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request")
     }
 
+    @ExceptionHandler(RuntimeException::class)
+    fun handleRuntime(ex: RuntimeException): ResponseEntity<ApiError> {
+        log.error("Runtime exception: {}", ex.message, ex)
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, ex.message ?: "Internal server error")
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ResponseEntity<ApiError> {
         val messages = ex.bindingResult.fieldErrors.joinToString("; ") {

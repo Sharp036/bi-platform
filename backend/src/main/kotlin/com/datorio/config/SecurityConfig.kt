@@ -46,6 +46,7 @@ class SecurityConfig(
                     .requestMatchers("/controls/**").authenticated()
                     .requestMatchers("/visualization/**").authenticated()
                     .requestMatchers("/modeling/**").authenticated()
+                    .requestMatchers("/templates/**").authenticated()
                     .requestMatchers("/profile/**").authenticated()
                     // Everything else requires authentication
                     .anyRequest().authenticated()

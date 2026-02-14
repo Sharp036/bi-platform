@@ -173,8 +173,12 @@ class ConnectionManager {
     }
 
     private fun extractValue(rs: ResultSet, index: Int): Any? {
-        val value = rs.getObject(index)
-        return if (rs.wasNull()) null else value?.toString()  // serialize to string for JSON safety
+        return try {
+            val value = rs.getObject(index)
+            if (rs.wasNull()) null else value?.toString()
+        } catch (e: Exception) {
+            try { rs.getString(index) } catch (_: Exception) { "???" }
+        }
     }
 }
 

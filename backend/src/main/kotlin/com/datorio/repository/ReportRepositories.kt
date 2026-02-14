@@ -16,6 +16,11 @@ interface ReportRepository : JpaRepository<Report, Long> {
 
     fun findByIsTemplateTrue(pageable: Pageable): Page<Report>
 
+    fun findByIsTemplateTrueAndTemplateCategory(category: String, pageable: Pageable): Page<Report>
+
+    @Query("SELECT DISTINCT r.templateCategory FROM Report r WHERE r.isTemplate = true AND r.templateCategory IS NOT NULL ORDER BY r.templateCategory")
+    fun findDistinctTemplateCategories(): List<String>
+
     @Query("SELECT r FROM Report r WHERE r.folderId = :folderId ORDER BY r.name")
     fun findByFolderId(folderId: Long, pageable: Pageable): Page<Report>
 
