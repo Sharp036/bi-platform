@@ -6,6 +6,7 @@ import LayerTogglePanel from '@/components/interactive/LayerTogglePanel'
 import { mergeAnnotationsIntoOption } from '@/components/charts/buildAnnotationOptions'
 import { buildRichTooltip } from '@/components/charts/buildRichTooltip'
 import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
+import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
 
 interface Props {
   data: WidgetData
@@ -51,6 +52,29 @@ export default function MultiLayerChart({
 
   const option = useMemo(() => {
     const chartType = (config.type as string) || 'bar'
+    // Custom chart types (radar, heatmap, treemap, funnel, gauge, sankey, etc.)
+    if (isCustomChartType(chartType)) {
+      const custom = buildCustomChart(chartType, data, config as Record<string, any>)
+      if (custom) {
+        const tooltipOpts = tooltipConfig
+          ? buildRichTooltip(tooltipConfig)
+          : (custom.tooltip ? { tooltip: custom.tooltip } : { tooltip: { trigger: 'item', confine: true } })
+
+        let result: any = {
+          ...tooltipOpts,
+          legend: custom.series.length > 1 ? { bottom: 0, type: 'scroll' } : undefined,
+          ...custom,
+          ...((config.option as object) || {}),
+        }
+
+        if (annotations && annotations.length > 0) {
+          result = mergeAnnotationsIntoOption(result, annotations)
+        }
+
+        return result
+      }
+    }
+
     const cols = data.columns || []
     const rows = data.rows || []
 
