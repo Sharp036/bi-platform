@@ -92,7 +92,10 @@ export default function ReportViewerPage() {
         setInteractiveMeta(meta)
         useActionStore.getState().setActions(meta.actions)
       }).catch(() => {})
-    } catch { toast.error(t('reports.failed_to_render')) }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || t('reports.failed_to_render'))
+    }
     finally { setRendering(false) }
   }, [currentReportId, id, currentParams, loadDrillActions])
 

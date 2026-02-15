@@ -8,7 +8,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.Instant
 
 /**
@@ -27,9 +30,15 @@ class ReportRenderService(
     private val savedQueryService: SavedQueryService,
     private val snapshotRepo: ReportSnapshotRepository,
     private val objectMapper: ObjectMapper,
-    private val liveDataService: LiveDataService
+    private val liveDataService: LiveDataService,
+    txManager: PlatformTransactionManager
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
+
+    /** Runs each widget query in its own transaction so one failure doesn't kill the whole render. */
+    private val widgetTxTemplate = TransactionTemplate(txManager).apply {
+        propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
+    }
 
     /**
      * Render a full report: execute all visible widget queries and return data.
@@ -148,31 +157,46 @@ class ReportRenderService(
         return resolved
     }
 
+    companion object {
+        private val NON_DATA_WIDGETS = setOf(
+            WidgetType.TEXT, WidgetType.IMAGE, WidgetType.BUTTON,
+            WidgetType.WEBPAGE, WidgetType.SPACER, WidgetType.DIVIDER
+        )
+    }
+
     private fun renderWidget(widget: ReportWidget, reportParams: Map<String, Any?>, username: String): RenderedWidget {
+        // Non-data widgets: return immediately, no query needed
+        if (widget.widgetType in NON_DATA_WIDGETS) {
+            return RenderedWidget(
+                widgetId = widget.id, widgetType = widget.widgetType,
+                title = widget.title, chartConfig = widget.chartConfig,
+                position = widget.position, style = widget.style,
+                data = null
+            )
+        }
+
         return try {
             val widgetParams = mapWidgetParams(widget, reportParams)
-            val data = executeWidgetQuery(widget, widgetParams, username)
+            // Each widget query runs in its own transaction so that:
+            // 1) query stats writes are not blocked by the outer read-only tx
+            // 2) one widget failure doesn't rollback the entire render
+            val data = widgetTxTemplate.execute {
+                executeWidgetQuery(widget, widgetParams, username)
+            }
 
             RenderedWidget(
-                widgetId = widget.id,
-                widgetType = widget.widgetType,
-                title = widget.title,
-                chartConfig = widget.chartConfig,
-                position = widget.position,
-                style = widget.style,
+                widgetId = widget.id, widgetType = widget.widgetType,
+                title = widget.title, chartConfig = widget.chartConfig,
+                position = widget.position, style = widget.style,
                 data = data
             )
         } catch (e: Exception) {
             log.warn("Widget {} (id={}) failed: {}", widget.title ?: widget.widgetType, widget.id, e.message)
             RenderedWidget(
-                widgetId = widget.id,
-                widgetType = widget.widgetType,
-                title = widget.title,
-                chartConfig = widget.chartConfig,
-                position = widget.position,
-                style = widget.style,
-                data = null,
-                error = e.message
+                widgetId = widget.id, widgetType = widget.widgetType,
+                title = widget.title, chartConfig = widget.chartConfig,
+                position = widget.position, style = widget.style,
+                data = null, error = e.message
             )
         }
     }
@@ -215,7 +239,7 @@ class ReportRenderService(
      */
     private fun executeWidgetQuery(widget: ReportWidget, params: Map<String, Any?>, username: String): WidgetData? {
         // Non-data widgets
-        if (widget.widgetType in listOf(WidgetType.TEXT, WidgetType.IMAGE)) {
+        if (widget.widgetType in NON_DATA_WIDGETS) {
             return null
         }
 
