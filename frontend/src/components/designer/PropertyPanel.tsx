@@ -614,8 +614,8 @@ export default function PropertyPanel() {
       {widget.widgetType === 'IMAGE' && (
         <Field label={t('designer.image_url')}>
           <input
-            value={(widget.chartConfig as Record<string, unknown>).url as string || ''}
-            onChange={e => update({ chartConfig: { ...widget.chartConfig, url: e.target.value } })}
+            value={(widget.chartConfig as Record<string, unknown>).src as string || (widget.chartConfig as Record<string, unknown>).url as string || ''}
+            onChange={e => update({ chartConfig: { ...widget.chartConfig, src: e.target.value, url: e.target.value } })}
             className="input text-sm" placeholder="https://..."
           />
         </Field>

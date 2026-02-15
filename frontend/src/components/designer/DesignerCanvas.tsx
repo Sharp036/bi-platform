@@ -250,9 +250,9 @@ function WidgetBlock({
             <div className="text-xs text-slate-500 dark:text-slate-400 overflow-hidden line-clamp-4 w-full"
                  dangerouslySetInnerHTML={{ __html: widget.title || '<p>Text content</p>' }} />
           ) : /* IMAGE */
-          widget.widgetType === 'IMAGE' && (cc.url as string) ? (
+          widget.widgetType === 'IMAGE' && ((cc.src as string) || (cc.url as string)) ? (
             <img
-              src={cc.url as string}
+              src={(cc.src as string) || (cc.url as string)}
               alt={widget.title}
               className="max-h-full max-w-full object-contain"
             />

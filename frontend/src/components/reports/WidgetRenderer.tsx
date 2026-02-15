@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import MultiLayerChart from '@/components/charts/MultiLayerChart'
 import TableWidget from '@/components/charts/TableWidget'
 import KpiCard from '@/components/charts/KpiCard'
+import FilterWidget from '@/components/charts/FilterWidget'
 import { AlertTriangle } from 'lucide-react'
 import ButtonWidget from '@/components/interactive/ButtonWidget'
 import type { ButtonConfig } from '@/api/controls'
@@ -82,7 +83,7 @@ export default function WidgetRenderer({
     }
     if (widget.widgetType === 'IMAGE') {
       const config = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
-      return <ImageWidget src={config.src || ''} alt={widget.title} linkUrl={config.linkUrl} fit={config.fit} borderRadius={config.borderRadius} />
+      return <ImageWidget src={config.src || config.url || ''} alt={widget.title} linkUrl={config.linkUrl} fit={config.fit} borderRadius={config.borderRadius} />
     }
     return <div className="h-full flex items-center justify-center text-slate-400 text-sm">{t('common.no_data')}</div>
   }
@@ -110,6 +111,8 @@ export default function WidgetRenderer({
       return <TableWidget data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
     case 'KPI':
       return <KpiCard data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
+    case 'FILTER':
+      return <FilterWidget data={widget.data} chartConfig={widget.chartConfig} onApplyFilter={onApplyFilter} />
     default:
       return <TableWidget data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
   }

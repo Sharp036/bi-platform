@@ -37,6 +37,7 @@ export default function ReportViewerPage() {
   const [navStack, setNavStack] = useState<BreadcrumbEntry[]>([])
   const [currentReportId, setCurrentReportId] = useState<number | null>(null)
   const [currentParams, setCurrentParams] = useState<Record<string, unknown>>({})
+  const [hiddenWidgetIds, setHiddenWidgetIds] = useState<number[]>([])
   const [interactiveMeta, setInteractiveMeta] = useState<InteractiveMeta | null>(null)
   const initializedRef = useRef(false)
 
@@ -76,14 +77,13 @@ export default function ReportViewerPage() {
     }
   }, [])
 
-  // Render report
-  const handleRender = useCallback(async (params?: Record<string, unknown>) => {
+  // Render report with explicit params
+  const renderWithParams = useCallback(async (paramsToUse: Record<string, unknown>) => {
     const rId = currentReportId || (id ? Number(id) : null)
     if (!rId) return
     setRendering(true)
     try {
-      const mergedParams = { ...currentParams, ...params }
-      const result = await reportApi.render(rId, mergedParams)
+      const result = await reportApi.render(rId, paramsToUse)
       setRenderResult(result)
       await loadDrillActions(rId)
       // Load interactive meta
@@ -97,7 +97,14 @@ export default function ReportViewerPage() {
       toast.error(msg || t('reports.failed_to_render'))
     }
     finally { setRendering(false) }
-  }, [currentReportId, id, currentParams, loadDrillActions])
+  }, [currentReportId, id, loadDrillActions, t])
+
+  // Render report (merge into current params)
+  const handleRender = useCallback(async (params?: Record<string, unknown>) => {
+    const mergedParams = { ...currentParams, ...params }
+    setCurrentParams(mergedParams)
+    await renderWithParams(mergedParams)
+  }, [currentParams, renderWithParams])
 
   // Initial render
   useEffect(() => {
@@ -175,6 +182,30 @@ export default function ReportViewerPage() {
       toast.error(t('reports.failed_to_navigate'))
     }
   }, [navStack])
+
+  const handleToggleWidgets = useCallback((widgetIds: number[]) => {
+    if (!widgetIds || widgetIds.length === 0) return
+    setHiddenWidgetIds(prev => {
+      const next = new Set(prev)
+      widgetIds.forEach((wid) => {
+        if (next.has(wid)) next.delete(wid)
+        else next.add(wid)
+      })
+      return Array.from(next)
+    })
+  }, [])
+
+  const handleApplyFilter = useCallback(async (field: string, value: string) => {
+    if (!field) return
+    const nextParams = { ...currentParams }
+    if (value == null || value === '') {
+      delete nextParams[field]
+    } else {
+      nextParams[field] = value
+    }
+    setCurrentParams(nextParams)
+    await renderWithParams(nextParams)
+  }, [currentParams, renderWithParams])
 
   // ── Render ──
 
@@ -261,7 +292,9 @@ export default function ReportViewerPage() {
         <LoadingSpinner />
       ) : renderResult ? (
         <div className="grid grid-cols-12 gap-4">
-          {renderResult.widgets.map((w) => {
+          {renderResult.widgets
+            .filter(w => !hiddenWidgetIds.includes(w.widgetId))
+            .map((w) => {
             const pos = parsePosition(w.position)
             const colSpan = pos.w || 12
             const minH = pos.h ? pos.h * 70 : 280
@@ -287,6 +320,9 @@ export default function ReportViewerPage() {
                   drillActions={widgetDrillActions}
                   onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
                   layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}
+                  reportId={currentReportId || Number(id)}
+                  onToggleWidgets={handleToggleWidgets}
+                  onApplyFilter={handleApplyFilter}
                   onChartClick={(data) => {
                     useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
                   }}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { RenderReportResponse } from '@/types'
@@ -17,24 +17,56 @@ export default function EmbedViewerPage() {
   const [renderResult, setRenderResult] = useState<RenderReportResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentParams, setCurrentParams] = useState<Record<string, string>>({})
+  const [hiddenWidgetIds, setHiddenWidgetIds] = useState<number[]>([])
+
+  const fetchRender = useCallback(async (params: Record<string, string>) => {
+    if (!token) return
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
+    try {
+      const r = await axios.get(`${baseUrl}/embed/${token}`, { params })
+      setRenderResult(r.data)
+      setError(null)
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.response?.statusText || t('embed.error')
+      setError(msg)
+    } finally {
+      setLoading(false)
+    }
+  }, [token, t])
 
   useEffect(() => {
     if (!token) return
-
-    // Build extra params from URL query string
     const params: Record<string, string> = {}
     searchParams.forEach((value, key) => { params[key] = value })
+    setCurrentParams(params)
+    fetchRender(params)
+  }, [token, searchParams, fetchRender])
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
-
-    axios.get(`${baseUrl}/embed/${token}`, { params })
-      .then(r => setRenderResult(r.data))
-      .catch(err => {
-        const msg = err.response?.data?.message || err.response?.statusText || t('embed.error')
-        setError(msg)
+  const handleToggleWidgets = useCallback((widgetIds: number[]) => {
+    if (!widgetIds || widgetIds.length === 0) return
+    setHiddenWidgetIds(prev => {
+      const next = new Set(prev)
+      widgetIds.forEach((wid) => {
+        if (next.has(wid)) next.delete(wid)
+        else next.add(wid)
       })
-      .finally(() => setLoading(false))
-  }, [token, searchParams])
+      return Array.from(next)
+    })
+  }, [])
+
+  const handleApplyFilter = useCallback(async (field: string, value: string) => {
+    if (!field) return
+    const nextParams = { ...currentParams }
+    if (value == null || value === '') {
+      delete nextParams[field]
+    } else {
+      nextParams[field] = value
+    }
+    setCurrentParams(nextParams)
+    setLoading(true)
+    await fetchRender(nextParams)
+  }, [currentParams, fetchRender])
 
   if (loading) {
     return (
@@ -66,7 +98,9 @@ export default function EmbedViewerPage() {
     <div className="p-4 bg-white dark:bg-slate-900 min-h-screen">
       <div className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-12 gap-4">
-          {renderResult.widgets.map(w => {
+          {renderResult.widgets
+            .filter(w => !hiddenWidgetIds.includes(w.widgetId))
+            .map(w => {
             const pos = parsePosition(w.position)
             const colSpan = pos.w || 12
             const minH = pos.h ? pos.h * 70 : 280
@@ -79,7 +113,11 @@ export default function EmbedViewerPage() {
                   minHeight: `${minH}px`,
                 }}
               >
-                <WidgetRenderer widget={w} />
+                <WidgetRenderer
+                  widget={w}
+                  onToggleWidgets={handleToggleWidgets}
+                  onApplyFilter={handleApplyFilter}
+                />
               </div>
             )
           })}
