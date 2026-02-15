@@ -107,10 +107,10 @@ export default function WidgetRenderer({
         />
       )
     case 'TABLE':
-      return <TableWidget data={widget.data} title={widget.title} />
+      return <TableWidget data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
     case 'KPI':
       return <KpiCard data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
     default:
-      return <TableWidget data={widget.data} title={widget.title} />
+      return <TableWidget data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
   }
 }

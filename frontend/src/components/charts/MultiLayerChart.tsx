@@ -19,6 +19,27 @@ function buildValueFormatter(format: string, currency: string): ((value: number)
   }
 }
 
+function buildLabelFormatter(
+  mode: string, count: number, total: number,
+  values: number[], valueFmt?: (v: number) => string
+): (p: { dataIndex: number; value: number }) => string {
+  let minIdx = -1, maxIdx = -1
+  if (mode === 'min_max' && values.length > 0) {
+    let minVal = Infinity, maxVal = -Infinity
+    values.forEach((v, i) => {
+      if (v < minVal) { minVal = v; minIdx = i }
+      if (v > maxVal) { maxVal = v; maxIdx = i }
+    })
+  }
+  return (p: { dataIndex: number; value: number }) => {
+    const { dataIndex, value } = p
+    if (mode === 'first' && dataIndex >= count) return ''
+    if (mode === 'last' && dataIndex < total - count) return ''
+    if (mode === 'min_max' && dataIndex !== minIdx && dataIndex !== maxIdx) return ''
+    return valueFmt ? valueFmt(value) : String(value)
+  }
+}
+
 interface Props {
   data: WidgetData
   chartConfig?: string
@@ -104,6 +125,8 @@ export default function MultiLayerChart({
     const yAxisCurrency = (config.yAxisCurrency as string) || 'USD'
     const xAxisRotation = Number(config.xAxisRotation) || 0
     const showDataLabels = !!config.showDataLabels
+    const dataLabelMode = (config.dataLabelMode as string) || 'all'
+    const dataLabelCount = Number(config.dataLabelCount) || 3
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
 
     if (layersWithVisibility.length === 0) {
@@ -113,6 +136,7 @@ export default function MultiLayerChart({
         ? configuredValues.filter(f => cols.includes(f))
         : cols.filter(c => c !== categoryCol)
       seriesCols.forEach(col => {
+        const colValues = rows.map(r => Number(r[col] ?? 0))
         if (chartType === 'pie') {
           series.push({
             name: col, type: 'pie', radius: ['40%', '70%'],
@@ -126,7 +150,7 @@ export default function MultiLayerChart({
             ...(showDataLabels ? {
               label: {
                 show: true, position: 'top',
-                formatter: valueFormatter ? (p: { value: number }) => valueFormatter(p.value) : undefined,
+                formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
               },
             } : {}),
           })

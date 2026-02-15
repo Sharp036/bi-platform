@@ -360,6 +360,29 @@ export default function PropertyPanel() {
                       />
                       {t('designer.show_data_labels')}
                     </label>
+                    {!!cc.showDataLabels && (
+                      <div className="mt-2 space-y-2">
+                        <select
+                          value={cc.dataLabelMode as string || 'all'}
+                          onChange={e => update({ chartConfig: { ...cc, dataLabelMode: e.target.value } })}
+                          className="input text-sm"
+                        >
+                          <option value="all">{t('designer.label_mode.all')}</option>
+                          <option value="first">{t('designer.label_mode.first_n')}</option>
+                          <option value="last">{t('designer.label_mode.last_n')}</option>
+                          <option value="min_max">{t('designer.label_mode.min_max')}</option>
+                        </select>
+                        {(cc.dataLabelMode === 'first' || cc.dataLabelMode === 'last') && (
+                          <input
+                            type="number" min={1} max={100}
+                            value={cc.dataLabelCount as number || 3}
+                            onChange={e => update({ chartConfig: { ...cc, dataLabelCount: Number(e.target.value) } })}
+                            className="input text-sm"
+                            placeholder={t('designer.label_count_placeholder')}
+                          />
+                        )}
+                      </div>
+                    )}
                   </Field>
                 </>
               )
