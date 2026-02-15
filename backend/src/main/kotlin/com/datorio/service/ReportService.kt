@@ -79,12 +79,14 @@ class ReportService(
         return toResponse(result)
     }
 
+    @Transactional(readOnly = true)
     fun getReport(id: Long): ReportResponse {
         val report = reportRepo.findById(id)
             .orElseThrow { IllegalArgumentException("Report not found: $id") }
         return toResponse(report)
     }
 
+    @Transactional(readOnly = true)
     fun listReports(
         status: ReportStatus? = null,
         createdBy: Long? = null,
@@ -95,10 +97,12 @@ class ReportService(
             .map { toListItem(it) }
     }
 
+    @Transactional(readOnly = true)
     fun searchReports(term: String, pageable: Pageable): Page<ReportListItem> {
         return reportRepo.searchByName(term, pageable).map { toListItem(it) }
     }
 
+    @Transactional(readOnly = true)
     fun listTemplates(pageable: Pageable): Page<ReportListItem> {
         return reportRepo.findByIsTemplateTrue(pageable).map { toListItem(it) }
     }
