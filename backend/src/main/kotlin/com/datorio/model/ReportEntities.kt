@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -30,9 +31,11 @@ class Report(
     var reportType: ReportType = ReportType.STANDARD,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var layout: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var settings: String = "{}",
 
     @Enumerated(EnumType.STRING)
@@ -107,6 +110,7 @@ class ReportParameter(
     var sortOrder: Int = 0,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var config: String = "{}"
 )
 
@@ -141,15 +145,19 @@ class ReportWidget(
     var rawSql: String? = null,
 
     @Column(name = "chart_config", columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var chartConfig: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var position: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var style: String = "{}",
 
     @Column(name = "param_mapping", columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var paramMapping: String = "{}",
 
     @Column(name = "sort_order", nullable = false)
@@ -185,6 +193,7 @@ class DashboardReport(
     var reportId: Long,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var position: String = "{}",
 
     @Column(name = "sort_order", nullable = false)
@@ -211,6 +220,7 @@ class ReportSchedule(
     var isActive: Boolean = true,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var parameters: String = "{}",
 
     @Enumerated(EnumType.STRING)
@@ -218,6 +228,7 @@ class ReportSchedule(
     var outputFormat: OutputFormat = OutputFormat.JSON,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var recipients: String = "[]",
 
     @Column(name = "last_run_at")
@@ -257,9 +268,11 @@ class ReportSnapshot(
     var scheduleId: Long? = null,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var parameters: String = "{}",
 
     @Column(name = "result_data", columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var resultData: String = "{}",
 
     @Enumerated(EnumType.STRING)

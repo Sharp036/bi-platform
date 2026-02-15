@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.OffsetDateTime
 
 @Entity
@@ -68,6 +69,7 @@ class ParameterControl(
     var sliderStep: Double? = 1.0,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var config: String = "{}",
 
     @Column(name = "sort_order", nullable = false)

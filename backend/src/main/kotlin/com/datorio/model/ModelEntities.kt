@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.OffsetDateTime
 
 @Entity
@@ -25,6 +26,7 @@ class DataModel(
     var isPublished: Boolean = false,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -111,6 +113,7 @@ class ModelField(
     var sortOrder: Int = 0,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)

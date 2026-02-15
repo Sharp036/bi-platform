@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 
 @Entity
@@ -19,6 +20,7 @@ class EmbedToken(
     var label: String? = null,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var parameters: String = "{}",
 
     @Column(name = "expires_at")

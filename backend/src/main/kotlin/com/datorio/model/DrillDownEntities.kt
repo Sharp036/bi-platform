@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -37,6 +38,7 @@ class DrillAction(
     var description: String? = null,
 
     @Column(name = "param_mapping", nullable = false, columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var paramMapping: String = "{}",
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +56,7 @@ class DrillAction(
     var openMode: OpenMode = OpenMode.REPLACE,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)

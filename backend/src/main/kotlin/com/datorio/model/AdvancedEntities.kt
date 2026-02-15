@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -176,9 +177,11 @@ class Bookmark(
     var description: String? = null,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var parameters: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var filters: String = "{}",
 
     @Column(name = "is_default", nullable = false)

@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -39,9 +40,11 @@ class Script(
     var isLibrary: Boolean = false,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var tags: String = "[]",
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var config: String = "{}",
 
     @Column(name = "created_by")

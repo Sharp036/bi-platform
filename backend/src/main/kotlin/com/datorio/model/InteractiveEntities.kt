@@ -1,6 +1,7 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnTransformer
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -50,6 +51,7 @@ class ChartLayer(
     var sortOrder: Int = 0,
 
     @Column(name = "series_config", columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var seriesConfig: String = "{}",
 
     @Column(name = "category_field", length = 200)
@@ -59,6 +61,7 @@ class ChartLayer(
     var valueField: String? = null,
 
     @Column(name = "param_mapping", columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var paramMapping: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -112,6 +115,7 @@ class DashboardAction(
     var sortOrder: Int = 0,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -193,6 +197,7 @@ class DashboardOverlay(
     var isVisible: Boolean = true,
 
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
     var style: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
