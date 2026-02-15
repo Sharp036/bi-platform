@@ -31,24 +31,30 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
     ? (config.visibleColumns as string[]).filter(c => cols.includes(c))
     : cols
 
+  // Configurable page size from chartConfig, 0 or undefined = auto
+  const configPageSize = Number(config.tablePageSize) || 0
+
   const containerRef = useRef<HTMLDivElement>(null)
-  const [pageSize, setPageSize] = useState(20)
+  const [autoPageSize, setAutoPageSize] = useState(20)
   const [page, setPage] = useState(0)
 
   // Auto-calculate page size based on container height
   useEffect(() => {
+    if (configPageSize > 0) return // skip auto-calc when user-configured
     const el = containerRef.current
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
       const h = entry.contentRect.height
       const available = h - HEADER_HEIGHT - FOOTER_HEIGHT - (title ? 28 : 0)
       const rows = Math.max(5, Math.floor(available / ROW_HEIGHT))
-      setPageSize(rows)
+      setAutoPageSize(rows)
       setPage(0)
     })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [title])
+  }, [title, configPageSize])
+
+  const pageSize = configPageSize > 0 ? configPageSize : autoPageSize
 
   const totalPages = Math.max(1, Math.ceil(allRows.length / pageSize))
   const safeePage = Math.min(page, totalPages - 1)

@@ -93,7 +93,6 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
         },
         ...(chartType !== 'pie' ? {
           labelLine: { show: true, length: 10, lineStyle: { color: '#aaa' } },
-          labelLayout: { hideOverlap: dataLabelMode === 'all', moveOverlap: 'shiftY' },
         } : {}),
       } : {}),
     }
@@ -122,6 +121,9 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
       },
     } : {}),
     series,
+    ...(showDataLabels && hasAxis ? {
+      labelLayout: { hideOverlap: dataLabelMode === 'all', moveOverlap: 'shiftY' },
+    } : {}),
     ...config.option as object || {},
   }
 }

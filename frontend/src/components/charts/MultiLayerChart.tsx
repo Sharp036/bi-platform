@@ -155,7 +155,6 @@ export default function MultiLayerChart({
                 formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
               },
               labelLine: { show: true, length: 10, lineStyle: { color: '#aaa' } },
-              labelLayout: { hideOverlap: dataLabelMode === 'all', moveOverlap: 'shiftY' },
             } : {}),
           })
         }
@@ -253,6 +252,9 @@ export default function MultiLayerChart({
         yAxis,
       } : {}),
       series,
+      ...(showDataLabels && !isPie ? {
+        labelLayout: { hideOverlap: dataLabelMode === 'all', moveOverlap: 'shiftY' },
+      } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),
     }
@@ -308,6 +310,7 @@ export default function MultiLayerChart({
       <div className="flex-1 min-h-0">
         <ReactECharts
           option={option}
+          notMerge={true}
           theme={isDark ? 'dark' : undefined}
           style={{ height: '100%', width: '100%' }}
           opts={{ renderer: 'canvas' }}

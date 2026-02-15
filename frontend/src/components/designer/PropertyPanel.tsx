@@ -469,6 +469,17 @@ export default function PropertyPanel() {
                     </div>
                     <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_columns_hint')}</p>
                   </Field>
+
+                  <Field label={t('designer.table_page_size')}>
+                    <input
+                      type="number" min={0} max={1000}
+                      value={cc.tablePageSize as number || ''}
+                      onChange={e => update({ chartConfig: { ...cc, tablePageSize: e.target.value ? Number(e.target.value) : undefined } })}
+                      className="input text-sm"
+                      placeholder={t('designer.table_page_size_auto')}
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_page_size_hint')}</p>
+                  </Field>
                 </>
               )
             })()}
