@@ -94,6 +94,11 @@ export default function EmbedViewerPage() {
     try { return JSON.parse(pos) } catch { return { x: 0, y: 0, w: 12, h: 4 } }
   }
 
+  const parseStyle = (style?: string) => {
+    if (!style) return {}
+    try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
+  }
+
   return (
     <div className="p-4 bg-white dark:bg-slate-900 min-h-screen">
       <div className="max-w-[1400px] mx-auto">
@@ -106,6 +111,8 @@ export default function EmbedViewerPage() {
             const y = Math.max(0, Number(pos.y) || 0)
             const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
             const hSpan = Math.max(1, Number(pos.h) || 4)
+            const styleCfg = parseStyle(w.style)
+            const zIndex = Number(styleCfg.zIndex ?? 0)
             return (
               <div
                 key={w.widgetId}
@@ -113,6 +120,8 @@ export default function EmbedViewerPage() {
                 style={{
                   gridColumn: `${x + 1} / span ${wSpan}`,
                   gridRow: `${y + 1} / span ${hSpan}`,
+                  zIndex,
+                  position: 'relative',
                 }}
               >
                 <WidgetRenderer

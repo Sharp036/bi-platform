@@ -148,6 +148,15 @@ export default function PropertyPanel() {
         </div>
       </Field>
 
+      <Field label="Layer (z-index)">
+        <input
+          type="number"
+          value={Number((widget.style as Record<string, unknown>).zIndex ?? 0)}
+          onChange={e => update({ style: { ...widget.style, zIndex: Number(e.target.value || 0) } })}
+          className="input text-sm"
+        />
+      </Field>
+
       {/* Data Binding */}
       {widget.widgetType !== 'TEXT' && widget.widgetType !== 'IMAGE' && (() => {
         const cc = widget.chartConfig as Record<string, unknown>

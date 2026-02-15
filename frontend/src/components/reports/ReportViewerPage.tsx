@@ -217,6 +217,11 @@ export default function ReportViewerPage() {
     try { return JSON.parse(pos) } catch { return { x: 0, y: 0, w: 12, h: 4 } }
   }
 
+  const parseStyle = (style?: string) => {
+    if (!style) return {}
+    try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto">
       {/* Header */}
@@ -300,6 +305,8 @@ export default function ReportViewerPage() {
             const y = Math.max(0, Number(pos.y) || 0)
             const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
             const hSpan = Math.max(1, Number(pos.h) || 4)
+            const styleCfg = parseStyle(w.style)
+            const zIndex = Number(styleCfg.zIndex ?? 0)
             const widgetDrillActions = drillActions[w.widgetId] || []
             const hasDrill = widgetDrillActions.length > 0
             return (
@@ -309,6 +316,8 @@ export default function ReportViewerPage() {
                 style={{
                   gridColumn: `${x + 1} / span ${wSpan}`,
                   gridRow: `${y + 1} / span ${hSpan}`,
+                  zIndex,
+                  position: 'relative',
                 }}
               >
                 {hasDrill && (

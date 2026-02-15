@@ -122,18 +122,23 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       const pm = typeof w.paramMapping === 'string' ? JSON.parse(w.paramMapping as string) : (w.paramMapping || {})
       return {
         id: genId(),
-        serverId: w.widgetId as number || w.id as number,
+        serverId: (w.widgetId as number | undefined) ?? (w.id as number | undefined),
         widgetType: w.widgetType as DesignerWidget['widgetType'],
         title: (w.title as string) || '',
-        queryId: (w.queryId as number) || null,
-        datasourceId: (w.datasourceId as number) || null,
+        queryId: (w.queryId as number | undefined) ?? null,
+        datasourceId: (w.datasourceId as number | undefined) ?? null,
         rawSql: (w.rawSql as string) || '',
         chartConfig: chart,
-        position: { x: pos.x || 0, y: pos.y || i * 4, w: pos.w || 12, h: pos.h || 4 },
+        position: {
+          x: Number(pos.x ?? 0),
+          y: Number(pos.y ?? (i * 4)),
+          w: Number(pos.w ?? 12),
+          h: Number(pos.h ?? 4),
+        },
         style,
         paramMapping: pm,
         isVisible: w.isVisible !== false,
-        sortOrder: (w.sortOrder as number) || i,
+        sortOrder: (w.sortOrder as number | undefined) ?? i,
       }
     })
 

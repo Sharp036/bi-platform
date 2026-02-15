@@ -121,6 +121,7 @@ function WidgetBlock({
     width: `${widget.position.w * colWidth}%`,
     height: `${widget.position.h * ROW_HEIGHT}px`,
     padding: '4px',
+    zIndex: Number((widget.style as Record<string, unknown>)?.zIndex ?? 0),
   }
 
   if (!widget.isVisible && !previewMode) {
