@@ -37,6 +37,16 @@ export interface Report {
   parameters: ReportParameter[]; widgets: Widget[]
   createdAt: string; updatedAt: string
 }
+export interface ReportListItem {
+  id: number; name: string; description?: string
+  reportType: 'STANDARD' | 'TEMPLATE'
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+  isTemplate: boolean
+  widgetCount: number
+  parameterCount: number
+  createdBy?: number
+  createdAt: string; updatedAt: string
+}
 export interface ReportParameter {
   id?: number; name: string; label?: string
   paramType: 'STRING' | 'NUMBER' | 'DATE' | 'DATE_RANGE' | 'SELECT' | 'MULTI_SELECT' | 'BOOLEAN'

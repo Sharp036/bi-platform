@@ -48,6 +48,8 @@ interface ReportParameterRepository : JpaRepository<ReportParameter, Long> {
     fun findByReportIdOrderBySortOrder(reportId: Long): List<ReportParameter>
 
     fun deleteByReportId(reportId: Long)
+
+    fun countByReportId(reportId: Long): Long
 }
 
 @Repository

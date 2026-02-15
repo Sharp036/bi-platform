@@ -106,6 +106,12 @@ class ReportController(
         return ResponseEntity.ok(reportService.publishReport(id, getUserId(auth)))
     }
 
+    @PostMapping("/{id}/unpublish")
+    @PreAuthorize("hasAuthority('REPORT_PUBLISH')")
+    fun unpublishReport(@PathVariable id: Long, auth: Authentication): ResponseEntity<ReportResponse> {
+        return ResponseEntity.ok(reportService.unpublishReport(id, getUserId(auth)))
+    }
+
     @PostMapping("/{id}/archive")
     @PreAuthorize("hasAuthority('REPORT_EDIT')")
     fun archiveReport(@PathVariable id: Long, auth: Authentication): ResponseEntity<ReportResponse> {

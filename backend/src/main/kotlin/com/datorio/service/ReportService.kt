@@ -133,6 +133,11 @@ class ReportService(
     }
 
     @Transactional
+    fun unpublishReport(id: Long, userId: Long): ReportResponse {
+        return updateReport(id, UpdateReportRequest(status = ReportStatus.DRAFT), userId)
+    }
+
+    @Transactional
     fun archiveReport(id: Long, userId: Long): ReportResponse {
         return updateReport(id, UpdateReportRequest(status = ReportStatus.ARCHIVED), userId)
     }
@@ -301,6 +306,7 @@ class ReportService(
         id = r.id, name = r.name, description = r.description,
         reportType = r.reportType, status = r.status,
         isTemplate = r.isTemplate, widgetCount = widgetRepo.countByReportId(r.id).toInt(),
+        parameterCount = paramRepo.countByReportId(r.id).toInt(),
         createdBy = r.createdBy,
         createdAt = r.createdAt, updatedAt = r.updatedAt
     )

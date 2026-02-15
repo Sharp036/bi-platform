@@ -1,9 +1,9 @@
 import api from './client'
-import type { Report, RenderReportResponse, Schedule } from '@/types'
+import type { Report, ReportListItem, PageResponse, RenderReportResponse, Schedule } from '@/types'
 
 export const reportApi = {
   list: (params?: { status?: string; page?: number; size?: number }) =>
-    api.get('/reports', { params }).then(r => r.data),
+    api.get<PageResponse<ReportListItem>>('/reports', { params }).then(r => r.data),
 
   get: (id: number) =>
     api.get<Report>(`/reports/${id}`).then(r => r.data),
@@ -19,6 +19,9 @@ export const reportApi = {
 
   publish: (id: number) =>
     api.post<Report>(`/reports/${id}/publish`).then(r => r.data),
+
+  unpublish: (id: number) =>
+    api.post<Report>(`/reports/${id}/unpublish`).then(r => r.data),
 
   archive: (id: number) =>
     api.post<Report>(`/reports/${id}/archive`).then(r => r.data),

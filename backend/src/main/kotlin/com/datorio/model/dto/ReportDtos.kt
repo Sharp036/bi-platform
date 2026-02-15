@@ -56,6 +56,7 @@ data class ReportListItem(
     val status: ReportStatus,
     val isTemplate: Boolean,
     val widgetCount: Int,
+    val parameterCount: Int,
     val createdBy: Long?,
     val createdAt: Instant,
     val updatedAt: Instant

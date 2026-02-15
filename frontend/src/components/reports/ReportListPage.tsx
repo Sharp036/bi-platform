@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
-import type { Report } from '@/types'
+import type { ReportListItem } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2 } from 'lucide-react'
@@ -23,11 +23,11 @@ const statusBadge = (status: string) => {
 
 export default function ReportListPage() {
   const { t } = useTranslation()
-  const [reports, setReports] = useState<Report[]>([])
+  const [reports, setReports] = useState<ReportListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('')
-  const [shareReport, setShareReport] = useState<Report | null>(null)
+  const [shareReport, setShareReport] = useState<ReportListItem | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -101,9 +101,9 @@ export default function ReportListPage() {
               </div>
 
               <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mb-3">
-                <span>{t('reports.widgets_count', { count: r.widgets?.length || 0 })}</span>
+                <span>{t('reports.widgets_count', { count: r.widgetCount ?? 0 })}</span>
                 <span>·</span>
-                <span>{t('reports.params_count', { count: r.parameters?.length || 0 })}</span>
+                <span>{t('reports.params_count', { count: r.parameterCount ?? 0 })}</span>
                 <span>·</span>
                 <span>{new Date(r.updatedAt).toLocaleDateString()}</span>
               </div>

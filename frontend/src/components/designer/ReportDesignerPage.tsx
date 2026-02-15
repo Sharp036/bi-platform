@@ -10,7 +10,7 @@ import ParameterDesigner from './ParameterDesigner'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Save, Undo2, Redo2, Eye, EyeOff, ArrowLeft,
-  Upload, Settings2
+  Upload, Download, Settings2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
@@ -29,6 +29,7 @@ export default function ReportDesignerPage() {
     undo, redo, canUndo, canRedo, reset, setDirty,
   } = useDesignerStore()
 
+  const isPublished = reportStatus === 'PUBLISHED'
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -153,9 +154,18 @@ export default function ReportDesignerPage() {
   const handlePublish = async () => {
     if (!reportId) { toast.error(t('designer.save_first')); return }
     try {
-      await reportApi.publish(reportId)
-      toast.success(t('designer.published'))
-    } catch { toast.error(t('designer.failed_publish')) }
+      if (isPublished) {
+        await reportApi.unpublish(reportId)
+        useDesignerStore.setState({ reportStatus: 'DRAFT' })
+        toast.success(t('designer.unpublished'))
+      } else {
+        await reportApi.publish(reportId)
+        useDesignerStore.setState({ reportStatus: 'PUBLISHED' })
+        toast.success(t('designer.published'))
+      }
+    } catch {
+      toast.error(isPublished ? t('designer.failed_unpublish') : t('designer.failed_publish'))
+    }
   }
 
   if (loading) return <div className="flex items-center justify-center h-96"><LoadingSpinner /></div>
@@ -196,7 +206,8 @@ export default function ReportDesignerPage() {
 
           {reportId && (
             <button onClick={handlePublish} className="btn-secondary text-sm">
-              <Upload className="w-4 h-4" /> {t('common.publish')}
+              {isPublished ? <Download className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
+              {' '}{isPublished ? t('common.unpublish') : t('common.publish')}
             </button>
           )}
           <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">
