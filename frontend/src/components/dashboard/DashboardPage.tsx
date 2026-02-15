@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import { datasourceApi } from '@/api/datasources'
 import { queryApi } from '@/api/queries'
-import type { Report, DataSource } from '@/types'
+import type { ReportListItem, DataSource } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { FileBarChart, Database, Code2, TrendingUp, ArrowRight } from 'lucide-react'
 
 export default function DashboardPage() {
   const { t } = useTranslation()
-  const [reports, setReports] = useState<Report[]>([])
+  const [reports, setReports] = useState<ReportListItem[]>([])
   const [datasources, setDatasources] = useState<DataSource[]>([])
   const [queryCount, setQueryCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -68,7 +68,7 @@ export default function DashboardPage() {
                 className="flex items-center justify-between px-4 py-3 hover:bg-surface-50 dark:hover:bg-dark-surface-50/50 transition-colors">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{r.name}</p>
-                  <p className="text-xs text-slate-400">{t('reports.widgets_count', { count: r.widgets?.length || 0 })} · {new Date(r.updatedAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-slate-400">{t('reports.widgets_count', { count: r.widgetCount ?? 0 })} · {new Date(r.updatedAt).toLocaleDateString()}</p>
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                   r.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
