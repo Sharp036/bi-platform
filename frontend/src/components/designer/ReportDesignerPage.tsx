@@ -3,10 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import { useDesignerStore } from '@/store/useDesignerStore'
+import type { ReportParameter } from '@/types'
 import ComponentPalette from './ComponentPalette'
 import DesignerCanvas from './DesignerCanvas'
 import PropertyPanel from './PropertyPanel'
 import ParameterDesigner from './ParameterDesigner'
+import ParameterControlConfigPanel from '@/components/interactive/ParameterControlConfigPanel'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Save, Undo2, Redo2, Eye, EyeOff, ArrowLeft,
@@ -33,6 +35,14 @@ export default function ReportDesignerPage() {
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const controlParams: ReportParameter[] = parameters.map(p => ({
+    name: p.name,
+    label: p.label,
+    paramType: p.paramType as ReportParameter['paramType'],
+    defaultValue: p.defaultValue,
+    isRequired: p.isRequired,
+    config: {},
+  }))
 
   // Load existing report
   useEffect(() => {
@@ -245,6 +255,14 @@ export default function ReportDesignerPage() {
           <div className="mt-3">
             <ParameterDesigner />
           </div>
+          {reportId && (
+            <div className="mt-4">
+              <ParameterControlConfigPanel
+                reportId={reportId}
+                parameters={controlParams}
+              />
+            </div>
+          )}
         </div>
       )}
 

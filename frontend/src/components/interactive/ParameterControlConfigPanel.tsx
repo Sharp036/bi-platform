@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { controlsApi, ParameterControlConfig } from '@/api/controls'
+import { datasourceApi } from '@/api/datasources'
 import type { ReportParameter } from '@/types'
+import type { DataSource } from '@/types'
 import { Settings, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -22,12 +24,16 @@ const CONTROL_TYPES = [
 export default function ParameterControlConfigPanel({ reportId, parameters }: Props) {
   const { t } = useTranslation()
   const [controls, setControls] = useState<ParameterControlConfig[]>([])
+  const [datasources, setDatasources] = useState<DataSource[]>([])
 
   const load = () => {
     controlsApi.getParameterControls(reportId).then(setControls).catch(() => {})
   }
 
   useEffect(load, [reportId])
+  useEffect(() => {
+    datasourceApi.list().then(setDatasources).catch(() => {})
+  }, [])
 
   const save = async (paramName: string, update: Partial<ParameterControlConfig>) => {
     const existing = controls.find(c => c.parameterName === paramName)
@@ -124,6 +130,19 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
 
                 {(ctrl?.controlType === 'DROPDOWN' || ctrl?.controlType === 'RADIO' || ctrl?.controlType === 'MULTI_CHECKBOX') && (
                   <>
+                    <div>
+                      <label className="text-xs text-slate-500 block mb-0.5">{t('designer.data_source')}</label>
+                      <select
+                        value={ctrl?.datasourceId || ''}
+                        onChange={e => save(p.name, { datasourceId: e.target.value ? Number(e.target.value) : undefined })}
+                        className="input text-xs py-1 w-56"
+                      >
+                        <option value="">{t('designer.select_datasource')}</option>
+                        {datasources.map(ds => (
+                          <option key={ds.id} value={ds.id}>{ds.name}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div>
                       <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.options_sql')}</label>
                       <input value={ctrl?.optionsQuery || ''}
