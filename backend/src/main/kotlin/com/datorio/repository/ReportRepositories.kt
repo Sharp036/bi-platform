@@ -58,6 +58,8 @@ interface ReportWidgetRepository : JpaRepository<ReportWidget, Long> {
     fun findByQueryId(queryId: Long): List<ReportWidget>
 
     fun deleteByReportId(reportId: Long)
+
+    fun countByReportId(reportId: Long): Long
 }
 
 @Repository

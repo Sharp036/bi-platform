@@ -107,6 +107,15 @@ export default function ReportDesignerPage() {
           widgets: widgetPayloads,
           parameters: paramPayloads,
         })
+        loadReport({
+          id: created.id,
+          name: created.name,
+          description: created.description || '',
+          status: created.status,
+          widgets: created.widgets as any,
+          parameters: created.parameters as any,
+        })
+        navigate(`/reports/${created.id}/edit`, { replace: true })
         toast.success(t('designer.report_created'))
         setDirty(false)
         navigate(`/reports/${created.id}/edit`, { replace: true })

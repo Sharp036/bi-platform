@@ -300,7 +300,7 @@ class ReportService(
     private fun toListItem(r: Report) = ReportListItem(
         id = r.id, name = r.name, description = r.description,
         reportType = r.reportType, status = r.status,
-        isTemplate = r.isTemplate, widgetCount = r.widgets.size,
+        isTemplate = r.isTemplate, widgetCount = widgetRepo.countByReportId(r.id).toInt(),
         createdBy = r.createdBy,
         createdAt = r.createdAt, updatedAt = r.updatedAt
     )
