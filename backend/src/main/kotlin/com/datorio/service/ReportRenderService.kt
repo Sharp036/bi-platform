@@ -12,6 +12,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
+import java.time.LocalDate
 import java.time.Instant
 
 /**
@@ -141,7 +142,7 @@ class ReportRenderService(
             if (value != null) {
                 resolved[param.name] = value
             } else if (param.defaultValue != null) {
-                resolved[param.name] = param.defaultValue
+                resolved[param.name] = resolveDefaultValue(param)
             } else if (param.isRequired) {
                 throw IllegalArgumentException("Missing required parameter: '${param.name}'")
             }
@@ -155,6 +156,19 @@ class ReportRenderService(
         }
 
         return resolved
+    }
+
+    private fun resolveDefaultValue(param: ReportParameter): Any? {
+        val raw = param.defaultValue ?: return null
+        val token = raw.trim().lowercase()
+        val today = LocalDate.now()
+        return when (token) {
+            "today", "__today__", "${'$'}{today}" -> today.toString()
+            "start_of_year", "__start_of_year__", "${'$'}{start_of_year}" -> today.withDayOfYear(1).toString()
+            "start_of_month", "__start_of_month__", "${'$'}{start_of_month}" -> today.withDayOfMonth(1).toString()
+            "end_of_year", "__end_of_year__", "${'$'}{end_of_year}" -> today.withMonth(12).withDayOfMonth(31).toString()
+            else -> raw
+        }
     }
 
     companion object {

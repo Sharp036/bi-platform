@@ -79,6 +79,12 @@ export default function ReportDesignerPage() {
 
   const handleSave = useCallback(async () => {
     if (!reportName.trim()) { toast.error(t('designer.report_name_required')); return }
+    const normalizedParamNames = parameters.map(p => (p.name || '').trim()).filter(Boolean)
+    const hasDuplicateParamNames = new Set(normalizedParamNames).size !== normalizedParamNames.length
+    if (hasDuplicateParamNames) {
+      toast.error('Duplicate parameter names are not allowed')
+      return
+    }
 
     setSaving(true)
     try {
@@ -98,6 +104,7 @@ export default function ReportDesignerPage() {
 
       const paramPayloads = parameters.map((p, i) => ({
         ...p,
+        name: p.name.trim(),
         sortOrder: i,
       }))
 

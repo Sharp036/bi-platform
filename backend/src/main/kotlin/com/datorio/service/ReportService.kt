@@ -199,8 +199,10 @@ class ReportService(
         val report = reportRepo.findById(reportId)
             .orElseThrow { IllegalArgumentException("Report not found: $reportId") }
 
-        report.parameters.clear()
-        reportRepo.save(report) // flush deletes
+        // Use direct delete + flush to avoid unique(report_id, name) conflicts
+        // when replacing parameters in a single transaction.
+        paramRepo.deleteByReportId(reportId)
+        paramRepo.flush()
 
         params.forEachIndexed { idx, dto ->
             val param = ReportParameter(

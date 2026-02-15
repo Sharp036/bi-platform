@@ -14,10 +14,29 @@ interface Props {
 
 export default function EnhancedParameterPanel({ reportId, parameters, onApply, loading }: Props) {
   const { t } = useTranslation()
+  const resolveDynamicDefault = (p: ReportParameter): string => {
+    const raw = (p.defaultValue || '').trim()
+    if (!raw) return ''
+    const token = raw.toLowerCase()
+    const now = new Date()
+    const toDate = (d: Date) => d.toISOString().slice(0, 10)
+    if (token === 'today' || token === '__today__' || token === '${today}') return toDate(now)
+    if (token === 'start_of_year' || token === '__start_of_year__' || token === '${start_of_year}') {
+      return toDate(new Date(now.getFullYear(), 0, 1))
+    }
+    if (token === 'start_of_month' || token === '__start_of_month__' || token === '${start_of_month}') {
+      return toDate(new Date(now.getFullYear(), now.getMonth(), 1))
+    }
+    if (token === 'end_of_year' || token === '__end_of_year__' || token === '${end_of_year}') {
+      return toDate(new Date(now.getFullYear(), 11, 31))
+    }
+    return raw
+  }
+
   const [values, setValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
     parameters.forEach(p => {
-      if (p.defaultValue) init[p.name] = p.defaultValue
+      if (p.defaultValue) init[p.name] = resolveDynamicDefault(p)
     })
     return init
   })
@@ -51,6 +70,14 @@ export default function EnhancedParameterPanel({ reportId, parameters, onApply, 
       }
     })
   }, [controls, loadOptions])
+
+  useEffect(() => {
+    const init: Record<string, string> = {}
+    parameters.forEach(p => {
+      if (p.defaultValue) init[p.name] = resolveDynamicDefault(p)
+    })
+    setValues(init)
+  }, [parameters])
 
   // Handle cascading: when parent changes, reload child options
   const handleChange = (paramName: string, value: string) => {

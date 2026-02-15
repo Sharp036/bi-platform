@@ -3,6 +3,12 @@ import { useDesignerStore } from '@/store/useDesignerStore'
 import { Plus, Trash2 } from 'lucide-react'
 
 const PARAM_TYPES = ['STRING', 'NUMBER', 'DATE', 'DATE_RANGE', 'SELECT', 'MULTI_SELECT', 'BOOLEAN']
+const DATE_DEFAULTS = [
+  { value: '', label: 'Manual' },
+  { value: '__today__', label: 'Today' },
+  { value: '__start_of_year__', label: 'Start of Year' },
+  { value: '__start_of_month__', label: 'Start of Month' },
+]
 
 export default function ParameterDesigner() {
   const { t } = useTranslation()
@@ -64,6 +70,15 @@ export default function ParameterDesigner() {
                 value={p.defaultValue} onChange={e => updateParam(i, { defaultValue: e.target.value })}
                 className="input text-xs w-24 py-1" placeholder={t('designer.param_default')}
               />
+              {(p.paramType === 'DATE' || p.paramType === 'DATE_RANGE') && (
+                <select
+                  value={DATE_DEFAULTS.some(d => d.value === p.defaultValue) ? p.defaultValue : ''}
+                  onChange={e => updateParam(i, { defaultValue: e.target.value })}
+                  className="input text-xs w-32 py-1"
+                >
+                  {DATE_DEFAULTS.map(d => <option key={d.value || 'manual'} value={d.value}>{d.label}</option>)}
+                </select>
+              )}
               <label className="flex items-center gap-1 text-xs text-slate-500 flex-shrink-0">
                 <input
                   type="checkbox" checked={p.isRequired}
