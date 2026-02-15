@@ -4,7 +4,7 @@ spring:
 
   # ── Metadata Database (internal) ──
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:datorio}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:datorio}?stringtype=unspecified
     username: ${DB_USER:datorio}
     password: ${DB_PASSWORD:datorio}
     driver-class-name: org.postgresql.Driver
@@ -103,4 +103,4 @@ spring:
     activate:
       on-profile: docker
   datasource:
-    url: jdbc:postgresql://postgres:5432/datorio
+    url: jdbc:postgresql://postgres:5432/datorio?stringtype=unspecified

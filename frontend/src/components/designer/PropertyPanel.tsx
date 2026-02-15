@@ -5,9 +5,26 @@ import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
-import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft } from 'lucide-react'
+import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown } from 'lucide-react'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
+
+const CURRENCIES = [
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
+  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'KRW', symbol: '₩', name: 'Korean Won' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+  { code: 'CHF', symbol: 'Fr', name: 'Swiss Franc' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+]
+
+const AXIS_CHART_TYPES = ['bar', 'line', 'area', 'scatter', 'waterfall', 'heatmap', 'boxplot']
 
 export default function PropertyPanel() {
   const { t } = useTranslation()
@@ -126,85 +143,50 @@ export default function PropertyPanel() {
       </Field>
 
       {/* Data Binding */}
-      {widget.widgetType !== 'TEXT' && widget.widgetType !== 'IMAGE' && (
-        <>
-          <Field label={t('designer.data_source')}>
-            <select
-              value={widget.queryId || ''}
-              onChange={e => {
-                const qId = e.target.value ? Number(e.target.value) : null
-                const q = queries.find(q => q.id === qId)
-                update({ queryId: qId, datasourceId: q?.datasourceId || widget.datasourceId })
-              }}
-              className="input text-sm"
-            >
-              <option value="">{t('designer.select_query')}</option>
-              {queries.map(q => (
-                <option key={q.id} value={q.id}>{q.name} ({q.datasourceName})</option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label={t('designer.inline_sql')}>
-            <select
-              value={widget.datasourceId || ''}
-              onChange={e => update({ datasourceId: e.target.value ? Number(e.target.value) : null })}
-              className="input text-sm mb-2"
-            >
-              <option value="">{t('designer.select_datasource')}</option>
-              {datasources.map(ds => (
-                <option key={ds.id} value={ds.id}>{ds.name} ({ds.type})</option>
-              ))}
-            </select>
-            <textarea
-              value={widget.rawSql}
-              onChange={e => update({ rawSql: e.target.value })}
-              placeholder={t('designer.sql_placeholder')}
-              className="input text-xs font-mono h-20 resize-none"
-            />
-          </Field>
-        </>
-      )}
-
-      {/* Chart Config */}
-      {widget.widgetType === 'CHART' && (() => {
+      {widget.widgetType !== 'TEXT' && widget.widgetType !== 'IMAGE' && (() => {
         const cc = widget.chartConfig as Record<string, unknown>
-        const catField = cc.categoryField as string || ''
-        const valFields = cc.valueFields as string[] || []
         const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
-
-        const allNonCat = availableCols.filter(c => c !== (catField || availableCols[0]))
-        const isAllSelected = !Array.isArray(cc.valueFields)
-        const effectiveFields = isAllSelected ? allNonCat : valFields
-
-        const handleToggleValue = (col: string) => {
-          const current = isAllSelected ? [...allNonCat] : [...valFields]
-          const next = current.includes(col)
-            ? current.filter(c => c !== col)
-            : [...current, col]
-          if (next.length === allNonCat.length) {
-            const { valueFields: _, ...rest } = cc
-            update({ chartConfig: rest })
-          } else {
-            update({ chartConfig: { ...cc, valueFields: next } })
-          }
-        }
 
         return (
           <>
-            <Field label={t('charts.select_type')}>
+            <Field label={t('designer.data_source')}>
               <select
-                value={cc.type as string || 'bar'}
-                onChange={e => update({ chartConfig: { ...cc, type: e.target.value } })}
+                value={widget.queryId || ''}
+                onChange={e => {
+                  const qId = e.target.value ? Number(e.target.value) : null
+                  const q = queries.find(q => q.id === qId)
+                  update({ queryId: qId, datasourceId: q?.datasourceId || widget.datasourceId })
+                }}
                 className="input text-sm"
               >
-                {CHART_TYPES.map(ct => (
-                  <option key={ct} value={ct}>{t(`charts.type.${ct}`, ct.charAt(0).toUpperCase() + ct.slice(1))}</option>
+                <option value="">{t('designer.select_query')}</option>
+                {queries.map(q => (
+                  <option key={q.id} value={q.id}>{q.name} ({q.datasourceName})</option>
                 ))}
               </select>
             </Field>
 
-            <Field label={t('designer.chart_fields')}>
+            <Field label={t('designer.inline_sql')}>
+              <select
+                value={widget.datasourceId || ''}
+                onChange={e => update({ datasourceId: e.target.value ? Number(e.target.value) : null })}
+                className="input text-sm mb-2"
+              >
+                <option value="">{t('designer.select_datasource')}</option>
+                {datasources.map(ds => (
+                  <option key={ds.id} value={ds.id}>{ds.name} ({ds.type})</option>
+                ))}
+              </select>
+              <textarea
+                value={widget.rawSql}
+                onChange={e => update({ rawSql: e.target.value })}
+                placeholder={t('designer.sql_placeholder')}
+                className="input text-xs font-mono h-20 resize-none"
+              />
+            </Field>
+
+            {/* Load Columns — shared for all data-bound types */}
+            <Field label={t('designer.columns')}>
               <button
                 onClick={loadColumns}
                 disabled={loadingCols || !hasDataSource}
@@ -218,102 +200,353 @@ export default function PropertyPanel() {
               )}
             </Field>
 
-            {availableCols.length > 0 && (
-              <>
-                <Field label={t('designer.category_field')}>
-                  <select
-                    value={catField}
-                    onChange={e => {
-                      const { valueFields: _, ...rest } = cc
-                      update({ chartConfig: { ...rest, categoryField: e.target.value || undefined } })
-                    }}
-                    className="input text-sm"
-                  >
-                    <option value="">{t('designer.auto_first_column')}</option>
-                    {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </Field>
+            {/* ── CHART Config ── */}
+            {widget.widgetType === 'CHART' && (() => {
+              const catField = cc.categoryField as string || ''
+              const valFields = cc.valueFields as string[] || []
+              const allNonCat = availableCols.filter(c => c !== (catField || availableCols[0]))
+              const isAllSelected = !Array.isArray(cc.valueFields)
+              const effectiveFields = isAllSelected ? allNonCat : valFields
 
-                <Field label={t('designer.value_fields')}>
-                  <div className="flex items-center gap-1 mb-1">
-                    <button
-                      onClick={() => { const { valueFields: _, ...rest } = cc; update({ chartConfig: rest }) }}
-                      className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.select_all')}
+              const handleToggleValue = (col: string) => {
+                const current = isAllSelected ? [...allNonCat] : [...valFields]
+                const next = current.includes(col)
+                  ? current.filter(c => c !== col)
+                  : [...current, col]
+                if (next.length === allNonCat.length) {
+                  const { valueFields: _, ...rest } = cc
+                  update({ chartConfig: rest })
+                } else {
+                  update({ chartConfig: { ...cc, valueFields: next } })
+                }
+              }
+
+              return (
+                <>
+                  <Field label={t('charts.select_type')}>
+                    <select
+                      value={cc.type as string || 'bar'}
+                      onChange={e => update({ chartConfig: { ...cc, type: e.target.value } })}
+                      className="input text-sm"
                     >
-                      <CheckSquare className="w-3 h-3" /> {t('designer.select_all')}
-                    </button>
-                    <button
-                      onClick={() => update({ chartConfig: { ...cc, valueFields: [] } })}
-                      className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.deselect_all')}
-                    >
-                      <Square className="w-3 h-3" /> {t('designer.deselect_all')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        const inverted = allNonCat.filter(c => !effectiveFields.includes(c))
-                        if (inverted.length === allNonCat.length) {
-                          const { valueFields: _, ...rest } = cc
-                          update({ chartConfig: rest })
-                        } else {
-                          update({ chartConfig: { ...cc, valueFields: inverted } })
-                        }
-                      }}
-                      className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.invert')}
-                    >
-                      <ToggleLeft className="w-3 h-3" /> {t('designer.invert')}
-                    </button>
-                  </div>
-                  <div className="space-y-1 max-h-36 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                    {allNonCat.map(col => (
-                        <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
+                      {CHART_TYPES.map(ct => (
+                        <option key={ct} value={ct}>{t(`charts.type.${ct}`, ct.charAt(0).toUpperCase() + ct.slice(1))}</option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  {availableCols.length > 0 && (
+                    <>
+                      <Field label={t('designer.category_field')}>
+                        <select
+                          value={catField}
+                          onChange={e => {
+                            const { valueFields: _, ...rest } = cc
+                            update({ chartConfig: { ...rest, categoryField: e.target.value || undefined } })
+                          }}
+                          className="input text-sm"
+                        >
+                          <option value="">{t('designer.auto_first_column')}</option>
+                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Field>
+
+                      <Field label={t('designer.value_fields')}>
+                        <div className="flex items-center gap-1 mb-1">
+                          <button
+                            onClick={() => { const { valueFields: _, ...rest } = cc; update({ chartConfig: rest }) }}
+                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.select_all')}
+                          >
+                            <CheckSquare className="w-3 h-3" /> {t('designer.select_all')}
+                          </button>
+                          <button
+                            onClick={() => update({ chartConfig: { ...cc, valueFields: [] } })}
+                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.deselect_all')}
+                          >
+                            <Square className="w-3 h-3" /> {t('designer.deselect_all')}
+                          </button>
+                          <button
+                            onClick={() => {
+                              const inverted = allNonCat.filter(c => !effectiveFields.includes(c))
+                              if (inverted.length === allNonCat.length) {
+                                const { valueFields: _, ...rest } = cc
+                                update({ chartConfig: rest })
+                              } else {
+                                update({ chartConfig: { ...cc, valueFields: inverted } })
+                              }
+                            }}
+                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.invert')}
+                          >
+                            <ToggleLeft className="w-3 h-3" /> {t('designer.invert')}
+                          </button>
+                        </div>
+                        <div className="space-y-1 max-h-36 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+                          {allNonCat.map(col => (
+                            <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
+                              <input
+                                type="checkbox"
+                                checked={isAllSelected || valFields.includes(col)}
+                                onChange={() => handleToggleValue(col)}
+                                className="rounded border-slate-300"
+                              />
+                              {col}
+                            </label>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">{t('designer.value_fields_hint')}</p>
+                      </Field>
+                    </>
+                  )}
+
+                  {/* Chart Display Options */}
+                  {AXIS_CHART_TYPES.includes(cc.type as string || 'bar') && (
+                    <>
+                      <Field label={t('designer.y_axis_format')}>
+                        <select
+                          value={cc.yAxisFormat as string || 'plain'}
+                          onChange={e => update({ chartConfig: { ...cc, yAxisFormat: e.target.value } })}
+                          className="input text-sm"
+                        >
+                          <option value="plain">{t('designer.axis_format.plain')}</option>
+                          <option value="thousands">{t('designer.axis_format.thousands')}</option>
+                          <option value="millions">{t('designer.axis_format.millions')}</option>
+                          <option value="billions">{t('designer.axis_format.billions')}</option>
+                          <option value="currency">{t('designer.axis_format.currency')}</option>
+                          <option value="percent">{t('designer.axis_format.percent')}</option>
+                        </select>
+                      </Field>
+
+                      {cc.yAxisFormat === 'currency' && (
+                        <Field label={t('designer.currency')}>
+                          <select
+                            value={cc.yAxisCurrency as string || 'USD'}
+                            onChange={e => update({ chartConfig: { ...cc, yAxisCurrency: e.target.value } })}
+                            className="input text-sm"
+                          >
+                            {CURRENCIES.map(c => (
+                              <option key={c.code} value={c.code}>{c.symbol} {c.code} — {c.name}</option>
+                            ))}
+                          </select>
+                        </Field>
+                      )}
+
+                      <Field label={t('designer.x_axis_rotation')}>
+                        <select
+                          value={String(cc.xAxisRotation || 0)}
+                          onChange={e => update({ chartConfig: { ...cc, xAxisRotation: Number(e.target.value) } })}
+                          className="input text-sm"
+                        >
+                          <option value="0">{t('designer.rotation.horizontal')}</option>
+                          <option value="45">{t('designer.rotation.angled')}</option>
+                          <option value="90">{t('designer.rotation.vertical')}</option>
+                        </select>
+                      </Field>
+                    </>
+                  )}
+
+                  <Field label={t('designer.data_labels')}>
+                    <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!cc.showDataLabels}
+                        onChange={e => update({ chartConfig: { ...cc, showDataLabels: e.target.checked } })}
+                        className="rounded border-slate-300"
+                      />
+                      {t('designer.show_data_labels')}
+                    </label>
+                  </Field>
+                </>
+              )
+            })()}
+
+            {/* ── TABLE Config ── */}
+            {widget.widgetType === 'TABLE' && availableCols.length > 0 && (() => {
+              const visibleCols = cc.visibleColumns as string[] | undefined
+              const isAllVisible = !Array.isArray(visibleCols)
+              const effectiveCols = isAllVisible ? availableCols : visibleCols
+
+              const handleToggleCol = (col: string) => {
+                const current = isAllVisible ? [...availableCols] : [...visibleCols]
+                const next = current.includes(col)
+                  ? current.filter(c => c !== col)
+                  : [...current, col]
+                if (next.length === availableCols.length) {
+                  const { visibleColumns: _, ...rest } = cc
+                  update({ chartConfig: rest })
+                } else {
+                  update({ chartConfig: { ...cc, visibleColumns: next } })
+                }
+              }
+
+              const moveCol = (col: string, dir: -1 | 1) => {
+                const cols = isAllVisible ? [...availableCols] : [...visibleCols]
+                const idx = cols.indexOf(col)
+                if (idx < 0) return
+                const newIdx = idx + dir
+                if (newIdx < 0 || newIdx >= cols.length) return
+                ;[cols[idx], cols[newIdx]] = [cols[newIdx], cols[idx]]
+                update({ chartConfig: { ...cc, visibleColumns: cols } })
+              }
+
+              return (
+                <>
+                  <Field label={t('designer.visible_columns')}>
+                    <div className="flex items-center gap-1 mb-1">
+                      <button
+                        onClick={() => { const { visibleColumns: _, ...rest } = cc; update({ chartConfig: rest }) }}
+                        className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5"
+                      >
+                        <CheckSquare className="w-3 h-3" /> {t('designer.select_all')}
+                      </button>
+                      <button
+                        onClick={() => update({ chartConfig: { ...cc, visibleColumns: [] } })}
+                        className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5"
+                      >
+                        <Square className="w-3 h-3" /> {t('designer.deselect_all')}
+                      </button>
+                    </div>
+                    <div className="space-y-0.5 max-h-44 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+                      {(isAllVisible ? availableCols : [...visibleCols, ...availableCols.filter(c => !visibleCols.includes(c))]).map(col => (
+                        <div key={col} className="flex items-center gap-1 group">
                           <input
                             type="checkbox"
-                            checked={isAllSelected || valFields.includes(col)}
-                            onChange={() => handleToggleValue(col)}
+                            checked={isAllVisible || effectiveCols.includes(col)}
+                            onChange={() => handleToggleCol(col)}
                             className="rounded border-slate-300"
                           />
-                          {col}
-                        </label>
+                          <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate">{col}</span>
+                          {!isAllVisible && effectiveCols.includes(col) && (
+                            <span className="opacity-0 group-hover:opacity-100 flex gap-0.5">
+                              <button onClick={() => moveCol(col, -1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                                <ArrowUp className="w-3 h-3 text-slate-400" />
+                              </button>
+                              <button onClick={() => moveCol(col, 1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                                <ArrowDown className="w-3 h-3 text-slate-400" />
+                              </button>
+                            </span>
+                          )}
+                        </div>
                       ))}
-                  </div>
-                  <p className="text-[10px] text-slate-400 mt-1">{t('designer.value_fields_hint')}</p>
-                </Field>
-              </>
-            )}
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_columns_hint')}</p>
+                  </Field>
+                </>
+              )
+            })()}
+
+            {/* ── KPI Config ── */}
+            {widget.widgetType === 'KPI' && (() => {
+              return (
+                <>
+                  {availableCols.length > 0 && (
+                    <>
+                      <Field label={t('designer.kpi_value_column')}>
+                        <select
+                          value={cc.valueColumn as string || ''}
+                          onChange={e => update({ chartConfig: { ...cc, valueColumn: e.target.value || undefined } })}
+                          className="input text-sm"
+                        >
+                          <option value="">{t('designer.auto_first_column')}</option>
+                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Field>
+                      <Field label={t('designer.kpi_aggregation')}>
+                        <select
+                          value={cc.aggregation as string || 'first'}
+                          onChange={e => update({ chartConfig: { ...cc, aggregation: e.target.value } })}
+                          className="input text-sm"
+                        >
+                          <option value="first">{t('designer.agg.first')}</option>
+                          <option value="last">{t('designer.agg.last')}</option>
+                          <option value="sum">{t('designer.agg.sum')}</option>
+                          <option value="avg">{t('designer.agg.avg')}</option>
+                          <option value="min">{t('designer.agg.min')}</option>
+                          <option value="max">{t('designer.agg.max')}</option>
+                          <option value="count">{t('designer.agg.count')}</option>
+                        </select>
+                      </Field>
+                      <Field label={t('designer.kpi_label_column')}>
+                        <select
+                          value={cc.labelColumn as string || ''}
+                          onChange={e => update({ chartConfig: { ...cc, labelColumn: e.target.value || undefined } })}
+                          className="input text-sm"
+                        >
+                          <option value="">{t('common.none')}</option>
+                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Field>
+                    </>
+                  )}
+                  <Field label={t('designer.number_format')}>
+                    <select
+                      value={cc.format as string || 'number'}
+                      onChange={e => update({ chartConfig: { ...cc, format: e.target.value } })}
+                      className="input text-sm"
+                    >
+                      <option value="number">{t('designer.format.number')}</option>
+                      <option value="currency">{t('designer.format.currency')}</option>
+                      <option value="percent">{t('designer.format.percent')}</option>
+                    </select>
+                  </Field>
+                  <Field label={t('designer.prefix_suffix')}>
+                    <div className="flex gap-2">
+                      <input
+                        value={cc.prefix as string || ''}
+                        onChange={e => update({ chartConfig: { ...cc, prefix: e.target.value } })}
+                        placeholder={t('designer.prefix')} className="input text-sm flex-1"
+                      />
+                      <input
+                        value={cc.suffix as string || ''}
+                        onChange={e => update({ chartConfig: { ...cc, suffix: e.target.value } })}
+                        placeholder={t('designer.suffix')} className="input text-sm flex-1"
+                      />
+                    </div>
+                  </Field>
+                </>
+              )
+            })()}
+
+            {/* ── FILTER Config ── */}
+            {widget.widgetType === 'FILTER' && availableCols.length > 0 && (() => {
+              return (
+                <>
+                  <Field label={t('designer.filter_column')}>
+                    <select
+                      value={cc.filterColumn as string || ''}
+                      onChange={e => update({ chartConfig: { ...cc, filterColumn: e.target.value || undefined } })}
+                      className="input text-sm"
+                    >
+                      <option value="">{t('designer.auto_first_column')}</option>
+                      {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </Field>
+                  <Field label={t('designer.filter_type')}>
+                    <select
+                      value={cc.filterType as string || 'select'}
+                      onChange={e => update({ chartConfig: { ...cc, filterType: e.target.value } })}
+                      className="input text-sm"
+                    >
+                      <option value="select">{t('designer.filter_types.select')}</option>
+                      <option value="multi_select">{t('designer.filter_types.multi_select')}</option>
+                      <option value="text">{t('designer.filter_types.text')}</option>
+                      <option value="number_range">{t('designer.filter_types.number_range')}</option>
+                      <option value="date_range">{t('designer.filter_types.date_range')}</option>
+                    </select>
+                  </Field>
+                  <Field label={t('designer.filter_placeholder')}>
+                    <input
+                      value={cc.placeholder as string || ''}
+                      onChange={e => update({ chartConfig: { ...cc, placeholder: e.target.value } })}
+                      className="input text-sm"
+                      placeholder={t('designer.filter_placeholder_hint')}
+                    />
+                  </Field>
+                </>
+              )
+            })()}
           </>
         )
       })()}
-
-      {/* KPI Config */}
-      {widget.widgetType === 'KPI' && (
-        <>
-          <Field label={t('designer.number_format')}>
-            <select
-              value={(widget.chartConfig as Record<string, unknown>).format as string || 'number'}
-              onChange={e => update({ chartConfig: { ...widget.chartConfig, format: e.target.value } })}
-              className="input text-sm"
-            >
-              <option value="number">{t('designer.format.number')}</option>
-              <option value="currency">{t('designer.format.currency')}</option>
-              <option value="percent">{t('designer.format.percent')}</option>
-            </select>
-          </Field>
-          <Field label={t('designer.prefix_suffix')}>
-            <div className="flex gap-2">
-              <input
-                value={(widget.chartConfig as Record<string, unknown>).prefix as string || ''}
-                onChange={e => update({ chartConfig: { ...widget.chartConfig, prefix: e.target.value } })}
-                placeholder={t('designer.prefix')} className="input text-sm flex-1"
-              />
-              <input
-                value={(widget.chartConfig as Record<string, unknown>).suffix as string || ''}
-                onChange={e => update({ chartConfig: { ...widget.chartConfig, suffix: e.target.value } })}
-                placeholder={t('designer.suffix')} className="input text-sm flex-1"
-              />
-            </div>
-          </Field>
-        </>
-      )}
 
       {/* Text content */}
       {widget.widgetType === 'TEXT' && (

@@ -16,6 +16,17 @@ function parseConfig(raw?: string): Record<string, unknown> {
   try { return JSON.parse(raw) } catch { return {} }
 }
 
+function buildValueFormatter(format: string, currency: string): ((value: number) => string) | undefined {
+  switch (format) {
+    case 'thousands': return (v: number) => (v / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'K'
+    case 'millions': return (v: number) => (v / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'M'
+    case 'billions': return (v: number) => (v / 1_000_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'B'
+    case 'currency': return (v: number) => v.toLocaleString(undefined, { style: 'currency', currency, maximumFractionDigits: 0 })
+    case 'percent': return (v: number) => (v * 100).toFixed(1) + '%'
+    default: return undefined
+  }
+}
+
 function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const chartType = (config.type as string) || 'bar'
   const cols = data.columns || []
@@ -28,6 +39,13 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
     ? configuredValues.filter(f => cols.includes(f))
     : cols.filter(c => c !== categoryCol)
 
+  // Display options
+  const yAxisFormat = (config.yAxisFormat as string) || 'plain'
+  const yAxisCurrency = (config.yAxisCurrency as string) || 'USD'
+  const xAxisRotation = Number(config.xAxisRotation) || 0
+  const showDataLabels = !!config.showDataLabels
+  const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
+
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
   const series = seriesCols.map(col => ({
     name: col,
@@ -37,15 +55,40 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
     ...(chartType === 'pie' ? {
       data: rows.map(r => ({ name: String(r[categoryCol] ?? ''), value: r[col] ?? 0 })),
     } : {}),
+    ...(showDataLabels ? {
+      label: {
+        show: true,
+        position: chartType === 'pie' ? 'outside' : 'top',
+        formatter: chartType === 'pie'
+          ? undefined
+          : valueFormatter
+            ? (p: { value: number }) => valueFormatter(p.value)
+            : undefined,
+      },
+    } : {}),
   }))
 
+  const hasAxis = !['pie', 'radar', 'funnel', 'gauge', 'treemap', 'sankey'].includes(chartType)
+
   return {
-    tooltip: { trigger: chartType === 'pie' ? 'item' : 'axis' },
+    tooltip: {
+      trigger: chartType === 'pie' ? 'item' : 'axis',
+      ...(hasAxis && valueFormatter ? {
+        valueFormatter: (v: number) => valueFormatter(v),
+      } : {}),
+    },
     legend: seriesCols.length > 1 ? { bottom: 0 } : undefined,
     grid: { left: '3%', right: '4%', bottom: seriesCols.length > 1 ? '15%' : '3%', containLabel: true },
-    ...(chartType !== 'pie' ? {
-      xAxis: { type: 'category', data: categories },
-      yAxis: { type: 'value' },
+    ...(hasAxis ? {
+      xAxis: {
+        type: 'category',
+        data: categories,
+        axisLabel: xAxisRotation ? { rotate: xAxisRotation } : undefined,
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: valueFormatter ? { formatter: valueFormatter } : undefined,
+      },
     } : {}),
     series,
     ...config.option as object || {},

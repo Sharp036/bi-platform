@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play } from 'lucide-react'
 import { queryApi } from '@/api/queries'
 import EChartWidget from '@/components/charts/EChartWidget'
+import TableWidget from '@/components/charts/TableWidget'
 import type { WidgetData } from '@/types'
 import clsx from 'clsx'
 import { useState, useCallback } from 'react'
@@ -126,8 +127,54 @@ function WidgetBlock({
     // Show as ghost in design mode
   }
 
-  const showChart = widget.widgetType === 'CHART' && previewData
-  const chartConfigStr = showChart ? JSON.stringify(widget.chartConfig) : undefined
+  const cc = widget.chartConfig as Record<string, unknown>
+  const chartConfigStr = widget.widgetType === 'CHART' && previewData ? JSON.stringify(cc) : undefined
+
+  // Build filtered data for TABLE preview (apply visibleColumns)
+  const tablePreviewData = widget.widgetType === 'TABLE' && previewData ? (() => {
+    const visCols = cc.visibleColumns as string[] | undefined
+    const cols = Array.isArray(visCols) && visCols.length > 0
+      ? visCols.filter(c => previewData.columns.includes(c))
+      : previewData.columns
+    return { ...previewData, columns: cols }
+  })() : null
+
+  // Build KPI preview value
+  const kpiPreview = widget.widgetType === 'KPI' && previewData ? (() => {
+    const valCol = (cc.valueColumn as string) || previewData.columns[0]
+    const rows = previewData.rows || []
+    if (rows.length === 0) return null
+    const agg = (cc.aggregation as string) || 'first'
+    const values = rows.map(r => Number(r[valCol]) || 0)
+    let value: number
+    switch (agg) {
+      case 'sum': value = values.reduce((a, b) => a + b, 0); break
+      case 'avg': value = values.reduce((a, b) => a + b, 0) / values.length; break
+      case 'min': value = Math.min(...values); break
+      case 'max': value = Math.max(...values); break
+      case 'count': value = rows.length; break
+      case 'last': value = values[values.length - 1]; break
+      default: value = values[0]
+    }
+    const fmt = cc.format as string || 'number'
+    let display: string
+    if (fmt === 'currency') display = value.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+    else if (fmt === 'percent') display = (value * 100).toFixed(1) + '%'
+    else display = value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    const prefix = (cc.prefix as string) || ''
+    const suffix = (cc.suffix as string) || ''
+    const labelCol = cc.labelColumn as string | undefined
+    const label = labelCol && rows[0] ? String(rows[0][labelCol] ?? '') : undefined
+    return { display: `${prefix}${display}${suffix}`, label }
+  })() : null
+
+  // FILTER preview: show distinct values
+  const filterPreview = widget.widgetType === 'FILTER' && previewData ? (() => {
+    const filterCol = (cc.filterColumn as string) || previewData.columns[0]
+    if (!filterCol) return null
+    const values = [...new Set(previewData.rows.map(r => String(r[filterCol] ?? '')))].slice(0, 10)
+    return { column: filterCol, values, filterType: (cc.filterType as string) || 'select' }
+  })() : null
 
   return (
     <div style={style} onClick={(e) => { e.stopPropagation(); onSelect() }}>
@@ -160,16 +207,52 @@ function WidgetBlock({
 
         {/* Body */}
         <div className="flex-1 flex items-center justify-center p-2 min-h-0">
-          {showChart ? (
+          {/* CHART preview */}
+          {widget.widgetType === 'CHART' && previewData ? (
             <div className="w-full h-full">
               <EChartWidget data={previewData} chartConfig={chartConfigStr} />
             </div>
-          ) : widget.widgetType === 'TEXT' ? (
+          ) : /* TABLE preview */
+          tablePreviewData ? (
+            <div className="w-full h-full overflow-hidden">
+              <TableWidget data={tablePreviewData} />
+            </div>
+          ) : /* KPI preview */
+          kpiPreview ? (
+            <div className="text-center w-full">
+              <p className="text-2xl font-bold text-slate-800 dark:text-white truncate">
+                {kpiPreview.display}
+              </p>
+              {kpiPreview.label && (
+                <p className="text-xs text-slate-400 mt-0.5 truncate">{kpiPreview.label}</p>
+              )}
+            </div>
+          ) : /* FILTER preview */
+          filterPreview ? (
+            <div className="w-full">
+              <p className="text-[10px] text-slate-400 mb-1">{filterPreview.column}</p>
+              {filterPreview.filterType === 'select' || filterPreview.filterType === 'multi_select' ? (
+                <select className="input text-xs w-full" disabled>
+                  <option>— {filterPreview.values.length} {t('designer.filter_values')} —</option>
+                  {filterPreview.values.map(v => <option key={v}>{v}</option>)}
+                </select>
+              ) : filterPreview.filterType === 'text' ? (
+                <input className="input text-xs w-full" disabled placeholder={cc.placeholder as string || filterPreview.column} />
+              ) : (
+                <div className="flex gap-1">
+                  <input className="input text-xs flex-1" disabled placeholder="min" />
+                  <input className="input text-xs flex-1" disabled placeholder="max" />
+                </div>
+              )}
+            </div>
+          ) : /* TEXT */
+          widget.widgetType === 'TEXT' ? (
             <div className="text-xs text-slate-500 dark:text-slate-400 overflow-hidden line-clamp-4 w-full"
                  dangerouslySetInnerHTML={{ __html: widget.title || '<p>Text content</p>' }} />
-          ) : widget.widgetType === 'IMAGE' && (widget.chartConfig as Record<string, unknown>).url ? (
+          ) : /* IMAGE */
+          widget.widgetType === 'IMAGE' && (cc.url as string) ? (
             <img
-              src={(widget.chartConfig as Record<string, unknown>).url as string}
+              src={cc.url as string}
               alt={widget.title}
               className="max-h-full max-w-full object-contain"
             />
