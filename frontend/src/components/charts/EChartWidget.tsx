@@ -67,6 +67,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const showDataLabels = !!config.showDataLabels
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
   const dataLabelCount = Number(config.dataLabelCount) || 3
+  const dataLabelRotation = Number(config.dataLabelRotation) || 0
   const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
 
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
@@ -84,10 +85,16 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
         label: {
           show: true,
           position: chartType === 'pie' ? 'outside' : 'top',
+          distance: 8,
+          rotate: chartType === 'pie' ? undefined : (dataLabelRotation || undefined),
           formatter: chartType === 'pie'
             ? undefined
             : buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
         },
+        ...(chartType !== 'pie' ? {
+          labelLine: { show: true, length: 10, lineStyle: { color: '#aaa' } },
+          labelLayout: { hideOverlap: dataLabelMode === 'all', moveOverlap: 'shiftY' },
+        } : {}),
       } : {}),
     }
   })

@@ -270,10 +270,10 @@ export default function ReportViewerPage() {
             return (
               <div
                 key={w.widgetId}
-                className={`card p-4 ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
+                className={`card p-4 overflow-hidden ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
                 style={{
                   gridColumn: `span ${Math.min(colSpan, 12)}`,
-                  minHeight: `${minH}px`,
+                  height: `${minH}px`,
                 }}
               >
                 {hasDrill && (

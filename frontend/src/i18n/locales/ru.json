@@ -265,6 +265,10 @@
   "designer.label_mode.last_n": "Последние N",
   "designer.label_mode.min_max": "Мин и Макс",
   "designer.label_count_placeholder": "Количество",
+  "designer.label_rotation.horizontal": "Подписи: Горизонтально (0°)",
+  "designer.label_rotation.angled_up": "Подписи: Под углом вверх (-45°)",
+  "designer.label_rotation.angled_down": "Подписи: Под углом вниз (45°)",
+  "designer.label_rotation.vertical": "Подписи: Вертикально (-90°)",
 
   "queries.title": "Запросы",
   "queries.adhoc_title": "Произвольный запрос",

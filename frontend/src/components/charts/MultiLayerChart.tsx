@@ -127,6 +127,7 @@ export default function MultiLayerChart({
     const showDataLabels = !!config.showDataLabels
     const dataLabelMode = (config.dataLabelMode as string) || 'all'
     const dataLabelCount = Number(config.dataLabelCount) || 3
+    const dataLabelRotation = Number(config.dataLabelRotation) || 0
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
 
     if (layersWithVisibility.length === 0) {
@@ -149,9 +150,12 @@ export default function MultiLayerChart({
             smooth: chartType === 'line',
             ...(showDataLabels ? {
               label: {
-                show: true, position: 'top',
+                show: true, position: 'top', distance: 8,
+                rotate: dataLabelRotation || undefined,
                 formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
               },
+              labelLine: { show: true, length: 10, lineStyle: { color: '#aaa' } },
+              labelLayout: { hideOverlap: dataLabelMode === 'all', moveOverlap: 'shiftY' },
             } : {}),
           })
         }

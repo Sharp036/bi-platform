@@ -381,6 +381,16 @@ export default function PropertyPanel() {
                             placeholder={t('designer.label_count_placeholder')}
                           />
                         )}
+                        <select
+                          value={String(cc.dataLabelRotation || 0)}
+                          onChange={e => update({ chartConfig: { ...cc, dataLabelRotation: Number(e.target.value) } })}
+                          className="input text-sm"
+                        >
+                          <option value="0">{t('designer.label_rotation.horizontal')}</option>
+                          <option value="-45">{t('designer.label_rotation.angled_up')}</option>
+                          <option value="45">{t('designer.label_rotation.angled_down')}</option>
+                          <option value="-90">{t('designer.label_rotation.vertical')}</option>
+                        </select>
                       </div>
                     )}
                   </Field>
