@@ -1,6 +1,8 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.OffsetDateTime
 
 @Entity
@@ -58,6 +60,7 @@ class ChartAnnotation(
     var sortOrder: Int = 0,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -83,6 +86,7 @@ class TooltipConfig(
     var titleField: String? = null,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var fields: String = "[]",
 
     @Column(name = "show_sparkline", nullable = false)
@@ -95,6 +99,7 @@ class TooltipConfig(
     var htmlTemplate: String? = null,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -126,6 +131,7 @@ class WidgetContainer(
     var autoDistribute: Boolean = true,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var config: String = "{}",
 
     @Column(name = "sort_order", nullable = false)

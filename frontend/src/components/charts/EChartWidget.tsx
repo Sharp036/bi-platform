@@ -114,6 +114,7 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
         <ReactECharts
           ref={chartRef}
           option={option}
+          notMerge={true}
           theme={isDark ? 'dark' : undefined}
           style={{ height: '100%', width: '100%' }}
           opts={{ renderer: 'canvas' }}

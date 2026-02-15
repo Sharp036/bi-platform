@@ -1,6 +1,8 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -50,6 +52,7 @@ class ChartLayer(
     var sortOrder: Int = 0,
 
     @Column(name = "series_config", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var seriesConfig: String = "{}",
 
     @Column(name = "category_field", length = 200)
@@ -59,6 +62,7 @@ class ChartLayer(
     var valueField: String? = null,
 
     @Column(name = "param_mapping", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var paramMapping: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -112,6 +116,7 @@ class DashboardAction(
     var sortOrder: Int = 0,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -193,6 +198,7 @@ class DashboardOverlay(
     var isVisible: Boolean = true,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var style: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)

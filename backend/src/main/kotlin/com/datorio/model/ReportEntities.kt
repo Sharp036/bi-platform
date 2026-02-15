@@ -1,6 +1,8 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -30,9 +32,11 @@ class Report(
     var reportType: ReportType = ReportType.STANDARD,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var layout: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var settings: String = "{}",
 
     @Enumerated(EnumType.STRING)
@@ -107,6 +111,7 @@ class ReportParameter(
     var sortOrder: Int = 0,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var config: String = "{}"
 )
 
@@ -141,15 +146,19 @@ class ReportWidget(
     var rawSql: String? = null,
 
     @Column(name = "chart_config", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var chartConfig: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var position: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var style: String = "{}",
 
     @Column(name = "param_mapping", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var paramMapping: String = "{}",
 
     @Column(name = "sort_order", nullable = false)
@@ -185,6 +194,7 @@ class DashboardReport(
     var reportId: Long,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var position: String = "{}",
 
     @Column(name = "sort_order", nullable = false)
@@ -211,6 +221,7 @@ class ReportSchedule(
     var isActive: Boolean = true,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var parameters: String = "{}",
 
     @Enumerated(EnumType.STRING)
@@ -218,6 +229,7 @@ class ReportSchedule(
     var outputFormat: OutputFormat = OutputFormat.JSON,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var recipients: String = "[]",
 
     @Column(name = "last_run_at")
@@ -257,9 +269,11 @@ class ReportSnapshot(
     var scheduleId: Long? = null,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var parameters: String = "{}",
 
     @Column(name = "result_data", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var resultData: String = "{}",
 
     @Enumerated(EnumType.STRING)

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import i18n from 'i18next'
 
 export interface DesignerWidget {
   id: string                // temp client ID (negative or uuid)
@@ -74,12 +75,12 @@ let nextId = 1
 const genId = () => `w_${nextId++}`
 
 const WIDGET_DEFAULTS: Record<string, Partial<DesignerWidget>> = {
-  CHART: { title: 'New Chart', position: { x: 0, y: 0, w: 6, h: 4 }, chartConfig: { type: 'bar' } },
-  TABLE: { title: 'New Table', position: { x: 0, y: 0, w: 12, h: 4 }, chartConfig: {} },
-  KPI:   { title: 'New KPI', position: { x: 0, y: 0, w: 3, h: 2 }, chartConfig: { format: 'number' } },
-  TEXT:  { title: 'Text Block', position: { x: 0, y: 0, w: 6, h: 2 }, chartConfig: {} },
-  FILTER: { title: 'Filter', position: { x: 0, y: 0, w: 3, h: 1 }, chartConfig: {} },
-  IMAGE: { title: 'Image', position: { x: 0, y: 0, w: 4, h: 3 }, chartConfig: {} },
+  CHART: { position: { x: 0, y: 0, w: 6, h: 4 }, chartConfig: { type: 'bar' } },
+  TABLE: { position: { x: 0, y: 0, w: 12, h: 4 }, chartConfig: {} },
+  KPI:   { position: { x: 0, y: 0, w: 3, h: 2 }, chartConfig: { format: 'number' } },
+  TEXT:  { position: { x: 0, y: 0, w: 6, h: 2 }, chartConfig: {} },
+  FILTER: { position: { x: 0, y: 0, w: 3, h: 1 }, chartConfig: {} },
+  IMAGE: { position: { x: 0, y: 0, w: 4, h: 3 }, chartConfig: {} },
 }
 
 const pushHistory = (state: DesignerState): Partial<DesignerState> => {
@@ -166,7 +167,7 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
     const widget: DesignerWidget = {
       id: genId(),
       widgetType: type,
-      title: (defaults.title as string) || 'New Widget',
+      title: i18n.t(`widgets.type.${type.toLowerCase()}`),
       queryId: null,
       datasourceId: null,
       rawSql: '',

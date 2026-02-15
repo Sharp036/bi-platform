@@ -1,6 +1,8 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -37,6 +39,7 @@ class DrillAction(
     var description: String? = null,
 
     @Column(name = "param_mapping", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var paramMapping: String = "{}",
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +57,7 @@ class DrillAction(
     var openMode: OpenMode = OpenMode.REPLACE,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var config: String = "{}",
 
     @Column(name = "created_at", nullable = false, updatable = false)

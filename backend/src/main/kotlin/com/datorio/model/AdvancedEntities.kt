@@ -1,6 +1,8 @@
 package com.datorio.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -176,9 +178,11 @@ class Bookmark(
     var description: String? = null,
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var parameters: String = "{}",
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var filters: String = "{}",
 
     @Column(name = "is_default", nullable = false)
