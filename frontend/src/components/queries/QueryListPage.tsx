@@ -34,6 +34,7 @@ export default function QueryListPage() {
   const [editingQuery, setEditingQuery] = useState<SavedQuery | null>(null)
   const [editName, setEditName] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  const [loadedQuery, setLoadedQuery] = useState<SavedQuery | null>(null)
   const normalizedSql = typeof sql === 'string' ? sql : ''
 
   const loadQueries = () =>
@@ -85,6 +86,20 @@ export default function QueryListPage() {
     } finally { setSaving(false) }
   }
 
+  const handleUpdateLoaded = async () => {
+    if (!loadedQuery || !normalizedSql.trim()) return
+    setSaving(true)
+    try {
+      await queryApi.update(loadedQuery.id, { sqlText: normalizedSql })
+      const fresh = await queryApi.get(loadedQuery.id)
+      setLoadedQuery(fresh)
+      toast.success(t('queries.updated'))
+      loadQueries()
+    } catch {
+      toast.error(t('queries.update_failed'))
+    } finally { setSaving(false) }
+  }
+
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(t('queries.delete_confirm', { name }))) return
     try {
@@ -128,6 +143,7 @@ export default function QueryListPage() {
     try {
       const full = await queryApi.get(q.id)
       setSql(full.sqlText || '')
+      setLoadedQuery(full)
       if (typeof full.datasourceId === 'number') {
         const ds = datasources.find(d => d.id === full.datasourceId)
         if (ds) setDsId(ds.id)
@@ -148,7 +164,14 @@ export default function QueryListPage() {
       <div className="card p-4 mb-6">
         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('queries.adhoc_title')}</h2>
         <div className="flex items-start gap-3">
-          <select value={dsId || ''} onChange={e => setDsId(Number(e.target.value))} className="input w-48 flex-shrink-0">
+          <select
+            value={dsId || ''}
+            onChange={e => {
+              setDsId(Number(e.target.value))
+              setLoadedQuery(null)
+            }}
+            className="input w-48 flex-shrink-0"
+          >
             {datasources.map(ds => <option key={ds.id} value={ds.id}>{ds.name}</option>)}
           </select>
           <textarea
@@ -161,14 +184,40 @@ export default function QueryListPage() {
               <Play className="w-4 h-4" /> {executing ? t('queries.running') : t('queries.run')}
             </button>
             <button
-              onClick={() => { setSaveName(''); setSaveDesc(''); setShowSaveDialog(true) }}
+              onClick={() => {
+                if (loadedQuery) handleUpdateLoaded()
+                else {
+                  setSaveName('')
+                  setSaveDesc('')
+                  setShowSaveDialog(true)
+                }
+              }}
               disabled={!dsId || !normalizedSql.trim()}
               className="btn-secondary"
             >
-              <Save className="w-4 h-4" /> {t('queries.save')}
+              <Save className="w-4 h-4" /> {loadedQuery ? t('common.update') : t('queries.save')}
             </button>
           </div>
         </div>
+        {loadedQuery && (
+          <div className="mt-2 flex items-center gap-2">
+            <p className="text-xs text-brand-600 dark:text-brand-400">
+              {t('common.edit')}: {loadedQuery.name}
+            </p>
+            <button
+              onClick={() => setLoadedQuery(null)}
+              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline"
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              onClick={() => { setSaveName(''); setSaveDesc(''); setShowSaveDialog(true) }}
+              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline"
+            >
+              {t('queries.save')}...
+            </button>
+          </div>
+        )}
         <p className="text-xs text-slate-400 mt-1">{t('queries.ctrl_enter_hint')}</p>
       </div>
 
