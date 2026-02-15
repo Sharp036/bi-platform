@@ -291,13 +291,15 @@ export default function ReportViewerPage() {
       {rendering && !renderResult ? (
         <LoadingSpinner />
       ) : renderResult ? (
-        <div className="grid grid-cols-12 gap-4">
+        <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
           {renderResult.widgets
             .filter(w => !hiddenWidgetIds.includes(w.widgetId))
             .map((w) => {
             const pos = parsePosition(w.position)
-            const colSpan = pos.w || 12
-            const minH = pos.h ? pos.h * 70 : 280
+            const x = Math.max(0, Number(pos.x) || 0)
+            const y = Math.max(0, Number(pos.y) || 0)
+            const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+            const hSpan = Math.max(1, Number(pos.h) || 4)
             const widgetDrillActions = drillActions[w.widgetId] || []
             const hasDrill = widgetDrillActions.length > 0
             return (
@@ -305,8 +307,8 @@ export default function ReportViewerPage() {
                 key={w.widgetId}
                 className={`card p-4 overflow-hidden ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
                 style={{
-                  gridColumn: `span ${Math.min(colSpan, 12)}`,
-                  height: `${minH}px`,
+                  gridColumn: `${x + 1} / span ${wSpan}`,
+                  gridRow: `${y + 1} / span ${hSpan}`,
                 }}
               >
                 {hasDrill && (

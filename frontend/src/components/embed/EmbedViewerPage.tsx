@@ -97,20 +97,22 @@ export default function EmbedViewerPage() {
   return (
     <div className="p-4 bg-white dark:bg-slate-900 min-h-screen">
       <div className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-12 gap-4">
+        <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
           {renderResult.widgets
             .filter(w => !hiddenWidgetIds.includes(w.widgetId))
             .map(w => {
             const pos = parsePosition(w.position)
-            const colSpan = pos.w || 12
-            const minH = pos.h ? pos.h * 70 : 280
+            const x = Math.max(0, Number(pos.x) || 0)
+            const y = Math.max(0, Number(pos.y) || 0)
+            const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+            const hSpan = Math.max(1, Number(pos.h) || 4)
             return (
               <div
                 key={w.widgetId}
                 className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4"
                 style={{
-                  gridColumn: `span ${Math.min(colSpan, 12)}`,
-                  minHeight: `${minH}px`,
+                  gridColumn: `${x + 1} / span ${wSpan}`,
+                  gridRow: `${y + 1} / span ${hSpan}`,
                 }}
               >
                 <WidgetRenderer
