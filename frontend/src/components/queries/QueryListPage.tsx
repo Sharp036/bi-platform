@@ -34,6 +34,7 @@ export default function QueryListPage() {
   const [editingQuery, setEditingQuery] = useState<SavedQuery | null>(null)
   const [editName, setEditName] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  const normalizedSql = typeof sql === 'string' ? sql : ''
 
   const loadQueries = () =>
     queryApi.list({ size: 50 }).then(d => setQueries(d.content || [])).catch(() => {})
@@ -46,10 +47,10 @@ export default function QueryListPage() {
   }, [])
 
   const handleExecute = async () => {
-    if (!dsId || !sql.trim()) return
+    if (!dsId || !normalizedSql.trim()) return
     setExecuting(true)
     try {
-      const res = await queryApi.executeAdHoc({ datasourceId: dsId, sql, limit: 1000 })
+      const res = await queryApi.executeAdHoc({ datasourceId: dsId, sql: normalizedSql, limit: 1000 })
       setResult(res)
       setResultPage(0)
     } catch (err: unknown) {
@@ -70,10 +71,10 @@ export default function QueryListPage() {
   }
 
   const handleSave = async () => {
-    if (!dsId || !sql.trim() || !saveName.trim()) return
+    if (!dsId || !normalizedSql.trim() || !saveName.trim()) return
     setSaving(true)
     try {
-      await queryApi.create({ name: saveName.trim(), datasourceId: dsId, sqlText: sql, description: saveDesc.trim() || undefined })
+      await queryApi.create({ name: saveName.trim(), datasourceId: dsId, sqlText: normalizedSql, description: saveDesc.trim() || undefined })
       toast.success(t('queries.saved_success'))
       setShowSaveDialog(false)
       setSaveName('')
@@ -123,11 +124,18 @@ export default function QueryListPage() {
     setEditDesc(q.description || '')
   }
 
-  const handleLoadSaved = (q: SavedQuery) => {
-    setSql(q.sqlText)
-    const ds = datasources.find(d => d.id === q.datasourceId)
-    if (ds) setDsId(ds.id)
-    toast.success(t('queries.loaded_to_editor'))
+  const handleLoadSaved = async (q: SavedQuery) => {
+    try {
+      const full = await queryApi.get(q.id)
+      setSql(full.sqlText || '')
+      if (typeof full.datasourceId === 'number') {
+        const ds = datasources.find(d => d.id === full.datasourceId)
+        if (ds) setDsId(ds.id)
+      }
+      toast.success(t('queries.loaded_to_editor'))
+    } catch {
+      toast.error(t('common.failed_to_load'))
+    }
   }
 
   if (loading) return <LoadingSpinner />
@@ -154,7 +162,7 @@ export default function QueryListPage() {
             </button>
             <button
               onClick={() => { setSaveName(''); setSaveDesc(''); setShowSaveDialog(true) }}
-              disabled={!dsId || !sql.trim()}
+              disabled={!dsId || !normalizedSql.trim()}
               className="btn-secondary"
             >
               <Save className="w-4 h-4" /> {t('queries.save')}
@@ -187,7 +195,7 @@ export default function QueryListPage() {
                 className="input w-full" rows={2}
               />
               <pre className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 text-xs font-mono text-slate-600 dark:text-slate-300 max-h-32 overflow-auto">
-                {sql}
+                {normalizedSql}
               </pre>
             </div>
             <div className="flex justify-end gap-2 mt-4">
