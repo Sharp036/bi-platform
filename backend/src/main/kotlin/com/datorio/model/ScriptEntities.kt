@@ -1,8 +1,6 @@
 package com.datorio.model
 
 import jakarta.persistence.*
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 import java.time.Instant
 
 // ─────────────────────────────────────────────
@@ -41,11 +39,9 @@ class Script(
     var isLibrary: Boolean = false,
 
     @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
     var tags: String = "[]",
 
     @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
     var config: String = "{}",
 
     @Column(name = "created_by")

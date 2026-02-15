@@ -1,8 +1,6 @@
 package com.datorio.model
 
 import jakarta.persistence.*
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 import java.time.Instant
 
 @Entity
@@ -21,7 +19,6 @@ class EmbedToken(
     var label: String? = null,
 
     @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
     var parameters: String = "{}",
 
     @Column(name = "expires_at")
