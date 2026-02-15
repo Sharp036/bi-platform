@@ -8,6 +8,17 @@ import { buildRichTooltip } from '@/components/charts/buildRichTooltip'
 import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
 import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
 
+function buildValueFormatter(format: string, currency: string): ((value: number) => string) | undefined {
+  switch (format) {
+    case 'thousands': return (v: number) => (v / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'K'
+    case 'millions': return (v: number) => (v / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'M'
+    case 'billions': return (v: number) => (v / 1_000_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'B'
+    case 'currency': return (v: number) => v.toLocaleString(undefined, { style: 'currency', currency, maximumFractionDigits: 0 })
+    case 'percent': return (v: number) => (v * 100).toFixed(1) + '%'
+    default: return undefined
+  }
+}
+
 interface Props {
   data: WidgetData
   chartConfig?: string
@@ -78,8 +89,8 @@ export default function MultiLayerChart({
     const cols = data.columns || []
     const rows = data.rows || []
 
-    // Base: first column = category, rest = series
-    const categoryCol = cols[0]
+    // Use configured fields or fall back to defaults (match EChartWidget behavior)
+    const categoryCol = (config.categoryField as string) || cols[0]
     const categories = rows.map(r => String(r[categoryCol] ?? ''))
 
     // Determine if we need dual axis
@@ -88,9 +99,19 @@ export default function MultiLayerChart({
     // Build base series from widget data (if no layers, use old logic)
     const series: any[] = []
 
+    // Display options from chartConfig (match EChartWidget behavior)
+    const yAxisFormat = (config.yAxisFormat as string) || 'plain'
+    const yAxisCurrency = (config.yAxisCurrency as string) || 'USD'
+    const xAxisRotation = Number(config.xAxisRotation) || 0
+    const showDataLabels = !!config.showDataLabels
+    const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
+
     if (layersWithVisibility.length === 0) {
-      // Classic: all non-category columns as series
-      const seriesCols = cols.slice(1)
+      // Use configured valueFields or fall back to all non-category columns
+      const configuredValues = config.valueFields as string[] | undefined
+      const seriesCols = Array.isArray(configuredValues)
+        ? configuredValues.filter(f => cols.includes(f))
+        : cols.filter(c => c !== categoryCol)
       seriesCols.forEach(col => {
         if (chartType === 'pie') {
           series.push({
@@ -102,6 +123,12 @@ export default function MultiLayerChart({
             name: col, type: chartType,
             data: rows.map(r => r[col] ?? 0),
             smooth: chartType === 'line',
+            ...(showDataLabels ? {
+              label: {
+                show: true, position: 'top',
+                formatter: valueFormatter ? (p: { value: number }) => valueFormatter(p.value) : undefined,
+              },
+            } : {}),
           })
         }
       })
@@ -175,8 +202,14 @@ export default function MultiLayerChart({
       ? buildRichTooltip(tooltipConfig)
       : { tooltip: { trigger: isPie ? 'item' : 'axis', confine: true } }
 
+    // Apply formatting to yAxis
+    if (valueFormatter) {
+      yAxis[0] = { ...yAxis[0], axisLabel: { formatter: valueFormatter } }
+    }
+
     let result = {
       ...tooltipOpts,
+      ...(valueFormatter && !isPie ? { tooltip: { ...((tooltipOpts as any).tooltip || {}), valueFormatter } } : {}),
       legend: series.length > 1 ? { bottom: 0, type: 'scroll' } : undefined,
       grid: {
         left: '3%',
@@ -185,7 +218,10 @@ export default function MultiLayerChart({
         containLabel: true,
       },
       ...(!isPie ? {
-        xAxis: { type: 'category', data: categories },
+        xAxis: {
+          type: 'category', data: categories,
+          axisLabel: xAxisRotation ? { rotate: xAxisRotation } : undefined,
+        },
         yAxis,
       } : {}),
       series,

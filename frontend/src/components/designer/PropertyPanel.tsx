@@ -46,8 +46,14 @@ export default function PropertyPanel() {
     datasourceApi.list().then(setDatasources).catch(() => {})
   }, [])
 
-  // Reset columns when widget selection changes
+  // Auto-load columns when widget selection changes (for saved widgets with a data source)
   useEffect(() => { setAvailableCols([]) }, [selected])
+
+  useEffect(() => {
+    if (!widget) return
+    const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
+    if (hasDataSource) loadColumns()
+  }, [selected]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadColumns = useCallback(async () => {
     if (!widget) return
