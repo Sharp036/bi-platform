@@ -53,6 +53,32 @@ interface Props {
   tooltipConfig?: TooltipConfigItem
 }
 
+function buildStaggeredLabelLayout(staggerCount: number) {
+  const rowSpacing = 16
+  const baseY = 8
+  return (params: { rect?: { x: number; y: number; width: number }; labelRect?: { width: number; height: number }; dataIndex: number }) => {
+    const { rect, labelRect, dataIndex } = params
+    if (!rect || !labelRect || labelRect.width < 1) return {}
+    const row = dataIndex % staggerCount
+    const y = baseY + row * rowSpacing
+    const midX = rect.x + rect.width / 2
+    return {
+      x: midX,
+      y,
+      align: 'center',
+      verticalAlign: 'top',
+      labelLinePoints: [
+        [midX, y + (labelRect.height || 12)],
+        [midX, rect.y],
+      ],
+    }
+  }
+}
+
+function baseTopPx(staggerRows: number): number {
+  return 8 + staggerRows * 16 + 10
+}
+
 function parseConfig(raw?: string): Record<string, unknown> {
   if (!raw) return {}
   try { return JSON.parse(raw) } catch { return {} }
@@ -152,9 +178,10 @@ export default function MultiLayerChart({
               label: {
                 show: true, position: 'top', distance: 8,
                 rotate: dataLabelRotation || undefined,
+                fontSize: 10,
                 formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
               },
-              labelLine: { show: true, length: 10, lineStyle: { color: '#aaa' } },
+              labelLine: { show: true, lineStyle: { color: '#bbb', width: 1 } },
             } : {}),
           })
         }
@@ -225,6 +252,12 @@ export default function MultiLayerChart({
 
     const isPie = chartType === 'pie' || layersWithVisibility.some(l => l.chartType === 'pie')
 
+    // Stagger row count for label layout
+    const visibleLabelCount = dataLabelMode === 'all' ? rows.length
+      : dataLabelMode === 'min_max' ? 2
+      : Math.min(dataLabelCount, rows.length)
+    const staggerRows = visibleLabelCount > 20 ? 6 : visibleLabelCount > 8 ? 4 : 3
+
     const tooltipOpts = tooltipConfig
       ? buildRichTooltip(tooltipConfig)
       : { tooltip: { trigger: isPie ? 'item' : 'axis', confine: true } }
@@ -241,6 +274,7 @@ export default function MultiLayerChart({
       grid: {
         left: '3%',
         right: hasRightAxis ? '8%' : '4%',
+        top: showDataLabels && !isPie ? baseTopPx(staggerRows) : undefined,
         bottom: series.length > 1 ? '15%' : '3%',
         containLabel: true,
       },
@@ -253,7 +287,7 @@ export default function MultiLayerChart({
       } : {}),
       series,
       ...(showDataLabels && !isPie ? {
-        labelLayout: { hideOverlap: dataLabelMode === 'all', moveOverlap: 'shiftY' },
+        labelLayout: buildStaggeredLabelLayout(staggerRows),
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),
