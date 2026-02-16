@@ -82,9 +82,10 @@ function calcLinearRegression(values: number[]): number[] {
 function buildSmartLabelLayout(
   visibleIndices: number[],
   mode: string,
-  staggerCount: number
+  staggerCount: number,
+  totalPoints: number
 ) {
-  const rowSpacing = 16
+  const rowSpacing = 18
   const baseY = 8
   const visibleOrder = new Map<number, number>()
   visibleIndices.forEach((idx, order) => visibleOrder.set(idx, order))
@@ -100,16 +101,23 @@ function buildSmartLabelLayout(
 
     // For selective modes, push labels to the side free space (like callouts).
     if (useSidePacking) {
-      const sideShift = 52 + Math.floor(order / staggerCount) * 22
-      const x = anchorX + sideShift
+      const column = Math.floor(order / staggerCount)
+      const sideBase = 56
+      const sideStep = 76
+      const side =
+        mode === 'last' ? -1 :
+          mode === 'first' ? 1 :
+            (dataIndex > totalPoints / 2 ? -1 : 1)
+      const sideShift = sideBase + column * sideStep
+      const x = anchorX + side * sideShift
       return {
         x,
         y,
-        align: 'left',
+        align: side > 0 ? 'left' : 'right',
         verticalAlign: 'top',
         labelLinePoints: [
           [x, y + (labelRect.height || 12)],
-          [anchorX + 10, y + (labelRect.height || 12)],
+          [anchorX + side * 10, y + (labelRect.height || 12)],
           [anchorX, rect.y],
         ],
       }
@@ -189,7 +197,12 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
           labelLine: { show: true, lineStyle: { color: '#bbb', width: 1 } },
         } : {}),
         ...(chartType !== 'pie' ? {
-          labelLayout: buildSmartLabelLayout(visibleLabelIndices, dataLabelMode, visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3),
+          labelLayout: buildSmartLabelLayout(
+            visibleLabelIndices,
+            dataLabelMode,
+            visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3,
+            rows.length
+          ),
         } : {}),
       } : {}),
     }
@@ -247,7 +260,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
       },
     } : {}),
     series,
-    ...(showDataLabels && hasAxis ? {
+    ...(showDataLabels && hasAxis && dataLabelMode === 'all' ? {
       labelLayout: { moveOverlap: 'shiftY' },
     } : {}),
     ...config.option as object || {},

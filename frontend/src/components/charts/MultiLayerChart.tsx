@@ -84,8 +84,8 @@ interface Props {
   tooltipConfig?: TooltipConfigItem
 }
 
-function buildStaggeredLabelLayout(visibleIndices: number[], mode: string, staggerCount: number) {
-  const rowSpacing = 16
+function buildStaggeredLabelLayout(visibleIndices: number[], mode: string, staggerCount: number, totalPoints: number) {
+  const rowSpacing = 18
   const baseY = 8
   const visibleOrder = new Map<number, number>()
   visibleIndices.forEach((idx, order) => visibleOrder.set(idx, order))
@@ -98,16 +98,23 @@ function buildStaggeredLabelLayout(visibleIndices: number[], mode: string, stagg
     const y = baseY + row * rowSpacing
     const midX = rect.x + rect.width / 2
     if (useSidePacking) {
-      const sideShift = 52 + Math.floor(order / staggerCount) * 22
-      const x = midX + sideShift
+      const column = Math.floor(order / staggerCount)
+      const sideBase = 56
+      const sideStep = 76
+      const side =
+        mode === 'last' ? -1 :
+          mode === 'first' ? 1 :
+            (dataIndex > totalPoints / 2 ? -1 : 1)
+      const sideShift = sideBase + column * sideStep
+      const x = midX + side * sideShift
       return {
         x,
         y,
-        align: 'left',
+        align: side > 0 ? 'left' : 'right',
         verticalAlign: 'top',
         labelLinePoints: [
           [x, y + (labelRect.height || 12)],
-          [midX + 10, y + (labelRect.height || 12)],
+          [midX + side * 10, y + (labelRect.height || 12)],
           [midX, rect.y],
         ],
       }
@@ -248,7 +255,8 @@ export default function MultiLayerChart({
               labelLayout: buildStaggeredLabelLayout(
                 visibleLabelIndices,
                 dataLabelMode,
-                visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3
+                visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3,
+                rows.length
               ),
             } : {}),
           })
@@ -388,7 +396,7 @@ export default function MultiLayerChart({
         yAxis,
       } : {}),
       series,
-      ...(showDataLabels && !isPie ? {
+      ...(showDataLabels && !isPie && dataLabelMode === 'all' ? {
         labelLayout: { moveOverlap: 'shiftY' },
       } : {}),
       ...(emphasisConfig || {}),
