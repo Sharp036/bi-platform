@@ -7,6 +7,7 @@ import { mergeAnnotationsIntoOption } from '@/components/charts/buildAnnotationO
 import { buildRichTooltip } from '@/components/charts/buildRichTooltip'
 import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
 import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
+import { useTranslation } from 'react-i18next'
 
 function buildValueFormatter(format: string, currency: string): ((value: number) => string) | undefined {
   switch (format) {
@@ -90,7 +91,8 @@ function buildStaggeredLabelLayout(
   staggerCount: number,
   totalPoints: number,
   seriesIndex: number,
-  totalSeries: number
+  totalSeries: number,
+  seriesColor?: string
 ) {
   const rowSpacing = 18
   const baseY = 8
@@ -106,15 +108,19 @@ function buildStaggeredLabelLayout(
     const y = baseY + row * rowSpacing
     const midX = rect.x + rect.width / 2
     if (useSidePacking) {
-      const column = Math.floor(compositeOrder / staggerCount)
-      const sideBase = 56
-      const sideStep = 76
+      const dayRankFromRight = Math.max(0, (totalPoints - 1) - dataIndex)
+      const dayRankFromLeft = Math.max(0, dataIndex)
+      const dayStep = 22
+      const seriesStep = 8
       const side =
         mode === 'last' ? -1 :
           mode === 'first' ? 1 :
             (dataIndex > totalPoints / 2 ? -1 : 1)
-      const sideShift = sideBase + column * sideStep
-      const x = midX + side * sideShift
+      const edgeShift =
+        mode === 'last' ? dayRankFromRight * dayStep :
+          mode === 'first' ? dayRankFromLeft * dayStep :
+            Math.floor(compositeOrder / staggerCount) * dayStep
+      const x = midX + side * (edgeShift + (Math.max(0, seriesIndex) * seriesStep))
       return {
         x,
         y,
@@ -125,6 +131,7 @@ function buildStaggeredLabelLayout(
           [midX + side * 10, y + (labelRect.height || 12)],
           [midX, rect.y],
         ],
+        labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
       }
     }
     return {
@@ -136,6 +143,7 @@ function buildStaggeredLabelLayout(
         [midX, y + (labelRect.height || 12)],
         [midX, rect.y],
       ],
+      labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
     }
   }
 }
@@ -155,6 +163,7 @@ export default function MultiLayerChart({
   annotations, tooltipConfig
 }: Props) {
   const isDark = useThemeStore(s => s.isDark)
+  const { t } = useTranslation()
   const config = parseConfig(chartConfig)
 
   // Local visibility state (overrides layer.isVisible for toggling without API call)
@@ -222,6 +231,10 @@ export default function MultiLayerChart({
     const dataLabelRotation = Number(config.dataLabelRotation) || 0
     const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
+    const regressionLabel = t('designer.regression_lines')
+    const palette = Array.isArray((config.option as Record<string, unknown> | undefined)?.color)
+      ? ((config.option as Record<string, unknown>).color as string[])
+      : ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
 
     if (layersWithVisibility.length === 0) {
       // Use configured valueFields or fall back to all non-category columns
@@ -230,6 +243,7 @@ export default function MultiLayerChart({
         ? configuredValues.filter(f => cols.includes(f))
         : cols.filter(c => c !== categoryCol)
       seriesCols.forEach((col, seriesIndex) => {
+        const seriesColor = palette[seriesIndex % palette.length]
         const colValues = rows.map(r => Number(r[col] ?? 0))
         const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
         const visibleLabelIndices = rows
@@ -253,6 +267,9 @@ export default function MultiLayerChart({
               }
             }),
             smooth: chartType === 'line',
+            itemStyle: { color: seriesColor },
+            lineStyle: { color: seriesColor },
+            z: 12,
             ...(showDataLabels ? {
               label: {
                 show: true, position: 'top', distance: 8,
@@ -260,14 +277,15 @@ export default function MultiLayerChart({
                 fontSize: 10,
                 formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
               },
-              labelLine: { show: true, lineStyle: { color: '#bbb', width: 1 } },
+              labelLine: { show: true, lineStyle: { color: seriesColor, width: 1.5, opacity: 0.95 } },
               labelLayout: buildStaggeredLabelLayout(
                 visibleLabelIndices,
                 dataLabelMode,
                 dataLabelLevels,
                 rows.length,
                 seriesIndex,
-                seriesCols.length
+                seriesCols.length,
+                seriesColor
               ),
             } : {}),
           })
@@ -276,15 +294,17 @@ export default function MultiLayerChart({
       if (chartType !== 'pie' && regressionFields.length > 0) {
         seriesCols.forEach(col => {
           if (!regressionFields.includes(col)) return
+          const seriesColor = palette[seriesCols.indexOf(col) % palette.length]
           series.push({
-            name: `Linear (${col})`,
+            name: `${regressionLabel} (${col})`,
             type: 'line',
             data: calcLinearRegression(rows.map(r => Number(r[col] ?? 0))),
             symbol: 'none',
             smooth: false,
-            lineStyle: { type: 'dashed', width: 2, opacity: 0.95 },
+            lineStyle: { type: 'dashed', width: 2, opacity: 0.95, color: seriesColor },
             emphasis: { disabled: true },
             silent: true,
+            z: 20,
           })
         })
       }
@@ -343,7 +363,7 @@ export default function MultiLayerChart({
           if (!regressionFields.includes(seriesName)) return
           const vals = (s.data as any[]).map(v => Number(typeof v === 'object' ? v?.value : v) || 0)
           series.push({
-            name: `Linear (${seriesName})`,
+            name: `${regressionLabel} (${seriesName})`,
             type: 'line',
             data: calcLinearRegression(vals),
             symbol: 'none',
@@ -352,6 +372,7 @@ export default function MultiLayerChart({
             lineStyle: { type: 'dashed', width: 2, opacity: 0.95, color: s.lineStyle?.color || s.itemStyle?.color },
             emphasis: { disabled: true },
             silent: true,
+            z: 20,
           })
         })
       }

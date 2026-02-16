@@ -88,7 +88,55 @@ export default function PropertyPanel() {
         res = await queryApi.execute(widget.queryId, paramValues, 1)
       }
       if (res?.columns) {
-        setAvailableCols(res.columns.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name))
+        const cols = res.columns.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
+        setAvailableCols(cols)
+
+        // Drop stale field references after SQL/query column changes.
+        const chartCfg = (widget.chartConfig || {}) as Record<string, unknown>
+        const nextCfg: Record<string, unknown> = { ...chartCfg }
+        const hasAnyChange = { value: false }
+        const markChanged = () => { hasAnyChange.value = true }
+
+        const categoryField = chartCfg.categoryField as string | undefined
+        if (categoryField && !cols.includes(categoryField)) {
+          delete nextCfg.categoryField
+          markChanged()
+        }
+
+        const allNonCat = cols.filter(c => c !== (nextCfg.categoryField as string || cols[0]))
+
+        if (Array.isArray(chartCfg.valueFields)) {
+          const valueFields = (chartCfg.valueFields as string[]).filter(f => allNonCat.includes(f))
+          if (valueFields.length === 0 || valueFields.length === allNonCat.length) {
+            delete nextCfg.valueFields
+          } else {
+            nextCfg.valueFields = valueFields
+          }
+          markChanged()
+        }
+
+        if (Array.isArray(chartCfg.regressionFields)) {
+          const currentValueFields = Array.isArray(nextCfg.valueFields)
+            ? (nextCfg.valueFields as string[])
+            : allNonCat
+          nextCfg.regressionFields = (chartCfg.regressionFields as string[])
+            .filter(f => currentValueFields.includes(f))
+          markChanged()
+        }
+
+        if (Array.isArray(chartCfg.visibleColumns)) {
+          const visibleColumns = (chartCfg.visibleColumns as string[]).filter(c => cols.includes(c))
+          if (visibleColumns.length === 0 || visibleColumns.length === cols.length) {
+            delete nextCfg.visibleColumns
+          } else {
+            nextCfg.visibleColumns = visibleColumns
+          }
+          markChanged()
+        }
+
+        if (hasAnyChange.value) {
+          updateWidget(widget.id, { chartConfig: nextCfg })
+        }
       }
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message

@@ -2,6 +2,7 @@ import ReactECharts from 'echarts-for-react'
 import type { WidgetData } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   data: WidgetData
@@ -85,7 +86,8 @@ function buildSmartLabelLayout(
   staggerCount: number,
   totalPoints: number,
   seriesIndex: number,
-  totalSeries: number
+  totalSeries: number,
+  seriesColor?: string
 ) {
   const rowSpacing = 18
   const baseY = 8
@@ -102,17 +104,21 @@ function buildSmartLabelLayout(
     const y = baseY + row * rowSpacing
     const anchorX = rect.x + rect.width / 2
 
-    // For selective modes, push labels to the side free space (like callouts).
+    // For selective modes, move callouts gradually from chart edge to reduce overlap.
     if (useSidePacking) {
-      const column = Math.floor(compositeOrder / staggerCount)
-      const sideBase = 56
-      const sideStep = 76
+      const dayRankFromRight = Math.max(0, (totalPoints - 1) - dataIndex)
+      const dayRankFromLeft = Math.max(0, dataIndex)
+      const dayStep = 22
+      const seriesStep = 8
       const side =
         mode === 'last' ? -1 :
           mode === 'first' ? 1 :
             (dataIndex > totalPoints / 2 ? -1 : 1)
-      const sideShift = sideBase + column * sideStep
-      const x = anchorX + side * sideShift
+      const edgeShift =
+        mode === 'last' ? dayRankFromRight * dayStep :
+          mode === 'first' ? dayRankFromLeft * dayStep :
+            Math.floor(compositeOrder / staggerCount) * dayStep
+      const x = anchorX + side * (edgeShift + (Math.max(0, seriesIndex) * seriesStep))
       return {
         x,
         y,
@@ -123,6 +129,7 @@ function buildSmartLabelLayout(
           [anchorX + side * 10, y + (labelRect.height || 12)],
           [anchorX, rect.y],
         ],
+        labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
       }
     }
 
@@ -135,11 +142,12 @@ function buildSmartLabelLayout(
         [anchorX, y + (labelRect.height || 12)],
         [anchorX, rect.y],
       ],
+      labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
     }
   }
 }
 
-function buildOption(data: WidgetData, config: Record<string, unknown>) {
+function buildOption(data: WidgetData, config: Record<string, unknown>, regressionLabel: string) {
   const chartType = (config.type as string) || 'bar'
   const cols = data.columns || []
   const rows = data.rows || []
@@ -162,9 +170,13 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const dataLabelRotation = Number(config.dataLabelRotation) || 0
   const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
   const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
+  const palette = Array.isArray((config.option as Record<string, unknown> | undefined)?.color)
+    ? ((config.option as Record<string, unknown>).color as string[])
+    : ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
 
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
   const series: any[] = seriesCols.map((col, seriesIndex) => {
+    const seriesColor = palette[seriesIndex % palette.length]
     const colValues = rows.map(r => Number(r[col] ?? 0))
     const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
     const visibleLabelIndices = rows
@@ -186,6 +198,11 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
       ...(chartType === 'pie' ? {
         data: rows.map(r => ({ name: String(r[categoryCol] ?? ''), value: r[col] ?? 0 })),
       } : {}),
+      ...(chartType !== 'pie' ? {
+        itemStyle: { color: seriesColor },
+        lineStyle: { color: seriesColor },
+      } : {}),
+      z: chartType === 'pie' ? undefined : 12,
       ...(showDataLabels ? {
         label: {
           show: true,
@@ -198,7 +215,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
             : buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
         },
         ...(chartType !== 'pie' ? {
-          labelLine: { show: true, lineStyle: { color: '#bbb', width: 1 } },
+          labelLine: { show: true, lineStyle: { color: seriesColor, width: 1.5, opacity: 0.95 } },
         } : {}),
         ...(chartType !== 'pie' ? {
           labelLayout: buildSmartLabelLayout(
@@ -207,7 +224,8 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
             dataLabelLevels,
             rows.length,
             seriesIndex,
-            seriesCols.length
+            seriesCols.length,
+            seriesColor
           ),
         } : {}),
       } : {}),
@@ -219,15 +237,17 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
       if (!regressionFields.includes(col)) return
       const colValues = rows.map(r => Number(r[col] ?? 0))
       const trend = calcLinearRegression(colValues)
+      const seriesColor = palette[seriesCols.indexOf(col) % palette.length]
       series.push({
-        name: `Linear (${col})`,
+        name: `${regressionLabel} (${col})`,
         type: 'line',
         data: trend,
         symbol: 'none',
         smooth: false,
-        lineStyle: { type: 'dashed', width: 2, opacity: 0.95 },
+        lineStyle: { type: 'dashed', width: 2, opacity: 0.95, color: seriesColor },
         emphasis: { disabled: true },
         silent: true,
+        z: 20,
       })
     })
   }
@@ -279,8 +299,9 @@ function baseTopPx(staggerRows: number): number {
 
 export default function EChartWidget({ data, chartConfig, title, onChartClick, clickable }: Props) {
   const isDark = useThemeStore(s => s.isDark)
+  const { t } = useTranslation()
   const config = parseConfig(chartConfig)
-  const option = buildOption(data, config)
+  const option = buildOption(data, config, t('designer.regression_lines'))
   const chartRef = useRef<ReactECharts>(null)
 
   const onEvents = onChartClick ? {
