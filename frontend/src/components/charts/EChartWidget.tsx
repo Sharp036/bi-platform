@@ -31,6 +31,17 @@ function buildLabelFormatter(
   mode: string, count: number, total: number,
   values: number[], valueFmt?: (v: number) => string
 ): (p: { dataIndex: number; value: number }) => string {
+  const isVisible = buildLabelVisibility(mode, count, total, values)
+  return (p: { dataIndex: number; value: number }) => {
+    const { dataIndex, value } = p
+    if (!isVisible(dataIndex)) return ''
+    return valueFmt ? valueFmt(value) : String(value)
+  }
+}
+
+function buildLabelVisibility(
+  mode: string, count: number, total: number, values: number[],
+): (dataIndex: number) => boolean {
   let minIdx = -1, maxIdx = -1
   if (mode === 'min_max' && values.length > 0) {
     let minVal = Infinity, maxVal = -Infinity
@@ -39,12 +50,11 @@ function buildLabelFormatter(
       if (v > maxVal) { maxVal = v; maxIdx = i }
     })
   }
-  return (p: { dataIndex: number; value: number }) => {
-    const { dataIndex, value } = p
-    if (mode === 'first' && dataIndex >= count) return ''
-    if (mode === 'last' && dataIndex < total - count) return ''
-    if (mode === 'min_max' && dataIndex !== minIdx && dataIndex !== maxIdx) return ''
-    return valueFmt ? valueFmt(value) : String(value)
+  return (dataIndex: number) => {
+    if (mode === 'first' && dataIndex >= count) return false
+    if (mode === 'last' && dataIndex < total - count) return false
+    if (mode === 'min_max' && dataIndex !== minIdx && dataIndex !== maxIdx) return false
+    return true
   }
 }
 
@@ -95,10 +105,19 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
   const series = seriesCols.map(col => {
     const colValues = rows.map(r => Number(r[col] ?? 0))
+    const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
     return {
       name: col,
       type: chartType,
-      data: rows.map(r => r[col] ?? 0),
+      data: rows.map((r, dataIndex) => {
+        const rawValue = r[col] ?? 0
+        if (!showDataLabels || chartType === 'pie' || isLabelVisible(dataIndex)) return rawValue
+        return {
+          value: rawValue,
+          label: { show: false },
+          labelLine: { show: false },
+        }
+      }),
       smooth: chartType === 'line',
       ...(chartType === 'pie' ? {
         data: rows.map(r => ({ name: String(r[categoryCol] ?? ''), value: r[col] ?? 0 })),

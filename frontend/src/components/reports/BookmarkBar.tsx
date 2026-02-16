@@ -9,9 +9,10 @@ interface Props {
   reportId: number
   currentParameters: Record<string, unknown>
   onApplyBookmark: (params: Record<string, unknown>) => void
+  className?: string
 }
 
-export default function BookmarkBar({ reportId, currentParameters, onApplyBookmark }: Props) {
+export default function BookmarkBar({ reportId, currentParameters, onApplyBookmark, className = '' }: Props) {
   const { t } = useTranslation()
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([])
   const [showSave, setShowSave] = useState(false)
@@ -57,7 +58,7 @@ export default function BookmarkBar({ reportId, currentParameters, onApplyBookma
   }
 
   return (
-    <div className="flex items-center gap-2 mb-3 overflow-x-auto">
+    <div className={`flex items-center gap-2 mb-3 overflow-x-auto ${className}`}>
       <Bookmark className="w-4 h-4 text-slate-400 flex-shrink-0" />
 
       {bookmarks.map(bm => (

@@ -235,14 +235,23 @@ export default function ReportViewerPage() {
 
   const renderWidgets = () => (
     <>
+      {(() => {
+        const bookmarkOffsetClass =
+          (filterPanelPosition === 'left' && filterPanelCollapsed) ? 'pl-20' :
+            (filterPanelPosition === 'right' && filterPanelCollapsed) ? 'pr-20' :
+              ''
+        return (
       <BookmarkBar
         reportId={currentReportId || Number(id)}
         currentParameters={currentParams}
+        className={bookmarkOffsetClass}
         onApplyBookmark={(params) => {
           setCurrentParams(params)
           handleRender(params)
         }}
       />
+        )
+      })()}
 
       {rendering && !renderResult ? (
         <LoadingSpinner />
