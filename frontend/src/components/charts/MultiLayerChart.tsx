@@ -20,6 +20,14 @@ function buildValueFormatter(format: string, currency: string): ((value: number)
   }
 }
 
+function buildLegendOption(seriesCount: number, legendPosition: string) {
+  if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
+  if (legendPosition === 'top') return { top: 0, left: 'center' as const, type: 'scroll' as const }
+  if (legendPosition === 'left') return { left: 0, top: 'middle' as const, orient: 'vertical' as const, type: 'scroll' as const }
+  if (legendPosition === 'right') return { right: 0, top: 'middle' as const, orient: 'vertical' as const, type: 'scroll' as const }
+  return { bottom: 0, left: 'center' as const, type: 'scroll' as const }
+}
+
 function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): string {
   const num = Number(v)
   if (!Number.isFinite(num)) return String(v ?? '')
@@ -229,6 +237,7 @@ export default function MultiLayerChart({
 
   const option = useMemo(() => {
     const chartType = (config.type as string) || 'bar'
+    const legendPosition = (config.legendPosition as string) || 'auto'
     // Custom chart types (radar, heatmap, treemap, funnel, gauge, sankey, etc.)
     if (isCustomChartType(chartType)) {
       const custom = buildCustomChart(chartType, data, config as Record<string, any>)
@@ -236,10 +245,11 @@ export default function MultiLayerChart({
         const tooltipOpts = tooltipConfig
           ? buildRichTooltip(tooltipConfig)
           : (custom.tooltip ? { tooltip: custom.tooltip } : { tooltip: { trigger: 'item', confine: true } })
+        const legend = buildLegendOption(custom.series.length, legendPosition)
 
         let result: any = {
           ...tooltipOpts,
-          legend: custom.series.length > 1 ? { bottom: 0, type: 'scroll' } : undefined,
+          legend,
           ...custom,
           ...((config.option as object) || {}),
         }
@@ -437,6 +447,12 @@ export default function MultiLayerChart({
     }
 
     const isPie = chartType === 'pie' || layersWithVisibility.some(l => l.chartType === 'pie')
+    const legend = buildLegendOption(series.length, legendPosition)
+    const showLegend = !!legend
+    const legendIsTop = showLegend && legendPosition === 'top'
+    const legendIsBottom = showLegend && (legendPosition === 'bottom' || legendPosition === 'auto')
+    const legendIsLeft = showLegend && legendPosition === 'left'
+    const legendIsRight = showLegend && legendPosition === 'right'
 
     const tooltipOpts = tooltipConfig
       ? buildRichTooltip(tooltipConfig)
@@ -450,12 +466,14 @@ export default function MultiLayerChart({
     let result = {
       ...tooltipOpts,
       ...(valueFormatter && !isPie ? { tooltip: { ...((tooltipOpts as any).tooltip || {}), valueFormatter } } : {}),
-      legend: series.length > 1 ? { bottom: 0, type: 'scroll' } : undefined,
+      legend,
       grid: {
-        left: '3%',
-        right: hasRightAxis ? '8%' : '4%',
-        top: showDataLabels && !isPie ? 120 : undefined,
-        bottom: series.length > 1 ? '15%' : '3%',
+        left: legendIsLeft ? '12%' : '3%',
+        right: legendIsRight ? (hasRightAxis ? '16%' : '12%') : (hasRightAxis ? '8%' : '4%'),
+        top: showDataLabels && !isPie
+          ? (legendIsTop ? 150 : 120)
+          : (legendIsTop ? 40 : undefined),
+        bottom: legendIsBottom ? '15%' : '3%',
         containLabel: true,
       },
       ...(!isPie ? {

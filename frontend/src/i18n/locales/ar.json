@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "الصفحة غير موجودة",
   "common.off": "إيقاف",
-
   "nav.home": "الرئيسية",
   "nav.reports": "التقارير",
   "nav.queries": "الاستعلامات",
@@ -67,7 +66,6 @@
   "nav.shared": "مشارك معي",
   "nav.admin": "الإدارة",
   "nav.password": "كلمة المرور",
-
   "auth.sign_in": "تسجيل الدخول",
   "auth.signing_in": "جارٍ تسجيل الدخول...",
   "auth.sign_in_subtitle": "سجّل الدخول إلى حسابك",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "يجب أن تتكون كلمة المرور الجديدة من 6 أحرف على الأقل",
   "auth.password_changed": "تم تغيير كلمة المرور بنجاح",
   "auth.password_change_failed": "فشل تغيير كلمة المرور",
-
   "header.search_placeholder": "بحث... (Ctrl+K)",
   "header.searching": "جارٍ البحث...",
   "header.no_results_for": "لا توجد نتائج لـ \"{{query}}\"",
   "header.language": "اللغة",
-
   "charts.type.bar": "أعمدة",
   "charts.type.line": "خطي",
   "charts.type.area": "مساحي",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "شلالي",
   "charts.type.candlestick": "شموع يابانية",
   "charts.select_type": "نوع الرسم البياني",
-
   "widgets.type.chart": "رسم بياني",
   "widgets.type.table": "جدول",
   "widgets.type.kpi": "بطاقة KPI",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "عنصر تحكم تصفية تفاعلي",
   "widgets.desc.image": "صورة ثابتة / شعار",
   "widgets.components": "المكونات",
-
   "reports.title": "التقارير",
   "reports.new_report": "تقرير جديد",
   "reports.search_placeholder": "البحث في التقارير...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "لقطة",
   "reports.snapshot_created": "تم إنشاء اللقطة",
   "reports.auto_refresh": "تحديث تلقائي",
-
   "export.title": "تصدير",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "فشل التصدير",
   "export.email_failed": "فشل إرسال البريد الإلكتروني",
   "export.enter_email": "أدخل بريدًا إلكترونيًا واحدًا على الأقل",
-
   "designer.new_report_name": "تقرير جديد",
   "designer.failed_load": "فشل تحميل التقرير",
   "designer.report_name_required": "اسم التقرير مطلوب",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "الاستعلامات",
   "queries.adhoc_title": "استعلام فوري",
   "queries.run": "تشغيل",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "فشل في حذف الاستعلام",
   "queries.loaded_to_editor": "تم التحميل في المحرر",
   "queries.showing_rows": "الصفوف {{from}}-{{to}} من {{total}}",
-
   "datasources.title": "مصادر البيانات",
   "datasources.add_source": "إضافة مصدر",
   "datasources.new_datasource": "مصدر بيانات جديد",
@@ -329,7 +319,6 @@
   "datasources.database_name": "اسم قاعدة البيانات",
   "datasources.username": "اسم المستخدم",
   "datasources.password": "كلمة المرور",
-
   "workspace.title": "الرئيسية",
   "workspace.favorites": "المفضلة",
   "workspace.recent": "الأخيرة",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "لا توجد عناصر حديثة",
   "workspace.add_favorite_hint": "ضع نجمة على العناصر لإضافتها إلى المفضلة",
   "workspace.view_reports_hint": "اعرض التقارير والاستعلامات لرؤيتها هنا",
-
   "admin.users_tab": "👥 المستخدمون",
   "admin.roles_tab": "🛡️ الأدوار",
   "admin.audit_tab": "📋 سجل التدقيق",
@@ -383,7 +371,6 @@
   "admin.deactivate": "تعطيل",
   "admin.activate": "تفعيل",
   "admin.password_placeholder": "6 أحرف على الأقل",
-
   "admin.role_management": "إدارة الأدوار",
   "admin.new_role": "دور جديد",
   "admin.role_name": "اسم الدور",
@@ -393,7 +380,6 @@
   "admin.edit_role": "تعديل الدور: {{name}}",
   "admin.delete_role_confirm": "حذف الدور \"{{name}}\"؟",
   "admin.failed_load_roles": "فشل تحميل الأدوار",
-
   "admin.audit_log": "سجل التدقيق",
   "admin.audit.user": "المستخدم",
   "admin.audit.action": "الإجراء",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "جميع الإجراءات",
   "admin.audit.all_types": "جميع الأنواع",
   "admin.audit.no_entries": "لا توجد إدخالات تدقيق",
-
   "alerts.title": "تنبيهات البيانات",
   "alerts.new_alert": "تنبيه جديد",
   "alerts.no_alerts": "لا توجد تنبيهات بعد",
@@ -426,7 +411,6 @@
   "alerts.last_value": "آخر قيمة:",
   "alerts.triggered": "مُفعَّل",
   "alerts.ok": "حسنًا",
-
   "monitoring.title": "مراقبة النظام",
   "monitoring.uptime": "وقت التشغيل",
   "monitoring.jvm_heap": "ذاكرة JVM",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "تم تفعيل التخزين المؤقت",
   "monitoring.clear_cache": "مسح التخزين المؤقت",
   "monitoring.toggle_cache": "تبديل التخزين المؤقت",
-
   "schedules.title": "الجداول الزمنية",
   "schedules.no_schedules": "لا توجد جداول زمنية",
   "schedules.description": "أنشئ جداول زمنية للتقارير من عارض التقارير",
@@ -466,7 +449,6 @@
   "schedules.recipients": "المستلمون:",
   "schedules.paused": "متوقف مؤقتًا",
   "schedules.active": "نشط",
-
   "scripts.title": "البرامج النصية",
   "scripts.new_script": "برنامج نصي جديد",
   "scripts.save": "حفظ",
@@ -489,7 +471,6 @@
   "scripts.error": "خطأ",
   "scripts.execution_time": "تم التنفيذ في {{ms}} مللي ثانية",
   "scripts.execution_failed": "فشل التنفيذ",
-
   "sharing.title": "مشارك معي",
   "sharing.all_types": "جميع الأنواع",
   "sharing.type.reports": "التقارير",
@@ -513,7 +494,6 @@
   "sharing.share_added": "تم منح الوصول",
   "sharing.share_removed": "تم سحب الوصول",
   "sharing.failed_share": "فشلت المشاركة",
-
   "templates.title": "القوالب",
   "templates.search_placeholder": "البحث في القوالب...",
   "templates.no_templates": "لا توجد قوالب متاحة",
@@ -523,7 +503,6 @@
   "templates.all_categories": "جميع الفئات",
   "templates.created_from": "تم إنشاء التقرير من القالب",
   "templates.failed_create": "فشل الإنشاء من القالب",
-
   "models.title": "نماذج البيانات",
   "models.new_model": "نموذج جديد",
   "models.new_data_model": "نموذج بيانات جديد",
@@ -548,14 +527,12 @@
   "models.run_query": "تشغيل الاستعلام",
   "models.select_fields": "حدد الحقول للاستعلام",
   "models.no_fields_selected": "لم يتم تحديد حقول",
-
   "search.placeholder": "بحث... (Ctrl+K)",
   "search.searching": "جارٍ البحث...",
   "search.no_results": "لا توجد نتائج لـ \"{{query}}\"",
   "search.reports": "التقارير",
   "search.queries": "الاستعلامات",
   "search.datasources": "مصادر البيانات",
-
   "interactive.active_filters": "المرشحات النشطة:",
   "interactive.clear_all": "مسح الكل",
   "interactive.global_filters": "المرشحات العامة",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "جارٍ تحميل التقرير المضمّن...",
   "embed.error": "فشل تحميل التقرير المضمّن",
   "embed.invalid_token": "رمز التضمين غير صالح أو منتهي الصلاحية",
-
   "tags.add_tag": "إضافة وسم...",
   "tags.remove_tag": "إزالة الوسم",
-
   "bookmarks.title": "الإشارات المرجعية",
   "bookmarks.save": "حفظ إشارة مرجعية",
   "bookmarks.name_placeholder": "اسم الإشارة المرجعية...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "لا توجد إشارات مرجعية",
   "bookmarks.apply": "تطبيق",
   "bookmarks.delete_confirm": "حذف هذه الإشارة المرجعية؟",
-
   "live.connected": "مباشر",
   "live.connecting": "جارٍ الاتصال...",
   "live.disconnected": "غير متصل",
   "live.reconnect": "إعادة الاتصال",
   "live.enable": "تفعيل التحديثات المباشرة",
-  "live.disable": "تعطيل التحديثات المباشرة"
+  "live.disable": "تعطيل التحديثات المباشرة",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

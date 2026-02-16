@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "页面未找到",
   "common.off": "关闭",
-
   "nav.home": "首页",
   "nav.reports": "报表",
   "nav.queries": "查询",
@@ -67,7 +66,6 @@
   "nav.shared": "与我共享",
   "nav.admin": "管理",
   "nav.password": "密码",
-
   "auth.sign_in": "登录",
   "auth.signing_in": "登录中...",
   "auth.sign_in_subtitle": "登录您的账户",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "新密码至少需要6个字符",
   "auth.password_changed": "密码修改成功",
   "auth.password_change_failed": "密码修改失败",
-
   "header.search_placeholder": "搜索... (Ctrl+K)",
   "header.searching": "搜索中...",
   "header.no_results_for": "未找到 \"{{query}}\" 的结果",
   "header.language": "语言",
-
   "charts.type.bar": "柱状图",
   "charts.type.line": "折线图",
   "charts.type.area": "面积图",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "瀑布图",
   "charts.type.candlestick": "K线图",
   "charts.select_type": "图表类型",
-
   "widgets.type.chart": "图表",
   "widgets.type.table": "表格",
   "widgets.type.kpi": "KPI 卡片",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "交互式筛选控件",
   "widgets.desc.image": "静态图片 / 标志",
   "widgets.components": "组件",
-
   "reports.title": "报表",
   "reports.new_report": "新建报表",
   "reports.search_placeholder": "搜索报表...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "快照",
   "reports.snapshot_created": "快照已创建",
   "reports.auto_refresh": "自动刷新",
-
   "export.title": "导出",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "导出失败",
   "export.email_failed": "邮件发送失败",
   "export.enter_email": "请输入至少一个邮箱地址",
-
   "designer.new_report_name": "新建报表",
   "designer.failed_load": "报表加载失败",
   "designer.report_name_required": "报表名称为必填项",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "查询",
   "queries.adhoc_title": "即席查询",
   "queries.run": "运行",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "删除查询失败",
   "queries.loaded_to_editor": "已加载到编辑器",
   "queries.showing_rows": "第 {{from}}-{{to}} 行，共 {{total}} 行",
-
   "datasources.title": "数据源",
   "datasources.add_source": "添加数据源",
   "datasources.new_datasource": "新建数据源",
@@ -329,7 +319,6 @@
   "datasources.database_name": "数据库名称",
   "datasources.username": "用户名",
   "datasources.password": "密码",
-
   "workspace.title": "首页",
   "workspace.favorites": "收藏",
   "workspace.recent": "最近",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "暂无最近项目",
   "workspace.add_favorite_hint": "为项目加星标以添加到收藏",
   "workspace.view_reports_hint": "查看报表和查询后可在此显示",
-
   "admin.users_tab": "👥 用户",
   "admin.roles_tab": "🛡️ 角色",
   "admin.audit_tab": "📋 审计日志",
@@ -383,7 +371,6 @@
   "admin.deactivate": "停用",
   "admin.activate": "启用",
   "admin.password_placeholder": "至少6个字符",
-
   "admin.role_management": "角色管理",
   "admin.new_role": "新建角色",
   "admin.role_name": "角色名称",
@@ -393,7 +380,6 @@
   "admin.edit_role": "编辑角色：{{name}}",
   "admin.delete_role_confirm": "删除角色 \"{{name}}\"？",
   "admin.failed_load_roles": "加载角色失败",
-
   "admin.audit_log": "审计日志",
   "admin.audit.user": "用户",
   "admin.audit.action": "操作",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "所有操作",
   "admin.audit.all_types": "所有类型",
   "admin.audit.no_entries": "暂无审计记录",
-
   "alerts.title": "数据告警",
   "alerts.new_alert": "新建告警",
   "alerts.no_alerts": "暂无告警",
@@ -426,7 +411,6 @@
   "alerts.last_value": "上次值：",
   "alerts.triggered": "已触发",
   "alerts.ok": "正常",
-
   "monitoring.title": "系统监控",
   "monitoring.uptime": "运行时间",
   "monitoring.jvm_heap": "JVM 堆内存",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "缓存已启用",
   "monitoring.clear_cache": "清除缓存",
   "monitoring.toggle_cache": "切换缓存",
-
   "schedules.title": "调度",
   "schedules.no_schedules": "暂无调度",
   "schedules.description": "从报表查看器创建报表调度",
@@ -466,7 +449,6 @@
   "schedules.recipients": "收件人：",
   "schedules.paused": "已暂停",
   "schedules.active": "活跃",
-
   "scripts.title": "脚本",
   "scripts.new_script": "新建脚本",
   "scripts.save": "保存",
@@ -489,7 +471,6 @@
   "scripts.error": "错误",
   "scripts.execution_time": "执行耗时 {{ms}}ms",
   "scripts.execution_failed": "执行失败",
-
   "sharing.title": "与我共享",
   "sharing.all_types": "所有类型",
   "sharing.type.reports": "报表",
@@ -513,7 +494,6 @@
   "sharing.share_added": "已授予访问权限",
   "sharing.share_removed": "已撤销访问权限",
   "sharing.failed_share": "共享失败",
-
   "templates.title": "模板",
   "templates.search_placeholder": "搜索模板...",
   "templates.no_templates": "暂无可用模板",
@@ -523,7 +503,6 @@
   "templates.all_categories": "所有分类",
   "templates.created_from": "已从模板创建报表",
   "templates.failed_create": "从模板创建失败",
-
   "models.title": "数据模型",
   "models.new_model": "新建模型",
   "models.new_data_model": "新建数据模型",
@@ -548,14 +527,12 @@
   "models.run_query": "运行查询",
   "models.select_fields": "选择要查询的字段",
   "models.no_fields_selected": "未选择字段",
-
   "search.placeholder": "搜索... (Ctrl+K)",
   "search.searching": "搜索中...",
   "search.no_results": "未找到 \"{{query}}\" 的结果",
   "search.reports": "报表",
   "search.queries": "查询",
   "search.datasources": "数据源",
-
   "interactive.active_filters": "活跃筛选器：",
   "interactive.clear_all": "清除全部",
   "interactive.global_filters": "全局筛选器",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "正在加载嵌入式报表...",
   "embed.error": "嵌入式报表加载失败",
   "embed.invalid_token": "嵌入令牌无效或已过期",
-
   "tags.add_tag": "添加标签...",
   "tags.remove_tag": "移除标签",
-
   "bookmarks.title": "书签",
   "bookmarks.save": "保存书签",
   "bookmarks.name_placeholder": "书签名称...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "暂无书签",
   "bookmarks.apply": "应用",
   "bookmarks.delete_confirm": "删除此书签？",
-
   "live.connected": "实时",
   "live.connecting": "连接中...",
   "live.disconnected": "已断开",
   "live.reconnect": "重新连接",
   "live.enable": "启用实时更新",
-  "live.disable": "禁用实时更新"
+  "live.disable": "禁用实时更新",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

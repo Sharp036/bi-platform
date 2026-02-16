@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Không tìm thấy trang",
   "common.off": "Tắt",
-
   "nav.home": "Trang chủ",
   "nav.reports": "Báo cáo",
   "nav.queries": "Truy vấn",
@@ -67,7 +66,6 @@
   "nav.shared": "Được chia sẻ với tôi",
   "nav.admin": "Quản trị",
   "nav.password": "Mật khẩu",
-
   "auth.sign_in": "Đăng nhập",
   "auth.signing_in": "Đang đăng nhập...",
   "auth.sign_in_subtitle": "Đăng nhập vào tài khoản của bạn",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Mật khẩu mới phải có ít nhất 6 ký tự",
   "auth.password_changed": "Đổi mật khẩu thành công",
   "auth.password_change_failed": "Không thể đổi mật khẩu",
-
   "header.search_placeholder": "Tìm kiếm... (Ctrl+K)",
   "header.searching": "Đang tìm kiếm...",
   "header.no_results_for": "Không có kết quả cho \"{{query}}\"",
   "header.language": "Ngôn ngữ",
-
   "charts.type.bar": "Cột",
   "charts.type.line": "Đường",
   "charts.type.area": "Vùng",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Thác nước",
   "charts.type.candlestick": "Nến Nhật",
   "charts.select_type": "Loại biểu đồ",
-
   "widgets.type.chart": "Biểu đồ",
   "widgets.type.table": "Bảng",
   "widgets.type.kpi": "Thẻ KPI",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Bộ lọc tương tác",
   "widgets.desc.image": "Hình ảnh tĩnh / logo",
   "widgets.components": "Thành phần",
-
   "reports.title": "Báo cáo",
   "reports.new_report": "Báo cáo mới",
   "reports.search_placeholder": "Tìm kiếm báo cáo...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Ảnh chụp nhanh",
   "reports.snapshot_created": "Đã tạo ảnh chụp nhanh",
   "reports.auto_refresh": "Tự động làm mới",
-
   "export.title": "Xuất",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Xuất thất bại",
   "export.email_failed": "Không thể gửi email",
   "export.enter_email": "Nhập ít nhất một địa chỉ email",
-
   "designer.new_report_name": "Báo cáo mới",
   "designer.failed_load": "Không thể tải báo cáo",
   "designer.report_name_required": "Tên báo cáo là bắt buộc",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Truy vấn",
   "queries.adhoc_title": "Truy vấn tùy biến",
   "queries.run": "Chạy",
@@ -296,21 +287,20 @@
   "queries.query_failed": "Truy vấn thất bại",
   "queries.runs": "{{count}} lần chạy",
   "queries.sql_placeholder": "SELECT ...",
-  "queries.save": "L\u01b0u",
-  "queries.save_query": "L\u01b0u truy v\u1ea5n",
-  "queries.edit_query": "S\u1eeda truy v\u1ea5n",
-  "queries.name_placeholder": "T\u00ean truy v\u1ea5n",
-  "queries.desc_placeholder": "M\u00f4 t\u1ea3 (t\u00f9y ch\u1ecdn)",
-  "queries.saved_success": "Truy v\u1ea5n \u0111\u00e3 l\u01b0u",
-  "queries.save_failed": "L\u01b0u truy v\u1ea5n th\u1ea5t b\u1ea1i",
-  "queries.updated": "Truy v\u1ea5n \u0111\u00e3 c\u1eadp nh\u1eadt",
-  "queries.update_failed": "C\u1eadp nh\u1eadt truy v\u1ea5n th\u1ea5t b\u1ea1i",
-  "queries.delete_confirm": "X\u00f3a truy v\u1ea5n '{{name}}'?",
-  "queries.deleted": "Truy v\u1ea5n \u0111\u00e3 x\u00f3a",
-  "queries.delete_failed": "X\u00f3a truy v\u1ea5n th\u1ea5t b\u1ea1i",
-  "queries.loaded_to_editor": "\u0110\u00e3 t\u1ea3i v\u00e0o tr\u00ecnh so\u1ea1n th\u1ea3o",
+  "queries.save": "Lưu",
+  "queries.save_query": "Lưu truy vấn",
+  "queries.edit_query": "Sửa truy vấn",
+  "queries.name_placeholder": "Tên truy vấn",
+  "queries.desc_placeholder": "Mô tả (tùy chọn)",
+  "queries.saved_success": "Truy vấn đã lưu",
+  "queries.save_failed": "Lưu truy vấn thất bại",
+  "queries.updated": "Truy vấn đã cập nhật",
+  "queries.update_failed": "Cập nhật truy vấn thất bại",
+  "queries.delete_confirm": "Xóa truy vấn '{{name}}'?",
+  "queries.deleted": "Truy vấn đã xóa",
+  "queries.delete_failed": "Xóa truy vấn thất bại",
+  "queries.loaded_to_editor": "Đã tải vào trình soạn thảo",
   "queries.showing_rows": "Hàng {{from}}-{{to}} / {{total}}",
-
   "datasources.title": "Nguồn dữ liệu",
   "datasources.add_source": "Thêm nguồn",
   "datasources.new_datasource": "Nguồn dữ liệu mới",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Tên cơ sở dữ liệu",
   "datasources.username": "Tên đăng nhập",
   "datasources.password": "Mật khẩu",
-
   "workspace.title": "Trang chủ",
   "workspace.favorites": "Yêu thích",
   "workspace.recent": "Gần đây",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Không có mục gần đây",
   "workspace.add_favorite_hint": "Đánh dấu sao để thêm vào danh sách yêu thích",
   "workspace.view_reports_hint": "Xem báo cáo và truy vấn để hiển thị tại đây",
-
   "admin.users_tab": "👥 Người dùng",
   "admin.roles_tab": "🛡️ Vai trò",
   "admin.audit_tab": "📋 Nhật ký kiểm toán",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Vô hiệu hóa",
   "admin.activate": "Kích hoạt",
   "admin.password_placeholder": "tối thiểu 6 ký tự",
-
   "admin.role_management": "Quản lý vai trò",
   "admin.new_role": "Vai trò mới",
   "admin.role_name": "Tên vai trò",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Chỉnh sửa vai trò: {{name}}",
   "admin.delete_role_confirm": "Xóa vai trò \"{{name}}\"?",
   "admin.failed_load_roles": "Không thể tải danh sách vai trò",
-
   "admin.audit_log": "Nhật ký kiểm toán",
   "admin.audit.user": "Người dùng",
   "admin.audit.action": "Hành động",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Tất cả hành động",
   "admin.audit.all_types": "Tất cả loại",
   "admin.audit.no_entries": "Không có bản ghi kiểm toán",
-
   "alerts.title": "Cảnh báo dữ liệu",
   "alerts.new_alert": "Cảnh báo mới",
   "alerts.no_alerts": "Chưa có cảnh báo",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Giá trị cuối:",
   "alerts.triggered": "ĐÃ KÍCH HOẠT",
   "alerts.ok": "OK",
-
   "monitoring.title": "Giám sát hệ thống",
   "monitoring.uptime": "Thời gian hoạt động",
   "monitoring.jvm_heap": "Bộ nhớ heap JVM",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Đã bật bộ nhớ đệm",
   "monitoring.clear_cache": "Xóa bộ nhớ đệm",
   "monitoring.toggle_cache": "Bật/tắt bộ nhớ đệm",
-
   "schedules.title": "Lịch trình",
   "schedules.no_schedules": "Không có lịch trình",
   "schedules.description": "Tạo lịch trình báo cáo từ trình xem báo cáo",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Người nhận:",
   "schedules.paused": "Tạm dừng",
   "schedules.active": "Hoạt động",
-
   "scripts.title": "Tập lệnh",
   "scripts.new_script": "Tập lệnh mới",
   "scripts.save": "Lưu",
@@ -489,7 +471,6 @@
   "scripts.error": "Lỗi",
   "scripts.execution_time": "Thực thi trong {{ms}}ms",
   "scripts.execution_failed": "Thực thi thất bại",
-
   "sharing.title": "Được chia sẻ với tôi",
   "sharing.all_types": "Tất cả loại",
   "sharing.type.reports": "Báo cáo",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Đã cấp quyền truy cập",
   "sharing.share_removed": "Đã thu hồi quyền truy cập",
   "sharing.failed_share": "Không thể chia sẻ",
-
   "templates.title": "Mẫu",
   "templates.search_placeholder": "Tìm kiếm mẫu...",
   "templates.no_templates": "Không có mẫu nào",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Tất cả danh mục",
   "templates.created_from": "Đã tạo báo cáo từ mẫu",
   "templates.failed_create": "Không thể tạo từ mẫu",
-
   "models.title": "Mô hình dữ liệu",
   "models.new_model": "Mô hình mới",
   "models.new_data_model": "Mô hình dữ liệu mới",
@@ -548,14 +527,12 @@
   "models.run_query": "Chạy truy vấn",
   "models.select_fields": "Chọn trường để truy vấn",
   "models.no_fields_selected": "Chưa chọn trường nào",
-
   "search.placeholder": "Tìm kiếm... (Ctrl+K)",
   "search.searching": "Đang tìm kiếm...",
   "search.no_results": "Không có kết quả cho \"{{query}}\"",
   "search.reports": "Báo cáo",
   "search.queries": "Truy vấn",
   "search.datasources": "Nguồn dữ liệu",
-
   "interactive.active_filters": "Bộ lọc đang hoạt động:",
   "interactive.clear_all": "Xóa tất cả",
   "interactive.global_filters": "Bộ lọc toàn cục",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Đang tải báo cáo nhúng...",
   "embed.error": "Không thể tải báo cáo nhúng",
   "embed.invalid_token": "Mã nhúng không hợp lệ hoặc đã hết hạn",
-
   "tags.add_tag": "Thêm thẻ...",
   "tags.remove_tag": "Xóa thẻ",
-
   "bookmarks.title": "Dấu trang",
   "bookmarks.save": "Lưu dấu trang",
   "bookmarks.name_placeholder": "Tên dấu trang...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Không có dấu trang",
   "bookmarks.apply": "Áp dụng",
   "bookmarks.delete_confirm": "Xóa dấu trang này?",
-
   "live.connected": "Trực tiếp",
   "live.connecting": "Đang kết nối...",
   "live.disconnected": "Đã ngắt kết nối",
   "live.reconnect": "Kết nối lại",
   "live.enable": "Bật cập nhật trực tiếp",
-  "live.disable": "Tắt cập nhật trực tiếp"
+  "live.disable": "Tắt cập nhật trực tiếp",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

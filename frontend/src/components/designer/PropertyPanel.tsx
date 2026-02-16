@@ -339,6 +339,21 @@ export default function PropertyPanel() {
                     </select>
                   </Field>
 
+                  <Field label={t('designer.legend_position')}>
+                    <select
+                      value={cc.legendPosition as string || 'auto'}
+                      onChange={e => update({ chartConfig: { ...cc, legendPosition: e.target.value } })}
+                      className="input text-sm"
+                    >
+                      <option value="auto">{t('designer.legend_position.auto')}</option>
+                      <option value="top">{t('designer.legend_position.top')}</option>
+                      <option value="bottom">{t('designer.legend_position.bottom')}</option>
+                      <option value="left">{t('designer.legend_position.left')}</option>
+                      <option value="right">{t('designer.legend_position.right')}</option>
+                      <option value="hidden">{t('designer.legend_position.hidden')}</option>
+                    </select>
+                  </Field>
+
                   {availableCols.length > 0 && (
                     <>
                       <Field label={t('designer.category_field')}>

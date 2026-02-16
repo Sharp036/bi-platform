@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Сторінку не знайдено",
   "common.off": "Вимк.",
-
   "nav.home": "Головна",
   "nav.reports": "Звіти",
   "nav.queries": "Запити",
@@ -67,7 +66,6 @@
   "nav.shared": "Спільні зі мною",
   "nav.admin": "Адміністрування",
   "nav.password": "Пароль",
-
   "auth.sign_in": "Увійти",
   "auth.signing_in": "Вхід...",
   "auth.sign_in_subtitle": "Увійдіть у свій обліковий запис",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Новий пароль повинен містити щонайменше 6 символів",
   "auth.password_changed": "Пароль успішно змінено",
   "auth.password_change_failed": "Не вдалося змінити пароль",
-
   "header.search_placeholder": "Пошук... (Ctrl+K)",
   "header.searching": "Пошук...",
   "header.no_results_for": "Немає результатів для \"{{query}}\"",
   "header.language": "Мова",
-
   "charts.type.bar": "Стовпчаста",
   "charts.type.line": "Лінійна",
   "charts.type.area": "Область",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Каскадна",
   "charts.type.candlestick": "Свічкова",
   "charts.select_type": "Тип діаграми",
-
   "widgets.type.chart": "Діаграма",
   "widgets.type.table": "Таблиця",
   "widgets.type.kpi": "KPI-картка",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Інтерактивний елемент фільтрації",
   "widgets.desc.image": "Статичне зображення / логотип",
   "widgets.components": "Компоненти",
-
   "reports.title": "Звіти",
   "reports.new_report": "Новий звіт",
   "reports.search_placeholder": "Пошук звітів...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Знімок",
   "reports.snapshot_created": "Знімок створено",
   "reports.auto_refresh": "Автооновлення",
-
   "export.title": "Експорт",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Експорт не вдався",
   "export.email_failed": "Не вдалося надіслати електронного листа",
   "export.enter_email": "Введіть хоча б одну адресу електронної пошти",
-
   "designer.new_report_name": "Новий звіт",
   "designer.failed_load": "Не вдалося завантажити звіт",
   "designer.report_name_required": "Назва звіту є обов'язковою",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Запити",
   "queries.adhoc_title": "Спеціальний запит",
   "queries.run": "Виконати",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "Не вдалося видалити запит",
   "queries.loaded_to_editor": "Завантажено в редактор",
   "queries.showing_rows": "Рядки {{from}}-{{to}} з {{total}}",
-
   "datasources.title": "Джерела даних",
   "datasources.add_source": "Додати джерело",
   "datasources.new_datasource": "Нове джерело даних",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Назва бази даних",
   "datasources.username": "Ім'я користувача",
   "datasources.password": "Пароль",
-
   "workspace.title": "Головна",
   "workspace.favorites": "Обране",
   "workspace.recent": "Нещодавні",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Немає нещодавніх елементів",
   "workspace.add_favorite_hint": "Додайте зірочку до елементів, щоб додати їх до обраного",
   "workspace.view_reports_hint": "Перегляньте звіти та запити, щоб побачити їх тут",
-
   "admin.users_tab": "👥 Користувачі",
   "admin.roles_tab": "🛡️ Ролі",
   "admin.audit_tab": "📋 Журнал аудиту",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Деактивувати",
   "admin.activate": "Активувати",
   "admin.password_placeholder": "мінімум 6 символів",
-
   "admin.role_management": "Управління ролями",
   "admin.new_role": "Нова роль",
   "admin.role_name": "Назва ролі",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Редагувати роль: {{name}}",
   "admin.delete_role_confirm": "Видалити роль \"{{name}}\"?",
   "admin.failed_load_roles": "Не вдалося завантажити ролі",
-
   "admin.audit_log": "Журнал аудиту",
   "admin.audit.user": "Користувач",
   "admin.audit.action": "Дія",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Всі дії",
   "admin.audit.all_types": "Всі типи",
   "admin.audit.no_entries": "Записів аудиту немає",
-
   "alerts.title": "Сповіщення про дані",
   "alerts.new_alert": "Нове сповіщення",
   "alerts.no_alerts": "Сповіщень поки немає",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Останнє значення:",
   "alerts.triggered": "СПРАЦЮВАЛО",
   "alerts.ok": "ОК",
-
   "monitoring.title": "Моніторинг системи",
   "monitoring.uptime": "Час роботи",
   "monitoring.jvm_heap": "Купа JVM",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Кеш увімкнено",
   "monitoring.clear_cache": "Очистити кеш",
   "monitoring.toggle_cache": "Перемкнути кеш",
-
   "schedules.title": "Розклади",
   "schedules.no_schedules": "Немає розкладів",
   "schedules.description": "Створюйте розклади звітів з переглядача звітів",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Одержувачі:",
   "schedules.paused": "Призупинено",
   "schedules.active": "Активний",
-
   "scripts.title": "Скрипти",
   "scripts.new_script": "Новий скрипт",
   "scripts.save": "Зберегти",
@@ -489,7 +471,6 @@
   "scripts.error": "Помилка",
   "scripts.execution_time": "Виконано за {{ms}} мс",
   "scripts.execution_failed": "Виконання не вдалося",
-
   "sharing.title": "Спільні зі мною",
   "sharing.all_types": "Всі типи",
   "sharing.type.reports": "Звіти",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Доступ надано",
   "sharing.share_removed": "Доступ відкликано",
   "sharing.failed_share": "Не вдалося поділитися",
-
   "templates.title": "Шаблони",
   "templates.search_placeholder": "Пошук шаблонів...",
   "templates.no_templates": "Немає доступних шаблонів",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Всі категорії",
   "templates.created_from": "Звіт створено з шаблону",
   "templates.failed_create": "Не вдалося створити зі шаблону",
-
   "models.title": "Моделі даних",
   "models.new_model": "Нова модель",
   "models.new_data_model": "Нова модель даних",
@@ -548,14 +527,12 @@
   "models.run_query": "Виконати запит",
   "models.select_fields": "Виберіть поля для запиту",
   "models.no_fields_selected": "Поля не вибрано",
-
   "search.placeholder": "Пошук... (Ctrl+K)",
   "search.searching": "Пошук...",
   "search.no_results": "Немає результатів для \"{{query}}\"",
   "search.reports": "Звіти",
   "search.queries": "Запити",
   "search.datasources": "Джерела даних",
-
   "interactive.active_filters": "Активні фільтри:",
   "interactive.clear_all": "Очистити все",
   "interactive.global_filters": "Глобальні фільтри",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Завантаження вбудованого звіту...",
   "embed.error": "Не вдалося завантажити вбудований звіт",
   "embed.invalid_token": "Недійсний або прострочений токен вбудовування",
-
   "tags.add_tag": "Додати тег...",
   "tags.remove_tag": "Видалити тег",
-
   "bookmarks.title": "Закладки",
   "bookmarks.save": "Зберегти закладку",
   "bookmarks.name_placeholder": "Назва закладки...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Немає закладок",
   "bookmarks.apply": "Застосувати",
   "bookmarks.delete_confirm": "Видалити цю закладку?",
-
   "live.connected": "Підключено",
   "live.connecting": "Підключення...",
   "live.disconnected": "Відключено",
   "live.reconnect": "Перепідключити",
   "live.enable": "Увімкнути оновлення в реальному часі",
-  "live.disable": "Вимкнути оновлення в реальному часі"
+  "live.disable": "Вимкнути оновлення в реальному часі",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

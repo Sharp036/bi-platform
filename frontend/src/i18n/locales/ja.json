@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "ページが見つかりません",
   "common.off": "オフ",
-
   "nav.home": "ホーム",
   "nav.reports": "レポート",
   "nav.queries": "クエリ",
@@ -67,7 +66,6 @@
   "nav.shared": "共有アイテム",
   "nav.admin": "管理",
   "nav.password": "パスワード",
-
   "auth.sign_in": "ログイン",
   "auth.signing_in": "ログイン中...",
   "auth.sign_in_subtitle": "アカウントにログイン",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "新しいパスワードは6文字以上にしてください",
   "auth.password_changed": "パスワードが正常に変更されました",
   "auth.password_change_failed": "パスワードの変更に失敗しました",
-
   "header.search_placeholder": "検索... (Ctrl+K)",
   "header.searching": "検索中...",
   "header.no_results_for": "\"{{query}}\" の結果が見つかりません",
   "header.language": "言語",
-
   "charts.type.bar": "棒グラフ",
   "charts.type.line": "折れ線グラフ",
   "charts.type.area": "エリアチャート",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "ウォーターフォール",
   "charts.type.candlestick": "ローソク足",
   "charts.select_type": "グラフの種類",
-
   "widgets.type.chart": "グラフ",
   "widgets.type.table": "テーブル",
   "widgets.type.kpi": "KPI カード",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "インタラクティブフィルター",
   "widgets.desc.image": "静的画像 / ロゴ",
   "widgets.components": "コンポーネント",
-
   "reports.title": "レポート",
   "reports.new_report": "新規レポート",
   "reports.search_placeholder": "レポートを検索...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "スナップショット",
   "reports.snapshot_created": "スナップショットを作成しました",
   "reports.auto_refresh": "自動更新",
-
   "export.title": "エクスポート",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "エクスポートに失敗しました",
   "export.email_failed": "メール送信に失敗しました",
   "export.enter_email": "メールアドレスを1つ以上入力してください",
-
   "designer.new_report_name": "新規レポート",
   "designer.failed_load": "レポートの読み込みに失敗しました",
   "designer.report_name_required": "レポート名は必須です",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "クエリ",
   "queries.adhoc_title": "アドホッククエリ",
   "queries.run": "実行",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "クエリの削除に失敗",
   "queries.loaded_to_editor": "エディタに読み込みました",
   "queries.showing_rows": "{{from}}-{{to}} 行 / {{total}} 行",
-
   "datasources.title": "データソース",
   "datasources.add_source": "ソースを追加",
   "datasources.new_datasource": "新規データソース",
@@ -329,7 +319,6 @@
   "datasources.database_name": "データベース名",
   "datasources.username": "ユーザー名",
   "datasources.password": "パスワード",
-
   "workspace.title": "ホーム",
   "workspace.favorites": "お気に入り",
   "workspace.recent": "最近",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "最近のアイテムはありません",
   "workspace.add_favorite_hint": "スターを付けてお気に入りに追加",
   "workspace.view_reports_hint": "レポートやクエリを表示するとここに表示されます",
-
   "admin.users_tab": "👥 ユーザー",
   "admin.roles_tab": "🛡️ ロール",
   "admin.audit_tab": "📋 監査ログ",
@@ -383,7 +371,6 @@
   "admin.deactivate": "無効化",
   "admin.activate": "有効化",
   "admin.password_placeholder": "6文字以上",
-
   "admin.role_management": "ロール管理",
   "admin.new_role": "新規ロール",
   "admin.role_name": "ロール名",
@@ -393,7 +380,6 @@
   "admin.edit_role": "ロール編集：{{name}}",
   "admin.delete_role_confirm": "ロール \"{{name}}\" を削除しますか？",
   "admin.failed_load_roles": "ロールの読み込みに失敗しました",
-
   "admin.audit_log": "監査ログ",
   "admin.audit.user": "ユーザー",
   "admin.audit.action": "操作",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "すべての操作",
   "admin.audit.all_types": "すべての種類",
   "admin.audit.no_entries": "監査エントリがありません",
-
   "alerts.title": "データアラート",
   "alerts.new_alert": "新規アラート",
   "alerts.no_alerts": "アラートはまだありません",
@@ -426,7 +411,6 @@
   "alerts.last_value": "最終値：",
   "alerts.triggered": "発動中",
   "alerts.ok": "正常",
-
   "monitoring.title": "システムモニタリング",
   "monitoring.uptime": "稼働時間",
   "monitoring.jvm_heap": "JVM ヒープ",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "キャッシュを有効にしました",
   "monitoring.clear_cache": "キャッシュをクリア",
   "monitoring.toggle_cache": "キャッシュの切替",
-
   "schedules.title": "スケジュール",
   "schedules.no_schedules": "スケジュールなし",
   "schedules.description": "レポートビューアーからレポートスケジュールを作成",
@@ -466,7 +449,6 @@
   "schedules.recipients": "受信者：",
   "schedules.paused": "一時停止",
   "schedules.active": "アクティブ",
-
   "scripts.title": "スクリプト",
   "scripts.new_script": "新規スクリプト",
   "scripts.save": "保存",
@@ -489,7 +471,6 @@
   "scripts.error": "エラー",
   "scripts.execution_time": "{{ms}}ms で実行完了",
   "scripts.execution_failed": "実行に失敗しました",
-
   "sharing.title": "共有アイテム",
   "sharing.all_types": "すべての種類",
   "sharing.type.reports": "レポート",
@@ -513,7 +494,6 @@
   "sharing.share_added": "アクセスを付与しました",
   "sharing.share_removed": "アクセスを取り消しました",
   "sharing.failed_share": "共有に失敗しました",
-
   "templates.title": "テンプレート",
   "templates.search_placeholder": "テンプレートを検索...",
   "templates.no_templates": "利用可能なテンプレートがありません",
@@ -523,7 +503,6 @@
   "templates.all_categories": "すべてのカテゴリ",
   "templates.created_from": "テンプレートからレポートを作成しました",
   "templates.failed_create": "テンプレートからの作成に失敗しました",
-
   "models.title": "データモデル",
   "models.new_model": "新規モデル",
   "models.new_data_model": "新規データモデル",
@@ -548,14 +527,12 @@
   "models.run_query": "クエリを実行",
   "models.select_fields": "クエリするフィールドを選択",
   "models.no_fields_selected": "フィールドが選択されていません",
-
   "search.placeholder": "検索... (Ctrl+K)",
   "search.searching": "検索中...",
   "search.no_results": "\"{{query}}\" の結果が見つかりません",
   "search.reports": "レポート",
   "search.queries": "クエリ",
   "search.datasources": "データソース",
-
   "interactive.active_filters": "アクティブなフィルター：",
   "interactive.clear_all": "すべてクリア",
   "interactive.global_filters": "グローバルフィルター",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "埋め込みレポートを読み込み中...",
   "embed.error": "埋め込みレポートの読み込みに失敗しました",
   "embed.invalid_token": "埋め込みトークンが無効または期限切れです",
-
   "tags.add_tag": "タグを追加...",
   "tags.remove_tag": "タグを削除",
-
   "bookmarks.title": "ブックマーク",
   "bookmarks.save": "ブックマークを保存",
   "bookmarks.name_placeholder": "ブックマーク名...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "ブックマークなし",
   "bookmarks.apply": "適用",
   "bookmarks.delete_confirm": "このブックマークを削除しますか？",
-
   "live.connected": "ライブ",
   "live.connecting": "接続中...",
   "live.disconnected": "切断済み",
   "live.reconnect": "再接続",
   "live.enable": "ライブ更新を有効化",
-  "live.disable": "ライブ更新を無効化"
+  "live.disable": "ライブ更新を無効化",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

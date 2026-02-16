@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Halaman tidak ditemukan",
   "common.off": "Mati",
-
   "nav.home": "Beranda",
   "nav.reports": "Laporan",
   "nav.queries": "Kueri",
@@ -67,7 +66,6 @@
   "nav.shared": "Dibagikan dengan Saya",
   "nav.admin": "Administrasi",
   "nav.password": "Kata Sandi",
-
   "auth.sign_in": "Masuk",
   "auth.signing_in": "Sedang masuk...",
   "auth.sign_in_subtitle": "Masuk ke akun Anda",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Kata sandi baru harus minimal 6 karakter",
   "auth.password_changed": "Kata sandi berhasil diubah",
   "auth.password_change_failed": "Gagal mengubah kata sandi",
-
   "header.search_placeholder": "Cari... (Ctrl+K)",
   "header.searching": "Mencari...",
   "header.no_results_for": "Tidak ada hasil untuk \"{{query}}\"",
   "header.language": "Bahasa",
-
   "charts.type.bar": "Batang",
   "charts.type.line": "Garis",
   "charts.type.area": "Area",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Air Terjun",
   "charts.type.candlestick": "Candlestick",
   "charts.select_type": "Tipe Grafik",
-
   "widgets.type.chart": "Grafik",
   "widgets.type.table": "Tabel",
   "widgets.type.kpi": "Kartu KPI",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Kontrol filter interaktif",
   "widgets.desc.image": "Gambar statis / logo",
   "widgets.components": "Komponen",
-
   "reports.title": "Laporan",
   "reports.new_report": "Laporan Baru",
   "reports.search_placeholder": "Cari laporan...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Cuplikan",
   "reports.snapshot_created": "Cuplikan dibuat",
   "reports.auto_refresh": "Segarkan otomatis",
-
   "export.title": "Ekspor",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Ekspor gagal",
   "export.email_failed": "Gagal mengirim email",
   "export.enter_email": "Masukkan setidaknya satu email",
-
   "designer.new_report_name": "Laporan Baru",
   "designer.failed_load": "Gagal memuat laporan",
   "designer.report_name_required": "Nama laporan wajib diisi",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Kueri",
   "queries.adhoc_title": "Kueri Ad-hoc",
   "queries.run": "Jalankan",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "Gagal menghapus kueri",
   "queries.loaded_to_editor": "Dimuat ke editor",
   "queries.showing_rows": "Baris {{from}}-{{to}} dari {{total}}",
-
   "datasources.title": "Sumber Data",
   "datasources.add_source": "Tambah Sumber",
   "datasources.new_datasource": "Sumber Data Baru",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Nama database",
   "datasources.username": "Nama pengguna",
   "datasources.password": "Kata sandi",
-
   "workspace.title": "Beranda",
   "workspace.favorites": "Favorit",
   "workspace.recent": "Terbaru",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Tidak ada item terbaru",
   "workspace.add_favorite_hint": "Beri bintang pada item untuk menambahkannya ke favorit",
   "workspace.view_reports_hint": "Lihat laporan dan kueri untuk menampilkannya di sini",
-
   "admin.users_tab": "👥 Pengguna",
   "admin.roles_tab": "🛡️ Peran",
   "admin.audit_tab": "📋 Log Audit",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Nonaktifkan",
   "admin.activate": "Aktifkan",
   "admin.password_placeholder": "minimal 6 karakter",
-
   "admin.role_management": "Manajemen Peran",
   "admin.new_role": "Peran Baru",
   "admin.role_name": "Nama Peran",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Edit Peran: {{name}}",
   "admin.delete_role_confirm": "Hapus peran \"{{name}}\"?",
   "admin.failed_load_roles": "Gagal memuat daftar peran",
-
   "admin.audit_log": "Log Audit",
   "admin.audit.user": "Pengguna",
   "admin.audit.action": "Tindakan",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Semua tindakan",
   "admin.audit.all_types": "Semua tipe",
   "admin.audit.no_entries": "Tidak ada entri audit",
-
   "alerts.title": "Peringatan Data",
   "alerts.new_alert": "Peringatan Baru",
   "alerts.no_alerts": "Belum ada peringatan",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Nilai terakhir:",
   "alerts.triggered": "TERPICU",
   "alerts.ok": "OK",
-
   "monitoring.title": "Pemantauan Sistem",
   "monitoring.uptime": "Waktu Aktif",
   "monitoring.jvm_heap": "Heap JVM",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Cache diaktifkan",
   "monitoring.clear_cache": "Bersihkan Cache",
   "monitoring.toggle_cache": "Alihkan Cache",
-
   "schedules.title": "Jadwal",
   "schedules.no_schedules": "Tidak ada jadwal",
   "schedules.description": "Buat jadwal laporan dari penampil laporan",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Penerima:",
   "schedules.paused": "Dijeda",
   "schedules.active": "Aktif",
-
   "scripts.title": "Skrip",
   "scripts.new_script": "Skrip Baru",
   "scripts.save": "Simpan",
@@ -489,7 +471,6 @@
   "scripts.error": "Error",
   "scripts.execution_time": "Dijalankan dalam {{ms}}ms",
   "scripts.execution_failed": "Eksekusi gagal",
-
   "sharing.title": "Dibagikan dengan Saya",
   "sharing.all_types": "Semua tipe",
   "sharing.type.reports": "Laporan",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Akses diberikan",
   "sharing.share_removed": "Akses dicabut",
   "sharing.failed_share": "Gagal membagikan",
-
   "templates.title": "Templat",
   "templates.search_placeholder": "Cari templat...",
   "templates.no_templates": "Tidak ada templat tersedia",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Semua kategori",
   "templates.created_from": "Laporan dibuat dari templat",
   "templates.failed_create": "Gagal membuat dari templat",
-
   "models.title": "Model Data",
   "models.new_model": "Model Baru",
   "models.new_data_model": "Model Data Baru",
@@ -548,14 +527,12 @@
   "models.run_query": "Jalankan Kueri",
   "models.select_fields": "Pilih field untuk dikueri",
   "models.no_fields_selected": "Tidak ada field yang dipilih",
-
   "search.placeholder": "Cari... (Ctrl+K)",
   "search.searching": "Mencari...",
   "search.no_results": "Tidak ada hasil untuk \"{{query}}\"",
   "search.reports": "Laporan",
   "search.queries": "Kueri",
   "search.datasources": "Sumber Data",
-
   "interactive.active_filters": "Filter Aktif:",
   "interactive.clear_all": "Hapus semua",
   "interactive.global_filters": "Filter Global",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Memuat laporan tertanam...",
   "embed.error": "Gagal memuat laporan tertanam",
   "embed.invalid_token": "Token embed tidak valid atau sudah kedaluwarsa",
-
   "tags.add_tag": "Tambah tag...",
   "tags.remove_tag": "Hapus tag",
-
   "bookmarks.title": "Penanda",
   "bookmarks.save": "Simpan Penanda",
   "bookmarks.name_placeholder": "Nama penanda...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Tidak ada penanda",
   "bookmarks.apply": "Terapkan",
   "bookmarks.delete_confirm": "Hapus penanda ini?",
-
   "live.connected": "Langsung",
   "live.connecting": "Menghubungkan...",
   "live.disconnected": "Terputus",
   "live.reconnect": "Hubungkan Ulang",
   "live.enable": "Aktifkan pembaruan langsung",
-  "live.disable": "Nonaktifkan pembaruan langsung"
+  "live.disable": "Nonaktifkan pembaruan langsung",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Pagina nu a fost găsită",
   "common.off": "Oprit",
-
   "nav.home": "Acasă",
   "nav.reports": "Rapoarte",
   "nav.queries": "Interogări",
@@ -67,7 +66,6 @@
   "nav.shared": "Partajate cu mine",
   "nav.admin": "Administrare",
   "nav.password": "Parolă",
-
   "auth.sign_in": "Autentificare",
   "auth.signing_in": "Se autentifică...",
   "auth.sign_in_subtitle": "Autentificați-vă în contul dvs.",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Parola nouă trebuie să aibă cel puțin 6 caractere",
   "auth.password_changed": "Parola a fost schimbată cu succes",
   "auth.password_change_failed": "Schimbarea parolei a eșuat",
-
   "header.search_placeholder": "Caută... (Ctrl+K)",
   "header.searching": "Se caută...",
   "header.no_results_for": "Niciun rezultat pentru '{{query}}'",
   "header.language": "Limbă",
-
   "charts.type.bar": "Bare",
   "charts.type.line": "Linie",
   "charts.type.area": "Arie",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Cascadă",
   "charts.type.candlestick": "Lumânare",
   "charts.select_type": "Tip de grafic",
-
   "widgets.type.chart": "Grafic",
   "widgets.type.table": "Tabel",
   "widgets.type.kpi": "Card KPI",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Control de filtrare interactiv",
   "widgets.desc.image": "Imagine statică / logo",
   "widgets.components": "Componente",
-
   "reports.title": "Rapoarte",
   "reports.new_report": "Raport nou",
   "reports.search_placeholder": "Caută rapoarte...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Captură",
   "reports.snapshot_created": "Captură creată",
   "reports.auto_refresh": "Reîmprospătare automată",
-
   "export.title": "Exportă",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Exportul a eșuat",
   "export.email_failed": "Trimiterea emailului a eșuat",
   "export.enter_email": "Introduceți cel puțin un email",
-
   "designer.new_report_name": "Raport nou",
   "designer.failed_load": "Încărcarea raportului a eșuat",
   "designer.report_name_required": "Numele raportului este obligatoriu",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Interogări",
   "queries.adhoc_title": "Interogare ad-hoc",
   "queries.run": "Execută",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "Stergerea interogarii a esuat",
   "queries.loaded_to_editor": "Incarcat in editor",
   "queries.showing_rows": "Randuri {{from}}-{{to}} din {{total}}",
-
   "datasources.title": "Surse de date",
   "datasources.add_source": "Adaugă sursă",
   "datasources.new_datasource": "Sursă de date nouă",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Numele bazei de date",
   "datasources.username": "Nume de utilizator",
   "datasources.password": "Parolă",
-
   "workspace.title": "Acasă",
   "workspace.favorites": "Favorite",
   "workspace.recent": "Recente",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Niciun element recent",
   "workspace.add_favorite_hint": "Marcați cu stea elementele pentru a le adăuga la favorite",
   "workspace.view_reports_hint": "Vizualizați rapoarte și interogări pentru a le vedea aici",
-
   "admin.users_tab": "👥 Utilizatori",
   "admin.roles_tab": "🛡️ Roluri",
   "admin.audit_tab": "📋 Jurnal de audit",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Dezactivează",
   "admin.activate": "Activează",
   "admin.password_placeholder": "minim 6 caractere",
-
   "admin.role_management": "Gestionarea rolurilor",
   "admin.new_role": "Rol nou",
   "admin.role_name": "Numele rolului",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Editare rol: {{name}}",
   "admin.delete_role_confirm": "Ștergeți rolul '{{name}}'?",
   "admin.failed_load_roles": "Încărcarea rolurilor a eșuat",
-
   "admin.audit_log": "Jurnal de audit",
   "admin.audit.user": "Utilizator",
   "admin.audit.action": "Acțiune",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Toate acțiunile",
   "admin.audit.all_types": "Toate tipurile",
   "admin.audit.no_entries": "Nicio intrare de audit",
-
   "alerts.title": "Alerte de date",
   "alerts.new_alert": "Alertă nouă",
   "alerts.no_alerts": "Nicio alertă încă",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Ultima valoare:",
   "alerts.triggered": "DECLANȘAT",
   "alerts.ok": "OK",
-
   "monitoring.title": "Monitorizare sistem",
   "monitoring.uptime": "Timp funcționare",
   "monitoring.jvm_heap": "JVM Heap",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Cache activat",
   "monitoring.clear_cache": "Golește cache",
   "monitoring.toggle_cache": "Comută cache",
-
   "schedules.title": "Programări",
   "schedules.no_schedules": "Nicio programare",
   "schedules.description": "Creați programări de rapoarte din vizualizatorul de rapoarte",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Destinatari:",
   "schedules.paused": "Suspendat",
   "schedules.active": "Activ",
-
   "scripts.title": "Scripturi",
   "scripts.new_script": "Script nou",
   "scripts.save": "Salvează",
@@ -489,7 +471,6 @@
   "scripts.error": "Eroare",
   "scripts.execution_time": "Executat în {{ms}}ms",
   "scripts.execution_failed": "Execuția a eșuat",
-
   "sharing.title": "Partajate cu mine",
   "sharing.all_types": "Toate tipurile",
   "sharing.type.reports": "Rapoarte",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Acces acordat",
   "sharing.share_removed": "Acces revocat",
   "sharing.failed_share": "Partajarea a eșuat",
-
   "templates.title": "Șabloane",
   "templates.search_placeholder": "Caută șabloane...",
   "templates.no_templates": "Niciun șablon disponibil",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Toate categoriile",
   "templates.created_from": "Raport creat din șablon",
   "templates.failed_create": "Crearea din șablon a eșuat",
-
   "models.title": "Modele de date",
   "models.new_model": "Model nou",
   "models.new_data_model": "Model de date nou",
@@ -548,14 +527,12 @@
   "models.run_query": "Execută interogarea",
   "models.select_fields": "Selectează câmpurile de interogat",
   "models.no_fields_selected": "Niciun câmp selectat",
-
   "search.placeholder": "Caută... (Ctrl+K)",
   "search.searching": "Se caută...",
   "search.no_results": "Niciun rezultat pentru '{{query}}'",
   "search.reports": "Rapoarte",
   "search.queries": "Interogări",
   "search.datasources": "Surse de date",
-
   "interactive.active_filters": "Filtre active:",
   "interactive.clear_all": "Șterge tot",
   "interactive.global_filters": "Filtre globale",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Se încarcă raportul încorporat...",
   "embed.error": "Încărcarea raportului încorporat a eșuat",
   "embed.invalid_token": "Token de încorporare invalid sau expirat",
-
   "tags.add_tag": "Adaugă etichetă...",
   "tags.remove_tag": "Elimină etichetă",
-
   "bookmarks.title": "Marcaje",
   "bookmarks.save": "Salvează marcaj",
   "bookmarks.name_placeholder": "Numele marcajului...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Niciun marcaj",
   "bookmarks.apply": "Aplică",
   "bookmarks.delete_confirm": "Ștergeți acest marcaj?",
-
   "live.connected": "Live",
   "live.connecting": "Se conectează...",
   "live.disconnected": "Deconectat",
   "live.reconnect": "Reconectare",
   "live.enable": "Activează actualizările live",
-  "live.disable": "Dezactivează actualizările live"
+  "live.disable": "Dezactivează actualizările live",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

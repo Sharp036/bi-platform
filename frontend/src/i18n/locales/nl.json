@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Pagina niet gevonden",
   "common.off": "Uit",
-
   "nav.home": "Home",
   "nav.reports": "Rapporten",
   "nav.queries": "Query's",
@@ -67,7 +66,6 @@
   "nav.shared": "Gedeeld met mij",
   "nav.admin": "Beheer",
   "nav.password": "Wachtwoord",
-
   "auth.sign_in": "Inloggen",
   "auth.signing_in": "Inloggen...",
   "auth.sign_in_subtitle": "Log in op uw account",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Nieuw wachtwoord moet minstens 6 tekens bevatten",
   "auth.password_changed": "Wachtwoord succesvol gewijzigd",
   "auth.password_change_failed": "Wachtwoord wijzigen mislukt",
-
   "header.search_placeholder": "Zoeken... (Ctrl+K)",
   "header.searching": "Zoeken...",
   "header.no_results_for": "Geen resultaten voor \"{{query}}\"",
   "header.language": "Taal",
-
   "charts.type.bar": "Staaf",
   "charts.type.line": "Lijn",
   "charts.type.area": "Vlak",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Waterval",
   "charts.type.candlestick": "Candlestick",
   "charts.select_type": "Grafiektype",
-
   "widgets.type.chart": "Grafiek",
   "widgets.type.table": "Tabel",
   "widgets.type.kpi": "KPI-kaart",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interactief filterbeheer",
   "widgets.desc.image": "Statische afbeelding / logo",
   "widgets.components": "Componenten",
-
   "reports.title": "Rapporten",
   "reports.new_report": "Nieuw rapport",
   "reports.search_placeholder": "Rapporten zoeken...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Momentopname",
   "reports.snapshot_created": "Momentopname aangemaakt",
   "reports.auto_refresh": "Automatisch vernieuwen",
-
   "export.title": "Exporteren",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Exporteren mislukt",
   "export.email_failed": "E-mail verzenden mislukt",
   "export.enter_email": "Voer minstens één e-mailadres in",
-
   "designer.new_report_name": "Nieuw rapport",
   "designer.failed_load": "Rapport laden mislukt",
   "designer.report_name_required": "Rapportnaam is verplicht",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Query's",
   "queries.adhoc_title": "Ad-hoc query",
   "queries.run": "Uitvoeren",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "Query verwijderen mislukt",
   "queries.loaded_to_editor": "Geladen in editor",
   "queries.showing_rows": "Rijen {{from}}-{{to}} van {{total}}",
-
   "datasources.title": "Gegevensbronnen",
   "datasources.add_source": "Bron toevoegen",
   "datasources.new_datasource": "Nieuwe gegevensbron",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Databasenaam",
   "datasources.username": "Gebruikersnaam",
   "datasources.password": "Wachtwoord",
-
   "workspace.title": "Home",
   "workspace.favorites": "Favorieten",
   "workspace.recent": "Recent",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Geen recente items",
   "workspace.add_favorite_hint": "Markeer items met een ster om ze aan favorieten toe te voegen",
   "workspace.view_reports_hint": "Bekijk rapporten en query's om ze hier te zien",
-
   "admin.users_tab": "👥 Gebruikers",
   "admin.roles_tab": "🛡️ Rollen",
   "admin.audit_tab": "📋 Auditlogboek",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Deactiveren",
   "admin.activate": "Activeren",
   "admin.password_placeholder": "minimaal 6 tekens",
-
   "admin.role_management": "Rollenbeheer",
   "admin.new_role": "Nieuwe rol",
   "admin.role_name": "Rolnaam",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Rol bewerken: {{name}}",
   "admin.delete_role_confirm": "Rol \"{{name}}\" verwijderen?",
   "admin.failed_load_roles": "Rollen laden mislukt",
-
   "admin.audit_log": "Auditlogboek",
   "admin.audit.user": "Gebruiker",
   "admin.audit.action": "Actie",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Alle acties",
   "admin.audit.all_types": "Alle typen",
   "admin.audit.no_entries": "Geen audit-vermeldingen",
-
   "alerts.title": "Gegevenswaarschuwingen",
   "alerts.new_alert": "Nieuwe waarschuwing",
   "alerts.no_alerts": "Nog geen waarschuwingen",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Laatste waarde:",
   "alerts.triggered": "GEACTIVEERD",
   "alerts.ok": "OK",
-
   "monitoring.title": "Systeemmonitoring",
   "monitoring.uptime": "Uptime",
   "monitoring.jvm_heap": "JVM Heap",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Cache ingeschakeld",
   "monitoring.clear_cache": "Cache wissen",
   "monitoring.toggle_cache": "Cache in-/uitschakelen",
-
   "schedules.title": "Planning",
   "schedules.no_schedules": "Geen planning",
   "schedules.description": "Maak rapportplanningen aan vanuit de rapportweergave",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Ontvangers:",
   "schedules.paused": "Gepauzeerd",
   "schedules.active": "Actief",
-
   "scripts.title": "Scripts",
   "scripts.new_script": "Nieuw script",
   "scripts.save": "Opslaan",
@@ -489,7 +471,6 @@
   "scripts.error": "Fout",
   "scripts.execution_time": "Uitgevoerd in {{ms}}ms",
   "scripts.execution_failed": "Uitvoering mislukt",
-
   "sharing.title": "Gedeeld met mij",
   "sharing.all_types": "Alle typen",
   "sharing.type.reports": "Rapporten",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Toegang verleend",
   "sharing.share_removed": "Toegang ingetrokken",
   "sharing.failed_share": "Delen mislukt",
-
   "templates.title": "Sjablonen",
   "templates.search_placeholder": "Sjablonen zoeken...",
   "templates.no_templates": "Geen sjablonen beschikbaar",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Alle categorieën",
   "templates.created_from": "Rapport aangemaakt vanuit sjabloon",
   "templates.failed_create": "Aanmaken vanuit sjabloon mislukt",
-
   "models.title": "Gegevensmodellen",
   "models.new_model": "Nieuw model",
   "models.new_data_model": "Nieuw gegevensmodel",
@@ -548,14 +527,12 @@
   "models.run_query": "Query uitvoeren",
   "models.select_fields": "Selecteer velden om te bevragen",
   "models.no_fields_selected": "Geen velden geselecteerd",
-
   "search.placeholder": "Zoeken... (Ctrl+K)",
   "search.searching": "Zoeken...",
   "search.no_results": "Geen resultaten voor \"{{query}}\"",
   "search.reports": "Rapporten",
   "search.queries": "Query's",
   "search.datasources": "Gegevensbronnen",
-
   "interactive.active_filters": "Actieve filters:",
   "interactive.clear_all": "Alles wissen",
   "interactive.global_filters": "Globale filters",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Ingesloten rapport laden...",
   "embed.error": "Ingesloten rapport laden mislukt",
   "embed.invalid_token": "Ongeldig of verlopen insluittoken",
-
   "tags.add_tag": "Tag toevoegen...",
   "tags.remove_tag": "Tag verwijderen",
-
   "bookmarks.title": "Bladwijzers",
   "bookmarks.save": "Bladwijzer opslaan",
   "bookmarks.name_placeholder": "Naam bladwijzer...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Geen bladwijzers",
   "bookmarks.apply": "Toepassen",
   "bookmarks.delete_confirm": "Deze bladwijzer verwijderen?",
-
   "live.connected": "Live",
   "live.connecting": "Verbinden...",
   "live.disconnected": "Verbroken",
   "live.reconnect": "Opnieuw verbinden",
   "live.enable": "Live updates inschakelen",
-  "live.disable": "Live updates uitschakelen"
+  "live.disable": "Live updates uitschakelen",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

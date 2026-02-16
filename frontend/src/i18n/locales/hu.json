@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Az oldal nem található",
   "common.off": "Ki",
-
   "nav.home": "Kezdőlap",
   "nav.reports": "Jelentések",
   "nav.queries": "Lekérdezések",
@@ -67,7 +66,6 @@
   "nav.shared": "Velem megosztva",
   "nav.admin": "Adminisztráció",
   "nav.password": "Jelszó",
-
   "auth.sign_in": "Bejelentkezés",
   "auth.signing_in": "Bejelentkezés...",
   "auth.sign_in_subtitle": "Jelentkezzen be fiókjába",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Az új jelszónak legalább 6 karakter hosszúnak kell lennie",
   "auth.password_changed": "A jelszó sikeresen megváltoztatva",
   "auth.password_change_failed": "A jelszó módosítása sikertelen",
-
   "header.search_placeholder": "Keresés... (Ctrl+K)",
   "header.searching": "Keresés...",
   "header.no_results_for": "Nincs találat a következőre: '{{query}}'",
   "header.language": "Nyelv",
-
   "charts.type.bar": "Oszlop",
   "charts.type.line": "Vonal",
   "charts.type.area": "Terület",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Vízesés",
   "charts.type.candlestick": "Gyertya",
   "charts.select_type": "Diagram típus",
-
   "widgets.type.chart": "Diagram",
   "widgets.type.table": "Táblázat",
   "widgets.type.kpi": "KPI kártya",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interaktív szűrővezérlő",
   "widgets.desc.image": "Statikus kép / logó",
   "widgets.components": "Komponensek",
-
   "reports.title": "Jelentések",
   "reports.new_report": "Új jelentés",
   "reports.search_placeholder": "Jelentések keresése...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Pillanatkép",
   "reports.snapshot_created": "Pillanatkép létrehozva",
   "reports.auto_refresh": "Automatikus frissítés",
-
   "export.title": "Exportálás",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Az exportálás sikertelen",
   "export.email_failed": "Az e-mail küldése sikertelen",
   "export.enter_email": "Adjon meg legalább egy e-mail címet",
-
   "designer.new_report_name": "Új jelentés",
   "designer.failed_load": "A jelentés betöltése sikertelen",
   "designer.report_name_required": "A jelentés neve kötelező",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Lekérdezések",
   "queries.adhoc_title": "Ad-hoc lekérdezés",
   "queries.run": "Futtatás",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "Lekerdezes torlese sikertelen",
   "queries.loaded_to_editor": "Betoltve a szerkesztobe",
   "queries.showing_rows": "Sorok: {{from}}-{{to}} / {{total}}",
-
   "datasources.title": "Adatforrások",
   "datasources.add_source": "Forrás hozzáadása",
   "datasources.new_datasource": "Új adatforrás",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Adatbázis neve",
   "datasources.username": "Felhasználónév",
   "datasources.password": "Jelszó",
-
   "workspace.title": "Kezdőlap",
   "workspace.favorites": "Kedvencek",
   "workspace.recent": "Legutóbbi",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Nincsenek legutóbbi elemek",
   "workspace.add_favorite_hint": "Csillagozza meg az elemeket a kedvencekhez adáshoz",
   "workspace.view_reports_hint": "Tekintsen meg jelentéseket és lekérdezéseket, hogy itt megjelenjenek",
-
   "admin.users_tab": "👥 Felhasználók",
   "admin.roles_tab": "🛡️ Szerepkörök",
   "admin.audit_tab": "📋 Audit napló",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Deaktiválás",
   "admin.activate": "Aktiválás",
   "admin.password_placeholder": "legalább 6 karakter",
-
   "admin.role_management": "Szerepkör kezelés",
   "admin.new_role": "Új szerepkör",
   "admin.role_name": "Szerepkör neve",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Szerepkör szerkesztése: {{name}}",
   "admin.delete_role_confirm": "Törli a(z) '{{name}}' szerepkört?",
   "admin.failed_load_roles": "A szerepkörök betöltése sikertelen",
-
   "admin.audit_log": "Audit napló",
   "admin.audit.user": "Felhasználó",
   "admin.audit.action": "Művelet",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Minden művelet",
   "admin.audit.all_types": "Minden típus",
   "admin.audit.no_entries": "Nincsenek audit bejegyzések",
-
   "alerts.title": "Adatriasztások",
   "alerts.new_alert": "Új riasztás",
   "alerts.no_alerts": "Még nincsenek riasztások",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Utolsó érték:",
   "alerts.triggered": "KIVÁLTVA",
   "alerts.ok": "OK",
-
   "monitoring.title": "Rendszerfelügyelet",
   "monitoring.uptime": "Üzemidő",
   "monitoring.jvm_heap": "JVM Heap",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Gyorsítótár engedélyezve",
   "monitoring.clear_cache": "Gyorsítótár kiürítése",
   "monitoring.toggle_cache": "Gyorsítótár váltása",
-
   "schedules.title": "Ütemezések",
   "schedules.no_schedules": "Nincsenek ütemezések",
   "schedules.description": "Hozzon létre jelentés ütemezéseket a jelentésnézegetőből",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Címzettek:",
   "schedules.paused": "Szüneteltetve",
   "schedules.active": "Aktív",
-
   "scripts.title": "Szkriptek",
   "scripts.new_script": "Új szkript",
   "scripts.save": "Mentés",
@@ -489,7 +471,6 @@
   "scripts.error": "Hiba",
   "scripts.execution_time": "Végrehajtva {{ms}}ms alatt",
   "scripts.execution_failed": "A végrehajtás sikertelen",
-
   "sharing.title": "Velem megosztva",
   "sharing.all_types": "Minden típus",
   "sharing.type.reports": "Jelentések",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Hozzáférés megadva",
   "sharing.share_removed": "Hozzáférés visszavonva",
   "sharing.failed_share": "A megosztás sikertelen",
-
   "templates.title": "Sablonok",
   "templates.search_placeholder": "Sablonok keresése...",
   "templates.no_templates": "Nincsenek elérhető sablonok",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Minden kategória",
   "templates.created_from": "Jelentés létrehozva sablonból",
   "templates.failed_create": "A sablonból történő létrehozás sikertelen",
-
   "models.title": "Adatmodellek",
   "models.new_model": "Új modell",
   "models.new_data_model": "Új adatmodell",
@@ -548,14 +527,12 @@
   "models.run_query": "Lekérdezés futtatása",
   "models.select_fields": "Válasszon mezőket a lekérdezéshez",
   "models.no_fields_selected": "Nincs kiválasztott mező",
-
   "search.placeholder": "Keresés... (Ctrl+K)",
   "search.searching": "Keresés...",
   "search.no_results": "Nincs találat a következőre: '{{query}}'",
   "search.reports": "Jelentések",
   "search.queries": "Lekérdezések",
   "search.datasources": "Adatforrások",
-
   "interactive.active_filters": "Aktív szűrők:",
   "interactive.clear_all": "Összes törlése",
   "interactive.global_filters": "Globális szűrők",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Beágyazott jelentés betöltése...",
   "embed.error": "A beágyazott jelentés betöltése sikertelen",
   "embed.invalid_token": "Érvénytelen vagy lejárt beágyazási token",
-
   "tags.add_tag": "Címke hozzáadása...",
   "tags.remove_tag": "Címke eltávolítása",
-
   "bookmarks.title": "Könyvjelzők",
   "bookmarks.save": "Könyvjelző mentése",
   "bookmarks.name_placeholder": "Könyvjelző neve...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Nincsenek könyvjelzők",
   "bookmarks.apply": "Alkalmazás",
   "bookmarks.delete_confirm": "Törli ezt a könyvjelzőt?",
-
   "live.connected": "Élő",
   "live.connecting": "Kapcsolódás...",
   "live.disconnected": "Leválasztva",
   "live.reconnect": "Újrakapcsolódás",
   "live.enable": "Élő frissítések engedélyezése",
-  "live.disable": "Élő frissítések letiltása"
+  "live.disable": "Élő frissítések letiltása",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

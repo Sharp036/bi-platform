@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Página não encontrada",
   "common.off": "Desligado",
-
   "nav.home": "Início",
   "nav.reports": "Relatórios",
   "nav.queries": "Consultas",
@@ -67,7 +66,6 @@
   "nav.shared": "Compartilhado Comigo",
   "nav.admin": "Administração",
   "nav.password": "Senha",
-
   "auth.sign_in": "Entrar",
   "auth.signing_in": "Entrando...",
   "auth.sign_in_subtitle": "Entre na sua conta",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "A nova senha deve ter pelo menos 6 caracteres",
   "auth.password_changed": "Senha alterada com sucesso",
   "auth.password_change_failed": "Falha ao alterar a senha",
-
   "header.search_placeholder": "Pesquisar... (Ctrl+K)",
   "header.searching": "Pesquisando...",
   "header.no_results_for": "Nenhum resultado para \"{{query}}\"",
   "header.language": "Idioma",
-
   "charts.type.bar": "Barras",
   "charts.type.line": "Linha",
   "charts.type.area": "Área",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Cascata",
   "charts.type.candlestick": "Candlestick",
   "charts.select_type": "Tipo de Gráfico",
-
   "widgets.type.chart": "Gráfico",
   "widgets.type.table": "Tabela",
   "widgets.type.kpi": "Cartão KPI",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Controle de filtro interativo",
   "widgets.desc.image": "Imagem estática / logotipo",
   "widgets.components": "Componentes",
-
   "reports.title": "Relatórios",
   "reports.new_report": "Novo Relatório",
   "reports.search_placeholder": "Pesquisar relatórios...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Snapshot",
   "reports.snapshot_created": "Snapshot criado",
   "reports.auto_refresh": "Atualização automática",
-
   "export.title": "Exportar",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Falha na exportação",
   "export.email_failed": "Falha ao enviar e-mail",
   "export.enter_email": "Insira pelo menos um e-mail",
-
   "designer.new_report_name": "Novo Relatório",
   "designer.failed_load": "Falha ao carregar relatório",
   "designer.report_name_required": "O nome do relatório é obrigatório",
@@ -255,7 +247,6 @@
   "designer.filter_types.text": "Pesquisa de texto",
   "designer.filter_types.number_range": "Faixa numérica",
   "designer.filter_types.date_range": "Faixa de datas",
-
   "designer.y_axis_format": "Formato eixo Y",
   "designer.axis_format.plain": "Número simples",
   "designer.axis_format.thousands": "Milhares (K)",
@@ -283,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Consultas",
   "queries.adhoc_title": "Consulta Ad-hoc",
   "queries.run": "Executar",
@@ -311,7 +301,6 @@
   "queries.delete_failed": "Falha ao excluir consulta",
   "queries.loaded_to_editor": "Carregado no editor",
   "queries.showing_rows": "Linhas {{from}}-{{to}} de {{total}}",
-
   "datasources.title": "Fontes de Dados",
   "datasources.add_source": "Adicionar Fonte",
   "datasources.new_datasource": "Nova Fonte de Dados",
@@ -330,7 +319,6 @@
   "datasources.database_name": "Nome do banco de dados",
   "datasources.username": "Nome de usuário",
   "datasources.password": "Senha",
-
   "workspace.title": "Início",
   "workspace.favorites": "Favoritos",
   "workspace.recent": "Recentes",
@@ -348,7 +336,6 @@
   "workspace.no_recent": "Nenhum item recente",
   "workspace.add_favorite_hint": "Marque itens com estrela para adicioná-los aos favoritos",
   "workspace.view_reports_hint": "Visualize relatórios e consultas para vê-los aqui",
-
   "admin.users_tab": "👥 Usuários",
   "admin.roles_tab": "🛡️ Funções",
   "admin.audit_tab": "📋 Log de Auditoria",
@@ -384,7 +371,6 @@
   "admin.deactivate": "Desativar",
   "admin.activate": "Ativar",
   "admin.password_placeholder": "mín. 6 caracteres",
-
   "admin.role_management": "Gerenciamento de Funções",
   "admin.new_role": "Nova Função",
   "admin.role_name": "Nome da Função",
@@ -394,7 +380,6 @@
   "admin.edit_role": "Editar Função: {{name}}",
   "admin.delete_role_confirm": "Excluir função \"{{name}}\"?",
   "admin.failed_load_roles": "Falha ao carregar funções",
-
   "admin.audit_log": "Log de Auditoria",
   "admin.audit.user": "Usuário",
   "admin.audit.action": "Ação",
@@ -405,7 +390,6 @@
   "admin.audit.all_actions": "Todas as ações",
   "admin.audit.all_types": "Todos os tipos",
   "admin.audit.no_entries": "Nenhum registro de auditoria",
-
   "alerts.title": "Alertas de Dados",
   "alerts.new_alert": "Novo Alerta",
   "alerts.no_alerts": "Nenhum alerta ainda",
@@ -427,7 +411,6 @@
   "alerts.last_value": "Último valor:",
   "alerts.triggered": "DISPARADO",
   "alerts.ok": "OK",
-
   "monitoring.title": "Monitoramento do Sistema",
   "monitoring.uptime": "Tempo de Atividade",
   "monitoring.jvm_heap": "Heap JVM",
@@ -454,7 +437,6 @@
   "monitoring.cache_enabled": "Cache ativado",
   "monitoring.clear_cache": "Limpar Cache",
   "monitoring.toggle_cache": "Alternar Cache",
-
   "schedules.title": "Agendamentos",
   "schedules.no_schedules": "Nenhum agendamento",
   "schedules.description": "Crie agendamentos de relatórios a partir do visualizador de relatórios",
@@ -467,7 +449,6 @@
   "schedules.recipients": "Destinatários:",
   "schedules.paused": "Pausado",
   "schedules.active": "Ativo",
-
   "scripts.title": "Scripts",
   "scripts.new_script": "Novo Script",
   "scripts.save": "Salvar",
@@ -490,7 +471,6 @@
   "scripts.error": "Erro",
   "scripts.execution_time": "Executado em {{ms}}ms",
   "scripts.execution_failed": "Falha na execução",
-
   "sharing.title": "Compartilhado Comigo",
   "sharing.all_types": "Todos os tipos",
   "sharing.type.reports": "Relatórios",
@@ -514,7 +494,6 @@
   "sharing.share_added": "Acesso concedido",
   "sharing.share_removed": "Acesso revogado",
   "sharing.failed_share": "Falha ao compartilhar",
-
   "templates.title": "Modelos de Relatório",
   "templates.search_placeholder": "Pesquisar modelos...",
   "templates.no_templates": "Nenhum modelo disponível",
@@ -524,7 +503,6 @@
   "templates.all_categories": "Todas as categorias",
   "templates.created_from": "Relatório criado a partir do modelo",
   "templates.failed_create": "Falha ao criar a partir do modelo",
-
   "models.title": "Modelos de Dados",
   "models.new_model": "Novo Modelo",
   "models.new_data_model": "Novo Modelo de Dados",
@@ -549,14 +527,12 @@
   "models.run_query": "Executar Consulta",
   "models.select_fields": "Selecione os campos para consultar",
   "models.no_fields_selected": "Nenhum campo selecionado",
-
   "search.placeholder": "Pesquisar... (Ctrl+K)",
   "search.searching": "Pesquisando...",
   "search.no_results": "Nenhum resultado para \"{{query}}\"",
   "search.reports": "Relatórios",
   "search.queries": "Consultas",
   "search.datasources": "Fontes de Dados",
-
   "interactive.active_filters": "Filtros Ativos:",
   "interactive.clear_all": "Limpar tudo",
   "interactive.global_filters": "Filtros Globais",
@@ -609,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Carregando relatório incorporado...",
   "embed.error": "Falha ao carregar relatório incorporado",
   "embed.invalid_token": "Token de incorporação inválido ou expirado",
-
   "tags.add_tag": "Adicionar tag...",
   "tags.remove_tag": "Remover tag",
-
   "bookmarks.title": "Marcadores",
   "bookmarks.save": "Salvar Marcador",
   "bookmarks.name_placeholder": "Nome do marcador...",
@@ -625,11 +598,17 @@
   "bookmarks.no_bookmarks": "Nenhum marcador",
   "bookmarks.apply": "Aplicar",
   "bookmarks.delete_confirm": "Excluir este marcador?",
-
   "live.connected": "Ao Vivo",
   "live.connecting": "Conectando...",
   "live.disconnected": "Desconectado",
   "live.reconnect": "Reconectar",
   "live.enable": "Ativar atualizações em tempo real",
-  "live.disable": "Desativar atualizações em tempo real"
+  "live.disable": "Desativar atualizações em tempo real",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

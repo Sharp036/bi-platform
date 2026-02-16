@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Страница не найдена",
   "common.off": "Выкл",
-
   "nav.home": "Главная",
   "nav.reports": "Отчёты",
   "nav.queries": "Запросы",
@@ -67,7 +66,6 @@
   "nav.shared": "Доступные мне",
   "nav.admin": "Администрирование",
   "nav.password": "Пароль",
-
   "auth.sign_in": "Войти",
   "auth.signing_in": "Вход...",
   "auth.sign_in_subtitle": "Войдите в свою учётную запись",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Новый пароль должен содержать не менее 6 символов",
   "auth.password_changed": "Пароль успешно изменён",
   "auth.password_change_failed": "Не удалось изменить пароль",
-
   "header.search_placeholder": "Поиск... (Ctrl+K)",
   "header.searching": "Поиск...",
   "header.no_results_for": "Нет результатов для «{{query}}»",
   "header.language": "Язык",
-
   "charts.type.bar": "Столбчатая",
   "charts.type.line": "Линейная",
   "charts.type.area": "С областями",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Водопад",
   "charts.type.candlestick": "Свечная",
   "charts.select_type": "Тип диаграммы",
-
   "widgets.type.chart": "Диаграмма",
   "widgets.type.table": "Таблица",
   "widgets.type.kpi": "KPI-карточка",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Интерактивный элемент фильтрации",
   "widgets.desc.image": "Статическое изображение / логотип",
   "widgets.components": "Компоненты",
-
   "reports.title": "Отчёты",
   "reports.new_report": "Новый отчёт",
   "reports.search_placeholder": "Поиск отчётов...",
@@ -150,7 +144,6 @@
   "reports.filters_short": "Фильтры",
   "reports.show_filters": "Показать фильтры",
   "reports.hide_filters": "Скрыть фильтры",
-
   "export.title": "Экспорт",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -166,7 +159,6 @@
   "export.export_failed": "Экспорт не удался",
   "export.email_failed": "Не удалось отправить email",
   "export.enter_email": "Введите хотя бы один email",
-
   "designer.new_report_name": "Новый отчёт",
   "designer.failed_load": "Не удалось загрузить отчёт",
   "designer.report_name_required": "Название отчёта обязательно",
@@ -264,7 +256,6 @@
   "designer.filter_types.text": "Текстовый поиск",
   "designer.filter_types.number_range": "Числовой диапазон",
   "designer.filter_types.date_range": "Диапазон дат",
-
   "designer.y_axis_format": "Формат оси Y",
   "designer.axis_format.plain": "Простое число",
   "designer.axis_format.thousands": "Тысячи (К)",
@@ -292,7 +283,6 @@
   "designer.label_rotation.angled_up": "Подписи: Под углом вверх (-45°)",
   "designer.label_rotation.angled_down": "Подписи: Под углом вниз (45°)",
   "designer.label_rotation.vertical": "Подписи: Вертикально (-90°)",
-
   "queries.title": "Запросы",
   "queries.adhoc_title": "Произвольный запрос",
   "queries.run": "Выполнить",
@@ -320,7 +310,6 @@
   "queries.delete_failed": "Не удалось удалить запрос",
   "queries.loaded_to_editor": "Загружено в редактор",
   "queries.showing_rows": "Строки {{from}}-{{to}} из {{total}}",
-
   "datasources.title": "Источники данных",
   "datasources.add_source": "Добавить источник",
   "datasources.new_datasource": "Новый источник данных",
@@ -339,7 +328,6 @@
   "datasources.database_name": "Имя базы данных",
   "datasources.username": "Имя пользователя",
   "datasources.password": "Пароль",
-
   "workspace.title": "Главная",
   "workspace.favorites": "Избранное",
   "workspace.recent": "Недавние",
@@ -357,7 +345,6 @@
   "workspace.no_recent": "Нет недавних элементов",
   "workspace.add_favorite_hint": "Отметьте элементы звёздочкой, чтобы добавить в избранное",
   "workspace.view_reports_hint": "Просматривайте отчёты и запросы, чтобы увидеть их здесь",
-
   "admin.users_tab": "👥 Пользователи",
   "admin.roles_tab": "🛡️ Роли",
   "admin.audit_tab": "📋 Журнал аудита",
@@ -393,7 +380,6 @@
   "admin.deactivate": "Деактивировать",
   "admin.activate": "Активировать",
   "admin.password_placeholder": "минимум 6 символов",
-
   "admin.role_management": "Управление ролями",
   "admin.new_role": "Новая роль",
   "admin.role_name": "Название роли",
@@ -403,7 +389,6 @@
   "admin.edit_role": "Редактировать роль: {{name}}",
   "admin.delete_role_confirm": "Удалить роль «{{name}}»?",
   "admin.failed_load_roles": "Не удалось загрузить роли",
-
   "admin.audit_log": "Журнал аудита",
   "admin.audit.user": "Пользователь",
   "admin.audit.action": "Действие",
@@ -414,7 +399,6 @@
   "admin.audit.all_actions": "Все действия",
   "admin.audit.all_types": "Все типы",
   "admin.audit.no_entries": "Записей аудита нет",
-
   "alerts.title": "Оповещения о данных",
   "alerts.new_alert": "Новое оповещение",
   "alerts.no_alerts": "Оповещений пока нет",
@@ -436,7 +420,6 @@
   "alerts.last_value": "Последнее значение:",
   "alerts.triggered": "СРАБОТАЛО",
   "alerts.ok": "ОК",
-
   "monitoring.title": "Системный мониторинг",
   "monitoring.uptime": "Время работы",
   "monitoring.jvm_heap": "Куча JVM",
@@ -463,7 +446,6 @@
   "monitoring.cache_enabled": "Кэш включён",
   "monitoring.clear_cache": "Очистить кэш",
   "monitoring.toggle_cache": "Переключить кэш",
-
   "schedules.title": "Расписания",
   "schedules.no_schedules": "Нет расписаний",
   "schedules.description": "Создавайте расписания отчётов из средства просмотра отчётов",
@@ -476,7 +458,6 @@
   "schedules.recipients": "Получатели:",
   "schedules.paused": "Приостановлено",
   "schedules.active": "Активно",
-
   "scripts.title": "Скрипты",
   "scripts.new_script": "Новый скрипт",
   "scripts.save": "Сохранить",
@@ -499,7 +480,6 @@
   "scripts.error": "Ошибка",
   "scripts.execution_time": "Выполнено за {{ms}} мс",
   "scripts.execution_failed": "Выполнение не удалось",
-
   "sharing.title": "Доступные мне",
   "sharing.all_types": "Все типы",
   "sharing.type.reports": "Отчёты",
@@ -523,7 +503,6 @@
   "sharing.share_added": "Доступ предоставлен",
   "sharing.share_removed": "Доступ отозван",
   "sharing.failed_share": "Не удалось предоставить доступ",
-
   "templates.title": "Шаблоны",
   "templates.search_placeholder": "Поиск шаблонов...",
   "templates.no_templates": "Нет доступных шаблонов",
@@ -533,7 +512,6 @@
   "templates.all_categories": "Все категории",
   "templates.created_from": "Отчёт создан из шаблона",
   "templates.failed_create": "Не удалось создать из шаблона",
-
   "models.title": "Модели данных",
   "models.new_model": "Новая модель",
   "models.new_data_model": "Новая модель данных",
@@ -558,14 +536,12 @@
   "models.run_query": "Выполнить запрос",
   "models.select_fields": "Выберите поля для запроса",
   "models.no_fields_selected": "Поля не выбраны",
-
   "search.placeholder": "Поиск... (Ctrl+K)",
   "search.searching": "Поиск...",
   "search.no_results": "Нет результатов для «{{query}}»",
   "search.reports": "Отчёты",
   "search.queries": "Запросы",
   "search.datasources": "Источники данных",
-
   "interactive.active_filters": "Активные фильтры:",
   "interactive.clear_all": "Очистить все",
   "interactive.global_filters": "Глобальные фильтры",
@@ -618,14 +594,11 @@
   "interactive.control.options_sql": "SQL для вариантов",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Родитель каскада",
-
   "embed.loading": "Загрузка встроенного отчёта...",
   "embed.error": "Не удалось загрузить встроенный отчёт",
   "embed.invalid_token": "Недействительный или просроченный токен встраивания",
-
   "tags.add_tag": "Добавить тег...",
   "tags.remove_tag": "Удалить тег",
-
   "bookmarks.title": "Закладки",
   "bookmarks.save": "Сохранить закладку",
   "bookmarks.name_placeholder": "Название закладки...",
@@ -634,11 +607,17 @@
   "bookmarks.no_bookmarks": "Нет закладок",
   "bookmarks.apply": "Применить",
   "bookmarks.delete_confirm": "Удалить эту закладку?",
-
   "live.connected": "Подключено",
   "live.connecting": "Подключение...",
   "live.disconnected": "Отключено",
   "live.reconnect": "Переподключиться",
   "live.enable": "Включить обновления в реальном времени",
-  "live.disable": "Отключить обновления в реальном времени"
+  "live.disable": "Отключить обновления в реальном времени",
+  "designer.legend_position": "Расположение легенды",
+  "designer.legend_position.auto": "Авто (снизу)",
+  "designer.legend_position.top": "Сверху",
+  "designer.legend_position.bottom": "Снизу",
+  "designer.legend_position.left": "Слева",
+  "designer.legend_position.right": "Справа",
+  "designer.legend_position.hidden": "Скрыть"
 }

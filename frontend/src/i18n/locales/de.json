@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Seite nicht gefunden",
   "common.off": "Aus",
-
   "nav.home": "Startseite",
   "nav.reports": "Berichte",
   "nav.queries": "Abfragen",
@@ -67,7 +66,6 @@
   "nav.shared": "Mit mir geteilt",
   "nav.admin": "Verwaltung",
   "nav.password": "Passwort",
-
   "auth.sign_in": "Anmelden",
   "auth.signing_in": "Anmeldung...",
   "auth.sign_in_subtitle": "Melden Sie sich bei Ihrem Konto an",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Das neue Passwort muss mindestens 6 Zeichen lang sein",
   "auth.password_changed": "Passwort erfolgreich geändert",
   "auth.password_change_failed": "Passwort konnte nicht geändert werden",
-
   "header.search_placeholder": "Suchen... (Ctrl+K)",
   "header.searching": "Suche läuft...",
   "header.no_results_for": "Keine Ergebnisse für \"{{query}}\"",
   "header.language": "Sprache",
-
   "charts.type.bar": "Balken",
   "charts.type.line": "Linie",
   "charts.type.area": "Fläche",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Wasserfall",
   "charts.type.candlestick": "Kerzendiagramm",
   "charts.select_type": "Diagrammtyp",
-
   "widgets.type.chart": "Diagramm",
   "widgets.type.table": "Tabelle",
   "widgets.type.kpi": "KPI-Karte",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interaktive Filtersteuerung",
   "widgets.desc.image": "Statisches Bild / Logo",
   "widgets.components": "Komponenten",
-
   "reports.title": "Berichte",
   "reports.new_report": "Neuer Bericht",
   "reports.search_placeholder": "Berichte durchsuchen...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Schnappschuss",
   "reports.snapshot_created": "Schnappschuss erstellt",
   "reports.auto_refresh": "Automatische Aktualisierung",
-
   "export.title": "Exportieren",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Export fehlgeschlagen",
   "export.email_failed": "E-Mail konnte nicht gesendet werden",
   "export.enter_email": "Geben Sie mindestens eine E-Mail-Adresse ein",
-
   "designer.new_report_name": "Neuer Bericht",
   "designer.failed_load": "Bericht konnte nicht geladen werden",
   "designer.report_name_required": "Berichtsname ist erforderlich",
@@ -255,7 +247,6 @@
   "designer.filter_types.text": "Textsuche",
   "designer.filter_types.number_range": "Zahlenbereich",
   "designer.filter_types.date_range": "Datumsbereich",
-
   "designer.y_axis_format": "Y-Achsen-Format",
   "designer.axis_format.plain": "Einfache Zahl",
   "designer.axis_format.thousands": "Tausend (K)",
@@ -283,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Abfragen",
   "queries.adhoc_title": "Ad-hoc-Abfrage",
   "queries.run": "Ausführen",
@@ -311,7 +301,6 @@
   "queries.delete_failed": "Abfrage konnte nicht gelöscht werden",
   "queries.loaded_to_editor": "In Editor geladen",
   "queries.showing_rows": "Zeilen {{from}}-{{to}} von {{total}}",
-
   "datasources.title": "Datenquellen",
   "datasources.add_source": "Quelle hinzufügen",
   "datasources.new_datasource": "Neue Datenquelle",
@@ -330,7 +319,6 @@
   "datasources.database_name": "Datenbankname",
   "datasources.username": "Benutzername",
   "datasources.password": "Passwort",
-
   "workspace.title": "Startseite",
   "workspace.favorites": "Favoriten",
   "workspace.recent": "Zuletzt verwendet",
@@ -348,7 +336,6 @@
   "workspace.no_recent": "Keine zuletzt verwendeten Elemente",
   "workspace.add_favorite_hint": "Markieren Sie Elemente mit einem Stern, um sie zu Favoriten hinzuzufügen",
   "workspace.view_reports_hint": "Sehen Sie sich Berichte und Abfragen an, um sie hier zu sehen",
-
   "admin.users_tab": "👥 Benutzer",
   "admin.roles_tab": "🛡️ Rollen",
   "admin.audit_tab": "📋 Prüfprotokoll",
@@ -384,7 +371,6 @@
   "admin.deactivate": "Deaktivieren",
   "admin.activate": "Aktivieren",
   "admin.password_placeholder": "mind. 6 Zeichen",
-
   "admin.role_management": "Rollenverwaltung",
   "admin.new_role": "Neue Rolle",
   "admin.role_name": "Rollenname",
@@ -394,7 +380,6 @@
   "admin.edit_role": "Rolle bearbeiten: {{name}}",
   "admin.delete_role_confirm": "Rolle \"{{name}}\" löschen?",
   "admin.failed_load_roles": "Rollen konnten nicht geladen werden",
-
   "admin.audit_log": "Prüfprotokoll",
   "admin.audit.user": "Benutzer",
   "admin.audit.action": "Aktion",
@@ -405,7 +390,6 @@
   "admin.audit.all_actions": "Alle Aktionen",
   "admin.audit.all_types": "Alle Typen",
   "admin.audit.no_entries": "Keine Prüfprotokolleinträge",
-
   "alerts.title": "Datenwarnungen",
   "alerts.new_alert": "Neue Warnung",
   "alerts.no_alerts": "Noch keine Warnungen",
@@ -427,7 +411,6 @@
   "alerts.last_value": "Letzter Wert:",
   "alerts.triggered": "AUSGELÖST",
   "alerts.ok": "OK",
-
   "monitoring.title": "Systemüberwachung",
   "monitoring.uptime": "Betriebszeit",
   "monitoring.jvm_heap": "JVM-Heap",
@@ -454,7 +437,6 @@
   "monitoring.cache_enabled": "Cache aktiviert",
   "monitoring.clear_cache": "Cache leeren",
   "monitoring.toggle_cache": "Cache umschalten",
-
   "schedules.title": "Zeitpläne",
   "schedules.no_schedules": "Keine Zeitpläne",
   "schedules.description": "Erstellen Sie Berichtszeitpläne aus der Berichtsansicht",
@@ -467,7 +449,6 @@
   "schedules.recipients": "Empfänger:",
   "schedules.paused": "Pausiert",
   "schedules.active": "Aktiv",
-
   "scripts.title": "Skripte",
   "scripts.new_script": "Neues Skript",
   "scripts.save": "Speichern",
@@ -490,7 +471,6 @@
   "scripts.error": "Fehler",
   "scripts.execution_time": "Ausgeführt in {{ms}} ms",
   "scripts.execution_failed": "Ausführung fehlgeschlagen",
-
   "sharing.title": "Mit mir geteilt",
   "sharing.all_types": "Alle Typen",
   "sharing.type.reports": "Berichte",
@@ -514,7 +494,6 @@
   "sharing.share_added": "Zugriff gewährt",
   "sharing.share_removed": "Zugriff widerrufen",
   "sharing.failed_share": "Teilen fehlgeschlagen",
-
   "templates.title": "Vorlagen",
   "templates.search_placeholder": "Vorlagen durchsuchen...",
   "templates.no_templates": "Keine Vorlagen verfügbar",
@@ -524,7 +503,6 @@
   "templates.all_categories": "Alle Kategorien",
   "templates.created_from": "Bericht aus Vorlage erstellt",
   "templates.failed_create": "Erstellen aus Vorlage fehlgeschlagen",
-
   "models.title": "Datenmodelle",
   "models.new_model": "Neues Modell",
   "models.new_data_model": "Neues Datenmodell",
@@ -549,14 +527,12 @@
   "models.run_query": "Abfrage ausführen",
   "models.select_fields": "Felder für die Abfrage auswählen",
   "models.no_fields_selected": "Keine Felder ausgewählt",
-
   "search.placeholder": "Suchen... (Ctrl+K)",
   "search.searching": "Suche läuft...",
   "search.no_results": "Keine Ergebnisse für \"{{query}}\"",
   "search.reports": "Berichte",
   "search.queries": "Abfragen",
   "search.datasources": "Datenquellen",
-
   "interactive.active_filters": "Aktive Filter:",
   "interactive.clear_all": "Alle löschen",
   "interactive.global_filters": "Globale Filter",
@@ -609,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Eingebetteter Bericht wird geladen...",
   "embed.error": "Eingebetteter Bericht konnte nicht geladen werden",
   "embed.invalid_token": "Ungültiges oder abgelaufenes Einbettungstoken",
-
   "tags.add_tag": "Tag hinzufügen...",
   "tags.remove_tag": "Tag entfernen",
-
   "bookmarks.title": "Lesezeichen",
   "bookmarks.save": "Lesezeichen speichern",
   "bookmarks.name_placeholder": "Lesezeichenname...",
@@ -625,11 +598,17 @@
   "bookmarks.no_bookmarks": "Keine Lesezeichen",
   "bookmarks.apply": "Anwenden",
   "bookmarks.delete_confirm": "Dieses Lesezeichen löschen?",
-
   "live.connected": "Live",
   "live.connecting": "Verbindung wird hergestellt...",
   "live.disconnected": "Getrennt",
   "live.reconnect": "Neu verbinden",
   "live.enable": "Live-Aktualisierungen aktivieren",
-  "live.disable": "Live-Aktualisierungen deaktivieren"
+  "live.disable": "Live-Aktualisierungen deaktivieren",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

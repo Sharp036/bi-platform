@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Sivua ei löytynyt",
   "common.off": "Pois",
-
   "nav.home": "Etusivu",
   "nav.reports": "Raportit",
   "nav.queries": "Kyselyt",
@@ -67,7 +66,6 @@
   "nav.shared": "Jaettu kanssani",
   "nav.admin": "Hallinta",
   "nav.password": "Salasana",
-
   "auth.sign_in": "Kirjaudu sisään",
   "auth.signing_in": "Kirjaudutaan...",
   "auth.sign_in_subtitle": "Kirjaudu tilillesi",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Uuden salasanan on oltava vähintään 6 merkkiä",
   "auth.password_changed": "Salasana vaihdettu onnistuneesti",
   "auth.password_change_failed": "Salasanan vaihto epäonnistui",
-
   "header.search_placeholder": "Hae... (Ctrl+K)",
   "header.searching": "Haetaan...",
   "header.no_results_for": "Ei tuloksia haulle \"{{query}}\"",
   "header.language": "Kieli",
-
   "charts.type.bar": "Pylväs",
   "charts.type.line": "Viiva",
   "charts.type.area": "Alue",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Vesiputous",
   "charts.type.candlestick": "Kynttilä",
   "charts.select_type": "Kaaviotyyppi",
-
   "widgets.type.chart": "Kaavio",
   "widgets.type.table": "Taulukko",
   "widgets.type.kpi": "KPI-kortti",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interaktiivinen suodatinkomponentti",
   "widgets.desc.image": "Staattinen kuva / logo",
   "widgets.components": "Komponentit",
-
   "reports.title": "Raportit",
   "reports.new_report": "Uusi raportti",
   "reports.search_placeholder": "Hae raportteja...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Tilannekuva",
   "reports.snapshot_created": "Tilannekuva luotu",
   "reports.auto_refresh": "Automaattinen päivitys",
-
   "export.title": "Vie",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Vienti epäonnistui",
   "export.email_failed": "Sähköpostin lähetys epäonnistui",
   "export.enter_email": "Syötä vähintään yksi sähköpostiosoite",
-
   "designer.new_report_name": "Uusi raportti",
   "designer.failed_load": "Raportin lataus epäonnistui",
   "designer.report_name_required": "Raportin nimi on pakollinen",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Kyselyt",
   "queries.adhoc_title": "Ad-hoc-kysely",
   "queries.run": "Suorita",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "Kyselyn poistaminen epäonnistui",
   "queries.loaded_to_editor": "Ladattu editoriin",
   "queries.showing_rows": "Rivit {{from}}-{{to}} / {{total}}",
-
   "datasources.title": "Tietolähteet",
   "datasources.add_source": "Lisää lähde",
   "datasources.new_datasource": "Uusi tietolähde",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Tietokannan nimi",
   "datasources.username": "Käyttäjänimi",
   "datasources.password": "Salasana",
-
   "workspace.title": "Etusivu",
   "workspace.favorites": "Suosikit",
   "workspace.recent": "Viimeisimmät",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Ei viimeaikaisia kohteita",
   "workspace.add_favorite_hint": "Merkitse kohteita tähdellä lisätäksesi ne suosikkeihin",
   "workspace.view_reports_hint": "Katso raportteja ja kyselyjä nähdäksesi ne täällä",
-
   "admin.users_tab": "👥 Käyttäjät",
   "admin.roles_tab": "🛡️ Roolit",
   "admin.audit_tab": "📋 Tarkastusloki",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Poista käytöstä",
   "admin.activate": "Aktivoi",
   "admin.password_placeholder": "vähintään 6 merkkiä",
-
   "admin.role_management": "Roolien hallinta",
   "admin.new_role": "Uusi rooli",
   "admin.role_name": "Roolin nimi",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Muokkaa roolia: {{name}}",
   "admin.delete_role_confirm": "Poista rooli \"{{name}}\"?",
   "admin.failed_load_roles": "Roolien lataus epäonnistui",
-
   "admin.audit_log": "Tarkastusloki",
   "admin.audit.user": "Käyttäjä",
   "admin.audit.action": "Toiminto",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Kaikki toiminnot",
   "admin.audit.all_types": "Kaikki tyypit",
   "admin.audit.no_entries": "Ei tarkastusmerkintöjä",
-
   "alerts.title": "Tietohälytykset",
   "alerts.new_alert": "Uusi hälytys",
   "alerts.no_alerts": "Ei hälytyksiä vielä",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Viimeisin arvo:",
   "alerts.triggered": "LAUENNUT",
   "alerts.ok": "OK",
-
   "monitoring.title": "Järjestelmävalvonta",
   "monitoring.uptime": "Käyttöaika",
   "monitoring.jvm_heap": "JVM Heap",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Välimuisti otettu käyttöön",
   "monitoring.clear_cache": "Tyhjennä välimuisti",
   "monitoring.toggle_cache": "Vaihda välimuisti",
-
   "schedules.title": "Aikataulut",
   "schedules.no_schedules": "Ei aikatauluja",
   "schedules.description": "Luo raporttien aikatauluja raporttinäkymästä",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Vastaanottajat:",
   "schedules.paused": "Tauolla",
   "schedules.active": "Aktiivinen",
-
   "scripts.title": "Skriptit",
   "scripts.new_script": "Uusi skripti",
   "scripts.save": "Tallenna",
@@ -489,7 +471,6 @@
   "scripts.error": "Virhe",
   "scripts.execution_time": "Suoritettu {{ms}}ms:ssa",
   "scripts.execution_failed": "Suoritus epäonnistui",
-
   "sharing.title": "Jaettu kanssani",
   "sharing.all_types": "Kaikki tyypit",
   "sharing.type.reports": "Raportit",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Pääsy myönnetty",
   "sharing.share_removed": "Pääsy peruutettu",
   "sharing.failed_share": "Jakaminen epäonnistui",
-
   "templates.title": "Pohjat",
   "templates.search_placeholder": "Hae pohjia...",
   "templates.no_templates": "Ei pohjia saatavilla",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Kaikki kategoriat",
   "templates.created_from": "Raportti luotu pohjasta",
   "templates.failed_create": "Luonti pohjasta epäonnistui",
-
   "models.title": "Tietomallit",
   "models.new_model": "Uusi malli",
   "models.new_data_model": "Uusi tietomalli",
@@ -548,14 +527,12 @@
   "models.run_query": "Suorita kysely",
   "models.select_fields": "Valitse kyselykentät",
   "models.no_fields_selected": "Ei valittuja kenttiä",
-
   "search.placeholder": "Hae... (Ctrl+K)",
   "search.searching": "Haetaan...",
   "search.no_results": "Ei tuloksia haulle \"{{query}}\"",
   "search.reports": "Raportit",
   "search.queries": "Kyselyt",
   "search.datasources": "Tietolähteet",
-
   "interactive.active_filters": "Aktiiviset suodattimet:",
   "interactive.clear_all": "Tyhjennä kaikki",
   "interactive.global_filters": "Yleiset suodattimet",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Ladataan upotettua raporttia...",
   "embed.error": "Upotetun raportin lataus epäonnistui",
   "embed.invalid_token": "Virheellinen tai vanhentunut upotustoken",
-
   "tags.add_tag": "Lisää tunniste...",
   "tags.remove_tag": "Poista tunniste",
-
   "bookmarks.title": "Kirjanmerkit",
   "bookmarks.save": "Tallenna kirjanmerkki",
   "bookmarks.name_placeholder": "Kirjanmerkin nimi...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Ei kirjanmerkkejä",
   "bookmarks.apply": "Käytä",
   "bookmarks.delete_confirm": "Poista tämä kirjanmerkki?",
-
   "live.connected": "Reaaliaikainen",
   "live.connecting": "Yhdistetään...",
   "live.disconnected": "Yhteys katkaistu",
   "live.reconnect": "Yhdistä uudelleen",
   "live.enable": "Ota reaaliaikaiset päivitykset käyttöön",
-  "live.disable": "Poista reaaliaikaiset päivitykset käytöstä"
+  "live.disable": "Poista reaaliaikaiset päivitykset käytöstä",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

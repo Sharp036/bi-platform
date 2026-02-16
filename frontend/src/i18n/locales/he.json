@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "הדף לא נמצא",
   "common.off": "כבוי",
-
   "nav.home": "דף הבית",
   "nav.reports": "דוחות",
   "nav.queries": "שאילתות",
@@ -67,7 +66,6 @@
   "nav.shared": "שותף איתי",
   "nav.admin": "ניהול",
   "nav.password": "סיסמה",
-
   "auth.sign_in": "התחברות",
   "auth.signing_in": "מתחבר...",
   "auth.sign_in_subtitle": "התחבר לחשבון שלך",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "הסיסמה החדשה חייבת להכיל לפחות 6 תווים",
   "auth.password_changed": "הסיסמה שונתה בהצלחה",
   "auth.password_change_failed": "שינוי הסיסמה נכשל",
-
   "header.search_placeholder": "חיפוש... (Ctrl+K)",
   "header.searching": "מחפש...",
   "header.no_results_for": "אין תוצאות עבור \"{{query}}\"",
   "header.language": "שפה",
-
   "charts.type.bar": "עמודות",
   "charts.type.line": "קו",
   "charts.type.area": "שטח",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "מפל",
   "charts.type.candlestick": "נר יפני",
   "charts.select_type": "סוג תרשים",
-
   "widgets.type.chart": "תרשים",
   "widgets.type.table": "טבלה",
   "widgets.type.kpi": "כרטיס KPI",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "פקד סינון אינטראקטיבי",
   "widgets.desc.image": "תמונה סטטית / לוגו",
   "widgets.components": "רכיבים",
-
   "reports.title": "דוחות",
   "reports.new_report": "דוח חדש",
   "reports.search_placeholder": "חפש דוחות...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "צילום מצב",
   "reports.snapshot_created": "צילום מצב נוצר",
   "reports.auto_refresh": "רענון אוטומטי",
-
   "export.title": "ייצוא",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "הייצוא נכשל",
   "export.email_failed": "שליחת האימייל נכשלה",
   "export.enter_email": "הזן לפחות כתובת אימייל אחת",
-
   "designer.new_report_name": "דוח חדש",
   "designer.failed_load": "טעינת הדוח נכשלה",
   "designer.report_name_required": "שם הדוח נדרש",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "שאילתות",
   "queries.adhoc_title": "שאילתה חד-פעמית",
   "queries.run": "הרץ",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "מחיקת השאילתה נכשלה",
   "queries.loaded_to_editor": "נטען לעורך",
   "queries.showing_rows": "שורות {{from}}-{{to}} מתוך {{total}}",
-
   "datasources.title": "מקורות נתונים",
   "datasources.add_source": "הוסף מקור",
   "datasources.new_datasource": "מקור נתונים חדש",
@@ -329,7 +319,6 @@
   "datasources.database_name": "שם מסד הנתונים",
   "datasources.username": "שם משתמש",
   "datasources.password": "סיסמה",
-
   "workspace.title": "דף הבית",
   "workspace.favorites": "מועדפים",
   "workspace.recent": "אחרונים",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "אין פריטים אחרונים",
   "workspace.add_favorite_hint": "סמן פריטים בכוכב כדי להוסיף אותם למועדפים",
   "workspace.view_reports_hint": "צפה בדוחות ושאילתות כדי לראות אותם כאן",
-
   "admin.users_tab": "👥 משתמשים",
   "admin.roles_tab": "🛡️ תפקידים",
   "admin.audit_tab": "📋 יומן ביקורת",
@@ -383,7 +371,6 @@
   "admin.deactivate": "השבת",
   "admin.activate": "הפעל",
   "admin.password_placeholder": "לפחות 6 תווים",
-
   "admin.role_management": "ניהול תפקידים",
   "admin.new_role": "תפקיד חדש",
   "admin.role_name": "שם התפקיד",
@@ -393,7 +380,6 @@
   "admin.edit_role": "עריכת תפקיד: {{name}}",
   "admin.delete_role_confirm": "למחוק את התפקיד \"{{name}}\"?",
   "admin.failed_load_roles": "טעינת התפקידים נכשלה",
-
   "admin.audit_log": "יומן ביקורת",
   "admin.audit.user": "משתמש",
   "admin.audit.action": "פעולה",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "כל הפעולות",
   "admin.audit.all_types": "כל הסוגים",
   "admin.audit.no_entries": "אין רשומות ביקורת",
-
   "alerts.title": "התראות נתונים",
   "alerts.new_alert": "התראה חדשה",
   "alerts.no_alerts": "אין התראות עדיין",
@@ -426,7 +411,6 @@
   "alerts.last_value": "ערך אחרון:",
   "alerts.triggered": "הופעלה",
   "alerts.ok": "תקין",
-
   "monitoring.title": "ניטור מערכת",
   "monitoring.uptime": "זמן פעילות",
   "monitoring.jvm_heap": "JVM Heap",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "המטמון הופעל",
   "monitoring.clear_cache": "נקה מטמון",
   "monitoring.toggle_cache": "החלף מצב מטמון",
-
   "schedules.title": "תזמונים",
   "schedules.no_schedules": "אין תזמונים",
   "schedules.description": "צור תזמוני דוחות מתוך מציג הדוחות",
@@ -466,7 +449,6 @@
   "schedules.recipients": "נמענים:",
   "schedules.paused": "מושהה",
   "schedules.active": "פעיל",
-
   "scripts.title": "סקריפטים",
   "scripts.new_script": "סקריפט חדש",
   "scripts.save": "שמור",
@@ -489,7 +471,6 @@
   "scripts.error": "שגיאה",
   "scripts.execution_time": "בוצע ב-{{ms}}ms",
   "scripts.execution_failed": "הביצוע נכשל",
-
   "sharing.title": "שותף איתי",
   "sharing.all_types": "כל הסוגים",
   "sharing.type.reports": "דוחות",
@@ -513,7 +494,6 @@
   "sharing.share_added": "הגישה הוענקה",
   "sharing.share_removed": "הגישה בוטלה",
   "sharing.failed_share": "השיתוף נכשל",
-
   "templates.title": "תבניות",
   "templates.search_placeholder": "חפש תבניות...",
   "templates.no_templates": "אין תבניות זמינות",
@@ -523,7 +503,6 @@
   "templates.all_categories": "כל הקטגוריות",
   "templates.created_from": "דוח נוצר מתבנית",
   "templates.failed_create": "היצירה מתבנית נכשלה",
-
   "models.title": "מודלי נתונים",
   "models.new_model": "מודל חדש",
   "models.new_data_model": "מודל נתונים חדש",
@@ -548,14 +527,12 @@
   "models.run_query": "הרץ שאילתה",
   "models.select_fields": "בחר שדות לשאילתה",
   "models.no_fields_selected": "לא נבחרו שדות",
-
   "search.placeholder": "חיפוש... (Ctrl+K)",
   "search.searching": "מחפש...",
   "search.no_results": "אין תוצאות עבור \"{{query}}\"",
   "search.reports": "דוחות",
   "search.queries": "שאילתות",
   "search.datasources": "מקורות נתונים",
-
   "interactive.active_filters": "מסננים פעילים:",
   "interactive.clear_all": "נקה הכל",
   "interactive.global_filters": "מסננים גלובליים",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "טוען דוח מוטבע...",
   "embed.error": "טעינת הדוח המוטבע נכשלה",
   "embed.invalid_token": "אסימון הטבעה לא תקין או שפג תוקפו",
-
   "tags.add_tag": "הוסף תגית...",
   "tags.remove_tag": "הסר תגית",
-
   "bookmarks.title": "סימניות",
   "bookmarks.save": "שמור סימנייה",
   "bookmarks.name_placeholder": "שם הסימנייה...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "אין סימניות",
   "bookmarks.apply": "החל",
   "bookmarks.delete_confirm": "למחוק סימנייה זו?",
-
   "live.connected": "שידור חי",
   "live.connecting": "מתחבר...",
   "live.disconnected": "מנותק",
   "live.reconnect": "התחבר מחדש",
   "live.enable": "הפעל עדכונים בזמן אמת",
-  "live.disable": "השבת עדכונים בזמן אמת"
+  "live.disable": "השבת עדכונים בזמן אמת",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

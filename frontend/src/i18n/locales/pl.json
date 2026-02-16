@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Nie znaleziono strony",
   "common.off": "Wył.",
-
   "nav.home": "Strona główna",
   "nav.reports": "Raporty",
   "nav.queries": "Zapytania",
@@ -67,7 +66,6 @@
   "nav.shared": "Udostępnione mi",
   "nav.admin": "Administracja",
   "nav.password": "Hasło",
-
   "auth.sign_in": "Zaloguj się",
   "auth.signing_in": "Logowanie...",
   "auth.sign_in_subtitle": "Zaloguj się na swoje konto",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Nowe hasło musi mieć co najmniej 6 znaków",
   "auth.password_changed": "Hasło zostało zmienione",
   "auth.password_change_failed": "Nie udało się zmienić hasła",
-
   "header.search_placeholder": "Szukaj... (Ctrl+K)",
   "header.searching": "Wyszukiwanie...",
   "header.no_results_for": "Brak wyników dla \"{{query}}\"",
   "header.language": "Język",
-
   "charts.type.bar": "Słupkowy",
   "charts.type.line": "Liniowy",
   "charts.type.area": "Obszarowy",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Kaskadowy",
   "charts.type.candlestick": "Świecowy",
   "charts.select_type": "Typ wykresu",
-
   "widgets.type.chart": "Wykres",
   "widgets.type.table": "Tabela",
   "widgets.type.kpi": "Karta KPI",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interaktywna kontrola filtrów",
   "widgets.desc.image": "Statyczny obraz / logo",
   "widgets.components": "Komponenty",
-
   "reports.title": "Raporty",
   "reports.new_report": "Nowy raport",
   "reports.search_placeholder": "Szukaj raportów...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Migawka",
   "reports.snapshot_created": "Migawka utworzona",
   "reports.auto_refresh": "Automatyczne odświeżanie",
-
   "export.title": "Eksport",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Eksport nie powiódł się",
   "export.email_failed": "Nie udało się wysłać e-maila",
   "export.enter_email": "Podaj co najmniej jeden adres e-mail",
-
   "designer.new_report_name": "Nowy raport",
   "designer.failed_load": "Nie udało się załadować raportu",
   "designer.report_name_required": "Nazwa raportu jest wymagana",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Zapytania",
   "queries.adhoc_title": "Zapytanie ad-hoc",
   "queries.run": "Uruchom",
@@ -302,15 +293,14 @@
   "queries.name_placeholder": "Nazwa zapytania",
   "queries.desc_placeholder": "Opis (opcjonalnie)",
   "queries.saved_success": "Zapytanie zapisane",
-  "queries.save_failed": "Nie uda\u0142o si\u0119 zapisa\u0107 zapytania",
+  "queries.save_failed": "Nie udało się zapisać zapytania",
   "queries.updated": "Zapytanie zaktualizowane",
-  "queries.update_failed": "Nie uda\u0142o si\u0119 zaktualizowa\u0107 zapytania",
-  "queries.delete_confirm": "Usun\u0105\u0107 zapytanie '{{name}}'?",
-  "queries.deleted": "Zapytanie usuni\u0119te",
-  "queries.delete_failed": "Nie uda\u0142o si\u0119 usun\u0105\u0107 zapytania",
-  "queries.loaded_to_editor": "Za\u0142adowano do edytora",
+  "queries.update_failed": "Nie udało się zaktualizować zapytania",
+  "queries.delete_confirm": "Usunąć zapytanie '{{name}}'?",
+  "queries.deleted": "Zapytanie usunięte",
+  "queries.delete_failed": "Nie udało się usunąć zapytania",
+  "queries.loaded_to_editor": "Załadowano do edytora",
   "queries.showing_rows": "Wiersze {{from}}-{{to}} z {{total}}",
-
   "datasources.title": "Źródła danych",
   "datasources.add_source": "Dodaj źródło",
   "datasources.new_datasource": "Nowe źródło danych",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Nazwa bazy danych",
   "datasources.username": "Nazwa użytkownika",
   "datasources.password": "Hasło",
-
   "workspace.title": "Strona główna",
   "workspace.favorites": "Ulubione",
   "workspace.recent": "Ostatnie",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Brak ostatnich elementów",
   "workspace.add_favorite_hint": "Oznacz gwiazdką, aby dodać do ulubionych",
   "workspace.view_reports_hint": "Przeglądaj raporty i zapytania, aby je tu zobaczyć",
-
   "admin.users_tab": "👥 Użytkownicy",
   "admin.roles_tab": "🛡️ Role",
   "admin.audit_tab": "📋 Dziennik audytu",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Dezaktywuj",
   "admin.activate": "Aktywuj",
   "admin.password_placeholder": "min. 6 znaków",
-
   "admin.role_management": "Zarządzanie rolami",
   "admin.new_role": "Nowa rola",
   "admin.role_name": "Nazwa roli",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Edytuj rolę: {{name}}",
   "admin.delete_role_confirm": "Usunąć rolę \"{{name}}\"?",
   "admin.failed_load_roles": "Nie udało się załadować ról",
-
   "admin.audit_log": "Dziennik audytu",
   "admin.audit.user": "Użytkownik",
   "admin.audit.action": "Akcja",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Wszystkie akcje",
   "admin.audit.all_types": "Wszystkie typy",
   "admin.audit.no_entries": "Brak wpisów audytu",
-
   "alerts.title": "Alerty danych",
   "alerts.new_alert": "Nowy alert",
   "alerts.no_alerts": "Brak alertów",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Ostatnia wartość:",
   "alerts.triggered": "WYZWOLONY",
   "alerts.ok": "OK",
-
   "monitoring.title": "Monitoring systemu",
   "monitoring.uptime": "Czas działania",
   "monitoring.jvm_heap": "Sterta JVM",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Pamięć podręczna włączona",
   "monitoring.clear_cache": "Wyczyść pamięć podręczną",
   "monitoring.toggle_cache": "Przełącz pamięć podręczną",
-
   "schedules.title": "Harmonogramy",
   "schedules.no_schedules": "Brak harmonogramów",
   "schedules.description": "Twórz harmonogramy raportów z poziomu przeglądarki raportów",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Odbiorcy:",
   "schedules.paused": "Wstrzymany",
   "schedules.active": "Aktywny",
-
   "scripts.title": "Skrypty",
   "scripts.new_script": "Nowy skrypt",
   "scripts.save": "Zapisz",
@@ -489,7 +471,6 @@
   "scripts.error": "Błąd",
   "scripts.execution_time": "Wykonano w {{ms}}ms",
   "scripts.execution_failed": "Wykonanie nie powiodło się",
-
   "sharing.title": "Udostępnione mi",
   "sharing.all_types": "Wszystkie typy",
   "sharing.type.reports": "Raporty",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Dostęp przyznany",
   "sharing.share_removed": "Dostęp cofnięty",
   "sharing.failed_share": "Nie udało się udostępnić",
-
   "templates.title": "Szablony",
   "templates.search_placeholder": "Szukaj szablonów...",
   "templates.no_templates": "Brak dostępnych szablonów",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Wszystkie kategorie",
   "templates.created_from": "Raport utworzony z szablonu",
   "templates.failed_create": "Nie udało się utworzyć z szablonu",
-
   "models.title": "Modele danych",
   "models.new_model": "Nowy model",
   "models.new_data_model": "Nowy model danych",
@@ -548,14 +527,12 @@
   "models.run_query": "Uruchom zapytanie",
   "models.select_fields": "Wybierz pola do zapytania",
   "models.no_fields_selected": "Nie wybrano pól",
-
   "search.placeholder": "Szukaj... (Ctrl+K)",
   "search.searching": "Wyszukiwanie...",
   "search.no_results": "Brak wyników dla \"{{query}}\"",
   "search.reports": "Raporty",
   "search.queries": "Zapytania",
   "search.datasources": "Źródła danych",
-
   "interactive.active_filters": "Aktywne filtry:",
   "interactive.clear_all": "Wyczyść wszystko",
   "interactive.global_filters": "Filtry globalne",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Ładowanie osadzonego raportu...",
   "embed.error": "Nie udało się załadować osadzonego raportu",
   "embed.invalid_token": "Nieprawidłowy lub wygasły token osadzania",
-
   "tags.add_tag": "Dodaj tag...",
   "tags.remove_tag": "Usuń tag",
-
   "bookmarks.title": "Zakładki",
   "bookmarks.save": "Zapisz zakładkę",
   "bookmarks.name_placeholder": "Nazwa zakładki...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Brak zakładek",
   "bookmarks.apply": "Zastosuj",
   "bookmarks.delete_confirm": "Usunąć tę zakładkę?",
-
   "live.connected": "Na żywo",
   "live.connecting": "Łączenie...",
   "live.disconnected": "Rozłączono",
   "live.reconnect": "Połącz ponownie",
   "live.enable": "Włącz aktualizacje na żywo",
-  "live.disable": "Wyłącz aktualizacje na żywo"
+  "live.disable": "Wyłącz aktualizacje na żywo",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

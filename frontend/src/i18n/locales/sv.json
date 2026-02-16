@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Sidan hittades inte",
   "common.off": "Av",
-
   "nav.home": "Hem",
   "nav.reports": "Rapporter",
   "nav.queries": "Frågor",
@@ -67,7 +66,6 @@
   "nav.shared": "Delat med mig",
   "nav.admin": "Administration",
   "nav.password": "Lösenord",
-
   "auth.sign_in": "Logga in",
   "auth.signing_in": "Loggar in...",
   "auth.sign_in_subtitle": "Logga in på ditt konto",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Nytt lösenord måste vara minst 6 tecken",
   "auth.password_changed": "Lösenordet har ändrats",
   "auth.password_change_failed": "Kunde inte byta lösenord",
-
   "header.search_placeholder": "Sök... (Ctrl+K)",
   "header.searching": "Söker...",
   "header.no_results_for": "Inga resultat för \"{{query}}\"",
   "header.language": "Språk",
-
   "charts.type.bar": "Stapel",
   "charts.type.line": "Linje",
   "charts.type.area": "Yta",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Vattenfall",
   "charts.type.candlestick": "Ljusstake",
   "charts.select_type": "Diagramtyp",
-
   "widgets.type.chart": "Diagram",
   "widgets.type.table": "Tabell",
   "widgets.type.kpi": "KPI-kort",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interaktiv filterkontroll",
   "widgets.desc.image": "Statisk bild / logotyp",
   "widgets.components": "Komponenter",
-
   "reports.title": "Rapporter",
   "reports.new_report": "Ny rapport",
   "reports.search_placeholder": "Sök rapporter...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Ögonblicksbild",
   "reports.snapshot_created": "Ögonblicksbild skapad",
   "reports.auto_refresh": "Automatisk uppdatering",
-
   "export.title": "Exportera",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Exporten misslyckades",
   "export.email_failed": "Kunde inte skicka e-post",
   "export.enter_email": "Ange minst en e-postadress",
-
   "designer.new_report_name": "Ny rapport",
   "designer.failed_load": "Kunde inte ladda rapporten",
   "designer.report_name_required": "Rapportnamn krävs",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Frågor",
   "queries.adhoc_title": "Ad-hoc-fråga",
   "queries.run": "Kör",
@@ -297,20 +288,19 @@
   "queries.runs": "{{count}} körningar",
   "queries.sql_placeholder": "SELECT ...",
   "queries.save": "Spara",
-  "queries.save_query": "Spara fr\u00e5ga",
-  "queries.edit_query": "Redigera fr\u00e5ga",
+  "queries.save_query": "Spara fråga",
+  "queries.edit_query": "Redigera fråga",
   "queries.name_placeholder": "Fragenamn",
   "queries.desc_placeholder": "Beskrivning (valfritt)",
-  "queries.saved_success": "Fr\u00e5ga sparad",
-  "queries.save_failed": "Kunde inte spara fr\u00e5gan",
-  "queries.updated": "Fr\u00e5ga uppdaterad",
-  "queries.update_failed": "Kunde inte uppdatera fr\u00e5gan",
-  "queries.delete_confirm": "Ta bort fr\u00e5gan '{{name}}'?",
-  "queries.deleted": "Fr\u00e5ga borttagen",
-  "queries.delete_failed": "Kunde inte ta bort fr\u00e5gan",
+  "queries.saved_success": "Fråga sparad",
+  "queries.save_failed": "Kunde inte spara frågan",
+  "queries.updated": "Fråga uppdaterad",
+  "queries.update_failed": "Kunde inte uppdatera frågan",
+  "queries.delete_confirm": "Ta bort frågan '{{name}}'?",
+  "queries.deleted": "Fråga borttagen",
+  "queries.delete_failed": "Kunde inte ta bort frågan",
   "queries.loaded_to_editor": "Laddad i redigeraren",
   "queries.showing_rows": "Rader {{from}}-{{to}} av {{total}}",
-
   "datasources.title": "Datakällor",
   "datasources.add_source": "Lägg till källa",
   "datasources.new_datasource": "Ny datakälla",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Databasnamn",
   "datasources.username": "Användarnamn",
   "datasources.password": "Lösenord",
-
   "workspace.title": "Hem",
   "workspace.favorites": "Favoriter",
   "workspace.recent": "Senaste",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Inga senaste objekt",
   "workspace.add_favorite_hint": "Stjärnmarkera objekt för att lägga till dem som favoriter",
   "workspace.view_reports_hint": "Visa rapporter och frågor för att se dem här",
-
   "admin.users_tab": "👥 Användare",
   "admin.roles_tab": "🛡️ Roller",
   "admin.audit_tab": "📋 Granskningslogg",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Inaktivera",
   "admin.activate": "Aktivera",
   "admin.password_placeholder": "minst 6 tecken",
-
   "admin.role_management": "Rollhantering",
   "admin.new_role": "Ny roll",
   "admin.role_name": "Rollnamn",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Redigera roll: {{name}}",
   "admin.delete_role_confirm": "Ta bort roll \"{{name}}\"?",
   "admin.failed_load_roles": "Kunde inte ladda roller",
-
   "admin.audit_log": "Granskningslogg",
   "admin.audit.user": "Användare",
   "admin.audit.action": "Åtgärd",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Alla åtgärder",
   "admin.audit.all_types": "Alla typer",
   "admin.audit.no_entries": "Inga granskningsposter",
-
   "alerts.title": "Datavarningar",
   "alerts.new_alert": "Ny varning",
   "alerts.no_alerts": "Inga varningar ännu",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Senaste värde:",
   "alerts.triggered": "UTLÖST",
   "alerts.ok": "OK",
-
   "monitoring.title": "Systemövervakning",
   "monitoring.uptime": "Drifttid",
   "monitoring.jvm_heap": "JVM-heap",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Cache aktiverad",
   "monitoring.clear_cache": "Rensa cache",
   "monitoring.toggle_cache": "Växla cache",
-
   "schedules.title": "Schemaläggningar",
   "schedules.no_schedules": "Inga schemaläggningar",
   "schedules.description": "Skapa rapportscheman från rapportvisaren",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Mottagare:",
   "schedules.paused": "Pausad",
   "schedules.active": "Aktiv",
-
   "scripts.title": "Skript",
   "scripts.new_script": "Nytt skript",
   "scripts.save": "Spara",
@@ -489,7 +471,6 @@
   "scripts.error": "Fel",
   "scripts.execution_time": "Utfört på {{ms}}ms",
   "scripts.execution_failed": "Körningen misslyckades",
-
   "sharing.title": "Delat med mig",
   "sharing.all_types": "Alla typer",
   "sharing.type.reports": "Rapporter",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Åtkomst beviljad",
   "sharing.share_removed": "Åtkomst återkallad",
   "sharing.failed_share": "Kunde inte dela",
-
   "templates.title": "Mallar",
   "templates.search_placeholder": "Sök mallar...",
   "templates.no_templates": "Inga mallar tillgängliga",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Alla kategorier",
   "templates.created_from": "Rapport skapad från mall",
   "templates.failed_create": "Kunde inte skapa från mall",
-
   "models.title": "Datamodeller",
   "models.new_model": "Ny modell",
   "models.new_data_model": "Ny datamodell",
@@ -548,14 +527,12 @@
   "models.run_query": "Kör fråga",
   "models.select_fields": "Välj fält att fråga",
   "models.no_fields_selected": "Inga fält valda",
-
   "search.placeholder": "Sök... (Ctrl+K)",
   "search.searching": "Söker...",
   "search.no_results": "Inga resultat för \"{{query}}\"",
   "search.reports": "Rapporter",
   "search.queries": "Frågor",
   "search.datasources": "Datakällor",
-
   "interactive.active_filters": "Aktiva filter:",
   "interactive.clear_all": "Rensa alla",
   "interactive.global_filters": "Globala filter",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Laddar inbäddad rapport...",
   "embed.error": "Kunde inte ladda inbäddad rapport",
   "embed.invalid_token": "Ogiltig eller utgången inbäddningstoken",
-
   "tags.add_tag": "Lägg till tagg...",
   "tags.remove_tag": "Ta bort tagg",
-
   "bookmarks.title": "Bokmärken",
   "bookmarks.save": "Spara bokmärke",
   "bookmarks.name_placeholder": "Bokmärkesnamn...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Inga bokmärken",
   "bookmarks.apply": "Tillämpa",
   "bookmarks.delete_confirm": "Ta bort detta bokmärke?",
-
   "live.connected": "Live",
   "live.connecting": "Ansluter...",
   "live.disconnected": "Frånkopplad",
   "live.reconnect": "Återanslut",
   "live.enable": "Aktivera liveuppdateringar",
-  "live.disable": "Inaktivera liveuppdateringar"
+  "live.disable": "Inaktivera liveuppdateringar",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

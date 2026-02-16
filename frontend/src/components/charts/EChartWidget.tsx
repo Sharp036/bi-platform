@@ -28,6 +28,14 @@ function buildValueFormatter(format: string, currency: string): ((value: number)
   }
 }
 
+function buildLegendOption(seriesCount: number, legendPosition: string) {
+  if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
+  if (legendPosition === 'top') return { top: 0, left: 'center' as const, type: 'scroll' as const }
+  if (legendPosition === 'left') return { left: 0, top: 'middle' as const, orient: 'vertical' as const, type: 'scroll' as const }
+  if (legendPosition === 'right') return { right: 0, top: 'middle' as const, orient: 'vertical' as const, type: 'scroll' as const }
+  return { bottom: 0, left: 'center' as const, type: 'scroll' as const }
+}
+
 function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): string {
   const num = Number(v)
   if (!Number.isFinite(num)) return String(v ?? '')
@@ -216,6 +224,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
   const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
   const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
+  const legendPosition = (config.legendPosition as string) || 'auto'
   const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
   const palette = Array.isArray((config.option as Record<string, unknown> | undefined)?.color)
     ? ((config.option as Record<string, unknown>).color as string[])
@@ -295,6 +304,12 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   }
 
   const hasAxis = !['pie', 'radar', 'funnel', 'gauge', 'treemap', 'sankey'].includes(chartType)
+  const legend = buildLegendOption(series.length, legendPosition)
+  const showLegend = !!legend
+  const legendIsTop = showLegend && legendPosition === 'top'
+  const legendIsBottom = showLegend && (legendPosition === 'bottom' || legendPosition === 'auto')
+  const legendIsLeft = showLegend && legendPosition === 'left'
+  const legendIsRight = showLegend && legendPosition === 'right'
 
   return {
     tooltip: {
@@ -303,11 +318,14 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
         valueFormatter: (v: number) => valueFormatter(v),
       } : {}),
     },
-    legend: seriesCols.length > 1 ? { bottom: 0 } : undefined,
+    legend,
     grid: {
-      left: '3%', right: '4%',
-      top: showDataLabels && hasAxis ? 120 : undefined,
-      bottom: seriesCols.length > 1 ? '15%' : '3%',
+      left: legendIsLeft ? '12%' : '3%',
+      right: legendIsRight ? '12%' : '4%',
+      top: showDataLabels && hasAxis
+        ? (legendIsTop ? 150 : 120)
+        : (legendIsTop ? 40 : undefined),
+      bottom: legendIsBottom ? '15%' : '3%',
       containLabel: true,
     },
     ...(hasAxis ? {

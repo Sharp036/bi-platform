@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Siden blev ikke fundet",
   "common.off": "Fra",
-
   "nav.home": "Hjem",
   "nav.reports": "Rapporter",
   "nav.queries": "Forespørgsler",
@@ -67,7 +66,6 @@
   "nav.shared": "Delt med mig",
   "nav.admin": "Administration",
   "nav.password": "Adgangskode",
-
   "auth.sign_in": "Log ind",
   "auth.signing_in": "Logger ind...",
   "auth.sign_in_subtitle": "Log ind på din konto",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Ny adgangskode skal være mindst 6 tegn",
   "auth.password_changed": "Adgangskoden er ændret",
   "auth.password_change_failed": "Ændring af adgangskode mislykkedes",
-
   "header.search_placeholder": "Søg... (Ctrl+K)",
   "header.searching": "Søger...",
   "header.no_results_for": "Ingen resultater for \"{{query}}\"",
   "header.language": "Sprog",
-
   "charts.type.bar": "Søjle",
   "charts.type.line": "Linje",
   "charts.type.area": "Område",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Vandfald",
   "charts.type.candlestick": "Lysestage",
   "charts.select_type": "Diagramtype",
-
   "widgets.type.chart": "Diagram",
   "widgets.type.table": "Tabel",
   "widgets.type.kpi": "KPI-kort",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interaktivt filterkomponent",
   "widgets.desc.image": "Statisk billede / logo",
   "widgets.components": "Komponenter",
-
   "reports.title": "Rapporter",
   "reports.new_report": "Ny rapport",
   "reports.search_placeholder": "Søg rapporter...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Øjebliksbillede",
   "reports.snapshot_created": "Øjebliksbillede oprettet",
   "reports.auto_refresh": "Automatisk opdatering",
-
   "export.title": "Eksportér",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Eksport mislykkedes",
   "export.email_failed": "Afsendelse af email mislykkedes",
   "export.enter_email": "Indtast mindst én email",
-
   "designer.new_report_name": "Ny rapport",
   "designer.failed_load": "Indlæsning af rapport mislykkedes",
   "designer.report_name_required": "Rapportnavn er påkrævet",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Forespørgsler",
   "queries.adhoc_title": "Ad-hoc-forespørgsel",
   "queries.run": "Kør",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "Kunne ikke slette forespørgsel",
   "queries.loaded_to_editor": "Indlæst i editor",
   "queries.showing_rows": "Rækker {{from}}-{{to}} af {{total}}",
-
   "datasources.title": "Datakilder",
   "datasources.add_source": "Tilføj kilde",
   "datasources.new_datasource": "Ny datakilde",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Databasenavn",
   "datasources.username": "Brugernavn",
   "datasources.password": "Adgangskode",
-
   "workspace.title": "Hjem",
   "workspace.favorites": "Favoritter",
   "workspace.recent": "Seneste",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Ingen seneste elementer",
   "workspace.add_favorite_hint": "Stjernemark elementer for at tilføje dem til favoritter",
   "workspace.view_reports_hint": "Se rapporter og forespørgsler for at se dem her",
-
   "admin.users_tab": "👥 Brugere",
   "admin.roles_tab": "🛡️ Roller",
   "admin.audit_tab": "📋 Revisionslog",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Deaktivér",
   "admin.activate": "Aktivér",
   "admin.password_placeholder": "mindst 6 tegn",
-
   "admin.role_management": "Rollestyring",
   "admin.new_role": "Ny rolle",
   "admin.role_name": "Rollenavn",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Rediger rolle: {{name}}",
   "admin.delete_role_confirm": "Slet rolle \"{{name}}\"?",
   "admin.failed_load_roles": "Indlæsning af roller mislykkedes",
-
   "admin.audit_log": "Revisionslog",
   "admin.audit.user": "Bruger",
   "admin.audit.action": "Handling",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Alle handlinger",
   "admin.audit.all_types": "Alle typer",
   "admin.audit.no_entries": "Ingen revisionsposter",
-
   "alerts.title": "Dataalarmer",
   "alerts.new_alert": "Ny alarm",
   "alerts.no_alerts": "Ingen alarmer endnu",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Seneste værdi:",
   "alerts.triggered": "UDLØST",
   "alerts.ok": "OK",
-
   "monitoring.title": "Systemovervågning",
   "monitoring.uptime": "Oppetid",
   "monitoring.jvm_heap": "JVM Heap",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Cache aktiveret",
   "monitoring.clear_cache": "Ryd cache",
   "monitoring.toggle_cache": "Skift cache",
-
   "schedules.title": "Tidsplaner",
   "schedules.no_schedules": "Ingen tidsplaner",
   "schedules.description": "Opret rapporttidsplaner fra rapportvisningen",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Modtagere:",
   "schedules.paused": "Sat på pause",
   "schedules.active": "Aktiv",
-
   "scripts.title": "Scripts",
   "scripts.new_script": "Nyt script",
   "scripts.save": "Gem",
@@ -489,7 +471,6 @@
   "scripts.error": "Fejl",
   "scripts.execution_time": "Udført på {{ms}}ms",
   "scripts.execution_failed": "Udførelse mislykkedes",
-
   "sharing.title": "Delt med mig",
   "sharing.all_types": "Alle typer",
   "sharing.type.reports": "Rapporter",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Adgang tildelt",
   "sharing.share_removed": "Adgang tilbagekaldt",
   "sharing.failed_share": "Deling mislykkedes",
-
   "templates.title": "Skabeloner",
   "templates.search_placeholder": "Søg skabeloner...",
   "templates.no_templates": "Ingen skabeloner tilgængelige",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Alle kategorier",
   "templates.created_from": "Rapport oprettet fra skabelon",
   "templates.failed_create": "Oprettelse fra skabelon mislykkedes",
-
   "models.title": "Datamodeller",
   "models.new_model": "Ny model",
   "models.new_data_model": "Ny datamodel",
@@ -548,14 +527,12 @@
   "models.run_query": "Kør forespørgsel",
   "models.select_fields": "Vælg felter til forespørgsel",
   "models.no_fields_selected": "Ingen felter valgt",
-
   "search.placeholder": "Søg... (Ctrl+K)",
   "search.searching": "Søger...",
   "search.no_results": "Ingen resultater for \"{{query}}\"",
   "search.reports": "Rapporter",
   "search.queries": "Forespørgsler",
   "search.datasources": "Datakilder",
-
   "interactive.active_filters": "Aktive filtre:",
   "interactive.clear_all": "Ryd alle",
   "interactive.global_filters": "Globale filtre",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Indlæser indlejret rapport...",
   "embed.error": "Indlæsning af indlejret rapport mislykkedes",
   "embed.invalid_token": "Ugyldigt eller udløbet indlejringstoken",
-
   "tags.add_tag": "Tilføj tag...",
   "tags.remove_tag": "Fjern tag",
-
   "bookmarks.title": "Bogmærker",
   "bookmarks.save": "Gem bogmærke",
   "bookmarks.name_placeholder": "Bogmærkenavn...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Ingen bogmærker",
   "bookmarks.apply": "Anvend",
   "bookmarks.delete_confirm": "Slet dette bogmærke?",
-
   "live.connected": "Live",
   "live.connecting": "Forbinder...",
   "live.disconnected": "Afbrudt",
   "live.reconnect": "Genopret forbindelse",
   "live.enable": "Aktivér liveopdateringer",
-  "live.disable": "Deaktivér liveopdateringer"
+  "live.disable": "Deaktivér liveopdateringer",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

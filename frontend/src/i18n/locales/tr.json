@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Sayfa bulunamadı",
   "common.off": "Kapalı",
-
   "nav.home": "Ana Sayfa",
   "nav.reports": "Raporlar",
   "nav.queries": "Sorgular",
@@ -67,7 +66,6 @@
   "nav.shared": "Benimle Paylaşılan",
   "nav.admin": "Yönetim",
   "nav.password": "Şifre",
-
   "auth.sign_in": "Giriş yap",
   "auth.signing_in": "Giriş yapılıyor...",
   "auth.sign_in_subtitle": "Hesabınıza giriş yapın",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Yeni şifre en az 6 karakter olmalıdır",
   "auth.password_changed": "Şifre başarıyla değiştirildi",
   "auth.password_change_failed": "Şifre değiştirilemedi",
-
   "header.search_placeholder": "Ara... (Ctrl+K)",
   "header.searching": "Aranıyor...",
   "header.no_results_for": "\"{{query}}\" için sonuç bulunamadı",
   "header.language": "Dil",
-
   "charts.type.bar": "Çubuk",
   "charts.type.line": "Çizgi",
   "charts.type.area": "Alan",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Şelale",
   "charts.type.candlestick": "Mum Grafiği",
   "charts.select_type": "Grafik Türü",
-
   "widgets.type.chart": "Grafik",
   "widgets.type.table": "Tablo",
   "widgets.type.kpi": "KPI Kartı",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Etkileşimli filtre kontrolü",
   "widgets.desc.image": "Statik görsel / logo",
   "widgets.components": "Bileşenler",
-
   "reports.title": "Raporlar",
   "reports.new_report": "Yeni Rapor",
   "reports.search_placeholder": "Rapor ara...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Anlık Görüntü",
   "reports.snapshot_created": "Anlık görüntü oluşturuldu",
   "reports.auto_refresh": "Otomatik yenileme",
-
   "export.title": "Dışa Aktar",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Dışa aktarma başarısız",
   "export.email_failed": "E-posta gönderilemedi",
   "export.enter_email": "En az bir e-posta adresi girin",
-
   "designer.new_report_name": "Yeni Rapor",
   "designer.failed_load": "Rapor yüklenemedi",
   "designer.report_name_required": "Rapor adı gereklidir",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Sorgular",
   "queries.adhoc_title": "Ad-hoc Sorgu",
   "queries.run": "Çalıştır",
@@ -298,19 +289,18 @@
   "queries.sql_placeholder": "SELECT ...",
   "queries.save": "Kaydet",
   "queries.save_query": "Sorguyu kaydet",
-  "queries.edit_query": "Sorguyu d\u00fczenle",
-  "queries.name_placeholder": "Sorgu ad\u0131",
-  "queries.desc_placeholder": "A\u00e7\u0131klama (iste\u011fe ba\u011fl\u0131)",
+  "queries.edit_query": "Sorguyu düzenle",
+  "queries.name_placeholder": "Sorgu adı",
+  "queries.desc_placeholder": "Açıklama (isteğe bağlı)",
   "queries.saved_success": "Sorgu kaydedildi",
   "queries.save_failed": "Sorgu kaydedilemedi",
-  "queries.updated": "Sorgu g\u00fcncellendi",
-  "queries.update_failed": "Sorgu g\u00fcncellenemedi",
+  "queries.updated": "Sorgu güncellendi",
+  "queries.update_failed": "Sorgu güncellenemedi",
   "queries.delete_confirm": "'{{name}}' sorgusu silinsin mi?",
   "queries.deleted": "Sorgu silindi",
   "queries.delete_failed": "Sorgu silinemedi",
-  "queries.loaded_to_editor": "Edit\u00f6re y\u00fcklendi",
+  "queries.loaded_to_editor": "Editöre yüklendi",
   "queries.showing_rows": "Satırlar {{from}}-{{to}} / {{total}}",
-
   "datasources.title": "Veri Kaynakları",
   "datasources.add_source": "Kaynak Ekle",
   "datasources.new_datasource": "Yeni Veri Kaynağı",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Veritabanı adı",
   "datasources.username": "Kullanıcı adı",
   "datasources.password": "Şifre",
-
   "workspace.title": "Ana Sayfa",
   "workspace.favorites": "Favoriler",
   "workspace.recent": "Son Kullanılanlar",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Son kullanılan öğe yok",
   "workspace.add_favorite_hint": "Favorilere eklemek için öğeleri yıldızlayın",
   "workspace.view_reports_hint": "Burada görmek için rapor ve sorguları görüntüleyin",
-
   "admin.users_tab": "👥 Kullanıcılar",
   "admin.roles_tab": "🛡️ Roller",
   "admin.audit_tab": "📋 Denetim Günlüğü",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Devre Dışı Bırak",
   "admin.activate": "Etkinleştir",
   "admin.password_placeholder": "en az 6 karakter",
-
   "admin.role_management": "Rol Yönetimi",
   "admin.new_role": "Yeni Rol",
   "admin.role_name": "Rol Adı",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Rolü Düzenle: {{name}}",
   "admin.delete_role_confirm": "\"{{name}}\" rolü silinsin mi?",
   "admin.failed_load_roles": "Roller yüklenemedi",
-
   "admin.audit_log": "Denetim Günlüğü",
   "admin.audit.user": "Kullanıcı",
   "admin.audit.action": "İşlem",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Tüm işlemler",
   "admin.audit.all_types": "Tüm türler",
   "admin.audit.no_entries": "Denetim kaydı yok",
-
   "alerts.title": "Veri Uyarıları",
   "alerts.new_alert": "Yeni Uyarı",
   "alerts.no_alerts": "Henüz uyarı yok",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Son değer:",
   "alerts.triggered": "TETİKLENDİ",
   "alerts.ok": "Tamam",
-
   "monitoring.title": "Sistem İzleme",
   "monitoring.uptime": "Çalışma Süresi",
   "monitoring.jvm_heap": "JVM Yığını",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Önbellek etkinleştirildi",
   "monitoring.clear_cache": "Önbelleği Temizle",
   "monitoring.toggle_cache": "Önbelleği Aç/Kapat",
-
   "schedules.title": "Zamanlamalar",
   "schedules.no_schedules": "Zamanlama yok",
   "schedules.description": "Rapor görüntüleyicisinden rapor zamanlamaları oluşturun",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Alıcılar:",
   "schedules.paused": "Duraklatıldı",
   "schedules.active": "Aktif",
-
   "scripts.title": "Betikler",
   "scripts.new_script": "Yeni Betik",
   "scripts.save": "Kaydet",
@@ -489,7 +471,6 @@
   "scripts.error": "Hata",
   "scripts.execution_time": "{{ms}}ms'de yürütüldü",
   "scripts.execution_failed": "Yürütme başarısız",
-
   "sharing.title": "Benimle Paylaşılan",
   "sharing.all_types": "Tüm türler",
   "sharing.type.reports": "Raporlar",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Erişim verildi",
   "sharing.share_removed": "Erişim iptal edildi",
   "sharing.failed_share": "Paylaşım başarısız",
-
   "templates.title": "Şablonlar",
   "templates.search_placeholder": "Şablon ara...",
   "templates.no_templates": "Kullanılabilir şablon yok",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Tüm kategoriler",
   "templates.created_from": "Şablondan rapor oluşturuldu",
   "templates.failed_create": "Şablondan oluşturma başarısız",
-
   "models.title": "Veri Modelleri",
   "models.new_model": "Yeni Model",
   "models.new_data_model": "Yeni Veri Modeli",
@@ -548,14 +527,12 @@
   "models.run_query": "Sorgu Çalıştır",
   "models.select_fields": "Sorgulanacak alanları seçin",
   "models.no_fields_selected": "Alan seçilmedi",
-
   "search.placeholder": "Ara... (Ctrl+K)",
   "search.searching": "Aranıyor...",
   "search.no_results": "\"{{query}}\" için sonuç bulunamadı",
   "search.reports": "Raporlar",
   "search.queries": "Sorgular",
   "search.datasources": "Veri Kaynakları",
-
   "interactive.active_filters": "Aktif Filtreler:",
   "interactive.clear_all": "Tümünü temizle",
   "interactive.global_filters": "Genel Filtreler",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Gömülü rapor yükleniyor...",
   "embed.error": "Gömülü rapor yüklenemedi",
   "embed.invalid_token": "Geçersiz veya süresi dolmuş gömme jetonu",
-
   "tags.add_tag": "Etiket ekle...",
   "tags.remove_tag": "Etiketi kaldır",
-
   "bookmarks.title": "Yer İmleri",
   "bookmarks.save": "Yer İmi Kaydet",
   "bookmarks.name_placeholder": "Yer imi adı...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Yer imi yok",
   "bookmarks.apply": "Uygula",
   "bookmarks.delete_confirm": "Bu yer imi silinsin mi?",
-
   "live.connected": "Canlı",
   "live.connecting": "Bağlanıyor...",
   "live.disconnected": "Bağlantı Kesildi",
   "live.reconnect": "Yeniden Bağlan",
   "live.enable": "Canlı güncellemeleri etkinleştir",
-  "live.disable": "Canlı güncellemeleri devre dışı bırak"
+  "live.disable": "Canlı güncellemeleri devre dışı bırak",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

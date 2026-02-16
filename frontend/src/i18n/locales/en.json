@@ -52,7 +52,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Page not found",
   "common.off": "Off",
-
   "nav.home": "Home",
   "nav.reports": "Reports",
   "nav.queries": "Queries",
@@ -66,7 +65,6 @@
   "nav.shared": "Shared with Me",
   "nav.admin": "Administration",
   "nav.password": "Password",
-
   "auth.sign_in": "Sign in",
   "auth.signing_in": "Signing in...",
   "auth.sign_in_subtitle": "Sign in to your account",
@@ -84,12 +82,10 @@
   "auth.password_min_length": "New password must be at least 6 characters",
   "auth.password_changed": "Password changed successfully",
   "auth.password_change_failed": "Failed to change password",
-
   "header.search_placeholder": "Search... (Ctrl+K)",
   "header.searching": "Searching...",
   "header.no_results_for": "No results for \"{{query}}\"",
   "header.language": "Language",
-
   "charts.type.bar": "Bar",
   "charts.type.line": "Line",
   "charts.type.area": "Area",
@@ -108,7 +104,6 @@
   "charts.type.waterfall": "Waterfall",
   "charts.type.candlestick": "Candlestick",
   "charts.select_type": "Chart Type",
-
   "widgets.type.chart": "Chart",
   "widgets.type.table": "Table",
   "widgets.type.kpi": "KPI Card",
@@ -122,7 +117,6 @@
   "widgets.desc.filter": "Interactive filter control",
   "widgets.desc.image": "Static image / logo",
   "widgets.components": "Components",
-
   "reports.title": "Reports",
   "reports.new_report": "New Report",
   "reports.search_placeholder": "Search reports...",
@@ -149,7 +143,6 @@
   "reports.filters_short": "Filters",
   "reports.show_filters": "Show filters",
   "reports.hide_filters": "Hide filters",
-
   "export.title": "Export",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -165,7 +158,6 @@
   "export.export_failed": "Export failed",
   "export.email_failed": "Failed to send email",
   "export.enter_email": "Enter at least one email",
-
   "designer.new_report_name": "New Report",
   "designer.failed_load": "Failed to load report",
   "designer.report_name_required": "Report name is required",
@@ -263,7 +255,6 @@
   "designer.filter_types.text": "Text search",
   "designer.filter_types.number_range": "Number range",
   "designer.filter_types.date_range": "Date range",
-
   "designer.y_axis_format": "Y-axis Format",
   "designer.axis_format.plain": "Plain number",
   "designer.axis_format.thousands": "Thousands (K)",
@@ -291,7 +282,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Queries",
   "queries.adhoc_title": "Ad-hoc Query",
   "queries.run": "Run",
@@ -319,7 +309,6 @@
   "queries.delete_failed": "Failed to delete query",
   "queries.loaded_to_editor": "Loaded to editor",
   "queries.showing_rows": "Rows {{from}}-{{to}} of {{total}}",
-
   "datasources.title": "Data Sources",
   "datasources.add_source": "Add Source",
   "datasources.new_datasource": "New Data Source",
@@ -338,7 +327,6 @@
   "datasources.database_name": "Database name",
   "datasources.username": "Username",
   "datasources.password": "Password",
-
   "workspace.title": "Home",
   "workspace.favorites": "Favorites",
   "workspace.recent": "Recent",
@@ -356,7 +344,6 @@
   "workspace.no_recent": "No recent items",
   "workspace.add_favorite_hint": "Star items to add them to favorites",
   "workspace.view_reports_hint": "View reports and queries to see them here",
-
   "admin.users_tab": "👥 Users",
   "admin.roles_tab": "🛡️ Roles",
   "admin.audit_tab": "📋 Audit Log",
@@ -392,7 +379,6 @@
   "admin.deactivate": "Deactivate",
   "admin.activate": "Activate",
   "admin.password_placeholder": "min 6 characters",
-
   "admin.role_management": "Role Management",
   "admin.new_role": "New Role",
   "admin.role_name": "Role Name",
@@ -402,7 +388,6 @@
   "admin.edit_role": "Edit Role: {{name}}",
   "admin.delete_role_confirm": "Delete role \"{{name}}\"?",
   "admin.failed_load_roles": "Failed to load roles",
-
   "admin.audit_log": "Audit Log",
   "admin.audit.user": "User",
   "admin.audit.action": "Action",
@@ -413,7 +398,6 @@
   "admin.audit.all_actions": "All actions",
   "admin.audit.all_types": "All types",
   "admin.audit.no_entries": "No audit entries",
-
   "alerts.title": "Data Alerts",
   "alerts.new_alert": "New Alert",
   "alerts.no_alerts": "No alerts yet",
@@ -435,7 +419,6 @@
   "alerts.last_value": "Last value:",
   "alerts.triggered": "TRIGGERED",
   "alerts.ok": "OK",
-
   "monitoring.title": "System Monitoring",
   "monitoring.uptime": "Uptime",
   "monitoring.jvm_heap": "JVM Heap",
@@ -462,7 +445,6 @@
   "monitoring.cache_enabled": "Cache enabled",
   "monitoring.clear_cache": "Clear Cache",
   "monitoring.toggle_cache": "Toggle Cache",
-
   "schedules.title": "Schedules",
   "schedules.no_schedules": "No schedules",
   "schedules.description": "Create report schedules from the report viewer",
@@ -475,7 +457,6 @@
   "schedules.recipients": "Recipients:",
   "schedules.paused": "Paused",
   "schedules.active": "Active",
-
   "scripts.title": "Scripts",
   "scripts.new_script": "New Script",
   "scripts.save": "Save",
@@ -498,7 +479,6 @@
   "scripts.error": "Error",
   "scripts.execution_time": "Executed in {{ms}}ms",
   "scripts.execution_failed": "Execution failed",
-
   "sharing.title": "Shared with Me",
   "sharing.all_types": "All types",
   "sharing.type.reports": "Reports",
@@ -522,7 +502,6 @@
   "sharing.share_added": "Access granted",
   "sharing.share_removed": "Access revoked",
   "sharing.failed_share": "Failed to share",
-
   "templates.title": "Templates",
   "templates.search_placeholder": "Search templates...",
   "templates.no_templates": "No templates available",
@@ -532,7 +511,6 @@
   "templates.all_categories": "All categories",
   "templates.created_from": "Report created from template",
   "templates.failed_create": "Failed to create from template",
-
   "models.title": "Data Models",
   "models.new_model": "New Model",
   "models.new_data_model": "New Data Model",
@@ -557,14 +535,12 @@
   "models.run_query": "Run Query",
   "models.select_fields": "Select fields to query",
   "models.no_fields_selected": "No fields selected",
-
   "search.placeholder": "Search... (Ctrl+K)",
   "search.searching": "Searching...",
   "search.no_results": "No results for \"{{query}}\"",
   "search.reports": "Reports",
   "search.queries": "Queries",
   "search.datasources": "Data Sources",
-
   "interactive.active_filters": "Active Filters:",
   "interactive.clear_all": "Clear all",
   "interactive.global_filters": "Global Filters",
@@ -606,14 +582,11 @@
   "interactive.control.slider": "Slider",
   "interactive.control.date_picker": "Date Picker",
   "interactive.control.text_input": "Text Input",
-
   "embed.loading": "Loading embedded report...",
   "embed.error": "Failed to load embedded report",
   "embed.invalid_token": "Invalid or expired embed token",
-
   "tags.add_tag": "Add tag...",
   "tags.remove_tag": "Remove tag",
-
   "bookmarks.title": "Bookmarks",
   "bookmarks.save": "Save Bookmark",
   "bookmarks.name_placeholder": "Bookmark name...",
@@ -622,7 +595,6 @@
   "bookmarks.no_bookmarks": "No bookmarks",
   "bookmarks.apply": "Apply",
   "bookmarks.delete_confirm": "Delete this bookmark?",
-
   "live.connected": "Live",
   "live.connecting": "Connecting...",
   "live.disconnected": "Disconnected",
@@ -631,7 +603,6 @@
   "live.disable": "Disable live updates",
   "live.error": "Error",
   "live.last_update": "Last: {{time}}",
-
   "common.yes": "Yes",
   "common.no": "No",
   "common.all": "All",
@@ -640,18 +611,15 @@
   "common.none": "None",
   "common.on": "on",
   "common.required": "required",
-
   "dashboard.title": "Dashboard",
   "dashboard.saved_queries": "Saved Queries",
   "dashboard.recent_reports": "Recent Reports",
   "dashboard.view_all": "View all",
   "dashboard.manage": "Manage",
   "dashboard.no_datasources": "No data sources",
-
   "designer.canvas_hint": "Click a component on the left to add it",
   "designer.inline_sql_badge": "Inline SQL",
   "designer.no_data_bound": "No data bound",
-
   "bookmarks.enter_name": "Enter a bookmark name",
   "bookmarks.failed_save": "Failed to save bookmark",
   "bookmarks.failed_delete": "Failed to delete bookmark",
@@ -660,7 +628,6 @@
   "bookmarks.bookmark_name": "Bookmark name",
   "bookmarks.share_all": "Share with all users",
   "bookmarks.shared": "shared",
-
   "interactive.overlay.image_logo": "Image / Logo",
   "interactive.overlay.shape": "Shape (SVG)",
   "interactive.overlay.divider": "Divider",
@@ -686,7 +653,6 @@
   "interactive.overlay.failed_delete": "Failed to delete overlay",
   "interactive.overlay.edit_title": "Edit Overlay",
   "interactive.overlay.add_title": "Add Overlay",
-
   "interactive.action.cross_filter": "Cross-Filter",
   "interactive.action.cross_filter_desc": "Filter other widgets on click",
   "interactive.action.highlight": "Highlight",
@@ -708,13 +674,11 @@
   "interactive.action.target_report": "Target Report ID",
   "interactive.action.url_template_placeholder": "https://example.com/detail?id={customer_id}",
   "interactive.action.action_name": "Action name",
-
   "interactive.filter.failed_load": "Failed to load filter config",
   "interactive.filter.config_title": "Global Filter Configuration",
   "interactive.filter.field_placeholder": "Filter field...",
   "interactive.filter.exclude_placeholder": "Exclude IDs...",
   "interactive.filter.exclude_tooltip": "Comma-separated widget IDs to exclude from filtering",
-
   "interactive.control.radio": "Radio Buttons",
   "interactive.control.multi_checkbox": "Multi Checkbox",
   "interactive.control.saved": "Saved",
@@ -726,11 +690,9 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "interactive.button.export_started": "{{format}} export started",
   "interactive.button.export_failed": "Export failed",
   "interactive.button.default_label": "Button",
-
   "interactive.annotation.reference_line": "Reference Line",
   "interactive.annotation.reference_band": "Reference Band",
   "interactive.annotation.trend_line": "Trend Line",
@@ -747,14 +709,11 @@
   "interactive.annotation.end_value": "End value...",
   "interactive.annotation.label_placeholder": "Label...",
   "interactive.annotation.no_annotations": "No annotations yet",
-
   "interactive.tab_default": "Tab {{number}}",
   "interactive.dashboard.no_url": "No URL configured",
   "interactive.dashboard.embedded_content": "Embedded content",
-
   "workspace.remove_favorite": "Remove from favorites",
   "workspace.add_favorite": "Add to favorites",
-
   "tags.failed_load": "Failed to load tags",
   "tags.failed_assign": "Failed to assign tag",
   "tags.failed_remove": "Failed to remove tag",
@@ -762,5 +721,12 @@
   "tags.new_placeholder": "New tag...",
   "tags.no_tags": "No tags yet",
   "tags.all_assigned": "All tags assigned",
-  "tags.tag_label": "Tag"
+  "tags.tag_label": "Tag",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

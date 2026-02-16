@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "페이지를 찾을 수 없습니다",
   "common.off": "끄기",
-
   "nav.home": "홈",
   "nav.reports": "리포트",
   "nav.queries": "쿼리",
@@ -67,7 +66,6 @@
   "nav.shared": "공유된 항목",
   "nav.admin": "관리",
   "nav.password": "비밀번호",
-
   "auth.sign_in": "로그인",
   "auth.signing_in": "로그인 중...",
   "auth.sign_in_subtitle": "계정에 로그인",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "새 비밀번호는 최소 6자 이상이어야 합니다",
   "auth.password_changed": "비밀번호가 성공적으로 변경되었습니다",
   "auth.password_change_failed": "비밀번호 변경에 실패했습니다",
-
   "header.search_placeholder": "검색... (Ctrl+K)",
   "header.searching": "검색 중...",
   "header.no_results_for": "\"{{query}}\"에 대한 결과 없음",
   "header.language": "언어",
-
   "charts.type.bar": "막대 차트",
   "charts.type.line": "꺾은선 차트",
   "charts.type.area": "영역 차트",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "폭포 차트",
   "charts.type.candlestick": "캔들스틱 차트",
   "charts.select_type": "차트 유형",
-
   "widgets.type.chart": "차트",
   "widgets.type.table": "테이블",
   "widgets.type.kpi": "KPI 카드",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "대화형 필터 컨트롤",
   "widgets.desc.image": "정적 이미지 / 로고",
   "widgets.components": "구성 요소",
-
   "reports.title": "리포트",
   "reports.new_report": "새 리포트",
   "reports.search_placeholder": "리포트 검색...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "스냅샷",
   "reports.snapshot_created": "스냅샷이 생성되었습니다",
   "reports.auto_refresh": "자동 새로고침",
-
   "export.title": "내보내기",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "내보내기에 실패했습니다",
   "export.email_failed": "이메일 전송에 실패했습니다",
   "export.enter_email": "이메일을 최소 하나 입력하세요",
-
   "designer.new_report_name": "새 리포트",
   "designer.failed_load": "리포트 로드에 실패했습니다",
   "designer.report_name_required": "리포트 이름은 필수입니다",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "쿼리",
   "queries.adhoc_title": "임시 쿼리",
   "queries.run": "실행",
@@ -310,7 +301,6 @@
   "queries.delete_failed": "쿼리 삭제 실패",
   "queries.loaded_to_editor": "에디터에 로드됨",
   "queries.showing_rows": "{{from}}-{{to}}행 / {{total}}행",
-
   "datasources.title": "데이터 소스",
   "datasources.add_source": "소스 추가",
   "datasources.new_datasource": "새 데이터 소스",
@@ -329,7 +319,6 @@
   "datasources.database_name": "데이터베이스 이름",
   "datasources.username": "사용자 이름",
   "datasources.password": "비밀번호",
-
   "workspace.title": "홈",
   "workspace.favorites": "즐겨찾기",
   "workspace.recent": "최근",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "최근 항목이 없습니다",
   "workspace.add_favorite_hint": "항목에 별표를 눌러 즐겨찾기에 추가하세요",
   "workspace.view_reports_hint": "리포트와 쿼리를 보면 여기에 표시됩니다",
-
   "admin.users_tab": "👥 사용자",
   "admin.roles_tab": "🛡️ 역할",
   "admin.audit_tab": "📋 감사 로그",
@@ -383,7 +371,6 @@
   "admin.deactivate": "비활성화",
   "admin.activate": "활성화",
   "admin.password_placeholder": "최소 6자",
-
   "admin.role_management": "역할 관리",
   "admin.new_role": "새 역할",
   "admin.role_name": "역할 이름",
@@ -393,7 +380,6 @@
   "admin.edit_role": "역할 편집: {{name}}",
   "admin.delete_role_confirm": "역할 \"{{name}}\"을(를) 삭제하시겠습니까?",
   "admin.failed_load_roles": "역할 로드에 실패했습니다",
-
   "admin.audit_log": "감사 로그",
   "admin.audit.user": "사용자",
   "admin.audit.action": "작업",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "모든 작업",
   "admin.audit.all_types": "모든 유형",
   "admin.audit.no_entries": "감사 항목 없음",
-
   "alerts.title": "데이터 알림",
   "alerts.new_alert": "새 알림",
   "alerts.no_alerts": "알림이 아직 없습니다",
@@ -426,7 +411,6 @@
   "alerts.last_value": "마지막 값:",
   "alerts.triggered": "트리거됨",
   "alerts.ok": "정상",
-
   "monitoring.title": "시스템 모니터링",
   "monitoring.uptime": "가동 시간",
   "monitoring.jvm_heap": "JVM 힙",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "캐시가 활성화되었습니다",
   "monitoring.clear_cache": "캐시 삭제",
   "monitoring.toggle_cache": "캐시 전환",
-
   "schedules.title": "스케줄",
   "schedules.no_schedules": "스케줄 없음",
   "schedules.description": "리포트 뷰어에서 리포트 스케줄을 생성하세요",
@@ -466,7 +449,6 @@
   "schedules.recipients": "수신자:",
   "schedules.paused": "일시 중지됨",
   "schedules.active": "활성",
-
   "scripts.title": "스크립트",
   "scripts.new_script": "새 스크립트",
   "scripts.save": "저장",
@@ -489,7 +471,6 @@
   "scripts.error": "오류",
   "scripts.execution_time": "{{ms}}ms에 실행 완료",
   "scripts.execution_failed": "실행에 실패했습니다",
-
   "sharing.title": "공유된 항목",
   "sharing.all_types": "모든 유형",
   "sharing.type.reports": "리포트",
@@ -513,7 +494,6 @@
   "sharing.share_added": "접근 권한이 부여되었습니다",
   "sharing.share_removed": "접근 권한이 취소되었습니다",
   "sharing.failed_share": "공유에 실패했습니다",
-
   "templates.title": "템플릿",
   "templates.search_placeholder": "템플릿 검색...",
   "templates.no_templates": "사용 가능한 템플릿이 없습니다",
@@ -523,7 +503,6 @@
   "templates.all_categories": "모든 카테고리",
   "templates.created_from": "템플릿에서 리포트를 생성했습니다",
   "templates.failed_create": "템플릿에서 생성에 실패했습니다",
-
   "models.title": "데이터 모델",
   "models.new_model": "새 모델",
   "models.new_data_model": "새 데이터 모델",
@@ -548,14 +527,12 @@
   "models.run_query": "쿼리 실행",
   "models.select_fields": "쿼리할 필드를 선택하세요",
   "models.no_fields_selected": "선택된 필드 없음",
-
   "search.placeholder": "검색... (Ctrl+K)",
   "search.searching": "검색 중...",
   "search.no_results": "\"{{query}}\"에 대한 결과 없음",
   "search.reports": "리포트",
   "search.queries": "쿼리",
   "search.datasources": "데이터 소스",
-
   "interactive.active_filters": "활성 필터:",
   "interactive.clear_all": "모두 지우기",
   "interactive.global_filters": "전역 필터",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "임베디드 리포트를 로딩 중...",
   "embed.error": "임베디드 리포트 로드에 실패했습니다",
   "embed.invalid_token": "임베드 토큰이 유효하지 않거나 만료되었습니다",
-
   "tags.add_tag": "태그 추가...",
   "tags.remove_tag": "태그 제거",
-
   "bookmarks.title": "북마크",
   "bookmarks.save": "북마크 저장",
   "bookmarks.name_placeholder": "북마크 이름...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "북마크 없음",
   "bookmarks.apply": "적용",
   "bookmarks.delete_confirm": "이 북마크를 삭제하시겠습니까?",
-
   "live.connected": "실시간",
   "live.connecting": "연결 중...",
   "live.disconnected": "연결 끊김",
   "live.reconnect": "재연결",
   "live.enable": "실시간 업데이트 활성화",
-  "live.disable": "실시간 업데이트 비활성화"
+  "live.disable": "실시간 업데이트 비활성화",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }

@@ -53,7 +53,6 @@
   "common.not_found.title": "404",
   "common.not_found.message": "Stránka nenalezena",
   "common.off": "Vyp.",
-
   "nav.home": "Domů",
   "nav.reports": "Sestavy",
   "nav.queries": "Dotazy",
@@ -67,7 +66,6 @@
   "nav.shared": "Sdíleno se mnou",
   "nav.admin": "Administrace",
   "nav.password": "Heslo",
-
   "auth.sign_in": "Přihlásit se",
   "auth.signing_in": "Přihlašování...",
   "auth.sign_in_subtitle": "Přihlaste se ke svému účtu",
@@ -85,12 +83,10 @@
   "auth.password_min_length": "Nové heslo musí mít alespoň 6 znaků",
   "auth.password_changed": "Heslo bylo úspěšně změněno",
   "auth.password_change_failed": "Nepodařilo se změnit heslo",
-
   "header.search_placeholder": "Hledat... (Ctrl+K)",
   "header.searching": "Vyhledávání...",
   "header.no_results_for": "Žádné výsledky pro \"{{query}}\"",
   "header.language": "Jazyk",
-
   "charts.type.bar": "Sloupcový",
   "charts.type.line": "Čárový",
   "charts.type.area": "Plošný",
@@ -109,7 +105,6 @@
   "charts.type.waterfall": "Vodopádový",
   "charts.type.candlestick": "Svíčkový",
   "charts.select_type": "Typ grafu",
-
   "widgets.type.chart": "Graf",
   "widgets.type.table": "Tabulka",
   "widgets.type.kpi": "KPI karta",
@@ -123,7 +118,6 @@
   "widgets.desc.filter": "Interaktivní ovládání filtru",
   "widgets.desc.image": "Statický obrázek / logo",
   "widgets.components": "Komponenty",
-
   "reports.title": "Sestavy",
   "reports.new_report": "Nová sestava",
   "reports.search_placeholder": "Hledat sestavy...",
@@ -147,7 +141,6 @@
   "reports.snapshot": "Snímek",
   "reports.snapshot_created": "Snímek vytvořen",
   "reports.auto_refresh": "Automatické obnovení",
-
   "export.title": "Export",
   "export.csv": "CSV",
   "export.excel": "Excel (.xlsx)",
@@ -163,7 +156,6 @@
   "export.export_failed": "Export se nezdařil",
   "export.email_failed": "Nepodařilo se odeslat e-mail",
   "export.enter_email": "Zadejte alespoň jeden e-mail",
-
   "designer.new_report_name": "Nová sestava",
   "designer.failed_load": "Nepodařilo se načíst sestavu",
   "designer.report_name_required": "Název sestavy je povinný",
@@ -282,7 +274,6 @@
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",
   "designer.label_rotation.vertical": "Labels: Vertical (-90°)",
-
   "queries.title": "Dotazy",
   "queries.adhoc_title": "Ad-hoc dotaz",
   "queries.run": "Spustit",
@@ -296,21 +287,20 @@
   "queries.query_failed": "Dotaz se nezdařil",
   "queries.runs": "{{count}} spuštění",
   "queries.sql_placeholder": "SELECT ...",
-  "queries.save": "Ulo\u017eit",
-  "queries.save_query": "Ulo\u017eit dotaz",
+  "queries.save": "Uložit",
+  "queries.save_query": "Uložit dotaz",
   "queries.edit_query": "Upravit dotaz",
-  "queries.name_placeholder": "N\u00e1zev dotazu",
-  "queries.desc_placeholder": "Popis (voliteln\u00e9)",
-  "queries.saved_success": "Dotaz ulo\u017een",
-  "queries.save_failed": "Nepoda\u0159ilo se ulo\u017eit dotaz",
-  "queries.updated": "Dotaz aktualizov\u00e1n",
-  "queries.update_failed": "Nepoda\u0159ilo se aktualizovat dotaz",
+  "queries.name_placeholder": "Název dotazu",
+  "queries.desc_placeholder": "Popis (volitelné)",
+  "queries.saved_success": "Dotaz uložen",
+  "queries.save_failed": "Nepodařilo se uložit dotaz",
+  "queries.updated": "Dotaz aktualizován",
+  "queries.update_failed": "Nepodařilo se aktualizovat dotaz",
   "queries.delete_confirm": "Smazat dotaz '{{name}}'?",
-  "queries.deleted": "Dotaz smaz\u00e1n",
-  "queries.delete_failed": "Nepoda\u0159ilo se smazat dotaz",
-  "queries.loaded_to_editor": "Na\u010dteno do editoru",
+  "queries.deleted": "Dotaz smazán",
+  "queries.delete_failed": "Nepodařilo se smazat dotaz",
+  "queries.loaded_to_editor": "Načteno do editoru",
   "queries.showing_rows": "Řádky {{from}}-{{to}} z {{total}}",
-
   "datasources.title": "Zdroje dat",
   "datasources.add_source": "Přidat zdroj",
   "datasources.new_datasource": "Nový zdroj dat",
@@ -329,7 +319,6 @@
   "datasources.database_name": "Název databáze",
   "datasources.username": "Uživatelské jméno",
   "datasources.password": "Heslo",
-
   "workspace.title": "Domů",
   "workspace.favorites": "Oblíbené",
   "workspace.recent": "Nedávné",
@@ -347,7 +336,6 @@
   "workspace.no_recent": "Žádné nedávné položky",
   "workspace.add_favorite_hint": "Označte položky hvězdičkou pro přidání do oblíbených",
   "workspace.view_reports_hint": "Prohlížejte sestavy a dotazy, abyste je zde viděli",
-
   "admin.users_tab": "👥 Uživatelé",
   "admin.roles_tab": "🛡️ Role",
   "admin.audit_tab": "📋 Protokol auditu",
@@ -383,7 +371,6 @@
   "admin.deactivate": "Deaktivovat",
   "admin.activate": "Aktivovat",
   "admin.password_placeholder": "min. 6 znaků",
-
   "admin.role_management": "Správa rolí",
   "admin.new_role": "Nová role",
   "admin.role_name": "Název role",
@@ -393,7 +380,6 @@
   "admin.edit_role": "Upravit roli: {{name}}",
   "admin.delete_role_confirm": "Smazat roli \"{{name}}\"?",
   "admin.failed_load_roles": "Nepodařilo se načíst role",
-
   "admin.audit_log": "Protokol auditu",
   "admin.audit.user": "Uživatel",
   "admin.audit.action": "Akce",
@@ -404,7 +390,6 @@
   "admin.audit.all_actions": "Všechny akce",
   "admin.audit.all_types": "Všechny typy",
   "admin.audit.no_entries": "Žádné záznamy auditu",
-
   "alerts.title": "Datová upozornění",
   "alerts.new_alert": "Nové upozornění",
   "alerts.no_alerts": "Zatím žádná upozornění",
@@ -426,7 +411,6 @@
   "alerts.last_value": "Poslední hodnota:",
   "alerts.triggered": "SPUŠTĚNO",
   "alerts.ok": "OK",
-
   "monitoring.title": "Monitoring systému",
   "monitoring.uptime": "Doba provozu",
   "monitoring.jvm_heap": "JVM halda",
@@ -453,7 +437,6 @@
   "monitoring.cache_enabled": "Mezipaměť povolena",
   "monitoring.clear_cache": "Vymazat mezipaměť",
   "monitoring.toggle_cache": "Přepnout mezipaměť",
-
   "schedules.title": "Plánování",
   "schedules.no_schedules": "Žádné plány",
   "schedules.description": "Vytvářejte plány sestav z prohlížeče sestav",
@@ -466,7 +449,6 @@
   "schedules.recipients": "Příjemci:",
   "schedules.paused": "Pozastaveno",
   "schedules.active": "Aktivní",
-
   "scripts.title": "Skripty",
   "scripts.new_script": "Nový skript",
   "scripts.save": "Uložit",
@@ -489,7 +471,6 @@
   "scripts.error": "Chyba",
   "scripts.execution_time": "Provedeno za {{ms}}ms",
   "scripts.execution_failed": "Provedení se nezdařilo",
-
   "sharing.title": "Sdíleno se mnou",
   "sharing.all_types": "Všechny typy",
   "sharing.type.reports": "Sestavy",
@@ -513,7 +494,6 @@
   "sharing.share_added": "Přístup udělen",
   "sharing.share_removed": "Přístup odvolán",
   "sharing.failed_share": "Nepodařilo se sdílet",
-
   "templates.title": "Šablony",
   "templates.search_placeholder": "Hledat šablony...",
   "templates.no_templates": "Žádné dostupné šablony",
@@ -523,7 +503,6 @@
   "templates.all_categories": "Všechny kategorie",
   "templates.created_from": "Sestava vytvořena ze šablony",
   "templates.failed_create": "Nepodařilo se vytvořit ze šablony",
-
   "models.title": "Datové modely",
   "models.new_model": "Nový model",
   "models.new_data_model": "Nový datový model",
@@ -548,14 +527,12 @@
   "models.run_query": "Spustit dotaz",
   "models.select_fields": "Vyberte pole pro dotaz",
   "models.no_fields_selected": "Žádná pole nevybrána",
-
   "search.placeholder": "Hledat... (Ctrl+K)",
   "search.searching": "Vyhledávání...",
   "search.no_results": "Žádné výsledky pro \"{{query}}\"",
   "search.reports": "Sestavy",
   "search.queries": "Dotazy",
   "search.datasources": "Zdroje dat",
-
   "interactive.active_filters": "Aktivní filtry:",
   "interactive.clear_all": "Vymazat vše",
   "interactive.global_filters": "Globální filtry",
@@ -608,14 +585,11 @@
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
   "interactive.control.cascade_parent": "Cascade Parent",
-
   "embed.loading": "Načítání vložené sestavy...",
   "embed.error": "Nepodařilo se načíst vloženou sestavu",
   "embed.invalid_token": "Neplatný nebo vypršelý token vložení",
-
   "tags.add_tag": "Přidat štítek...",
   "tags.remove_tag": "Odebrat štítek",
-
   "bookmarks.title": "Záložky",
   "bookmarks.save": "Uložit záložku",
   "bookmarks.name_placeholder": "Název záložky...",
@@ -624,11 +598,17 @@
   "bookmarks.no_bookmarks": "Žádné záložky",
   "bookmarks.apply": "Použít",
   "bookmarks.delete_confirm": "Smazat tuto záložku?",
-
   "live.connected": "Živě",
   "live.connecting": "Připojování...",
   "live.disconnected": "Odpojeno",
   "live.reconnect": "Znovu připojit",
   "live.enable": "Povolit živé aktualizace",
-  "live.disable": "Zakázat živé aktualizace"
+  "live.disable": "Zakázat živé aktualizace",
+  "designer.legend_position": "Legend position",
+  "designer.legend_position.auto": "Auto (bottom)",
+  "designer.legend_position.top": "Top",
+  "designer.legend_position.bottom": "Bottom",
+  "designer.legend_position.left": "Left",
+  "designer.legend_position.right": "Right",
+  "designer.legend_position.hidden": "Hide"
 }
