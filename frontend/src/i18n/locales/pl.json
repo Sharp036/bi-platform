@@ -269,6 +269,8 @@
   "designer.data_labels": "Etykiety danych",
   "designer.show_data_labels": "Pokaż wartości na wykresie",
   "designer.data_label_boxed": "Etykiety z kolorową ramką",
+  "designer.data_label_decimals": "Miejsca dziesiętne",
+  "designer.data_label_thousands_sep": "Separator tysięcy",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

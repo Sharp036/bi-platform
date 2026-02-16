@@ -269,6 +269,8 @@
   "designer.data_labels": "Label data",
   "designer.show_data_labels": "Tampilkan nilai pada grafik",
   "designer.data_label_boxed": "Label dengan bingkai berwarna",
+  "designer.data_label_decimals": "Desimal",
+  "designer.data_label_thousands_sep": "Pemisah ribuan",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

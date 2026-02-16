@@ -270,6 +270,8 @@
   "designer.data_labels": "Étiquettes de données",
   "designer.show_data_labels": "Afficher les valeurs sur le graphique",
   "designer.data_label_boxed": "Étiquettes encadrées (couleur série)",
+  "designer.data_label_decimals": "Décimales",
+  "designer.data_label_thousands_sep": "Séparateur de milliers",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

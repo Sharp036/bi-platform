@@ -269,6 +269,8 @@
   "designer.data_labels": "Adatcímkék",
   "designer.show_data_labels": "Értékek megjelenítése a diagramon",
   "designer.data_label_boxed": "Címkék színes keretben",
+  "designer.data_label_decimals": "Tizedesjegyek",
+  "designer.data_label_thousands_sep": "Ezres elválasztó",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

@@ -269,6 +269,8 @@
   "designer.data_labels": "Dataetiketter",
   "designer.show_data_labels": "Vis værdier på diagrammet",
   "designer.data_label_boxed": "Etiketter i farvet ramme",
+  "designer.data_label_decimals": "Decimaler",
+  "designer.data_label_thousands_sep": "Tusindtalsseparator",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

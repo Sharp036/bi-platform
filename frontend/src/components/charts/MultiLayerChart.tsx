@@ -20,15 +20,27 @@ function buildValueFormatter(format: string, currency: string): ((value: number)
   }
 }
 
+function formatLabelValue(v: number, decimals: number, thousandsSep: boolean): string {
+  if (thousandsSep) {
+    return v.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    })
+  }
+  return v.toFixed(decimals)
+}
+
 function buildLabelFormatter(
   mode: string, count: number, total: number,
-  values: number[], valueFmt?: (v: number) => string
+  values: number[], decimals: number, thousandsSep: boolean,
+  valueFmt?: (v: number) => string
 ): (p: { dataIndex: number; value: number }) => string {
   const isVisible = buildLabelVisibility(mode, count, total, values)
   return (p: { dataIndex: number; value: number }) => {
     const { dataIndex, value } = p
     if (!isVisible(dataIndex)) return ''
-    return valueFmt ? valueFmt(value) : String(value)
+    if (valueFmt) return valueFmt(value)
+    return formatLabelValue(value, decimals, thousandsSep)
   }
 }
 
@@ -83,6 +95,89 @@ interface Props {
   highlightValue?: unknown
   annotations?: AnnotationItem[]
   tooltipConfig?: TooltipConfigItem
+}
+
+/**
+ * Creates a top-level labelLayout function that prevents label overlap
+ * using greedy rectangle-packing. All series share the same `placed` array
+ * so cross-series collision is handled.
+ */
+function createCollisionFreeLayout() {
+  const placed: { x1: number; y1: number; x2: number; y2: number }[] = []
+  let lastTs = 0
+  const GAP = 4
+
+  function collides(r: { x1: number; y1: number; x2: number; y2: number }) {
+    return placed.some(p =>
+      r.x1 < p.x2 + GAP && r.x2 > p.x1 - GAP &&
+      r.y1 < p.y2 + GAP && r.y2 > p.y1 - GAP
+    )
+  }
+
+  return (params: {
+    rect?: { x: number; y: number; width: number; height: number }
+    labelRect?: { x: number; y: number; width: number; height: number }
+    dataIndex: number
+    seriesIndex: number
+  }) => {
+    const now = Date.now()
+    if (now - lastTs > 50) placed.length = 0
+    lastTs = now
+
+    const { rect, labelRect } = params
+    if (!rect || !labelRect || labelRect.width < 1) return {}
+
+    const anchorX = rect.x + rect.width / 2
+    const anchorY = rect.y
+    const lw = labelRect.width
+    const lh = labelRect.height
+    const ROW_H = lh + GAP
+
+    for (let row = 0; row < 20; row++) {
+      const baseY = 8 + row * ROW_H
+      const offsets = [0]
+      for (let i = 1; i <= 6; i++) {
+        offsets.push(-(lw * 0.5 + GAP) * i)
+        offsets.push((lw * 0.5 + GAP) * i)
+      }
+      for (const dx of offsets) {
+        const cx = anchorX + dx
+        const candidate = {
+          x1: cx - lw / 2,
+          y1: baseY,
+          x2: cx + lw / 2,
+          y2: baseY + lh,
+        }
+        if (candidate.x1 < 0) continue
+        if (!collides(candidate)) {
+          placed.push(candidate)
+          return {
+            x: cx,
+            y: baseY,
+            align: 'center' as const,
+            verticalAlign: 'top' as const,
+            labelLinePoints: [
+              [cx, baseY + lh],
+              [anchorX, anchorY],
+            ],
+          }
+        }
+      }
+    }
+
+    const y = 8 + placed.length * ROW_H
+    placed.push({ x1: anchorX - lw / 2, y1: y, x2: anchorX + lw / 2, y2: y + lh })
+    return {
+      x: anchorX,
+      y,
+      align: 'center' as const,
+      verticalAlign: 'top' as const,
+      labelLinePoints: [
+        [anchorX, y + lh],
+        [anchorX, anchorY],
+      ],
+    }
+  }
 }
 
 function parseConfig(raw?: string): Record<string, unknown> {
@@ -162,6 +257,8 @@ export default function MultiLayerChart({
     const dataLabelCount = Number(config.dataLabelCount) || 3
     const dataLabelRotation = Number(config.dataLabelRotation) || 0
     const dataLabelBoxed = !!config.dataLabelBoxed
+    const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
+    const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
     const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
     const regressionLabel = t('designer.regression_lines')
@@ -207,9 +304,8 @@ export default function MultiLayerChart({
                 show: true, position: 'top', distance: 8,
                 rotate: dataLabelRotation || undefined,
                 fontSize: 10,
-                formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
+                formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
                 ...(dataLabelBoxed ? {
-                  color: seriesColor,
                   borderColor: seriesColor,
                   borderWidth: 1,
                   borderRadius: 3,
@@ -341,7 +437,7 @@ export default function MultiLayerChart({
       grid: {
         left: '3%',
         right: hasRightAxis ? '8%' : '4%',
-        top: showDataLabels && !isPie ? 80 : undefined,
+        top: showDataLabels && !isPie ? 120 : undefined,
         bottom: series.length > 1 ? '15%' : '3%',
         containLabel: true,
       },
@@ -354,7 +450,7 @@ export default function MultiLayerChart({
       } : {}),
       series,
       ...(showDataLabels && !isPie ? {
-        labelLayout: { moveOverlap: 'shiftY' },
+        labelLayout: createCollisionFreeLayout(),
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),

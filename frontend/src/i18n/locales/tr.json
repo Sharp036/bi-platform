@@ -269,6 +269,8 @@
   "designer.data_labels": "Veri etiketleri",
   "designer.show_data_labels": "Grafikte değerleri göster",
   "designer.data_label_boxed": "Renkli çerçeveli etiketler",
+  "designer.data_label_decimals": "Ondalık basamak",
+  "designer.data_label_thousands_sep": "Binlik ayırıcı",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

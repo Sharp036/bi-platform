@@ -269,6 +269,8 @@
   "designer.data_labels": "Etichette dati",
   "designer.show_data_labels": "Mostra valori sul grafico",
   "designer.data_label_boxed": "Etichette con bordo colorato",
+  "designer.data_label_decimals": "Decimali",
+  "designer.data_label_thousands_sep": "Separatore migliaia",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

@@ -269,6 +269,8 @@
   "designer.data_labels": "تسميات البيانات",
   "designer.show_data_labels": "إظهار القيم على الرسم البياني",
   "designer.data_label_boxed": "تسميات في إطار ملون",
+  "designer.data_label_decimals": "خانات عشرية",
+  "designer.data_label_thousands_sep": "فاصل الآلاف",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

@@ -269,6 +269,8 @@
   "designer.data_labels": "データラベル",
   "designer.show_data_labels": "グラフに値を表示",
   "designer.data_label_boxed": "ラベルに色付き枠線",
+  "designer.data_label_decimals": "小数点以下の桁数",
+  "designer.data_label_thousands_sep": "桁区切り",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

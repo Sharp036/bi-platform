@@ -269,6 +269,8 @@
   "designer.data_labels": "Datové popisky",
   "designer.show_data_labels": "Zobrazit hodnoty v grafu",
   "designer.data_label_boxed": "Štítky v barevném rámečku",
+  "designer.data_label_decimals": "Desetinná místa",
+  "designer.data_label_thousands_sep": "Oddělovač tisíců",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

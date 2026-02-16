@@ -269,6 +269,8 @@
   "designer.data_labels": "Gegevenslabels",
   "designer.show_data_labels": "Waarden op grafiek tonen",
   "designer.data_label_boxed": "Labels met gekleurde rand",
+  "designer.data_label_decimals": "Decimalen",
+  "designer.data_label_thousands_sep": "Duizendtallen scheidingsteken",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

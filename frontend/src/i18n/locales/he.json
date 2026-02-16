@@ -269,6 +269,8 @@
   "designer.data_labels": "תוויות נתונים",
   "designer.show_data_labels": "הצג ערכים בתרשים",
   "designer.data_label_boxed": "תוויות במסגרת צבעונית",
+  "designer.data_label_decimals": "ספרות עשרוניות",
+  "designer.data_label_thousands_sep": "מפריד אלפים",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

@@ -269,6 +269,8 @@
   "designer.data_labels": "Nhãn dữ liệu",
   "designer.show_data_labels": "Hiển thị giá trị trên biểu đồ",
   "designer.data_label_boxed": "Nhãn có viền màu",
+  "designer.data_label_decimals": "Chữ số thập phân",
+  "designer.data_label_thousands_sep": "Phân cách hàng nghìn",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

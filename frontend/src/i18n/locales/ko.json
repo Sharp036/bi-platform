@@ -269,6 +269,8 @@
   "designer.data_labels": "데이터 레이블",
   "designer.show_data_labels": "차트에 값 표시",
   "designer.data_label_boxed": "색상 테두리 라벨",
+  "designer.data_label_decimals": "소수 자릿수",
+  "designer.data_label_thousands_sep": "천 단위 구분",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

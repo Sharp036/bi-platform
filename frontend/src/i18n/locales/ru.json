@@ -279,6 +279,8 @@
   "designer.data_labels": "Подписи данных",
   "designer.show_data_labels": "Показывать значения на графике",
   "designer.data_label_boxed": "Подписи в цветной рамке",
+  "designer.data_label_decimals": "Знаков после запятой",
+  "designer.data_label_thousands_sep": "Разделитель разрядов",
   "designer.label_mode.all": "Все",
   "designer.label_mode.first_n": "Первые N",
   "designer.label_mode.last_n": "Последние N",

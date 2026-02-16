@@ -270,6 +270,8 @@
   "designer.data_labels": "Rótulos de dados",
   "designer.show_data_labels": "Mostrar valores no gráfico",
   "designer.data_label_boxed": "Rótulos com borda colorida",
+  "designer.data_label_decimals": "Casas decimais",
+  "designer.data_label_thousands_sep": "Separador de milhares",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

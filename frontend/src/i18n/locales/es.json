@@ -270,6 +270,8 @@
   "designer.data_labels": "Etiquetas de datos",
   "designer.show_data_labels": "Mostrar valores en el gráfico",
   "designer.data_label_boxed": "Etiquetas con borde de color",
+  "designer.data_label_decimals": "Decimales",
+  "designer.data_label_thousands_sep": "Separador de miles",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

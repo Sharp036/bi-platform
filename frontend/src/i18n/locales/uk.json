@@ -269,6 +269,8 @@
   "designer.data_labels": "Підписи даних",
   "designer.show_data_labels": "Показувати значення на графіку",
   "designer.data_label_boxed": "Підписи в кольоровій рамці",
+  "designer.data_label_decimals": "Десяткових знаків",
+  "designer.data_label_thousands_sep": "Роздільник розрядів",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

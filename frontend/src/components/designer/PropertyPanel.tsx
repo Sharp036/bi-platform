@@ -496,6 +496,24 @@ export default function PropertyPanel() {
                             placeholder={t('designer.label_count_placeholder')}
                           />
                         )}
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number" min={0} max={6}
+                            value={cc.dataLabelDecimals != null ? Number(cc.dataLabelDecimals) : 1}
+                            onChange={e => update({ chartConfig: { ...cc, dataLabelDecimals: Number(e.target.value) } })}
+                            className="input text-sm w-16"
+                          />
+                          <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_decimals')}</span>
+                        </div>
+                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={cc.dataLabelThousandsSep !== false}
+                            onChange={e => update({ chartConfig: { ...cc, dataLabelThousandsSep: e.target.checked } })}
+                            className="rounded border-slate-300"
+                          />
+                          {t('designer.data_label_thousands_sep')}
+                        </label>
                         <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
                           <input
                             type="checkbox"

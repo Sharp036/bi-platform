@@ -269,6 +269,8 @@
   "designer.data_labels": "Ετικέτες δεδομένων",
   "designer.show_data_labels": "Εμφάνιση τιμών στο γράφημα",
   "designer.data_label_boxed": "Ετικέτες σε χρωματιστό πλαίσιο",
+  "designer.data_label_decimals": "Δεκαδικά ψηφία",
+  "designer.data_label_thousands_sep": "Διαχωριστικό χιλιάδων",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

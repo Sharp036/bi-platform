@@ -269,6 +269,8 @@
   "designer.data_labels": "डेटा लेबल",
   "designer.show_data_labels": "चार्ट पर मान दिखाएं",
   "designer.data_label_boxed": "रंगीन बॉर्डर वाले लेबल",
+  "designer.data_label_decimals": "दशमलव स्थान",
+  "designer.data_label_thousands_sep": "हजार विभाजक",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",
