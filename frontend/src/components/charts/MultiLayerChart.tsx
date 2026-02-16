@@ -533,7 +533,7 @@ export default function MultiLayerChart({
     const legendIsRight = showLegend && legendPosition === 'right'
     const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
     const gridBottom = !isPie
-      ? (legendIsBottom ? (xAxisRotation ? 170 : 150) : (xAxisRotation ? 62 : 30))
+      ? (legendIsBottom ? (xAxisRotation ? 110 : 86) : (xAxisRotation ? 62 : 30))
       : 12
 
     const tooltipOpts = tooltipConfig
