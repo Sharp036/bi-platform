@@ -31,21 +31,27 @@ export function buildDesignerParameterValues(
   const values: Record<string, unknown> = {}
 
   parameters.forEach((p) => {
+    const key = (p.name || '').trim()
+    if (!key) return
     const resolved = resolveDynamicDefault(p.defaultValue)
-    if (!resolved) return
+    if (!resolved) {
+      // Keep parameter key present to avoid backend "missing required parameter"
+      // during design-time metadata loading.
+      values[key] = null
+      return
+    }
 
     switch ((p.paramType || '').toUpperCase()) {
       case 'NUMBER':
-        values[p.name] = Number(resolved)
+        values[key] = Number(resolved)
         break
       case 'BOOLEAN':
-        values[p.name] = resolved === 'true'
+        values[key] = resolved === 'true'
         break
       default:
-        values[p.name] = resolved
+        values[key] = resolved
     }
   })
 
   return values
 }
-

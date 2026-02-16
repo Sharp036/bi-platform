@@ -293,67 +293,69 @@ export default function ReportDesignerPage() {
         </div>
       </div>
 
-      {/* Settings panel (collapsible) */}
-      {showSettings && (
-        <div className="px-4 py-3 bg-surface-50 dark:bg-dark-surface-100/50 border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
-          <div className="flex items-center gap-4 max-w-[800px]">
-            <div className="flex-1">
-              <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.description_label')}</label>
-              <input
-                value={reportDescription}
-                onChange={e => setReportMeta(reportName, e.target.value)}
-                className="input text-sm" placeholder={t('designer.report_desc_placeholder')}
-              />
-            </div>
-            <div className="w-32">
-              <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.status_label')}</label>
-              <span className="text-sm text-slate-600 dark:text-slate-400">{reportStatus}</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[800px] mt-3">
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.filter_panel_position')}</label>
-              <select
-                value={filterPanelPosition}
-                onChange={e => setFilterPanelPosition(e.target.value as FilterPanelPosition)}
-                className="input text-sm"
-              >
-                <option value="top">{t('designer.filter_panel_position.top')}</option>
-                <option value="bottom">{t('designer.filter_panel_position.bottom')}</option>
-                <option value="left">{t('designer.filter_panel_position.left')}</option>
-                <option value="right">{t('designer.filter_panel_position.right')}</option>
-              </select>
-            </div>
-            <div className="flex items-end">
-              <label className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={filterPanelCollapsed}
-                  onChange={e => setFilterPanelCollapsed(e.target.checked)}
-                />
-                {t('designer.filter_panel_collapsed_default')}
-              </label>
-            </div>
-          </div>
-
-          {/* Parameters */}
-          <div className="mt-3">
-            <ParameterDesigner />
-          </div>
-          {reportId && (
-            <div className="mt-4">
-              <ParameterControlConfigPanel
-                reportId={reportId}
-                parameters={controlParams}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Main area: palette + canvas + properties */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Left: Settings panel */}
+        {!previewMode && showSettings && (
+          <div className="w-[380px] flex-shrink-0 overflow-y-auto border-r border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/40 p-3 space-y-4">
+            <div className="card p-3">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.description_label')}</label>
+                  <input
+                    value={reportDescription}
+                    onChange={e => setReportMeta(reportName, e.target.value)}
+                    className="input text-sm" placeholder={t('designer.report_desc_placeholder')}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.status_label')}</label>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">{reportStatus}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="card p-3">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.filter_panel_position')}</label>
+                  <select
+                    value={filterPanelPosition}
+                    onChange={e => setFilterPanelPosition(e.target.value as FilterPanelPosition)}
+                    className="input text-sm"
+                  >
+                    <option value="top">{t('designer.filter_panel_position.top')}</option>
+                    <option value="bottom">{t('designer.filter_panel_position.bottom')}</option>
+                    <option value="left">{t('designer.filter_panel_position.left')}</option>
+                    <option value="right">{t('designer.filter_panel_position.right')}</option>
+                  </select>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={filterPanelCollapsed}
+                    onChange={e => setFilterPanelCollapsed(e.target.checked)}
+                  />
+                  {t('designer.filter_panel_collapsed_default')}
+                </label>
+              </div>
+            </div>
+
+            <div className="card p-3">
+              <ParameterDesigner />
+            </div>
+
+            {reportId && (
+              <div className="card p-3">
+                <ParameterControlConfigPanel
+                  reportId={reportId}
+                  parameters={controlParams}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Left: Component Palette */}
         {!previewMode && (
           <div className="w-52 flex-shrink-0 p-3 overflow-y-auto border-r border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30">

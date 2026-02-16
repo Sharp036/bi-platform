@@ -93,7 +93,7 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
 
               <div className="flex flex-wrap gap-3">
                 <div>
-                  <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.control_type')}</label>
+                  <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control_type')}</label>
                   <select
                     value={ctrl?.controlType || 'INPUT'}
                     onChange={e => save(p.name, { controlType: e.target.value })}
