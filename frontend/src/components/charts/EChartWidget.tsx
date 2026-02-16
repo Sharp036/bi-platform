@@ -30,10 +30,50 @@ function buildValueFormatter(format: string, currency: string): ((value: number)
 
 function buildLegendOption(seriesCount: number, legendPosition: string) {
   if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
-  if (legendPosition === 'top') return { top: 0, left: 'center' as const, type: 'scroll' as const }
-  if (legendPosition === 'left') return { left: 0, top: 'middle' as const, orient: 'vertical' as const, type: 'scroll' as const }
-  if (legendPosition === 'right') return { right: 0, top: 'middle' as const, orient: 'vertical' as const, type: 'scroll' as const }
-  return { bottom: 0, left: 'center' as const, type: 'scroll' as const }
+  const compact = {
+    type: 'scroll' as const,
+    itemWidth: 12,
+    itemHeight: 7,
+    itemGap: 6,
+    pageIconSize: 10,
+    pageTextStyle: { fontSize: 10 },
+    textStyle: {
+      fontSize: 10,
+      lineHeight: 12,
+      width: 138,
+      overflow: 'break' as const,
+    },
+    formatter: (name: string) => wrapLegendText(name, 22, 3),
+  }
+  if (legendPosition === 'top') return { ...compact, top: 0, left: 'center' as const }
+  if (legendPosition === 'left') return { ...compact, left: 0, top: 'middle' as const, orient: 'vertical' as const, height: '78%' }
+  if (legendPosition === 'right') return { ...compact, right: 0, top: 'middle' as const, orient: 'vertical' as const, height: '78%' }
+  return { ...compact, bottom: 0, left: 'center' as const }
+}
+
+function wrapLegendText(value: string, lineLen: number, maxLines: number): string {
+  const text = String(value ?? '').trim()
+  if (!text) return ''
+  const words = text.split(/\s+/)
+  const lines: string[] = []
+  let current = ''
+  for (const word of words) {
+    if (!current) {
+      current = word
+      continue
+    }
+    if ((current + ' ' + word).length <= lineLen) {
+      current += ' ' + word
+    } else {
+      lines.push(current)
+      current = word
+      if (lines.length >= maxLines - 1) break
+    }
+  }
+  if (lines.length < maxLines && current) lines.push(current)
+  const hasMore = words.join(' ').length > lines.join(' ').length
+  if (hasMore && lines.length > 0) lines[lines.length - 1] = `${lines[lines.length - 1]}…`
+  return lines.join('\n')
 }
 
 function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): string {
@@ -310,6 +350,10 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const legendIsBottom = showLegend && (legendPosition === 'bottom' || legendPosition === 'auto')
   const legendIsLeft = showLegend && legendPosition === 'left'
   const legendIsRight = showLegend && legendPosition === 'right'
+  const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
+  const gridBottom = hasAxis
+    ? (legendIsBottom ? (xAxisRotation ? 110 : 86) : (xAxisRotation ? 62 : 30))
+    : 12
 
   return {
     tooltip: {
@@ -320,12 +364,12 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
     },
     legend,
     grid: {
-      left: legendIsLeft ? '12%' : '3%',
-      right: legendIsRight ? '12%' : '4%',
+      left: legendIsLeft ? legendSidePad : '3%',
+      right: legendIsRight ? legendSidePad : '4%',
       top: showDataLabels && hasAxis
-        ? (legendIsTop ? 150 : 120)
-        : (legendIsTop ? 40 : undefined),
-      bottom: legendIsBottom ? '15%' : '3%',
+        ? (legendIsTop ? 165 : 120)
+        : (legendIsTop ? 56 : undefined),
+      bottom: gridBottom,
       containLabel: true,
     },
     ...(hasAxis ? {
