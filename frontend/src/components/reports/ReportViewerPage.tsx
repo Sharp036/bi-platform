@@ -310,7 +310,7 @@ export default function ReportViewerPage() {
   )
 
   const sidePanel = report.parameters.length > 0 && (
-    <div className={`${filterPanelCollapsed ? 'w-14' : 'w-80'} flex-shrink-0`}>
+    <div className={`${filterPanelCollapsed ? 'w-0 overflow-hidden' : 'w-80'} flex-shrink-0`}>
       <div className="sticky top-3">
         <div className="card p-2 mb-2">
           <div className="flex items-center justify-between gap-2">
@@ -322,9 +322,9 @@ export default function ReportViewerPage() {
             <button
               onClick={() => setFilterPanelCollapsed(v => !v)}
               className="btn-ghost text-xs px-2 py-1 w-full"
-              title={filterPanelCollapsed ? t('reports.show_filters') : t('reports.hide_filters')}
+              title={t('reports.hide_filters')}
             >
-              {filterPanelCollapsed ? t('reports.filters_short') : t('reports.hide_filters')}
+              {t('reports.hide_filters')}
             </button>
           </div>
         </div>
@@ -414,8 +414,17 @@ export default function ReportViewerPage() {
       )}
 
       {(filterPanelPosition === 'left' || filterPanelPosition === 'right') ? (
-        <div className={`flex gap-4 ${filterPanelPosition === 'right' ? 'flex-row-reverse' : ''}`}>
+        <div className={`relative flex gap-4 ${filterPanelPosition === 'right' ? 'flex-row-reverse' : ''}`}>
           {sidePanel}
+          {filterPanelCollapsed && report.parameters.length > 0 && (
+            <button
+              onClick={() => setFilterPanelCollapsed(false)}
+              className={`absolute top-0 z-20 btn-secondary text-xs px-3 py-1 ${filterPanelPosition === 'right' ? 'right-0' : 'left-0'}`}
+              title={t('reports.show_filters')}
+            >
+              {t('reports.filters_short')}
+            </button>
+          )}
           <div className="flex-1 min-w-0">
             {renderWidgets()}
           </div>
