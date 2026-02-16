@@ -21,7 +21,7 @@ export const queryApi = {
     api.post<{ isFavorite: boolean }>(`/queries/${id}/favorite`).then(r => r.data),
 
   execute: (id: number, parameters?: Record<string, unknown>, limit?: number) =>
-    api.post<QueryResult>(`/queries/${id}/execute`, { parameters }, limit ? { params: { limit } } : undefined).then(r => r.data),
+    api.post<QueryResult>(`/queries/${id}/execute`, parameters ?? {}, limit ? { params: { limit } } : undefined).then(r => r.data),
 
   executeAdHoc: (data: { datasourceId: number; sql: string; parameters?: Record<string, unknown>; limit?: number }) =>
     api.post<QueryResult>('/query/execute', data).then(r => r.data),
