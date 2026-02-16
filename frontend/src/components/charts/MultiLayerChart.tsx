@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 import type { WidgetData, ChartLayerItem } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
@@ -102,7 +102,7 @@ interface Props {
  * using greedy rectangle-packing. All series share the same `placed` array
  * so cross-series collision is handled.
  */
-function createCollisionFreeLayout() {
+function createCollisionFreeLayout(getChartWidth?: () => number) {
   const placed: { x1: number; y1: number; x2: number; y2: number }[] = []
   let lastTs = 0
   const GAP = 4
@@ -132,13 +132,22 @@ function createCollisionFreeLayout() {
     const lw = labelRect.width
     const lh = labelRect.height
     const ROW_H = lh + GAP
+    const chartW = getChartWidth?.() ?? 0
+
+    // For labels near the right edge, try left offsets first; near the left — right first
+    const preferLeft = chartW > 0 && anchorX > chartW * 0.6
 
     for (let row = 0; row < 20; row++) {
       const baseY = 8 + row * ROW_H
       const offsets = [0]
       for (let i = 1; i <= 6; i++) {
-        offsets.push(-(lw * 0.5 + GAP) * i)
-        offsets.push((lw * 0.5 + GAP) * i)
+        if (preferLeft) {
+          offsets.push(-(lw * 0.5 + GAP) * i)
+          offsets.push((lw * 0.5 + GAP) * i)
+        } else {
+          offsets.push((lw * 0.5 + GAP) * i)
+          offsets.push(-(lw * 0.5 + GAP) * i)
+        }
       }
       for (const dx of offsets) {
         const cx = anchorX + dx
@@ -149,6 +158,7 @@ function createCollisionFreeLayout() {
           y2: baseY + lh,
         }
         if (candidate.x1 < 0) continue
+        if (chartW > 0 && candidate.x2 > chartW) continue
         if (!collides(candidate)) {
           placed.push(candidate)
           return {
@@ -165,15 +175,17 @@ function createCollisionFreeLayout() {
       }
     }
 
+    // Fallback — clamp within chart bounds
     const y = 8 + placed.length * ROW_H
-    placed.push({ x1: anchorX - lw / 2, y1: y, x2: anchorX + lw / 2, y2: y + lh })
+    const clampedX = chartW > 0 ? Math.max(lw / 2, Math.min(anchorX, chartW - lw / 2)) : anchorX
+    placed.push({ x1: clampedX - lw / 2, y1: y, x2: clampedX + lw / 2, y2: y + lh })
     return {
-      x: anchorX,
+      x: clampedX,
       y,
       align: 'center' as const,
       verticalAlign: 'top' as const,
       labelLinePoints: [
-        [anchorX, y + lh],
+        [clampedX, y + lh],
         [anchorX, anchorY],
       ],
     }
@@ -193,6 +205,8 @@ export default function MultiLayerChart({
   const isDark = useThemeStore(s => s.isDark)
   const { t } = useTranslation()
   const config = parseConfig(chartConfig)
+  const chartRef = useRef<ReactECharts>(null)
+  const getChartWidth = useCallback(() => chartRef.current?.getEchartsInstance()?.getWidth() ?? 0, [])
 
   // Local visibility state (overrides layer.isVisible for toggling without API call)
   const [visibilityMap, setVisibilityMap] = useState<Record<number, boolean>>(() => {
@@ -450,7 +464,7 @@ export default function MultiLayerChart({
       } : {}),
       series,
       ...(showDataLabels && !isPie ? {
-        labelLayout: createCollisionFreeLayout(),
+        labelLayout: createCollisionFreeLayout(getChartWidth),
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),
@@ -506,6 +520,7 @@ export default function MultiLayerChart({
       {/* Chart */}
       <div className="flex-1 min-h-0">
         <ReactECharts
+          ref={chartRef}
           option={option}
           notMerge={true}
           theme={isDark ? 'dark' : undefined}

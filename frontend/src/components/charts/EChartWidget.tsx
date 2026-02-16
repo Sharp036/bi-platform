@@ -97,7 +97,7 @@ function calcLinearRegression(values: number[]): number[] {
  * using greedy rectangle-packing. All series share the same `placed` array
  * so cross-series collision is handled.
  */
-function createCollisionFreeLayout() {
+function createCollisionFreeLayout(getChartWidth?: () => number) {
   const placed: { x1: number; y1: number; x2: number; y2: number }[] = []
   let lastTs = 0
   const GAP = 4
@@ -128,15 +128,23 @@ function createCollisionFreeLayout() {
     const lw = labelRect.width
     const lh = labelRect.height
     const ROW_H = lh + GAP
+    const chartW = getChartWidth?.() ?? 0
+
+    // For labels near the right edge, try left offsets first; near the left — right first
+    const preferLeft = chartW > 0 && anchorX > chartW * 0.6
 
     // Try rows from top of chart, with horizontal offsets for each row
     for (let row = 0; row < 20; row++) {
       const baseY = 8 + row * ROW_H
-      // Try centered first, then alternating left/right offsets
       const offsets = [0]
       for (let i = 1; i <= 6; i++) {
-        offsets.push(-(lw * 0.5 + GAP) * i)
-        offsets.push((lw * 0.5 + GAP) * i)
+        if (preferLeft) {
+          offsets.push(-(lw * 0.5 + GAP) * i)
+          offsets.push((lw * 0.5 + GAP) * i)
+        } else {
+          offsets.push((lw * 0.5 + GAP) * i)
+          offsets.push(-(lw * 0.5 + GAP) * i)
+        }
       }
       for (const dx of offsets) {
         const cx = anchorX + dx
@@ -147,6 +155,7 @@ function createCollisionFreeLayout() {
           y2: baseY + lh,
         }
         if (candidate.x1 < 0) continue
+        if (chartW > 0 && candidate.x2 > chartW) continue
         if (!collides(candidate)) {
           placed.push(candidate)
           return {
@@ -163,23 +172,24 @@ function createCollisionFreeLayout() {
       }
     }
 
-    // Fallback
+    // Fallback — clamp within chart bounds
     const y = 8 + placed.length * ROW_H
-    placed.push({ x1: anchorX - lw / 2, y1: y, x2: anchorX + lw / 2, y2: y + lh })
+    const clampedX = chartW > 0 ? Math.max(lw / 2, Math.min(anchorX, chartW - lw / 2)) : anchorX
+    placed.push({ x1: clampedX - lw / 2, y1: y, x2: clampedX + lw / 2, y2: y + lh })
     return {
-      x: anchorX,
+      x: clampedX,
       y,
       align: 'center' as const,
       verticalAlign: 'top' as const,
       labelLinePoints: [
-        [anchorX, y + lh],
+        [clampedX, y + lh],
         [anchorX, anchorY],
       ],
     }
   }
 }
 
-function buildOption(data: WidgetData, config: Record<string, unknown>, regressionLabel: string, isDark: boolean) {
+function buildOption(data: WidgetData, config: Record<string, unknown>, regressionLabel: string, isDark: boolean, getChartWidth?: () => number) {
   const chartType = (config.type as string) || 'bar'
   const cols = data.columns || []
   const rows = data.rows || []
@@ -310,7 +320,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
     } : {}),
     series,
     ...(showDataLabels && hasAxis ? {
-      labelLayout: createCollisionFreeLayout(),
+      labelLayout: createCollisionFreeLayout(getChartWidth),
     } : {}),
     ...config.option as object || {},
   }
@@ -320,8 +330,9 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
   const isDark = useThemeStore(s => s.isDark)
   const { t } = useTranslation()
   const config = parseConfig(chartConfig)
-  const option = buildOption(data, config, t('designer.regression_lines'), isDark)
   const chartRef = useRef<ReactECharts>(null)
+  const getChartWidth = () => chartRef.current?.getEchartsInstance()?.getWidth() ?? 0
+  const option = buildOption(data, config, t('designer.regression_lines'), isDark, getChartWidth)
 
   const onEvents = onChartClick ? {
     click: (params: Record<string, unknown>) => {
