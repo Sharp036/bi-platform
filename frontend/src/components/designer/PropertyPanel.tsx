@@ -5,7 +5,7 @@ import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
-import { buildDesignerParameterValues } from '@/utils/designerParameters'
+import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
 import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -62,10 +62,11 @@ export default function PropertyPanel() {
     if (!widget) return
     setLoadingCols(true)
     try {
-      const paramValues = buildDesignerParameterValues(parameters)
+      let paramValues = buildDesignerParameterValues(parameters)
       let res
       // Prefer inline SQL when present, even if stale queryId is still set.
       if (widget.datasourceId && widget.rawSql?.trim()) {
+        paramValues = mergeSqlParameterKeys(widget.rawSql, paramValues)
         res = await queryApi.executeAdHoc({
           datasourceId: widget.datasourceId,
           sql: widget.rawSql,
@@ -73,6 +74,17 @@ export default function PropertyPanel() {
           limit: 1,
         })
       } else if (widget.queryId) {
+        const selectedQuery = queries.find(q => q.id === widget.queryId)
+        if (selectedQuery?.sqlText) {
+          paramValues = mergeSqlParameterKeys(selectedQuery.sqlText, paramValues)
+        } else {
+          try {
+            const fullQuery = await queryApi.get(widget.queryId)
+            paramValues = mergeSqlParameterKeys(fullQuery.sqlText || '', paramValues)
+          } catch {
+            // Ignore fallback fetch errors; execution error will be surfaced below.
+          }
+        }
         res = await queryApi.execute(widget.queryId, paramValues, 1)
       }
       if (res?.columns) {
@@ -83,7 +95,7 @@ export default function PropertyPanel() {
       toast.error(msg || t('common.operation_failed'))
     }
     finally { setLoadingCols(false) }
-  }, [widget?.queryId, widget?.datasourceId, widget?.rawSql, parameters, t])
+  }, [widget?.queryId, widget?.datasourceId, widget?.rawSql, parameters, queries, t])
 
   if (!widget) {
     return (

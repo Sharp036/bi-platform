@@ -55,3 +55,19 @@ export function buildDesignerParameterValues(
 
   return values
 }
+
+export function mergeSqlParameterKeys(
+  sql: string,
+  values: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!sql?.trim()) return values
+  const next = { ...values }
+  const re = /(^|[^:]):([a-zA-Z_][a-zA-Z0-9_]*)/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(sql)) !== null) {
+    const name = (m[2] || '').trim()
+    if (!name) continue
+    if (!(name in next)) next[name] = null
+  }
+  return next
+}

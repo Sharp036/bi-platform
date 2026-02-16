@@ -51,44 +51,53 @@ export default function ParameterDesigner() {
       ) : (
         <div className="space-y-2">
           {parameters.map((p, i) => (
-            <div key={i} className="flex items-center gap-2 bg-white dark:bg-dark-surface-50 rounded-lg p-2 border border-surface-200 dark:border-dark-surface-100">
-              <input
-                value={p.name} onChange={e => updateParam(i, { name: e.target.value })}
-                className="input text-xs flex-1 py-1" placeholder={t('designer.param_name')}
-              />
-              <input
-                value={p.label} onChange={e => updateParam(i, { label: e.target.value })}
-                className="input text-xs flex-1 py-1" placeholder={t('designer.param_label')}
-              />
-              <select
-                value={p.paramType} onChange={e => updateParam(i, { paramType: e.target.value })}
-                className="input text-xs w-28 py-1"
-              >
-                {PARAM_TYPES.map(pt => <option key={pt} value={pt}>{pt}</option>)}
-              </select>
-              <input
-                value={p.defaultValue} onChange={e => updateParam(i, { defaultValue: e.target.value })}
-                className="input text-xs w-24 py-1" placeholder={t('designer.param_default')}
-              />
-              {(p.paramType === 'DATE' || p.paramType === 'DATE_RANGE') && (
-                <select
-                  value={DATE_DEFAULTS.some(d => d.value === p.defaultValue) ? p.defaultValue : ''}
-                  onChange={e => updateParam(i, { defaultValue: e.target.value })}
-                  className="input text-xs w-32 py-1"
-                >
-                  {DATE_DEFAULTS.map(d => <option key={d.value || 'manual'} value={d.value}>{d.label}</option>)}
-                </select>
-              )}
-              <label className="flex items-center gap-1 text-xs text-slate-500 flex-shrink-0">
+            <div key={i} className="bg-white dark:bg-dark-surface-50 rounded-lg p-2 border border-surface-200 dark:border-dark-surface-100 space-y-2">
+              <div className="grid grid-cols-1 gap-2">
                 <input
-                  type="checkbox" checked={p.isRequired}
-                  onChange={e => updateParam(i, { isRequired: e.target.checked })}
+                  value={p.name} onChange={e => updateParam(i, { name: e.target.value })}
+                  className="input text-xs py-1" placeholder={t('designer.param_name')}
                 />
-                {t('designer.param_required')}
-              </label>
-              <button onClick={() => removeParam(i)} className="btn-ghost p-1 text-red-500 flex-shrink-0">
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+                <input
+                  value={p.label} onChange={e => updateParam(i, { label: e.target.value })}
+                  className="input text-xs py-1" placeholder={t('designer.param_label')}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-2">
+                <select
+                  value={p.paramType} onChange={e => updateParam(i, { paramType: e.target.value })}
+                  className="input text-xs py-1"
+                >
+                  {PARAM_TYPES.map(pt => <option key={pt} value={pt}>{pt}</option>)}
+                </select>
+                <input
+                  value={p.defaultValue} onChange={e => updateParam(i, { defaultValue: e.target.value })}
+                  className="input text-xs py-1" placeholder={t('designer.param_default')}
+                />
+                {(p.paramType === 'DATE' || p.paramType === 'DATE_RANGE') && (
+                  <select
+                    value={DATE_DEFAULTS.some(d => d.value === p.defaultValue) ? p.defaultValue : ''}
+                    onChange={e => updateParam(i, { defaultValue: e.target.value })}
+                    className="input text-xs py-1"
+                  >
+                    {DATE_DEFAULTS.map(d => <option key={d.value || 'manual'} value={d.value}>{d.label}</option>)}
+                  </select>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <input
+                    type="checkbox" checked={p.isRequired}
+                    onChange={e => updateParam(i, { isRequired: e.target.checked })}
+                    className="h-3.5 w-3.5"
+                  />
+                  {t('designer.param_required')}
+                </label>
+                <button onClick={() => removeParam(i)} className="btn-ghost p-1 text-red-500">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
