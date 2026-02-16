@@ -222,6 +222,7 @@
   "designer.value_fields": "Значення (вісь Y / серії)",
   "designer.value_fields_hint": "Усі позначені = усі стовпці",
   "designer.regression_lines": "Linear Regression",
+  "charts.regression_short": "Лінійна",
   "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Всі",
   "designer.deselect_all": "Жодного",

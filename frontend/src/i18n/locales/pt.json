@@ -222,6 +222,7 @@
   "designer.value_fields": "Valores (eixo Y / séries)",
   "designer.value_fields_hint": "Todos marcados = todas as colunas",
   "designer.regression_lines": "Linear Regression",
+  "charts.regression_short": "Linear",
   "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Todos",
   "designer.deselect_all": "Nenhum",

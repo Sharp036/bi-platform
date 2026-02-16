@@ -278,7 +278,7 @@ export default function MultiLayerChart({
     const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
     const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
-    const regressionLabel = t('designer.regression_lines')
+    const regressionLabel = t('charts.regression_short', 'Linear')
     const palette = Array.isArray((config.option as Record<string, unknown> | undefined)?.color)
       ? ((config.option as Record<string, unknown>).color as string[])
       : ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']

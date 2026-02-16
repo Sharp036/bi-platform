@@ -222,6 +222,7 @@
   "designer.value_fields": "Nilai (sumbu Y / seri)",
   "designer.value_fields_hint": "Semua dipilih = semua kolom",
   "designer.regression_lines": "Linear Regression",
+  "charts.regression_short": "Linear",
   "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Semua",
   "designer.deselect_all": "Tidak ada",

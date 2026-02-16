@@ -222,6 +222,7 @@
   "designer.value_fields": "Værdier (Y-akse / serier)",
   "designer.value_fields_hint": "Alle markeret = alle kolonner",
   "designer.regression_lines": "Linear Regression",
+  "charts.regression_short": "Linear",
   "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Alle",
   "designer.deselect_all": "Ingen",

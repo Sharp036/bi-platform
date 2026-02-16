@@ -335,7 +335,7 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
   const config = parseConfig(chartConfig)
   const chartRef = useRef<ReactECharts>(null)
   const getChartWidth = () => chartRef.current?.getEchartsInstance()?.getWidth() ?? 0
-  const option = buildOption(data, config, t('designer.regression_lines'), isDark, getChartWidth)
+  const option = buildOption(data, config, t('charts.regression_short', 'Linear'), isDark, getChartWidth)
 
   const onEvents = onChartClick ? {
     click: (params: Record<string, unknown>) => {

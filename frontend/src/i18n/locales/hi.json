@@ -222,6 +222,7 @@
   "designer.value_fields": "मान (Y-अक्ष / श्रृंखला)",
   "designer.value_fields_hint": "सभी चयनित = सभी कॉलम",
   "designer.regression_lines": "Linear Regression",
+  "charts.regression_short": "Linear",
   "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "सभी",
   "designer.deselect_all": "कोई नहीं",

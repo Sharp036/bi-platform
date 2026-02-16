@@ -222,6 +222,7 @@
   "designer.value_fields": "ค่า (แกน Y / ซีรีส์)",
   "designer.value_fields_hint": "เลือกทั้งหมด = ใช้ทุกคอลัมน์",
   "designer.regression_lines": "Linear Regression",
+  "charts.regression_short": "Linear",
   "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "ทั้งหมด",
   "designer.deselect_all": "ไม่มี",
