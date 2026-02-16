@@ -28,14 +28,16 @@ function buildValueFormatter(format: string, currency: string): ((value: number)
   }
 }
 
-function formatLabelValue(v: number, decimals: number, thousandsSep: boolean): string {
+function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): string {
+  const num = Number(v)
+  if (!Number.isFinite(num)) return String(v ?? '')
   if (thousandsSep) {
-    return v.toLocaleString(undefined, {
+    return num.toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     })
   }
-  return v.toFixed(decimals)
+  return num.toFixed(decimals)
 }
 
 function buildLabelFormatter(
@@ -47,7 +49,8 @@ function buildLabelFormatter(
   return (p: { dataIndex: number; value: number }) => {
     const { dataIndex, value } = p
     if (!isVisible(dataIndex)) return ''
-    if (valueFmt) return valueFmt(value)
+    const num = Number(value)
+    if (valueFmt && Number.isFinite(num)) return valueFmt(num)
     return formatLabelValue(value, decimals, thousandsSep)
   }
 }
