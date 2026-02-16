@@ -68,6 +68,28 @@ function wrapLegendText(value: string, lineLen: number, maxLines: number): strin
   return lines.join('\n')
 }
 
+function ensureXAxisLabelsVisible(option: any) {
+  const ensureAxis = (axis: any) => {
+    if (!axis || axis.type !== 'category') return axis
+    const existing = axis.axisLabel || {}
+    return {
+      ...axis,
+      axisLabel: {
+        ...existing,
+        show: true,
+        hideOverlap: false,
+      },
+    }
+  }
+  if (Array.isArray(option?.xAxis)) {
+    return { ...option, xAxis: option.xAxis.map(ensureAxis) }
+  }
+  if (option?.xAxis) {
+    return { ...option, xAxis: ensureAxis(option.xAxis) }
+  }
+  return option
+}
+
 function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): string {
   const num = Number(v)
   if (!Number.isFinite(num)) return String(v ?? '')
@@ -78,6 +100,18 @@ function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): 
     })
   }
   return num.toFixed(decimals)
+}
+
+function formatTooltipValue(
+  raw: unknown,
+  valueFmt: ((value: number) => string) | undefined,
+  decimals: number,
+  thousandsSep: boolean
+): string {
+  const num = Number(raw)
+  if (!Number.isFinite(num)) return String(raw ?? '')
+  if (valueFmt) return valueFmt(num)
+  return formatLabelValue(num, decimals, thousandsSep)
 }
 
 function buildLabelFormatter(
@@ -499,7 +533,7 @@ export default function MultiLayerChart({
     const legendIsRight = showLegend && legendPosition === 'right'
     const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
     const gridBottom = !isPie
-      ? (legendIsBottom ? (xAxisRotation ? 110 : 86) : (xAxisRotation ? 62 : 30))
+      ? (legendIsBottom ? (xAxisRotation ? 170 : 150) : (xAxisRotation ? 62 : 30))
       : 12
 
     const tooltipOpts = tooltipConfig
@@ -513,7 +547,12 @@ export default function MultiLayerChart({
 
     let result = {
       ...tooltipOpts,
-      ...(valueFormatter && !isPie ? { tooltip: { ...((tooltipOpts as any).tooltip || {}), valueFormatter } } : {}),
+      ...(!isPie ? {
+        tooltip: {
+          ...((tooltipOpts as any).tooltip || {}),
+          valueFormatter: (v: unknown) => formatTooltipValue(v, valueFormatter, dataLabelDecimals, dataLabelThousandsSep),
+        },
+      } : {}),
       legend,
       grid: {
         left: legendIsLeft ? legendSidePad : '3%',
@@ -543,7 +582,7 @@ export default function MultiLayerChart({
       result = mergeAnnotationsIntoOption(result, annotations)
     }
 
-    return result
+    return ensureXAxisLabelsVisible(result)
   }, [data, config, layersWithVisibility, layerData, highlightField, highlightValue, annotations, tooltipConfig, isDark])
 
   const handleClick = useCallback((params: any) => {

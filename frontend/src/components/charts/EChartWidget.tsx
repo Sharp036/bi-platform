@@ -76,6 +76,28 @@ function wrapLegendText(value: string, lineLen: number, maxLines: number): strin
   return lines.join('\n')
 }
 
+function ensureXAxisLabelsVisible(option: any) {
+  const ensureAxis = (axis: any) => {
+    if (!axis || axis.type !== 'category') return axis
+    const existing = axis.axisLabel || {}
+    return {
+      ...axis,
+      axisLabel: {
+        ...existing,
+        show: true,
+        hideOverlap: false,
+      },
+    }
+  }
+  if (Array.isArray(option?.xAxis)) {
+    return { ...option, xAxis: option.xAxis.map(ensureAxis) }
+  }
+  if (option?.xAxis) {
+    return { ...option, xAxis: ensureAxis(option.xAxis) }
+  }
+  return option
+}
+
 function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): string {
   const num = Number(v)
   if (!Number.isFinite(num)) return String(v ?? '')
@@ -86,6 +108,18 @@ function formatLabelValue(v: unknown, decimals: number, thousandsSep: boolean): 
     })
   }
   return num.toFixed(decimals)
+}
+
+function formatTooltipValue(
+  raw: unknown,
+  valueFmt: ((value: number) => string) | undefined,
+  decimals: number,
+  thousandsSep: boolean
+): string {
+  const num = Number(raw)
+  if (!Number.isFinite(num)) return String(raw ?? '')
+  if (valueFmt) return valueFmt(num)
+  return formatLabelValue(num, decimals, thousandsSep)
 }
 
 function buildLabelFormatter(
@@ -352,14 +386,14 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const legendIsRight = showLegend && legendPosition === 'right'
   const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
   const gridBottom = hasAxis
-    ? (legendIsBottom ? (xAxisRotation ? 110 : 86) : (xAxisRotation ? 62 : 30))
+    ? (legendIsBottom ? (xAxisRotation ? 170 : 150) : (xAxisRotation ? 62 : 30))
     : 12
 
-  return {
+  const base = {
     tooltip: {
       trigger: chartType === 'pie' ? 'item' : 'axis',
-      ...(hasAxis && valueFormatter ? {
-        valueFormatter: (v: number) => valueFormatter(v),
+      ...(hasAxis ? {
+        valueFormatter: (v: unknown) => formatTooltipValue(v, valueFormatter, dataLabelDecimals, dataLabelThousandsSep),
       } : {}),
     },
     legend,
@@ -387,8 +421,13 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
     ...(showDataLabels && hasAxis ? {
       labelLayout: createCollisionFreeLayout(getChartWidth),
     } : {}),
+  }
+
+  const merged = {
+    ...base,
     ...config.option as object || {},
   }
+  return ensureXAxisLabelsVisible(merged)
 }
 
 export default function EChartWidget({ data, chartConfig, title, onChartClick, clickable }: Props) {
