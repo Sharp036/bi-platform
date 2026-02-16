@@ -448,6 +448,13 @@ export default function PropertyPanel() {
                             placeholder={t('designer.label_count_placeholder')}
                           />
                         )}
+                        <input
+                          type="number" min={1} max={12}
+                          value={cc.dataLabelLevels as number || 3}
+                          onChange={e => update({ chartConfig: { ...cc, dataLabelLevels: Number(e.target.value) || 3 } })}
+                          className="input text-sm"
+                          placeholder={t('designer.label_levels_placeholder')}
+                        />
                         <select
                           value={String(cc.dataLabelRotation || 0)}
                           onChange={e => update({ chartConfig: { ...cc, dataLabelRotation: Number(e.target.value) } })}

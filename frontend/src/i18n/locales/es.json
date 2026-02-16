@@ -274,6 +274,7 @@
   "designer.label_mode.last_n": "Last N",
   "designer.label_mode.min_max": "Min & Max",
   "designer.label_count_placeholder": "Count",
+  "designer.label_levels_placeholder": "Label levels",
   "designer.label_rotation.horizontal": "Labels: Horizontal (0°)",
   "designer.label_rotation.angled_up": "Labels: Angled up (-45°)",
   "designer.label_rotation.angled_down": "Labels: Angled down (45°)",

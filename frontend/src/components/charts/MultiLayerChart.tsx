@@ -84,7 +84,14 @@ interface Props {
   tooltipConfig?: TooltipConfigItem
 }
 
-function buildStaggeredLabelLayout(visibleIndices: number[], mode: string, staggerCount: number, totalPoints: number) {
+function buildStaggeredLabelLayout(
+  visibleIndices: number[],
+  mode: string,
+  staggerCount: number,
+  totalPoints: number,
+  seriesIndex: number,
+  totalSeries: number
+) {
   const rowSpacing = 18
   const baseY = 8
   const visibleOrder = new Map<number, number>()
@@ -94,11 +101,12 @@ function buildStaggeredLabelLayout(visibleIndices: number[], mode: string, stagg
     const { rect, labelRect, dataIndex } = params
     if (!rect || !labelRect || labelRect.width < 1) return {}
     const order = visibleOrder.get(dataIndex) ?? dataIndex
-    const row = order % staggerCount
+    const compositeOrder = order * Math.max(1, totalSeries) + Math.max(0, seriesIndex)
+    const row = compositeOrder % staggerCount
     const y = baseY + row * rowSpacing
     const midX = rect.x + rect.width / 2
     if (useSidePacking) {
-      const column = Math.floor(order / staggerCount)
+      const column = Math.floor(compositeOrder / staggerCount)
       const sideBase = 56
       const sideStep = 76
       const side =
@@ -210,6 +218,7 @@ export default function MultiLayerChart({
     const showDataLabels = !!config.showDataLabels
     const dataLabelMode = (config.dataLabelMode as string) || 'all'
     const dataLabelCount = Number(config.dataLabelCount) || 3
+    const dataLabelLevels = Math.max(1, Number(config.dataLabelLevels) || 3)
     const dataLabelRotation = Number(config.dataLabelRotation) || 0
     const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
@@ -220,7 +229,7 @@ export default function MultiLayerChart({
       const seriesCols = Array.isArray(configuredValues)
         ? configuredValues.filter(f => cols.includes(f))
         : cols.filter(c => c !== categoryCol)
-      seriesCols.forEach(col => {
+      seriesCols.forEach((col, seriesIndex) => {
         const colValues = rows.map(r => Number(r[col] ?? 0))
         const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
         const visibleLabelIndices = rows
@@ -255,8 +264,10 @@ export default function MultiLayerChart({
               labelLayout: buildStaggeredLabelLayout(
                 visibleLabelIndices,
                 dataLabelMode,
-                visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3,
-                rows.length
+                dataLabelLevels,
+                rows.length,
+                seriesIndex,
+                seriesCols.length
               ),
             } : {}),
           })
@@ -366,7 +377,7 @@ export default function MultiLayerChart({
     const visibleLabelCount = dataLabelMode === 'all' ? rows.length
       : dataLabelMode === 'min_max' ? 2
       : Math.min(dataLabelCount, rows.length)
-    const staggerRows = visibleLabelCount > 20 ? 6 : visibleLabelCount > 8 ? 4 : 3
+    const staggerRows = Math.max(1, dataLabelLevels)
 
     const tooltipOpts = tooltipConfig
       ? buildRichTooltip(tooltipConfig)

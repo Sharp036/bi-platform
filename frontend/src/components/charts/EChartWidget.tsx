@@ -83,7 +83,9 @@ function buildSmartLabelLayout(
   visibleIndices: number[],
   mode: string,
   staggerCount: number,
-  totalPoints: number
+  totalPoints: number,
+  seriesIndex: number,
+  totalSeries: number
 ) {
   const rowSpacing = 18
   const baseY = 8
@@ -95,13 +97,14 @@ function buildSmartLabelLayout(
     const { rect, labelRect, dataIndex } = params
     if (!rect || !labelRect || labelRect.width < 1) return {}
     const order = visibleOrder.get(dataIndex) ?? dataIndex
-    const row = order % staggerCount
+    const compositeOrder = order * Math.max(1, totalSeries) + Math.max(0, seriesIndex)
+    const row = compositeOrder % staggerCount
     const y = baseY + row * rowSpacing
     const anchorX = rect.x + rect.width / 2
 
     // For selective modes, push labels to the side free space (like callouts).
     if (useSidePacking) {
-      const column = Math.floor(order / staggerCount)
+      const column = Math.floor(compositeOrder / staggerCount)
       const sideBase = 56
       const sideStep = 76
       const side =
@@ -155,12 +158,13 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const showDataLabels = !!config.showDataLabels
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
   const dataLabelCount = Number(config.dataLabelCount) || 3
+  const dataLabelLevels = Math.max(1, Number(config.dataLabelLevels) || 3)
   const dataLabelRotation = Number(config.dataLabelRotation) || 0
   const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
   const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
 
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
-  const series: any[] = seriesCols.map(col => {
+  const series: any[] = seriesCols.map((col, seriesIndex) => {
     const colValues = rows.map(r => Number(r[col] ?? 0))
     const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
     const visibleLabelIndices = rows
@@ -200,8 +204,10 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
           labelLayout: buildSmartLabelLayout(
             visibleLabelIndices,
             dataLabelMode,
-            visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3,
-            rows.length
+            dataLabelLevels,
+            rows.length,
+            seriesIndex,
+            seriesCols.length
           ),
         } : {}),
       } : {}),
@@ -232,7 +238,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const visibleLabelCount = dataLabelMode === 'all' ? rows.length
     : dataLabelMode === 'min_max' ? 2
     : Math.min(dataLabelCount, rows.length)
-  const staggerRows = visibleLabelCount > 20 ? 6 : visibleLabelCount > 8 ? 4 : 3
+  const staggerRows = Math.max(1, dataLabelLevels)
 
   return {
     tooltip: {
