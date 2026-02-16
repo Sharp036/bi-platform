@@ -269,6 +269,7 @@
   "designer.rotation.vertical": "Vertical (90°)",
   "designer.data_labels": "Etiquetas de datos",
   "designer.show_data_labels": "Mostrar valores en el gráfico",
+  "designer.data_label_boxed": "Etiquetas con borde de color",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

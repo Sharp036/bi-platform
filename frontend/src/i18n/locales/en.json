@@ -277,6 +277,7 @@
   "designer.rotation.vertical": "Vertical (90°)",
   "designer.data_labels": "Data Labels",
   "designer.show_data_labels": "Show values on chart",
+  "designer.data_label_boxed": "Boxed labels (colored border)",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

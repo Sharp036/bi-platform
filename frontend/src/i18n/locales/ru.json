@@ -278,6 +278,7 @@
   "designer.rotation.vertical": "Вертикально (90°)",
   "designer.data_labels": "Подписи данных",
   "designer.show_data_labels": "Показывать значения на графике",
+  "designer.data_label_boxed": "Подписи в цветной рамке",
   "designer.label_mode.all": "Все",
   "designer.label_mode.first_n": "Первые N",
   "designer.label_mode.last_n": "Последние N",

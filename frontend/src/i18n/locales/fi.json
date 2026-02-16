@@ -268,6 +268,7 @@
   "designer.rotation.vertical": "Pystysuora (90°)",
   "designer.data_labels": "Tietoselitteet",
   "designer.show_data_labels": "Näytä arvot kaaviossa",
+  "designer.data_label_boxed": "Merkinnät värikehyksessä",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

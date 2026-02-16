@@ -85,73 +85,6 @@ interface Props {
   tooltipConfig?: TooltipConfigItem
 }
 
-function buildStaggeredLabelLayout(
-  visibleIndices: number[],
-  mode: string,
-  staggerCount: number,
-  totalPoints: number,
-  seriesIndex: number,
-  totalSeries: number,
-  seriesColor?: string
-) {
-  const rowSpacing = 18
-  const baseY = 8
-  const visibleOrder = new Map<number, number>()
-  visibleIndices.forEach((idx, order) => visibleOrder.set(idx, order))
-  const useSidePacking = mode === 'last' || mode === 'first' || mode === 'min_max'
-  return (params: { rect?: { x: number; y: number; width: number }; labelRect?: { width: number; height: number }; dataIndex: number }) => {
-    const { rect, labelRect, dataIndex } = params
-    if (!rect || !labelRect || labelRect.width < 1) return {}
-    const order = visibleOrder.get(dataIndex) ?? dataIndex
-    const compositeOrder = order * Math.max(1, totalSeries) + Math.max(0, seriesIndex)
-    const row = compositeOrder % staggerCount
-    const y = baseY + row * rowSpacing
-    const midX = rect.x + rect.width / 2
-    if (useSidePacking) {
-      const dayRankFromRight = Math.max(0, (totalPoints - 1) - dataIndex)
-      const dayRankFromLeft = Math.max(0, dataIndex)
-      const dayStep = 22
-      const seriesStep = 8
-      const side =
-        mode === 'last' ? -1 :
-          mode === 'first' ? 1 :
-            (dataIndex > totalPoints / 2 ? -1 : 1)
-      const edgeShift =
-        mode === 'last' ? dayRankFromRight * dayStep :
-          mode === 'first' ? dayRankFromLeft * dayStep :
-            Math.floor(compositeOrder / staggerCount) * dayStep
-      const x = midX + side * (edgeShift + (Math.max(0, seriesIndex) * seriesStep))
-      return {
-        x,
-        y,
-        align: side > 0 ? 'left' : 'right',
-        verticalAlign: 'top',
-        labelLinePoints: [
-          [x, y + (labelRect.height || 12)],
-          [midX + side * 10, y + (labelRect.height || 12)],
-          [midX, rect.y],
-        ],
-        labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
-      }
-    }
-    return {
-      x: midX,
-      y,
-      align: 'center',
-      verticalAlign: 'top',
-      labelLinePoints: [
-        [midX, y + (labelRect.height || 12)],
-        [midX, rect.y],
-      ],
-      labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
-    }
-  }
-}
-
-function baseTopPx(staggerRows: number): number {
-  return 8 + staggerRows * 16 + 10
-}
-
 function parseConfig(raw?: string): Record<string, unknown> {
   if (!raw) return {}
   try { return JSON.parse(raw) } catch { return {} }
@@ -227,14 +160,16 @@ export default function MultiLayerChart({
     const showDataLabels = !!config.showDataLabels
     const dataLabelMode = (config.dataLabelMode as string) || 'all'
     const dataLabelCount = Number(config.dataLabelCount) || 3
-    const dataLabelLevels = Math.max(1, Number(config.dataLabelLevels) || 3)
     const dataLabelRotation = Number(config.dataLabelRotation) || 0
+    const dataLabelBoxed = !!config.dataLabelBoxed
     const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
     const regressionLabel = t('designer.regression_lines')
     const palette = Array.isArray((config.option as Record<string, unknown> | undefined)?.color)
       ? ((config.option as Record<string, unknown>).color as string[])
       : ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
+
+    const labelBg = isDark ? 'rgba(30,30,46,0.85)' : 'rgba(255,255,255,0.85)'
 
     if (layersWithVisibility.length === 0) {
       // Use configured valueFields or fall back to all non-category columns
@@ -246,9 +181,6 @@ export default function MultiLayerChart({
         const seriesColor = palette[seriesIndex % palette.length]
         const colValues = rows.map(r => Number(r[col] ?? 0))
         const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
-        const visibleLabelIndices = rows
-          .map((_, idx) => idx)
-          .filter(idx => isLabelVisible(idx))
         if (chartType === 'pie') {
           series.push({
             name: col, type: 'pie', radius: ['40%', '70%'],
@@ -276,17 +208,16 @@ export default function MultiLayerChart({
                 rotate: dataLabelRotation || undefined,
                 fontSize: 10,
                 formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
+                ...(dataLabelBoxed ? {
+                  color: seriesColor,
+                  borderColor: seriesColor,
+                  borderWidth: 1,
+                  borderRadius: 3,
+                  padding: [2, 6],
+                  backgroundColor: labelBg,
+                } : {}),
               },
               labelLine: { show: true, lineStyle: { color: seriesColor, width: 1.5, opacity: 0.95 } },
-              labelLayout: buildStaggeredLabelLayout(
-                visibleLabelIndices,
-                dataLabelMode,
-                dataLabelLevels,
-                rows.length,
-                seriesIndex,
-                seriesCols.length,
-                seriesColor
-              ),
             } : {}),
           })
         }
@@ -394,12 +325,6 @@ export default function MultiLayerChart({
 
     const isPie = chartType === 'pie' || layersWithVisibility.some(l => l.chartType === 'pie')
 
-    // Stagger row count for label layout
-    const visibleLabelCount = dataLabelMode === 'all' ? rows.length
-      : dataLabelMode === 'min_max' ? 2
-      : Math.min(dataLabelCount, rows.length)
-    const staggerRows = Math.max(1, dataLabelLevels)
-
     const tooltipOpts = tooltipConfig
       ? buildRichTooltip(tooltipConfig)
       : { tooltip: { trigger: isPie ? 'item' : 'axis', confine: true } }
@@ -416,7 +341,7 @@ export default function MultiLayerChart({
       grid: {
         left: '3%',
         right: hasRightAxis ? '8%' : '4%',
-        top: showDataLabels && !isPie ? baseTopPx(staggerRows) : undefined,
+        top: showDataLabels && !isPie ? 80 : undefined,
         bottom: series.length > 1 ? '15%' : '3%',
         containLabel: true,
       },
@@ -428,7 +353,7 @@ export default function MultiLayerChart({
         yAxis,
       } : {}),
       series,
-      ...(showDataLabels && !isPie && dataLabelMode === 'all' ? {
+      ...(showDataLabels && !isPie ? {
         labelLayout: { moveOverlap: 'shiftY' },
       } : {}),
       ...(emphasisConfig || {}),
@@ -440,7 +365,7 @@ export default function MultiLayerChart({
     }
 
     return result
-  }, [data, config, layersWithVisibility, layerData, highlightField, highlightValue, annotations, tooltipConfig])
+  }, [data, config, layersWithVisibility, layerData, highlightField, highlightValue, annotations, tooltipConfig, isDark])
 
   const handleClick = useCallback((params: any) => {
     if (!onChartClick) return

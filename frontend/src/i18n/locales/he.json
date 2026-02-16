@@ -268,6 +268,7 @@
   "designer.rotation.vertical": "אנכי (90°)",
   "designer.data_labels": "תוויות נתונים",
   "designer.show_data_labels": "הצג ערכים בתרשים",
+  "designer.data_label_boxed": "תוויות במסגרת צבעונית",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

@@ -269,6 +269,7 @@
   "designer.rotation.vertical": "Vertikal (90°)",
   "designer.data_labels": "Datenbeschriftungen",
   "designer.show_data_labels": "Werte im Diagramm anzeigen",
+  "designer.data_label_boxed": "Labels in farbigem Rahmen",
   "designer.label_mode.all": "All",
   "designer.label_mode.first_n": "First N",
   "designer.label_mode.last_n": "Last N",

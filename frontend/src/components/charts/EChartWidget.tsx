@@ -80,74 +80,7 @@ function calcLinearRegression(values: number[]): number[] {
   return values.map((_, i) => slope * i + intercept)
 }
 
-function buildSmartLabelLayout(
-  visibleIndices: number[],
-  mode: string,
-  staggerCount: number,
-  totalPoints: number,
-  seriesIndex: number,
-  totalSeries: number,
-  seriesColor?: string
-) {
-  const rowSpacing = 18
-  const baseY = 8
-  const visibleOrder = new Map<number, number>()
-  visibleIndices.forEach((idx, order) => visibleOrder.set(idx, order))
-  const useSidePacking = mode === 'last' || mode === 'first' || mode === 'min_max'
-
-  return (params: { rect?: { x: number; y: number; width: number }; labelRect?: { width: number; height: number }; dataIndex: number }) => {
-    const { rect, labelRect, dataIndex } = params
-    if (!rect || !labelRect || labelRect.width < 1) return {}
-    const order = visibleOrder.get(dataIndex) ?? dataIndex
-    const compositeOrder = order * Math.max(1, totalSeries) + Math.max(0, seriesIndex)
-    const row = compositeOrder % staggerCount
-    const y = baseY + row * rowSpacing
-    const anchorX = rect.x + rect.width / 2
-
-    // For selective modes, move callouts gradually from chart edge to reduce overlap.
-    if (useSidePacking) {
-      const dayRankFromRight = Math.max(0, (totalPoints - 1) - dataIndex)
-      const dayRankFromLeft = Math.max(0, dataIndex)
-      const dayStep = 22
-      const seriesStep = 8
-      const side =
-        mode === 'last' ? -1 :
-          mode === 'first' ? 1 :
-            (dataIndex > totalPoints / 2 ? -1 : 1)
-      const edgeShift =
-        mode === 'last' ? dayRankFromRight * dayStep :
-          mode === 'first' ? dayRankFromLeft * dayStep :
-            Math.floor(compositeOrder / staggerCount) * dayStep
-      const x = anchorX + side * (edgeShift + (Math.max(0, seriesIndex) * seriesStep))
-      return {
-        x,
-        y,
-        align: side > 0 ? 'left' : 'right',
-        verticalAlign: 'top',
-        labelLinePoints: [
-          [x, y + (labelRect.height || 12)],
-          [anchorX + side * 10, y + (labelRect.height || 12)],
-          [anchorX, rect.y],
-        ],
-        labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
-      }
-    }
-
-    return {
-      x: anchorX,
-      y,
-      align: 'center',
-      verticalAlign: 'top',
-      labelLinePoints: [
-        [anchorX, y + (labelRect.height || 12)],
-        [anchorX, rect.y],
-      ],
-      labelLineStyle: { color: seriesColor || '#bbb', width: 1.5, opacity: 0.95 },
-    }
-  }
-}
-
-function buildOption(data: WidgetData, config: Record<string, unknown>, regressionLabel: string) {
+function buildOption(data: WidgetData, config: Record<string, unknown>, regressionLabel: string, isDark: boolean) {
   const chartType = (config.type as string) || 'bar'
   const cols = data.columns || []
   const rows = data.rows || []
@@ -166,22 +99,21 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const showDataLabels = !!config.showDataLabels
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
   const dataLabelCount = Number(config.dataLabelCount) || 3
-  const dataLabelLevels = Math.max(1, Number(config.dataLabelLevels) || 3)
   const dataLabelRotation = Number(config.dataLabelRotation) || 0
+  const dataLabelBoxed = !!config.dataLabelBoxed
   const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
   const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
   const palette = Array.isArray((config.option as Record<string, unknown> | undefined)?.color)
     ? ((config.option as Record<string, unknown>).color as string[])
     : ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
 
+  const labelBg = isDark ? 'rgba(30,30,46,0.85)' : 'rgba(255,255,255,0.85)'
+
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
   const series: any[] = seriesCols.map((col, seriesIndex) => {
     const seriesColor = palette[seriesIndex % palette.length]
     const colValues = rows.map(r => Number(r[col] ?? 0))
     const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
-    const visibleLabelIndices = rows
-      .map((_, idx) => idx)
-      .filter(idx => isLabelVisible(idx))
     return {
       name: col,
       type: chartType,
@@ -213,20 +145,17 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
           formatter: chartType === 'pie'
             ? undefined
             : buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
+          ...(dataLabelBoxed && chartType !== 'pie' ? {
+            color: seriesColor,
+            borderColor: seriesColor,
+            borderWidth: 1,
+            borderRadius: 3,
+            padding: [2, 6],
+            backgroundColor: labelBg,
+          } : {}),
         },
         ...(chartType !== 'pie' ? {
           labelLine: { show: true, lineStyle: { color: seriesColor, width: 1.5, opacity: 0.95 } },
-        } : {}),
-        ...(chartType !== 'pie' ? {
-          labelLayout: buildSmartLabelLayout(
-            visibleLabelIndices,
-            dataLabelMode,
-            dataLabelLevels,
-            rows.length,
-            seriesIndex,
-            seriesCols.length,
-            seriesColor
-          ),
         } : {}),
       } : {}),
     }
@@ -254,12 +183,6 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
 
   const hasAxis = !['pie', 'radar', 'funnel', 'gauge', 'treemap', 'sankey'].includes(chartType)
 
-  // Count how many labels will be visible for stagger row calculation
-  const visibleLabelCount = dataLabelMode === 'all' ? rows.length
-    : dataLabelMode === 'min_max' ? 2
-    : Math.min(dataLabelCount, rows.length)
-  const staggerRows = Math.max(1, dataLabelLevels)
-
   return {
     tooltip: {
       trigger: chartType === 'pie' ? 'item' : 'axis',
@@ -270,7 +193,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
     legend: seriesCols.length > 1 ? { bottom: 0 } : undefined,
     grid: {
       left: '3%', right: '4%',
-      top: showDataLabels && hasAxis ? (baseTopPx(staggerRows)) : undefined,
+      top: showDataLabels && hasAxis ? 80 : undefined,
       bottom: seriesCols.length > 1 ? '15%' : '3%',
       containLabel: true,
     },
@@ -286,22 +209,18 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
       },
     } : {}),
     series,
-    ...(showDataLabels && hasAxis && dataLabelMode === 'all' ? {
+    ...(showDataLabels && hasAxis ? {
       labelLayout: { moveOverlap: 'shiftY' },
     } : {}),
     ...config.option as object || {},
   }
 }
 
-function baseTopPx(staggerRows: number): number {
-  return 8 + staggerRows * 16 + 10
-}
-
 export default function EChartWidget({ data, chartConfig, title, onChartClick, clickable }: Props) {
   const isDark = useThemeStore(s => s.isDark)
   const { t } = useTranslation()
   const config = parseConfig(chartConfig)
-  const option = buildOption(data, config, t('designer.regression_lines'))
+  const option = buildOption(data, config, t('designer.regression_lines'), isDark)
   const chartRef = useRef<ReactECharts>(null)
 
   const onEvents = onChartClick ? {
