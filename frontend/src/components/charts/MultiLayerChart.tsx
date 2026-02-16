@@ -50,6 +50,27 @@ function buildLabelVisibility(
   }
 }
 
+function calcLinearRegression(values: number[]): number[] {
+  const n = values.length
+  if (n <= 1) return [...values]
+  let sumX = 0
+  let sumY = 0
+  let sumXY = 0
+  let sumXX = 0
+  for (let i = 0; i < n; i++) {
+    const x = i
+    const y = Number(values[i] ?? 0)
+    sumX += x
+    sumY += y
+    sumXY += x * y
+    sumXX += x * x
+  }
+  const denom = (n * sumXX) - (sumX * sumX)
+  const slope = denom === 0 ? 0 : ((n * sumXY) - (sumX * sumY)) / denom
+  const intercept = (sumY - slope * sumX) / n
+  return values.map((_, i) => slope * i + intercept)
+}
+
 interface Props {
   data: WidgetData
   chartConfig?: string
@@ -63,15 +84,34 @@ interface Props {
   tooltipConfig?: TooltipConfigItem
 }
 
-function buildStaggeredLabelLayout(staggerCount: number) {
+function buildStaggeredLabelLayout(visibleIndices: number[], mode: string, staggerCount: number) {
   const rowSpacing = 16
   const baseY = 8
+  const visibleOrder = new Map<number, number>()
+  visibleIndices.forEach((idx, order) => visibleOrder.set(idx, order))
+  const useSidePacking = mode === 'last' || mode === 'first' || mode === 'min_max'
   return (params: { rect?: { x: number; y: number; width: number }; labelRect?: { width: number; height: number }; dataIndex: number }) => {
     const { rect, labelRect, dataIndex } = params
     if (!rect || !labelRect || labelRect.width < 1) return {}
-    const row = dataIndex % staggerCount
+    const order = visibleOrder.get(dataIndex) ?? dataIndex
+    const row = order % staggerCount
     const y = baseY + row * rowSpacing
     const midX = rect.x + rect.width / 2
+    if (useSidePacking) {
+      const sideShift = 52 + Math.floor(order / staggerCount) * 22
+      const x = midX + sideShift
+      return {
+        x,
+        y,
+        align: 'left',
+        verticalAlign: 'top',
+        labelLinePoints: [
+          [x, y + (labelRect.height || 12)],
+          [midX + 10, y + (labelRect.height || 12)],
+          [midX, rect.y],
+        ],
+      }
+    }
     return {
       x: midX,
       y,
@@ -164,6 +204,7 @@ export default function MultiLayerChart({
     const dataLabelMode = (config.dataLabelMode as string) || 'all'
     const dataLabelCount = Number(config.dataLabelCount) || 3
     const dataLabelRotation = Number(config.dataLabelRotation) || 0
+    const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
 
     if (layersWithVisibility.length === 0) {
@@ -175,6 +216,9 @@ export default function MultiLayerChart({
       seriesCols.forEach(col => {
         const colValues = rows.map(r => Number(r[col] ?? 0))
         const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
+        const visibleLabelIndices = rows
+          .map((_, idx) => idx)
+          .filter(idx => isLabelVisible(idx))
         if (chartType === 'pie') {
           series.push({
             name: col, type: 'pie', radius: ['40%', '70%'],
@@ -201,10 +245,30 @@ export default function MultiLayerChart({
                 formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, valueFormatter),
               },
               labelLine: { show: true, lineStyle: { color: '#bbb', width: 1 } },
+              labelLayout: buildStaggeredLabelLayout(
+                visibleLabelIndices,
+                dataLabelMode,
+                visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3
+              ),
             } : {}),
           })
         }
       })
+      if (chartType !== 'pie' && regressionFields.length > 0) {
+        seriesCols.forEach(col => {
+          if (!regressionFields.includes(col)) return
+          series.push({
+            name: `Linear (${col})`,
+            type: 'line',
+            data: calcLinearRegression(rows.map(r => Number(r[col] ?? 0))),
+            symbol: 'none',
+            smooth: false,
+            lineStyle: { type: 'dashed', width: 2, opacity: 0.95 },
+            emphasis: { disabled: true },
+            silent: true,
+          })
+        })
+      }
     } else {
       // Layer-based series
       layersWithVisibility.forEach((layer) => {
@@ -253,6 +317,25 @@ export default function MultiLayerChart({
 
         series.push(s)
       })
+      if (regressionFields.length > 0) {
+        const baseSeries = series.filter(s => Array.isArray(s?.data))
+        baseSeries.forEach((s: any) => {
+          const seriesName = String(s.name || '')
+          if (!regressionFields.includes(seriesName)) return
+          const vals = (s.data as any[]).map(v => Number(typeof v === 'object' ? v?.value : v) || 0)
+          series.push({
+            name: `Linear (${seriesName})`,
+            type: 'line',
+            data: calcLinearRegression(vals),
+            symbol: 'none',
+            smooth: false,
+            yAxisIndex: s.yAxisIndex || 0,
+            lineStyle: { type: 'dashed', width: 2, opacity: 0.95, color: s.lineStyle?.color || s.itemStyle?.color },
+            emphasis: { disabled: true },
+            silent: true,
+          })
+        })
+      }
     }
 
     // Build yAxis
@@ -306,7 +389,7 @@ export default function MultiLayerChart({
       } : {}),
       series,
       ...(showDataLabels && !isPie ? {
-        labelLayout: buildStaggeredLabelLayout(staggerRows),
+        labelLayout: { moveOverlap: 'shiftY' },
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),

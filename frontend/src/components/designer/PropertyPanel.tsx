@@ -251,6 +251,7 @@ export default function PropertyPanel() {
             {widget.widgetType === 'CHART' && (() => {
               const catField = cc.categoryField as string || ''
               const valFields = cc.valueFields as string[] || []
+              const regressionFields = cc.regressionFields as string[] || []
               const allNonCat = availableCols.filter(c => c !== (catField || availableCols[0]))
               const isAllSelected = !Array.isArray(cc.valueFields)
               const effectiveFields = isAllSelected ? allNonCat : valFields
@@ -266,6 +267,14 @@ export default function PropertyPanel() {
                 } else {
                   update({ chartConfig: { ...cc, valueFields: next } })
                 }
+              }
+
+              const handleToggleRegression = (col: string) => {
+                const current = Array.isArray(regressionFields) ? [...regressionFields] : []
+                const next = current.includes(col)
+                  ? current.filter(c => c !== col)
+                  : [...current, col]
+                update({ chartConfig: { ...cc, regressionFields: next } })
               }
 
               return (
@@ -341,6 +350,23 @@ export default function PropertyPanel() {
                           ))}
                         </div>
                         <p className="text-[10px] text-slate-400 mt-1">{t('designer.value_fields_hint')}</p>
+                      </Field>
+
+                      <Field label={t('designer.regression_lines')}>
+                        <div className="space-y-1 max-h-28 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+                          {effectiveFields.map(col => (
+                            <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
+                              <input
+                                type="checkbox"
+                                checked={Array.isArray(regressionFields) && regressionFields.includes(col)}
+                                onChange={() => handleToggleRegression(col)}
+                                className="rounded border-slate-300"
+                              />
+                              {col}
+                            </label>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">{t('designer.regression_lines_hint')}</p>
                       </Field>
                     </>
                   )}

@@ -58,23 +58,71 @@ function buildLabelVisibility(
   }
 }
 
-function buildStaggeredLabelLayout(staggerCount: number) {
+function calcLinearRegression(values: number[]): number[] {
+  const n = values.length
+  if (n <= 1) return [...values]
+  let sumX = 0
+  let sumY = 0
+  let sumXY = 0
+  let sumXX = 0
+  for (let i = 0; i < n; i++) {
+    const x = i
+    const y = Number(values[i] ?? 0)
+    sumX += x
+    sumY += y
+    sumXY += x * y
+    sumXX += x * x
+  }
+  const denom = (n * sumXX) - (sumX * sumX)
+  const slope = denom === 0 ? 0 : ((n * sumXY) - (sumX * sumY)) / denom
+  const intercept = (sumY - slope * sumX) / n
+  return values.map((_, i) => slope * i + intercept)
+}
+
+function buildSmartLabelLayout(
+  visibleIndices: number[],
+  mode: string,
+  staggerCount: number
+) {
   const rowSpacing = 16
   const baseY = 8
+  const visibleOrder = new Map<number, number>()
+  visibleIndices.forEach((idx, order) => visibleOrder.set(idx, order))
+  const useSidePacking = mode === 'last' || mode === 'first' || mode === 'min_max'
+
   return (params: { rect?: { x: number; y: number; width: number }; labelRect?: { width: number; height: number }; dataIndex: number }) => {
     const { rect, labelRect, dataIndex } = params
     if (!rect || !labelRect || labelRect.width < 1) return {}
-    const row = dataIndex % staggerCount
+    const order = visibleOrder.get(dataIndex) ?? dataIndex
+    const row = order % staggerCount
     const y = baseY + row * rowSpacing
-    const midX = rect.x + rect.width / 2
+    const anchorX = rect.x + rect.width / 2
+
+    // For selective modes, push labels to the side free space (like callouts).
+    if (useSidePacking) {
+      const sideShift = 52 + Math.floor(order / staggerCount) * 22
+      const x = anchorX + sideShift
+      return {
+        x,
+        y,
+        align: 'left',
+        verticalAlign: 'top',
+        labelLinePoints: [
+          [x, y + (labelRect.height || 12)],
+          [anchorX + 10, y + (labelRect.height || 12)],
+          [anchorX, rect.y],
+        ],
+      }
+    }
+
     return {
-      x: midX,
+      x: anchorX,
       y,
       align: 'center',
       verticalAlign: 'top',
       labelLinePoints: [
-        [midX, y + (labelRect.height || 12)],
-        [midX, rect.y],
+        [anchorX, y + (labelRect.height || 12)],
+        [anchorX, rect.y],
       ],
     }
   }
@@ -100,12 +148,16 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
   const dataLabelCount = Number(config.dataLabelCount) || 3
   const dataLabelRotation = Number(config.dataLabelRotation) || 0
+  const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
   const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
 
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
-  const series = seriesCols.map(col => {
+  const series: any[] = seriesCols.map(col => {
     const colValues = rows.map(r => Number(r[col] ?? 0))
     const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
+    const visibleLabelIndices = rows
+      .map((_, idx) => idx)
+      .filter(idx => isLabelVisible(idx))
     return {
       name: col,
       type: chartType,
@@ -136,9 +188,30 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
         ...(chartType !== 'pie' ? {
           labelLine: { show: true, lineStyle: { color: '#bbb', width: 1 } },
         } : {}),
+        ...(chartType !== 'pie' ? {
+          labelLayout: buildSmartLabelLayout(visibleLabelIndices, dataLabelMode, visibleLabelIndices.length > 20 ? 6 : visibleLabelIndices.length > 8 ? 4 : 3),
+        } : {}),
       } : {}),
     }
   })
+
+  if (chartType !== 'pie' && regressionFields.length > 0) {
+    seriesCols.forEach(col => {
+      if (!regressionFields.includes(col)) return
+      const colValues = rows.map(r => Number(r[col] ?? 0))
+      const trend = calcLinearRegression(colValues)
+      series.push({
+        name: `Linear (${col})`,
+        type: 'line',
+        data: trend,
+        symbol: 'none',
+        smooth: false,
+        lineStyle: { type: 'dashed', width: 2, opacity: 0.95 },
+        emphasis: { disabled: true },
+        silent: true,
+      })
+    })
+  }
 
   const hasAxis = !['pie', 'radar', 'funnel', 'gauge', 'treemap', 'sankey'].includes(chartType)
 
@@ -175,7 +248,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>) {
     } : {}),
     series,
     ...(showDataLabels && hasAxis ? {
-      labelLayout: buildStaggeredLabelLayout(staggerRows),
+      labelLayout: { moveOverlap: 'shiftY' },
     } : {}),
     ...config.option as object || {},
   }

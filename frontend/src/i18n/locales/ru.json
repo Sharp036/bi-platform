@@ -230,6 +230,8 @@
   "designer.auto_first_column": "— Авто (первый столбец) —",
   "designer.value_fields": "Значения (ось Y / серии)",
   "designer.value_fields_hint": "Все отмечены = все столбцы",
+  "designer.regression_lines": "Линейная регрессия",
+  "designer.regression_lines_hint": "Показывать линию тренда для выбранных метрик",
   "designer.select_all": "Все",
   "designer.deselect_all": "Ничего",
   "designer.invert": "Инвертировать",
