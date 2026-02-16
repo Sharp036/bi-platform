@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Tự động (cột đầu tiên) —",
   "designer.value_fields": "Giá trị (trục Y / chuỗi)",
   "designer.value_fields_hint": "Chọn tất cả = dùng tất cả cột",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Tat ca",
   "designer.deselect_all": "Khong chon",
   "designer.invert": "Dao nguoc",

@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— 자동 (첫 번째 열) —",
   "designer.value_fields": "값 (Y축 / 시리즈)",
   "designer.value_fields_hint": "모두 선택 = 모든 열 사용",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "모두 선택",
   "designer.deselect_all": "선택 해제",
   "designer.invert": "반전",

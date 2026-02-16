@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Auto (första kolumnen) —",
   "designer.value_fields": "Värden (Y-axel / serier)",
   "designer.value_fields_hint": "Alla markerade = alla kolumner",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Alla",
   "designer.deselect_all": "Inga",
   "designer.invert": "Invertera",

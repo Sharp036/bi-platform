@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Automaattinen (ensimmäinen sarake) —",
   "designer.value_fields": "Arvot (Y-akseli / sarjat)",
   "designer.value_fields_hint": "Kaikki valittu = kaikki sarakkeet",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Kaikki",
   "designer.deselect_all": "Ei mitaan",
   "designer.invert": "Kaanna",

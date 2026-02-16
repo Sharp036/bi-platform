@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Auto (første kolonne) —",
   "designer.value_fields": "Værdier (Y-akse / serier)",
   "designer.value_fields_hint": "Alle markeret = alle kolonner",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Alle",
   "designer.deselect_all": "Ingen",
   "designer.invert": "Inverter",

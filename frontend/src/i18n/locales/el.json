@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Αυτόματο (πρώτη στήλη) —",
   "designer.value_fields": "Τιμές (άξονας Y / σειρές)",
   "designer.value_fields_hint": "Όλα επιλεγμένα = όλες οι στήλες",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Ολα",
   "designer.deselect_all": "Κανενα",
   "designer.invert": "Αντιστροφη",

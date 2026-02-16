@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Auto (pierwsza kolumna) —",
   "designer.value_fields": "Wartości (oś Y / serie)",
   "designer.value_fields_hint": "Wszystkie zaznaczone = wszystkie kolumny",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Wszystko",
   "designer.deselect_all": "Nic",
   "designer.invert": "Odwroc",

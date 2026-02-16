@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Auto (première colonne) —",
   "designer.value_fields": "Valeurs (axe Y / séries)",
   "designer.value_fields_hint": "Tout coché = toutes les colonnes",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Tout",
   "designer.deselect_all": "Aucun",
   "designer.invert": "Inverser",

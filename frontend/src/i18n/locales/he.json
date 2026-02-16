@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— אוטומטי (עמודה ראשונה) —",
   "designer.value_fields": "ערכים (ציר Y / סדרות)",
   "designer.value_fields_hint": "הכל מסומן = כל העמודות",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "הכל",
   "designer.deselect_all": "כלום",
   "designer.invert": "הפוך",

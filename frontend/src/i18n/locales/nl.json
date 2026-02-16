@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Auto (eerste kolom) —",
   "designer.value_fields": "Waarden (Y-as / reeksen)",
   "designer.value_fields_hint": "Alles aangevinkt = alle kolommen",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Alles",
   "designer.deselect_all": "Niets",
   "designer.invert": "Omkeren",

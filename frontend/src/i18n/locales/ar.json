@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— تلقائي (العمود الأول) —",
   "designer.value_fields": "القيم (المحور Y / السلاسل)",
   "designer.value_fields_hint": "الكل محدد = جميع الأعمدة",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "الكل",
   "designer.deselect_all": "لا شيء",
   "designer.invert": "عكس",

@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— 自动（第一列）—",
   "designer.value_fields": "数值（Y轴 / 系列）",
   "designer.value_fields_hint": "全选 = 使用所有列",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "全选",
   "designer.deselect_all": "全不选",
   "designer.invert": "反选",

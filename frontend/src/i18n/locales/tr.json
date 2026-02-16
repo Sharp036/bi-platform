@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Otomatik (ilk sütun) —",
   "designer.value_fields": "Değerler (Y ekseni / seriler)",
   "designer.value_fields_hint": "Tümü seçili = tüm sütunlar",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Tumunu sec",
   "designer.deselect_all": "Hicbiri",
   "designer.invert": "Ters cevir",

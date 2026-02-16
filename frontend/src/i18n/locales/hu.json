@@ -221,6 +221,8 @@
   "designer.auto_first_column": "— Automatikus (első oszlop) —",
   "designer.value_fields": "Értékek (Y tengely / sorozatok)",
   "designer.value_fields_hint": "Mind kijelölve = összes oszlop",
+  "designer.regression_lines": "Linear Regression",
+  "designer.regression_lines_hint": "Show trend line for selected metrics",
   "designer.select_all": "Mind",
   "designer.deselect_all": "Egyik sem",
   "designer.invert": "Megfordit",
