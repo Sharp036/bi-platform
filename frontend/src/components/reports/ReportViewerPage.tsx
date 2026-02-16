@@ -244,12 +244,6 @@ export default function ReportViewerPage() {
         }}
       />
 
-      {renderResult && (
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
-          {t('reports.rendered_stats', { count: renderResult.widgets.length, ms: renderResult.executionMs })}
-        </p>
-      )}
-
       {rendering && !renderResult ? (
         <LoadingSpinner />
       ) : renderResult ? (
@@ -342,17 +336,17 @@ export default function ReportViewerPage() {
   )
 
   return (
-    <div className="max-w-[1400px] mx-auto">
-      <div className="flex items-center justify-between mb-4">
+    <div className="-m-6 p-2 md:p-3 w-full">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <Link to="/reports" className="btn-ghost p-2"><ArrowLeft className="w-5 h-5" /></Link>
           <div>
-            <h1 className="text-xl font-bold text-slate-800 dark:text-white">{report.name}</h1>
-            {report.description && <p className="text-sm text-slate-500 dark:text-slate-400">{report.description}</p>}
+            <h1 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">{report.name}</h1>
+            {report.description && <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">{report.description}</p>}
           </div>
           <FavoriteButton objectType="REPORT" objectId={Number(id)} size={20} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <div className="flex items-center gap-1">
             <LiveIndicator
               status={liveStatus}
@@ -365,7 +359,7 @@ export default function ReportViewerPage() {
             <select
               value={autoRefresh || ''}
               onChange={e => setAutoRefresh(e.target.value ? Number(e.target.value) : null)}
-              className="input text-xs w-24 py-1"
+              className="input text-xs w-24 py-0.5"
             >
               <option value="">{t('common.off')}</option>
               <option value="10">10s</option>
@@ -374,12 +368,12 @@ export default function ReportViewerPage() {
               <option value="300">5m</option>
             </select>
           </div>
-          <button onClick={() => handleRender()} disabled={rendering} className="btn-secondary text-sm">
+          <button onClick={() => handleRender()} disabled={rendering} className="btn-secondary text-xs py-1">
             <RefreshCw className={`w-4 h-4 ${rendering ? 'animate-spin' : ''}`} /> {t('common.refresh')}
           </button>
           <button
             onClick={() => { reportApi.createSnapshot(Number(id)); toast.success(t('reports.snapshot_created')) }}
-            className="btn-secondary text-sm"
+            className="btn-secondary text-xs py-1"
           >
             <Camera className="w-4 h-4" /> {t('reports.snapshot')}
           </button>
