@@ -23,6 +23,26 @@ import FavoriteButton from '@/components/workspace/FavoriteButton'
 import { useLiveData } from '@/hooks/useLiveData'
 import LiveIndicator from './LiveIndicator'
 
+type FilterPanelPosition = 'top' | 'bottom' | 'left' | 'right'
+
+function getFilterPanelLayout(layout?: string): { position: FilterPanelPosition; collapsed: boolean } {
+  if (!layout) return { position: 'top', collapsed: false }
+  try {
+    const parsed = JSON.parse(layout) as {
+      filterPanel?: { position?: FilterPanelPosition; collapsed?: boolean }
+    }
+    const position = parsed.filterPanel?.position
+    return {
+      position: position === 'top' || position === 'bottom' || position === 'left' || position === 'right'
+        ? position
+        : 'top',
+      collapsed: !!parsed.filterPanel?.collapsed,
+    }
+  } catch {
+    return { position: 'top', collapsed: false }
+  }
+}
+
 export default function ReportViewerPage() {
   const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
@@ -32,7 +52,6 @@ export default function ReportViewerPage() {
   const [rendering, setRendering] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState<number | null>(null)
 
-  // Drill-down state
   const [drillActions, setDrillActions] = useState<Record<number, DrillAction[]>>({})
   const [navStack, setNavStack] = useState<BreadcrumbEntry[]>([])
   const [currentReportId, setCurrentReportId] = useState<number | null>(null)
@@ -41,6 +60,9 @@ export default function ReportViewerPage() {
   const [interactiveMeta, setInteractiveMeta] = useState<InteractiveMeta | null>(null)
   const initializedRef = useRef(false)
 
+  const [filterPanelPosition, setFilterPanelPosition] = useState<FilterPanelPosition>('top')
+  const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
+
   const [liveEnabled, setLiveEnabled] = useState(false)
   const { status: liveStatus, lastUpdate: liveLastUpdate, reconnect: liveReconnect } = useLiveData({
     enabled: liveEnabled,
@@ -48,13 +70,15 @@ export default function ReportViewerPage() {
     onReportUpdate: () => handleRender(),
   })
 
-  // Load initial report
   useEffect(() => {
     if (!id) return
     const reportId = Number(id)
     reportApi.get(reportId)
       .then(r => {
         setReport(r)
+        const filterPanelLayout = getFilterPanelLayout(r.layout)
+        setFilterPanelPosition(filterPanelLayout.position)
+        setFilterPanelCollapsed(filterPanelLayout.collapsed)
         workspaceApi.trackView('REPORT', reportId).catch(() => {})
         setCurrentReportId(reportId)
         if (!initializedRef.current) {
@@ -64,20 +88,17 @@ export default function ReportViewerPage() {
       })
       .catch(() => toast.error(t('reports.failed_to_load')))
       .finally(() => setLoading(false))
-  }, [id])
+  }, [id, t])
 
-  // Load drill actions when report changes
   const loadDrillActions = useCallback(async (reportId: number) => {
     try {
       const actions = await drillApi.forReport(reportId)
       setDrillActions(actions)
     } catch {
-      // No drill actions — that's fine
       setDrillActions({})
     }
   }, [])
 
-  // Render report with explicit params
   const renderWithParams = useCallback(async (paramsToUse: Record<string, unknown>) => {
     const rId = currentReportId || (id ? Number(id) : null)
     if (!rId) return
@@ -86,7 +107,6 @@ export default function ReportViewerPage() {
       const result = await reportApi.render(rId, paramsToUse)
       setRenderResult(result)
       await loadDrillActions(rId)
-      // Load interactive meta
       const widgetIds = result.widgets.map((w: any) => w.widgetId)
       interactiveApi.getMeta(rId, widgetIds).then(meta => {
         setInteractiveMeta(meta)
@@ -95,26 +115,22 @@ export default function ReportViewerPage() {
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       toast.error(msg || t('reports.failed_to_render'))
+    } finally {
+      setRendering(false)
     }
-    finally { setRendering(false) }
   }, [currentReportId, id, loadDrillActions, t])
 
-  // Render report (merge into current params)
   const handleRender = useCallback(async (params?: Record<string, unknown>) => {
     const mergedParams = { ...currentParams, ...params }
     setCurrentParams(mergedParams)
     await renderWithParams(mergedParams)
   }, [currentParams, renderWithParams])
 
-  // Initial render
   useEffect(() => {
     if (report && currentReportId) handleRender()
   }, [report, currentReportId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-refresh
   useAutoRefresh(() => handleRender(), autoRefresh)
-
-  // ── Drill-down navigation ──
 
   const handleDrillDown = useCallback(async (
     widgetId: number,
@@ -122,15 +138,13 @@ export default function ReportViewerPage() {
   ) => {
     const actions = drillActions[widgetId]
     if (!actions || actions.length === 0) return
-
-    // Use first matching action (could extend to show menu for multiple)
     const action = actions[0]
 
     try {
       const navResult: DrillNavigateResponse = await drillApi.navigate({
         actionId: action.id,
         clickedData,
-        currentParameters: currentParams
+        currentParameters: currentParams,
       })
 
       if (navResult.openMode === 'NEW_TAB') {
@@ -143,34 +157,33 @@ export default function ReportViewerPage() {
         return
       }
 
-      // REPLACE mode: push to stack, load new report
       const newEntry: BreadcrumbEntry = {
         reportId: navResult.targetReportId,
         reportName: navResult.targetReportName,
         parameters: navResult.resolvedParameters,
-        label: navResult.breadcrumbLabel
+        label: navResult.breadcrumbLabel,
       }
 
       setNavStack(prev => [...prev, newEntry])
       setCurrentReportId(navResult.targetReportId)
       setCurrentParams(navResult.resolvedParameters)
 
-      // Load new report metadata
       const newReport = await reportApi.get(navResult.targetReportId)
       setReport(newReport)
+      const filterPanelLayout = getFilterPanelLayout(newReport.layout)
+      setFilterPanelPosition(filterPanelLayout.position)
+      setFilterPanelCollapsed(filterPanelLayout.collapsed)
 
       toast.success(t('reports.drill_down_to', { name: navResult.targetReportName }))
     } catch {
       toast.error(t('reports.drill_failed'))
     }
-  }, [drillActions, currentParams])
+  }, [drillActions, currentParams, t])
 
-  // Breadcrumb navigation (go back to previous level)
   const handleBreadcrumbNavigate = useCallback(async (index: number) => {
     const entry = navStack[index]
     if (!entry) return
 
-    // Truncate stack to this level
     setNavStack(prev => prev.slice(0, index + 1))
     setCurrentReportId(entry.reportId)
     setCurrentParams(entry.parameters)
@@ -178,10 +191,13 @@ export default function ReportViewerPage() {
     try {
       const newReport = await reportApi.get(entry.reportId)
       setReport(newReport)
+      const filterPanelLayout = getFilterPanelLayout(newReport.layout)
+      setFilterPanelPosition(filterPanelLayout.position)
+      setFilterPanelCollapsed(filterPanelLayout.collapsed)
     } catch {
       toast.error(t('reports.failed_to_navigate'))
     }
-  }, [navStack])
+  }, [navStack, t])
 
   const handleToggleWidgets = useCallback((widgetIds: number[]) => {
     if (!widgetIds || widgetIds.length === 0) return
@@ -198,16 +214,11 @@ export default function ReportViewerPage() {
   const handleApplyFilter = useCallback(async (field: string, value: string) => {
     if (!field) return
     const nextParams = { ...currentParams }
-    if (value == null || value === '') {
-      delete nextParams[field]
-    } else {
-      nextParams[field] = value
-    }
+    if (value == null || value === '') delete nextParams[field]
+    else nextParams[field] = value
     setCurrentParams(nextParams)
     await renderWithParams(nextParams)
   }, [currentParams, renderWithParams])
-
-  // ── Render ──
 
   if (loading) return <LoadingSpinner />
   if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
@@ -222,9 +233,116 @@ export default function ReportViewerPage() {
     try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
   }
 
+  const renderWidgets = () => (
+    <>
+      <BookmarkBar
+        reportId={currentReportId || Number(id)}
+        currentParameters={currentParams}
+        onApplyBookmark={(params) => {
+          setCurrentParams(params)
+          handleRender(params)
+        }}
+      />
+
+      {renderResult && (
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
+          {t('reports.rendered_stats', { count: renderResult.widgets.length, ms: renderResult.executionMs })}
+        </p>
+      )}
+
+      {rendering && !renderResult ? (
+        <LoadingSpinner />
+      ) : renderResult ? (
+        <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
+          {renderResult.widgets
+            .filter(w => !hiddenWidgetIds.includes(w.widgetId))
+            .map((w) => {
+              const pos = parsePosition(w.position)
+              const x = Math.max(0, Number(pos.x) || 0)
+              const y = Math.max(0, Number(pos.y) || 0)
+              const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+              const hSpan = Math.max(1, Number(pos.h) || 4)
+              const styleCfg = parseStyle(w.style)
+              const zIndex = Number(styleCfg.zIndex ?? 0)
+              const widgetDrillActions = drillActions[w.widgetId] || []
+              const hasDrill = widgetDrillActions.length > 0
+              return (
+                <div
+                  key={w.widgetId}
+                  className={`card p-4 overflow-hidden ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
+                  style={{
+                    gridColumn: `${x + 1} / span ${wSpan}`,
+                    gridRow: `${y + 1} / span ${hSpan}`,
+                    zIndex,
+                    position: 'relative',
+                  }}
+                >
+                  {hasDrill && (
+                    <div className="text-[10px] text-brand-500 dark:text-brand-400 mb-1 flex items-center gap-1">
+                      <span>{'->'}</span>
+                      <span>{t('reports.drill_to', { name: widgetDrillActions[0].targetReportName })}</span>
+                    </div>
+                  )}
+                  <WidgetRenderer
+                    widget={w}
+                    drillActions={widgetDrillActions}
+                    onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
+                    layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}
+                    reportId={currentReportId || Number(id)}
+                    onToggleWidgets={handleToggleWidgets}
+                    onApplyFilter={handleApplyFilter}
+                    onChartClick={(data) => {
+                      useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
+                    }}
+                  />
+                </div>
+              )
+            })}
+        </div>
+      ) : null}
+
+      {interactiveMeta?.overlays && interactiveMeta.overlays.length > 0 && (
+        <div className="relative">
+          <OverlayLayer overlays={interactiveMeta.overlays} />
+        </div>
+      )}
+    </>
+  )
+
+  const sidePanel = report.parameters.length > 0 && (
+    <div className={`${filterPanelCollapsed ? 'w-14' : 'w-80'} flex-shrink-0`}>
+      <div className="sticky top-3">
+        <div className="card p-2 mb-2">
+          <div className="flex items-center justify-between gap-2">
+            {!filterPanelCollapsed && (
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                {t('widgets.type.filter')}
+              </span>
+            )}
+            <button
+              onClick={() => setFilterPanelCollapsed(v => !v)}
+              className="btn-ghost text-xs px-2 py-1 w-full"
+              title={filterPanelCollapsed ? t('reports.show_filters') : t('reports.hide_filters')}
+            >
+              {filterPanelCollapsed ? t('reports.filters_short') : t('reports.hide_filters')}
+            </button>
+          </div>
+        </div>
+        {!filterPanelCollapsed && (
+          <EnhancedParameterPanel
+            reportId={Number(id)}
+            parameters={report.parameters}
+            onApply={handleRender}
+            loading={rendering}
+            compact
+          />
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="max-w-[1400px] mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <Link to="/reports" className="btn-ghost p-2"><ArrowLeft className="w-5 h-5" /></Link>
@@ -269,86 +387,53 @@ export default function ReportViewerPage() {
         </div>
       </div>
 
-      {/* Breadcrumb */}
       <DrillDownBreadcrumb stack={navStack} onNavigate={handleBreadcrumbNavigate} />
 
-      {/* Parameters */}
-      <EnhancedParameterPanel reportId={Number(id)} parameters={report.parameters} onApply={handleRender} loading={rendering} />
-
-      {/* Bookmarks */}
-      <BookmarkBar
-        reportId={currentReportId || Number(id)}
-        currentParameters={currentParams}
-        onApplyBookmark={(params) => {
-          setCurrentParams(params)
-          handleRender(params)
-        }}
-      />
-
-      {/* Execution stats */}
-      {renderResult && (
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
-          {t('reports.rendered_stats', { count: renderResult.widgets.length, ms: renderResult.executionMs })}
-        </p>
+      {report.parameters.length > 0 && (filterPanelPosition === 'top' || filterPanelPosition === 'bottom') && (
+        <div className="card p-3 mb-4">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{t('widgets.type.filter')}</span>
+            <button
+              onClick={() => setFilterPanelCollapsed(v => !v)}
+              className="btn-ghost text-xs px-2 py-1"
+            >
+              {filterPanelCollapsed ? t('reports.show_filters') : t('reports.hide_filters')}
+            </button>
+          </div>
+        </div>
       )}
 
-      {/* Widgets grid */}
-      {rendering && !renderResult ? (
-        <LoadingSpinner />
-      ) : renderResult ? (
-        <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
-          {renderResult.widgets
-            .filter(w => !hiddenWidgetIds.includes(w.widgetId))
-            .map((w) => {
-            const pos = parsePosition(w.position)
-            const x = Math.max(0, Number(pos.x) || 0)
-            const y = Math.max(0, Number(pos.y) || 0)
-            const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
-            const hSpan = Math.max(1, Number(pos.h) || 4)
-            const styleCfg = parseStyle(w.style)
-            const zIndex = Number(styleCfg.zIndex ?? 0)
-            const widgetDrillActions = drillActions[w.widgetId] || []
-            const hasDrill = widgetDrillActions.length > 0
-            return (
-              <div
-                key={w.widgetId}
-                className={`card p-4 overflow-hidden ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
-                style={{
-                  gridColumn: `${x + 1} / span ${wSpan}`,
-                  gridRow: `${y + 1} / span ${hSpan}`,
-                  zIndex,
-                  position: 'relative',
-                }}
-              >
-                {hasDrill && (
-                  <div className="text-[10px] text-brand-500 dark:text-brand-400 mb-1 flex items-center gap-1">
-                    <span>⤵</span>
-                    <span>{t('reports.drill_to', { name: widgetDrillActions[0].targetReportName })}</span>
-                  </div>
-                )}
-                <WidgetRenderer
-                  widget={w}
-                  drillActions={widgetDrillActions}
-                  onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
-                  layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}
-                  reportId={currentReportId || Number(id)}
-                  onToggleWidgets={handleToggleWidgets}
-                  onApplyFilter={handleApplyFilter}
-                  onChartClick={(data) => {
-                    useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
-                  }}
-                />
-              </div>
-            )
-          })}
-        </div>
-      ) : null}
+      {report.parameters.length > 0 && filterPanelPosition === 'top' && !filterPanelCollapsed && (
+        <EnhancedParameterPanel
+          reportId={Number(id)}
+          parameters={report.parameters}
+          onApply={handleRender}
+          loading={rendering}
+          className="mb-4"
+        />
+      )}
 
-      {/* Floating overlays (logos, images) */}
-      {interactiveMeta?.overlays && interactiveMeta.overlays.length > 0 && (
-        <div className="relative">
-          <OverlayLayer overlays={interactiveMeta.overlays} />
+      {(filterPanelPosition === 'left' || filterPanelPosition === 'right') ? (
+        <div className={`flex gap-4 ${filterPanelPosition === 'right' ? 'flex-row-reverse' : ''}`}>
+          {sidePanel}
+          <div className="flex-1 min-w-0">
+            {renderWidgets()}
+          </div>
         </div>
+      ) : (
+        <>
+          {renderWidgets()}
+        </>
+      )}
+
+      {report.parameters.length > 0 && filterPanelPosition === 'bottom' && !filterPanelCollapsed && (
+        <EnhancedParameterPanel
+          reportId={Number(id)}
+          parameters={report.parameters}
+          onApply={handleRender}
+          loading={rendering}
+          className="mt-4"
+        />
       )}
     </div>
   )

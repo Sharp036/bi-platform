@@ -34,6 +34,7 @@ export interface Report {
   reportType: 'STANDARD' | 'TEMPLATE'
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   isTemplate: boolean
+  layout?: string
   parameters: ReportParameter[]; widgets: Widget[]
   createdAt: string; updatedAt: string
 }

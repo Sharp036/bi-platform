@@ -3,6 +3,7 @@ import type { DesignerWidget } from '@/store/useDesignerStore'
 import { useTranslation } from 'react-i18next'
 import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play } from 'lucide-react'
 import { queryApi } from '@/api/queries'
+import { buildDesignerParameterValues } from '@/utils/designerParameters'
 import EChartWidget from '@/components/charts/EChartWidget'
 import TableWidget from '@/components/charts/TableWidget'
 import type { WidgetData } from '@/types'
@@ -23,6 +24,7 @@ export default function DesignerCanvas() {
   const selectedId = useDesignerStore(s => s.selectedWidgetId)
   const selectWidget = useDesignerStore(s => s.selectWidget)
   const previewMode = useDesignerStore(s => s.previewMode)
+  const parameters = useDesignerStore(s => s.parameters)
 
   // Calculate total canvas height
   const maxY = widgets.length > 0
@@ -49,6 +51,7 @@ export default function DesignerCanvas() {
         <WidgetBlock
           key={widget.id}
           widget={widget}
+          parameters={parameters}
           isSelected={widget.id === selectedId}
           onSelect={() => selectWidget(widget.id)}
           previewMode={previewMode}
@@ -69,9 +72,10 @@ export default function DesignerCanvas() {
 }
 
 function WidgetBlock({
-  widget, isSelected, onSelect, previewMode,
+  widget, parameters, isSelected, onSelect, previewMode,
 }: {
   widget: DesignerWidget
+  parameters: Array<{ name: string; paramType: string; defaultValue: string }>
   isSelected: boolean
   onSelect: () => void
   previewMode: boolean
@@ -92,11 +96,18 @@ function WidgetBlock({
     setPreviewLoading(true)
     setPreviewError(null)
     try {
+      const paramValues = buildDesignerParameterValues(parameters)
       let res
-      if (widget.queryId) {
-        res = await queryApi.execute(widget.queryId, undefined, 100)
-      } else if (widget.datasourceId && widget.rawSql?.trim()) {
-        res = await queryApi.executeAdHoc({ datasourceId: widget.datasourceId, sql: widget.rawSql, limit: 100 })
+      // Prefer inline SQL when configured to avoid stale query bindings.
+      if (widget.datasourceId && widget.rawSql?.trim()) {
+        res = await queryApi.executeAdHoc({
+          datasourceId: widget.datasourceId,
+          sql: widget.rawSql,
+          parameters: paramValues,
+          limit: 100,
+        })
+      } else if (widget.queryId) {
+        res = await queryApi.execute(widget.queryId, paramValues, 100)
       }
       if (res) {
         const cols = res.columns?.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name) || []
@@ -112,7 +123,7 @@ function WidgetBlock({
     } finally {
       setPreviewLoading(false)
     }
-  }, [widget.queryId, widget.datasourceId, widget.rawSql, hasDataSource, t])
+  }, [widget.queryId, widget.datasourceId, widget.rawSql, hasDataSource, parameters, t])
 
   const style: React.CSSProperties = {
     position: 'absolute',

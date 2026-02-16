@@ -17,6 +17,36 @@ import {
 import toast from 'react-hot-toast'
 import { useState } from 'react'
 
+type FilterPanelPosition = 'top' | 'bottom' | 'left' | 'right'
+
+const defaultLayoutConfig = {
+  filterPanel: {
+    position: 'top' as FilterPanelPosition,
+    collapsed: false,
+  },
+}
+
+function parseReportLayout(layout?: string) {
+  if (!layout) return defaultLayoutConfig
+  try {
+    const parsed = JSON.parse(layout) as {
+      filterPanel?: { position?: FilterPanelPosition; collapsed?: boolean }
+    }
+    const position = parsed.filterPanel?.position
+    const collapsed = parsed.filterPanel?.collapsed
+    return {
+      filterPanel: {
+        position: position === 'top' || position === 'bottom' || position === 'left' || position === 'right'
+          ? position
+          : defaultLayoutConfig.filterPanel.position,
+        collapsed: !!collapsed,
+      },
+    }
+  } catch {
+    return defaultLayoutConfig
+  }
+}
+
 export default function ReportDesignerPage() {
   const { t, i18n } = useTranslation()
   const { id } = useParams<{ id: string }>()
@@ -35,6 +65,8 @@ export default function ReportDesignerPage() {
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [filterPanelPosition, setFilterPanelPosition] = useState<FilterPanelPosition>('top')
+  const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
   const controlParams: ReportParameter[] = parameters.map(p => ({
     name: p.name,
     label: p.label,
@@ -49,6 +81,9 @@ export default function ReportDesignerPage() {
     if (isNew) {
       reset()
       setReportMeta(t('designer.new_report_name'), '')
+      const defaults = parseReportLayout()
+      setFilterPanelPosition(defaults.filterPanel.position)
+      setFilterPanelCollapsed(defaults.filterPanel.collapsed)
       nameEditedRef.current = false
       return
     }
@@ -56,6 +91,9 @@ export default function ReportDesignerPage() {
     setLoading(true)
     reportApi.get(Number(id))
       .then(data => {
+        const parsedLayout = parseReportLayout(data.layout)
+        setFilterPanelPosition(parsedLayout.filterPanel.position)
+        setFilterPanelCollapsed(parsedLayout.filterPanel.collapsed)
         loadReport({
           id: data.id,
           name: data.name,
@@ -98,30 +136,40 @@ export default function ReportDesignerPage() {
 
     setSaving(true)
     try {
-      const widgetPayloads = widgets.map((w, i) => ({
-        widgetType: w.widgetType,
-        title: w.title,
-        queryId: w.queryId,
-        datasourceId: w.datasourceId,
-        rawSql: w.rawSql || null,
-        chartConfig: JSON.stringify(w.chartConfig),
-        position: JSON.stringify(w.position),
-        style: JSON.stringify(w.style),
-        paramMapping: JSON.stringify(w.paramMapping),
-        sortOrder: i,
-        isVisible: w.isVisible,
-      }))
+      const widgetPayloads = widgets.map((w, i) => {
+        const hasInlineSql = !!(w.datasourceId && w.rawSql?.trim())
+        return {
+          widgetType: w.widgetType,
+          title: w.title,
+          queryId: hasInlineSql ? null : w.queryId,
+          datasourceId: w.datasourceId,
+          rawSql: hasInlineSql ? w.rawSql : null,
+          chartConfig: JSON.stringify(w.chartConfig),
+          position: JSON.stringify(w.position),
+          style: JSON.stringify(w.style),
+          paramMapping: JSON.stringify(w.paramMapping),
+          sortOrder: i,
+          isVisible: w.isVisible,
+        }
+      })
 
       const paramPayloads = parameters.map((p, i) => ({
         ...p,
         name: p.name.trim(),
         sortOrder: i,
       }))
+      const layout = JSON.stringify({
+        filterPanel: {
+          position: filterPanelPosition,
+          collapsed: filterPanelCollapsed,
+        },
+      })
 
       if (isNew || !reportId) {
         const created = await reportApi.create({
           name: reportName,
           description: reportDescription,
+          layout,
           widgets: widgetPayloads,
           parameters: paramPayloads,
         })
@@ -142,6 +190,7 @@ export default function ReportDesignerPage() {
         await reportApi.update(reportId, {
           name: reportName,
           description: reportDescription,
+          layout,
         })
 
         // Update parameters
@@ -166,7 +215,18 @@ export default function ReportDesignerPage() {
     } finally {
       setSaving(false)
     }
-  }, [reportName, reportDescription, widgets, parameters, isNew, reportId, navigate, setDirty])
+  }, [
+    reportName,
+    reportDescription,
+    widgets,
+    parameters,
+    filterPanelPosition,
+    filterPanelCollapsed,
+    isNew,
+    reportId,
+    navigate,
+    setDirty,
+  ])
 
   const handlePublish = async () => {
     if (!reportId) { toast.error(t('designer.save_first')); return }
@@ -248,6 +308,32 @@ export default function ReportDesignerPage() {
             <div className="w-32">
               <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.status_label')}</label>
               <span className="text-sm text-slate-600 dark:text-slate-400">{reportStatus}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[800px] mt-3">
+            <div>
+              <label className="text-xs font-medium text-slate-500 mb-1 block">{t('designer.filter_panel_position')}</label>
+              <select
+                value={filterPanelPosition}
+                onChange={e => setFilterPanelPosition(e.target.value as FilterPanelPosition)}
+                className="input text-sm"
+              >
+                <option value="top">{t('designer.filter_panel_position.top')}</option>
+                <option value="bottom">{t('designer.filter_panel_position.bottom')}</option>
+                <option value="left">{t('designer.filter_panel_position.left')}</option>
+                <option value="right">{t('designer.filter_panel_position.right')}</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <label className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={filterPanelCollapsed}
+                  onChange={e => setFilterPanelCollapsed(e.target.checked)}
+                />
+                {t('designer.filter_panel_collapsed_default')}
+              </label>
             </div>
           </div>
 

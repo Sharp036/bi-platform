@@ -10,9 +10,18 @@ interface Props {
   parameters: ReportParameter[]
   onApply: (values: Record<string, unknown>) => void
   loading?: boolean
+  compact?: boolean
+  className?: string
 }
 
-export default function EnhancedParameterPanel({ reportId, parameters, onApply, loading }: Props) {
+export default function EnhancedParameterPanel({
+  reportId,
+  parameters,
+  onApply,
+  loading,
+  compact = false,
+  className = '',
+}: Props) {
   const { t } = useTranslation()
   const resolveDynamicDefault = (p: ReportParameter): string => {
     const raw = (p.defaultValue || '').trim()
@@ -110,15 +119,15 @@ export default function EnhancedParameterPanel({ reportId, parameters, onApply, 
   const getControl = (paramName: string) => controls.find(c => c.parameterName === paramName)
 
   return (
-    <div className="card p-4 mb-4">
-      <div className="flex flex-wrap items-end gap-4">
+    <div className={`card ${compact ? 'p-3' : 'p-4'} ${className}`}>
+      <div className={`flex ${compact ? 'flex-col items-stretch gap-3' : 'flex-wrap items-end gap-4'}`}>
         {parameters.map(p => {
           const ctrl = getControl(p.name)
           const controlType = ctrl?.controlType || guessControlType(p)
           const options = dynamicOptions[p.name] || (p.config?.options as string[] | undefined) || []
 
           return (
-            <div key={p.name} className="flex-1 min-w-[180px] max-w-[300px]">
+            <div key={p.name} className={compact ? 'w-full' : 'flex-1 min-w-[180px] max-w-[300px]'}>
               <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 {p.label || p.name}
                 {p.isRequired && <span className="text-red-500 ml-0.5">*</span>}
@@ -185,7 +194,11 @@ export default function EnhancedParameterPanel({ reportId, parameters, onApply, 
           )
         })}
 
-        <button onClick={handleApply} disabled={loading} className="btn-primary h-[38px]">
+        <button
+          onClick={handleApply}
+          disabled={loading}
+          className={`btn-primary h-[38px] ${compact ? 'w-full justify-center' : ''}`}
+        >
           <Play className="w-4 h-4" />
           {t('common.apply')}
         </button>

@@ -5,7 +5,9 @@ import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
+import { buildDesignerParameterValues } from '@/utils/designerParameters'
 import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
 
@@ -30,6 +32,7 @@ export default function PropertyPanel() {
   const { t } = useTranslation()
   const selected = useDesignerStore(s => s.selectedWidgetId)
   const widgets = useDesignerStore(s => s.widgets)
+  const parameters = useDesignerStore(s => s.parameters)
   const updateWidget = useDesignerStore(s => s.updateWidget)
   const removeWidget = useDesignerStore(s => s.removeWidget)
   const duplicateWidget = useDesignerStore(s => s.duplicateWidget)
@@ -59,18 +62,28 @@ export default function PropertyPanel() {
     if (!widget) return
     setLoadingCols(true)
     try {
+      const paramValues = buildDesignerParameterValues(parameters)
       let res
-      if (widget.queryId) {
-        res = await queryApi.execute(widget.queryId, undefined, 1)
-      } else if (widget.datasourceId && widget.rawSql?.trim()) {
-        res = await queryApi.executeAdHoc({ datasourceId: widget.datasourceId, sql: widget.rawSql, limit: 1 })
+      // Prefer inline SQL when present, even if stale queryId is still set.
+      if (widget.datasourceId && widget.rawSql?.trim()) {
+        res = await queryApi.executeAdHoc({
+          datasourceId: widget.datasourceId,
+          sql: widget.rawSql,
+          parameters: paramValues,
+          limit: 1,
+        })
+      } else if (widget.queryId) {
+        res = await queryApi.execute(widget.queryId, paramValues, 1)
       }
       if (res?.columns) {
         setAvailableCols(res.columns.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name))
       }
-    } catch { /* ignore */ }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || t('common.operation_failed'))
+    }
     finally { setLoadingCols(false) }
-  }, [widget?.queryId, widget?.datasourceId, widget?.rawSql])
+  }, [widget?.queryId, widget?.datasourceId, widget?.rawSql, parameters, t])
 
   if (!widget) {
     return (
@@ -170,7 +183,11 @@ export default function PropertyPanel() {
                 onChange={e => {
                   const qId = e.target.value ? Number(e.target.value) : null
                   const q = queries.find(q => q.id === qId)
-                  update({ queryId: qId, datasourceId: q?.datasourceId || widget.datasourceId })
+                  update({
+                    queryId: qId,
+                    datasourceId: q?.datasourceId || widget.datasourceId,
+                    rawSql: qId ? '' : widget.rawSql,
+                  })
                 }}
                 className="input text-sm"
               >
@@ -184,7 +201,10 @@ export default function PropertyPanel() {
             <Field label={t('designer.inline_sql')}>
               <select
                 value={widget.datasourceId || ''}
-                onChange={e => update({ datasourceId: e.target.value ? Number(e.target.value) : null })}
+                onChange={e => update({
+                  datasourceId: e.target.value ? Number(e.target.value) : null,
+                  queryId: null,
+                })}
                 className="input text-sm mb-2"
               >
                 <option value="">{t('designer.select_datasource')}</option>
@@ -194,7 +214,7 @@ export default function PropertyPanel() {
               </select>
               <textarea
                 value={widget.rawSql}
-                onChange={e => update({ rawSql: e.target.value })}
+                onChange={e => update({ rawSql: e.target.value, queryId: null })}
                 placeholder={t('designer.sql_placeholder')}
                 className="input text-xs font-mono h-20 resize-none"
               />
