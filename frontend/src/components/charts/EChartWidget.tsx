@@ -76,23 +76,6 @@ function wrapLegendText(value: string, lineLen: number, maxLines: number): strin
   return lines.join('\n')
 }
 
-function measureTextWidth(text: string, fontSize = 12): number {
-  if (typeof document === 'undefined') return text.length * fontSize * 0.6
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return text.length * fontSize * 0.6
-  ctx.font = `${fontSize}px sans-serif`
-  return ctx.measureText(text).width
-}
-
-function estimateXAxisLabelHeight(categories: string[], xAxisRotation: number, fontSize = 12): number {
-  const maxLabel = categories.reduce((m, c) => (String(c).length > m.length ? String(c) : m), '')
-  const width = Math.max(8, measureTextWidth(maxLabel, fontSize))
-  const lineHeight = Math.round(fontSize * 1.2)
-  const rad = Math.abs((xAxisRotation * Math.PI) / 180)
-  const projected = Math.abs(Math.sin(rad)) * width + Math.abs(Math.cos(rad)) * lineHeight
-  return Math.ceil(projected + 8)
-}
 
 function estimateLegendHeight(seriesNames: string[], legendPosition: string): number {
   if (legendPosition !== 'bottom' && legendPosition !== 'auto') return 0
@@ -414,10 +397,11 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const legendIsLeft = showLegend && legendPosition === 'left'
   const legendIsRight = showLegend && legendPosition === 'right'
   const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
-  const xAxisLabelHeight = hasAxis ? estimateXAxisLabelHeight(categories, xAxisRotation) : 0
   const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
+  // containLabel: true already accounts for x-axis label height, so gridBottom
+  // only needs space for the legend (when at bottom) plus a small gap.
   const gridBottom = hasAxis
-    ? Math.max(24, Math.min(140, xAxisLabelHeight + (legendIsBottom ? legendHeight + 8 : 6)))
+    ? Math.max(24, legendIsBottom ? legendHeight + 8 : 6)
     : 12
 
   const base = {
