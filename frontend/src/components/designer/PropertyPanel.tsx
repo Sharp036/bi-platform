@@ -452,6 +452,23 @@ export default function PropertyPanel() {
                         </select>
                       </Field>
 
+                      {['thousands', 'millions', 'billions', 'currency', 'percent'].includes((cc.yAxisFormat as string) || 'plain') && (
+                        <Field label={t('designer.y_axis_decimals')}>
+                          <input
+                            type="number" min={0} max={6}
+                            value={cc.yAxisDecimals != null ? Number(cc.yAxisDecimals) : ''}
+                            onChange={e => update({
+                              chartConfig: {
+                                ...cc,
+                                yAxisDecimals: e.target.value === '' ? undefined : Number(e.target.value),
+                              },
+                            })}
+                            className="input text-sm"
+                            placeholder="0"
+                          />
+                        </Field>
+                      )}
+
                       {cc.yAxisFormat === 'currency' && (
                         <Field label={t('designer.currency')}>
                           <select

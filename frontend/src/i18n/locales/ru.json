@@ -621,5 +621,6 @@
   "designer.legend_position.right": "Справа",
   "designer.legend_position.hidden": "Скрыть",
   "designer.label_top_spacing_mode.dynamic": "Динамический отступ сверху",
-  "designer.label_top_spacing_mode.fixed": "Фиксированный отступ сверху"
+  "designer.label_top_spacing_mode.fixed": "Фиксированный отступ сверху",
+  "designer.y_axis_decimals": "Знаков после запятой (ось Y)"
 }

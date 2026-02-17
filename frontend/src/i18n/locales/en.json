@@ -730,5 +730,6 @@
   "designer.legend_position.right": "Right",
   "designer.legend_position.hidden": "Hide",
   "designer.label_top_spacing_mode.dynamic": "Dynamic top spacing",
-  "designer.label_top_spacing_mode.fixed": "Fixed top spacing"
+  "designer.label_top_spacing_mode.fixed": "Fixed top spacing",
+  "designer.y_axis_decimals": "Decimal places (Y-axis)"
 }

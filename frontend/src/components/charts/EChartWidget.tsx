@@ -17,13 +17,21 @@ function parseConfig(raw?: string): Record<string, unknown> {
   try { return JSON.parse(raw) } catch { return {} }
 }
 
-function buildValueFormatter(format: string, currency: string): ((value: number) => string) | undefined {
+function defaultAxisDecimals(format: string): number {
+  if (format === 'currency') return 0
+  if (format === 'percent') return 1
+  if (format === 'thousands' || format === 'millions' || format === 'billions') return 1
+  return 0
+}
+
+function buildValueFormatter(format: string, currency: string, decimals?: number): ((value: number) => string) | undefined {
+  const d = Math.max(0, Math.min(6, Number.isFinite(Number(decimals)) ? Number(decimals) : defaultAxisDecimals(format)))
   switch (format) {
-    case 'thousands': return (v: number) => (v / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'K'
-    case 'millions': return (v: number) => (v / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'M'
-    case 'billions': return (v: number) => (v / 1_000_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'B'
-    case 'currency': return (v: number) => v.toLocaleString(undefined, { style: 'currency', currency, maximumFractionDigits: 0 })
-    case 'percent': return (v: number) => (v * 100).toFixed(1) + '%'
+    case 'thousands': return (v: number) => (v / 1000).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + 'K'
+    case 'millions': return (v: number) => (v / 1_000_000).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + 'M'
+    case 'billions': return (v: number) => (v / 1_000_000_000).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + 'B'
+    case 'currency': return (v: number) => v.toLocaleString(undefined, { style: 'currency', currency, minimumFractionDigits: d, maximumFractionDigits: d })
+    case 'percent': return (v: number) => (v * 100).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + '%'
     default: return undefined
   }
 }
@@ -321,6 +329,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   // Display options
   const yAxisFormat = (config.yAxisFormat as string) || 'plain'
   const yAxisCurrency = (config.yAxisCurrency as string) || 'USD'
+  const yAxisDecimals = config.yAxisDecimals != null ? Number(config.yAxisDecimals) : undefined
   const xAxisRotation = Number(config.xAxisRotation) || 0
   const showDataLabels = !!config.showDataLabels
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
@@ -332,7 +341,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
   const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
   const legendPosition = (config.legendPosition as string) || 'auto'
-  const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency)
+  const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency, yAxisDecimals)
   const palette = Array.isArray((config.option as Record<string, unknown> | undefined)?.color)
     ? ((config.option as Record<string, unknown>).color as string[])
     : ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
