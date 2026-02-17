@@ -68,6 +68,35 @@ function wrapLegendText(value: string, lineLen: number, maxLines: number): strin
   return lines.join('\n')
 }
 
+function measureTextWidth(text: string, fontSize = 12): number {
+  if (typeof document === 'undefined') return text.length * fontSize * 0.6
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return text.length * fontSize * 0.6
+  ctx.font = `${fontSize}px sans-serif`
+  return ctx.measureText(text).width
+}
+
+function estimateXAxisLabelHeight(categories: string[], xAxisRotation: number, fontSize = 12): number {
+  const maxLabel = categories.reduce((m, c) => (String(c).length > m.length ? String(c) : m), '')
+  const width = Math.max(8, measureTextWidth(maxLabel, fontSize))
+  const lineHeight = Math.round(fontSize * 1.2)
+  const rad = Math.abs((xAxisRotation * Math.PI) / 180)
+  const projected = Math.abs(Math.sin(rad)) * width + Math.abs(Math.cos(rad)) * lineHeight
+  return Math.ceil(projected + 8)
+}
+
+function estimateLegendHeight(seriesNames: string[], legendPosition: string): number {
+  if (legendPosition !== 'bottom' && legendPosition !== 'auto') return 0
+  const maxLines = seriesNames.reduce((m, name) => {
+    const lines = wrapLegendText(name, 22, 3).split('\n').length
+    return Math.max(m, lines)
+  }, 1)
+  const lineHeight = 12
+  const legendLineBlock = Math.max(10, maxLines * lineHeight)
+  return legendLineBlock + 14
+}
+
 function ensureXAxisLabelsVisible(option: any) {
   const ensureAxis = (axis: any) => {
     if (!axis || axis.type !== 'category') return axis
@@ -532,8 +561,10 @@ export default function MultiLayerChart({
     const legendIsLeft = showLegend && legendPosition === 'left'
     const legendIsRight = showLegend && legendPosition === 'right'
     const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
+    const xAxisLabelHeight = !isPie ? estimateXAxisLabelHeight(categories, xAxisRotation) : 0
+    const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
     const gridBottom = !isPie
-      ? (legendIsBottom ? (xAxisRotation ? 110 : 86) : (xAxisRotation ? 62 : 30))
+      ? Math.max(24, Math.min(140, xAxisLabelHeight + (legendIsBottom ? legendHeight + 8 : 6)))
       : 12
 
     const tooltipOpts = tooltipConfig
