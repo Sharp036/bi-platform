@@ -511,6 +511,14 @@ export default function PropertyPanel() {
                             placeholder={t('designer.label_count_placeholder')}
                           />
                         )}
+                        <select
+                          value={cc.dataLabelTopSpacingMode as string || 'dynamic'}
+                          onChange={e => update({ chartConfig: { ...cc, dataLabelTopSpacingMode: e.target.value } })}
+                          className="input text-sm"
+                        >
+                          <option value="dynamic">{t('designer.label_top_spacing_mode.dynamic')}</option>
+                          <option value="fixed">{t('designer.label_top_spacing_mode.fixed')}</option>
+                        </select>
                         <div className="flex items-center gap-2">
                           <input
                             type="number" min={0} max={6}

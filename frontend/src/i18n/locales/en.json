@@ -728,5 +728,7 @@
   "designer.legend_position.bottom": "Bottom",
   "designer.legend_position.left": "Left",
   "designer.legend_position.right": "Right",
-  "designer.legend_position.hidden": "Hide"
+  "designer.legend_position.hidden": "Hide",
+  "designer.label_top_spacing_mode.dynamic": "Dynamic top spacing",
+  "designer.label_top_spacing_mode.fixed": "Fixed top spacing"
 }

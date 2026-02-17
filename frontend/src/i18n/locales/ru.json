@@ -619,5 +619,7 @@
   "designer.legend_position.bottom": "Снизу",
   "designer.legend_position.left": "Слева",
   "designer.legend_position.right": "Справа",
-  "designer.legend_position.hidden": "Скрыть"
+  "designer.legend_position.hidden": "Скрыть",
+  "designer.label_top_spacing_mode.dynamic": "Динамический отступ сверху",
+  "designer.label_top_spacing_mode.fixed": "Фиксированный отступ сверху"
 }

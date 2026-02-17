@@ -88,6 +88,26 @@ function estimateLegendHeight(seriesNames: string[], legendPosition: string): nu
   return legendLineBlock + 14
 }
 
+function estimateDataLabelTopPadding(
+  showDataLabels: boolean,
+  hasAxis: boolean,
+  totalRows: number,
+  seriesCount: number,
+  mode: string,
+  count: number
+): number {
+  if (!showDataLabels || !hasAxis || totalRows <= 0 || seriesCount <= 0) return 0
+  const visiblePerSeries =
+    mode === 'all' ? totalRows
+      : mode === 'min_max' ? Math.min(2, totalRows)
+        : Math.min(Math.max(1, count || 1), totalRows)
+  const totalVisible = Math.max(1, visiblePerSeries * seriesCount)
+  // Conservative estimate: keep plot clear while collision layout still handles exact anti-overlap.
+  const rows = Math.ceil(totalVisible / 4)
+  const top = 18 + rows * 18
+  return Math.max(52, Math.min(220, top))
+}
+
 function ensureXAxisLabelsVisible(option: any) {
   const ensureAxis = (axis: any) => {
     if (!axis || axis.type !== 'category') return axis
@@ -305,6 +325,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const showDataLabels = !!config.showDataLabels
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
   const dataLabelCount = Number(config.dataLabelCount) || 3
+  const dataLabelTopSpacingMode = (config.dataLabelTopSpacingMode as string) || 'dynamic'
   const dataLabelRotation = Number(config.dataLabelRotation) || 0
   const dataLabelBoxed = !!config.dataLabelBoxed
   const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
@@ -397,6 +418,16 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   const legendIsLeft = showLegend && legendPosition === 'left'
   const legendIsRight = showLegend && legendPosition === 'right'
   const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
+  const dynamicLabelTopPad = estimateDataLabelTopPadding(
+    showDataLabels,
+    hasAxis,
+    rows.length,
+    seriesCols.length,
+    dataLabelMode,
+    dataLabelCount
+  )
+  const fixedLabelTopPad = showDataLabels && hasAxis ? 120 : 0
+  const labelTopPad = dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
   const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
   // containLabel: true already accounts for x-axis label height, so gridBottom
   // only needs space for the legend (when at bottom) plus a small gap.
@@ -415,9 +446,9 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
     grid: {
       left: legendIsLeft ? legendSidePad : '3%',
       right: legendIsRight ? legendSidePad : '4%',
-      top: showDataLabels && hasAxis
-        ? (legendIsTop ? 165 : 120)
-        : (legendIsTop ? 56 : undefined),
+      top: hasAxis
+        ? (legendIsTop ? Math.max(56, labelTopPad + 42) : (labelTopPad || undefined))
+        : undefined,
       bottom: gridBottom,
       containLabel: true,
     },
