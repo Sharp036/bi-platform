@@ -38,3 +38,5 @@ docker/volumes/
 .DS_Store
 Thumbs.db
 nul
+
+backend/bin/
