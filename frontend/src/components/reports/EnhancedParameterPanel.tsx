@@ -12,6 +12,7 @@ interface Props {
   loading?: boolean
   compact?: boolean
   className?: string
+  currentParameters?: Record<string, unknown>
 }
 
 export default function EnhancedParameterPanel({
@@ -21,6 +22,7 @@ export default function EnhancedParameterPanel({
   loading,
   compact = false,
   className = '',
+  currentParameters,
 }: Props) {
   const { t } = useTranslation()
   const resolveDynamicDefault = (p: ReportParameter): string => {
@@ -45,7 +47,12 @@ export default function EnhancedParameterPanel({
   const [values, setValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
     parameters.forEach(p => {
-      if (p.defaultValue) init[p.name] = resolveDynamicDefault(p)
+      const current = currentParameters?.[p.name]
+      if (current !== undefined) {
+        init[p.name] = String(current)
+      } else if (p.defaultValue) {
+        init[p.name] = resolveDynamicDefault(p)
+      }
     })
     return init
   })
@@ -83,7 +90,12 @@ export default function EnhancedParameterPanel({
   useEffect(() => {
     const init: Record<string, string> = {}
     parameters.forEach(p => {
-      if (p.defaultValue) init[p.name] = resolveDynamicDefault(p)
+      const current = currentParameters?.[p.name]
+      if (current !== undefined) {
+        init[p.name] = String(current)
+      } else if (p.defaultValue) {
+        init[p.name] = resolveDynamicDefault(p)
+      }
     })
     setValues(init)
   }, [parameters])
