@@ -238,15 +238,16 @@ const UserManagement: React.FC = () => {
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay">
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>{editingUser ? t('admin.edit_user', { name: editingUser.username }) : t('admin.create_user')}</h3>
+            <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(); }}>
             <div className="form-group">
               <label>{t('admin.field.username')}</label>
               <input
                 type="text"
                 value={form.username}
-                onChange={e => setForm({ ...form, username: e.target.value })}
+                onChange={e => setForm(prev => ({ ...prev, username: e.target.value }))}
                 disabled={!!editingUser}
                 placeholder="username"
               />
@@ -256,7 +257,7 @@ const UserManagement: React.FC = () => {
               <input
                 type="email"
                 value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
+                onChange={e => setForm(prev => ({ ...prev, email: e.target.value }))}
                 placeholder="user@example.com"
               />
             </div>
@@ -266,7 +267,7 @@ const UserManagement: React.FC = () => {
                 <input
                   type="password"
                   value={form.password}
-                  onChange={e => setForm({ ...form, password: e.target.value })}
+                  onChange={e => setForm(prev => ({ ...prev, password: e.target.value }))}
                   placeholder={t('admin.password_placeholder')}
                 />
               </div>
@@ -276,7 +277,7 @@ const UserManagement: React.FC = () => {
               <input
                 type="text"
                 value={form.displayName}
-                onChange={e => setForm({ ...form, displayName: e.target.value })}
+                onChange={e => setForm(prev => ({ ...prev, displayName: e.target.value }))}
                 placeholder="John Doe"
               />
             </div>
@@ -301,17 +302,18 @@ const UserManagement: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={form.isActive}
-                  onChange={e => setForm({ ...form, isActive: e.target.checked })}
+                  onChange={e => setForm(prev => ({ ...prev, isActive: e.target.checked }))}
                 />
                 {t('admin.field.active')}
               </label>
             </div>
             <div className="modal-actions">
-              <button className="btn" onClick={() => setShowModal(false)}>{t('common.cancel')}</button>
-              <button className="btn btn-primary" onClick={handleSubmit}>
+              <button type="button" className="btn" onClick={() => setShowModal(false)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">
                 {editingUser ? t('admin.save_changes') : t('admin.create_user_btn')}
               </button>
             </div>
+            </form>
           </div>
         </div>
       )}
