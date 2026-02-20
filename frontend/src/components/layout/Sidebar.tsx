@@ -3,26 +3,29 @@ import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
+import { useAuthStore } from '@/store/authStore'
 
 const navItems = [
   { to: '/', icon: Home, i18nKey: 'nav.home' },
-  { to: '/reports', icon: FileBarChart, i18nKey: 'nav.reports' },
+  { to: '/reports', icon: FileBarChart, i18nKey: 'nav.reports', permission: 'REPORT_VIEW' },
   { to: '/queries', icon: Code2, i18nKey: 'nav.queries' },
   { to: '/scripts', icon: Braces, i18nKey: 'nav.scripts' },
-  { to: '/datasources', icon: Database, i18nKey: 'nav.datasources' },
+  { to: '/datasources', icon: Database, i18nKey: 'nav.datasources', permission: 'DATASOURCE_VIEW' },
   { to: '/models', icon: Boxes, i18nKey: 'nav.models' },
   { to: '/templates', icon: LayoutTemplate, i18nKey: 'nav.templates' },
   { to: '/schedules', icon: CalendarClock, i18nKey: 'nav.schedules' },
   { to: '/alerts', icon: Bell, i18nKey: 'nav.alerts' },
   { to: '/monitoring', icon: Activity, i18nKey: 'nav.monitoring' },
   { to: '/shared', icon: Share2, i18nKey: 'nav.shared' },
-  { to: '/admin', icon: Settings, i18nKey: 'nav.admin' },
+  { to: '/admin', icon: Settings, i18nKey: 'nav.admin', permission: 'USER_MANAGE' },
   { to: '/profile/password', icon: KeyRound, i18nKey: 'nav.password' },
 ]
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const { t } = useTranslation()
+  const permissions = useAuthStore(s => s.user?.permissions ?? [])
+  const visibleNavItems = navItems.filter(item => !item.permission || permissions.includes(item.permission))
 
   return (
     <aside className={clsx(
@@ -39,7 +42,7 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 py-3 space-y-1 px-2 overflow-y-auto">
-        {navItems.map(({ to, icon: Icon, i18nKey }) => (
+        {visibleNavItems.map(({ to, icon: Icon, i18nKey }) => (
           <NavLink
             key={to}
             to={to}
