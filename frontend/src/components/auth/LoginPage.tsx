@@ -48,7 +48,7 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('auth.username')}</label>
             <input
               type="text" value={username} onChange={e => setUsername(e.target.value)}
-              className="input" placeholder="admin" autoFocus required
+              className="input" placeholder={t('auth.username')} autoFocus required
             />
           </div>
 

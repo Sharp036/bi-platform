@@ -113,6 +113,18 @@ const RoleManagement: React.FC = () => {
     return acc;
   }, {});
 
+  const getRoleDescription = (roleName: string, fallback?: string | null) => {
+    return t(`admin.role_description.${roleName}`, {
+      defaultValue: fallback || t('admin.no_description')
+    });
+  };
+
+  const getPermissionDescription = (permCode: string, fallback?: string | null) => {
+    return t(`admin.permission_description.${permCode}`, {
+      defaultValue: fallback || ''
+    });
+  };
+
   return (
     <div className="admin-roles">
       <div className="admin-header">
@@ -135,10 +147,10 @@ const RoleManagement: React.FC = () => {
             >
               <div className="role-card-header">
                 <span className={`badge badge-${role.name.toLowerCase()}`}>{role.name}</span>
-                {role.isSystem && <small className="system-tag">System</small>}
+                {role.isSystem && <small className="system-tag">{t('admin.system_badge')}</small>}
               </div>
-              <p className="role-desc">{role.description || 'No description'}</p>
-              <small>{role.permissionCount} {t('admin.permissions').toLowerCase()}</small>
+              <p className="role-desc">{getRoleDescription(role.name, role.description)}</p>
+              <small>{t('admin.permissions_count', { count: role.permissionCount })}</small>
             </div>
           ))}
         </div>
@@ -159,15 +171,15 @@ const RoleManagement: React.FC = () => {
                   )}
                 </div>
               </div>
-              <p>{selectedRole.description || 'No description'}</p>
-              <p className="user-count">{selectedRole.userCount} user(s) assigned</p>
+              <p>{getRoleDescription(selectedRole.name, selectedRole.description)}</p>
+              <p className="user-count">{t('admin.users_assigned', { count: selectedRole.userCount })}</p>
 
               <h4>{t('admin.permissions')} ({selectedRole.permissions.length})</h4>
               <div className="perm-list">
                 {selectedRole.permissions.map(p => (
                   <div key={p.id} className="perm-item">
                     <code>{p.code}</code>
-                    <small>{p.description}</small>
+                    <small>{getPermissionDescription(p.code, p.description)}</small>
                   </div>
                 ))}
               </div>
@@ -200,7 +212,7 @@ const RoleManagement: React.FC = () => {
                 type="text"
                 value={formDesc}
                 onChange={e => setFormDesc(e.target.value)}
-                placeholder="Optional description"
+                placeholder={t('admin.role_description_placeholder')}
               />
             </div>
             <div className="form-group">
