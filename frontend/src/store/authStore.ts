@@ -21,14 +21,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     const res = await authApi.login(data)
     localStorage.setItem('accessToken', res.accessToken)
     localStorage.setItem('refreshToken', res.refreshToken)
-    if (res.language) {
+    const user = await authApi.me()
+    if (user.language) {
+      i18n.changeLanguage(user.language)
+      localStorage.setItem('language', user.language)
+    } else if (res.language) {
       i18n.changeLanguage(res.language)
       localStorage.setItem('language', res.language)
     }
-    set({
-      user: { username: res.username, roles: res.roles, permissions: [], language: res.language || 'en' },
-      isAuthenticated: true,
-    })
+    set({ user, isAuthenticated: true })
   },
 
   logout: () => {

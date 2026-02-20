@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import PermissionRoute from '@/components/auth/PermissionRoute'
 import LoginPage from '@/components/auth/LoginPage'
 import AppLayout from '@/components/layout/AppLayout'
 
@@ -54,17 +55,38 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<WorkspacePage />} />
-          <Route path="/reports" element={<ReportListPage />} />
+          <Route
+            path="/reports"
+            element={
+              <PermissionRoute permission="REPORT_VIEW">
+                <ReportListPage />
+              </PermissionRoute>
+            }
+          />
           <Route path="/reports/new" element={<ReportDesignerPage />} />
           <Route path="/reports/:id/edit" element={<ReportDesignerPage />} />
           <Route path="/reports/:id" element={<ReportViewerPage />} />
           <Route path="/queries" element={<QueryListPage />} />
-          <Route path="/datasources" element={<DataSourceListPage />} />
+          <Route
+            path="/datasources"
+            element={
+              <PermissionRoute permission="DATASOURCE_VIEW">
+                <DataSourceListPage />
+              </PermissionRoute>
+            }
+          />
           <Route path="/schedules" element={<ScheduleListPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/scripts" element={<ScriptEditorPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={
+              <PermissionRoute permission="USER_MANAGE">
+                <AdminPage />
+              </PermissionRoute>
+            }
+          />
           <Route path="/profile/password" element={<ChangePassword />} />
           <Route path="/shared" element={<SharedWithMePage />} />
           <Route path="/models" element={<ModelListPage />} />
