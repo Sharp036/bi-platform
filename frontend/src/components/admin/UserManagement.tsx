@@ -140,6 +140,12 @@ const UserManagement: React.FC = () => {
     }));
   };
 
+  const isCreateMode = !editingUser;
+  const isSubmitDisabled =
+    !form.username.trim() ||
+    !form.email.trim() ||
+    (isCreateMode && !form.password.trim());
+
   return (
     <div className="admin-users">
       <div className="admin-header">
@@ -309,7 +315,7 @@ const UserManagement: React.FC = () => {
             </div>
             <div className="modal-actions">
               <button type="button" className="btn" onClick={() => setShowModal(false)}>{t('common.cancel')}</button>
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn btn-primary" disabled={isSubmitDisabled}>
                 {editingUser ? t('admin.save_changes') : t('admin.create_user_btn')}
               </button>
             </div>
