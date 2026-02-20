@@ -338,6 +338,7 @@ export default function ReportViewerPage() {
             onApply={handleRender}
             loading={rendering}
             compact
+            currentParameters={currentParams}
           />
         )}
       </div>
@@ -413,6 +414,7 @@ export default function ReportViewerPage() {
           onApply={handleRender}
           loading={rendering}
           className="mb-4"
+          currentParameters={currentParams}
         />
       )}
 
@@ -445,6 +447,7 @@ export default function ReportViewerPage() {
           onApply={handleRender}
           loading={rendering}
           className="mt-4"
+          currentParameters={currentParams}
         />
       )}
     </div>
