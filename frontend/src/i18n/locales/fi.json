@@ -262,6 +262,7 @@
   "designer.data_labels": "Tietoselitteet",
   "designer.show_data_labels": "Näytä arvot kaaviossa",
   "designer.data_label_boxed": "Merkinnät värikehyksessä",
+  "designer.data_label_spread": "Spread labels horizontally",
   "designer.data_label_decimals": "Desimaalit",
   "designer.data_label_thousands_sep": "Tuhaterotin",
   "designer.label_mode.all": "All",

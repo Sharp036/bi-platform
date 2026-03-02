@@ -304,6 +304,7 @@ export default function MultiLayerChart({
     const dataLabelMode = (config.dataLabelMode as string) || 'all'
     const dataLabelCount = Number(config.dataLabelCount) || 3
     const dataLabelTopSpacingMode = (config.dataLabelTopSpacingMode as string) || 'dynamic'
+    const dataLabelSpread = !!config.dataLabelSpread
     const dataLabelRotation = Number(config.dataLabelRotation) || 0
     const dataLabelBoxed = !!config.dataLabelBoxed
     const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
@@ -533,7 +534,7 @@ export default function MultiLayerChart({
       } : {}),
       series,
       ...(showDataLabels && !isPie ? {
-        labelLayout: createCollisionFreeLayout(getChartWidth),
+        labelLayout: createCollisionFreeLayout(getChartWidth, undefined, undefined, dataLabelSpread),
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),

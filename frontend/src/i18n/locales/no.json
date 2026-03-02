@@ -262,6 +262,7 @@
   "designer.data_labels": "Dataetiketter",
   "designer.show_data_labels": "Vis verdier på diagrammet",
   "designer.data_label_boxed": "Etiketter med farget ramme",
+  "designer.data_label_spread": "Spread labels horizontally",
   "designer.data_label_decimals": "Desimaler",
   "designer.data_label_thousands_sep": "Tusenskille",
   "designer.label_mode.all": "All",
