@@ -1,8 +1,10 @@
 import ReactECharts from 'echarts-for-react'
 import type { WidgetData } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
-import { useRef } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { createCollisionFreeLayout } from '@/components/charts/labelLayout'
+import type { LabelPlacement } from '@/components/charts/labelLayout'
 
 interface Props {
   data: WidgetData
@@ -217,104 +219,15 @@ function calcLinearRegression(values: number[]): number[] {
   return values.map((_, i) => slope * i + intercept)
 }
 
-/**
- * Creates a top-level labelLayout function that prevents label overlap
- * using greedy rectangle-packing. All series share the same `placed` array
- * so cross-series collision is handled.
- */
-function createCollisionFreeLayout(getChartWidth?: () => number) {
-  const placed: { x1: number; y1: number; x2: number; y2: number }[] = []
-  let lastTs = 0
-  const GAP = 4
-
-  function collides(r: { x1: number; y1: number; x2: number; y2: number }) {
-    return placed.some(p =>
-      r.x1 < p.x2 + GAP && r.x2 > p.x1 - GAP &&
-      r.y1 < p.y2 + GAP && r.y2 > p.y1 - GAP
-    )
-  }
-
-  return (params: {
-    rect?: { x: number; y: number; width: number; height: number }
-    labelRect?: { x: number; y: number; width: number; height: number }
-    dataIndex: number
-    seriesIndex: number
-  }) => {
-    // Reset placed array on a new layout pass (gap > 50ms between calls)
-    const now = Date.now()
-    if (now - lastTs > 50) placed.length = 0
-    lastTs = now
-
-    const { rect, labelRect } = params
-    if (!rect || !labelRect || labelRect.width < 1) return {}
-
-    const anchorX = rect.x + rect.width / 2
-    const anchorY = rect.y
-    const lw = labelRect.width
-    const lh = labelRect.height
-    const ROW_H = lh + GAP
-    const chartW = getChartWidth?.() ?? 0
-
-    // For labels near the right edge, try left offsets first; near the left — right first
-    const preferLeft = chartW > 0 && anchorX > chartW * 0.6
-
-    // Try rows from top of chart, with horizontal offsets for each row
-    for (let row = 0; row < 20; row++) {
-      const baseY = 8 + row * ROW_H
-      const offsets = [0]
-      for (let i = 1; i <= 6; i++) {
-        if (preferLeft) {
-          offsets.push(-(lw * 0.5 + GAP) * i)
-          offsets.push((lw * 0.5 + GAP) * i)
-        } else {
-          offsets.push((lw * 0.5 + GAP) * i)
-          offsets.push(-(lw * 0.5 + GAP) * i)
-        }
-      }
-      for (const dx of offsets) {
-        const cx = anchorX + dx
-        const candidate = {
-          x1: cx - lw / 2,
-          y1: baseY,
-          x2: cx + lw / 2,
-          y2: baseY + lh,
-        }
-        if (candidate.x1 < 0) continue
-        if (chartW > 0 && candidate.x2 > chartW) continue
-        if (!collides(candidate)) {
-          placed.push(candidate)
-          return {
-            x: cx,
-            y: baseY,
-            align: 'center' as const,
-            verticalAlign: 'top' as const,
-            labelLinePoints: [
-              [cx, baseY + lh],
-              [anchorX, anchorY],
-            ],
-          }
-        }
-      }
-    }
-
-    // Fallback — clamp within chart bounds
-    const y = 8 + placed.length * ROW_H
-    const clampedX = chartW > 0 ? Math.max(lw / 2, Math.min(anchorX, chartW - lw / 2)) : anchorX
-    placed.push({ x1: clampedX - lw / 2, y1: y, x2: clampedX + lw / 2, y2: y + lh })
-    return {
-      x: clampedX,
-      y,
-      align: 'center' as const,
-      verticalAlign: 'top' as const,
-      labelLinePoints: [
-        [clampedX, y + lh],
-        [anchorX, anchorY],
-      ],
-    }
-  }
-}
-
-function buildOption(data: WidgetData, config: Record<string, unknown>, regressionLabel: string, isDark: boolean, getChartWidth?: () => number) {
+function buildOption(
+  data: WidgetData,
+  config: Record<string, unknown>,
+  regressionLabel: string,
+  isDark: boolean,
+  getChartWidth?: () => number,
+  manualPositions?: Map<string, { x: number; y: number }>,
+  placementsRef?: { current: Map<string, LabelPlacement> },
+) {
   const chartType = (config.type as string) || 'bar'
   const cols = data.columns || []
   const rows = data.rows || []
@@ -474,7 +387,7 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
     } : {}),
     series,
     ...(showDataLabels && hasAxis ? {
-      labelLayout: createCollisionFreeLayout(getChartWidth),
+      labelLayout: createCollisionFreeLayout(getChartWidth, manualPositions, placementsRef),
     } : {}),
   }
 
@@ -485,24 +398,138 @@ function buildOption(data: WidgetData, config: Record<string, unknown>, regressi
   return ensureXAxisLabelsVisible(merged)
 }
 
+interface DragState {
+  key: string
+  startMouseX: number
+  startMouseY: number
+  startLabelX: number
+  startLabelY: number
+}
+
 export default function EChartWidget({ data, chartConfig, title, onChartClick, clickable }: Props) {
   const isDark = useThemeStore(s => s.isDark)
   const { t } = useTranslation()
   const config = parseConfig(chartConfig)
+
   const chartRef = useRef<ReactECharts>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const manualLabelPositions = useRef(new Map<string, { x: number; y: number }>())
+  const labelPlacements = useRef(new Map<string, LabelPlacement>())
+  const dragState = useRef<DragState | null>(null)
+
+  const [, forceUpdate] = useState(0)
+  const [dragging, setDragging] = useState<{ containerX: number; containerY: number } | null>(null)
+
   const getChartWidth = () => chartRef.current?.getEchartsInstance()?.getWidth() ?? 0
-  const option = buildOption(data, config, t('charts.regression_short', 'Linear'), isDark, getChartWidth)
+
+  const option = buildOption(
+    data, config, t('charts.regression_short', 'Linear'), isDark,
+    getChartWidth, manualLabelPositions.current, labelPlacements,
+  )
+
+  // ── Drag handlers ─────────────────────────────────────────────────────────
+
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current
+    if (!container) return
+    const rect = container.getBoundingClientRect()
+    const cx = e.clientX - rect.left
+    const cy = e.clientY - rect.top
+    for (const [key, p] of labelPlacements.current) {
+      if (cx >= p.x1 && cx <= p.x2 && cy >= p.y1 && cy <= p.y2) {
+        e.preventDefault()
+        e.stopPropagation()
+        dragState.current = {
+          key,
+          startMouseX: cx,
+          startMouseY: cy,
+          startLabelX: (p.x1 + p.x2) / 2,
+          startLabelY: p.y1,
+        }
+        setDragging({ containerX: cx, containerY: cy })
+        return
+      }
+    }
+  }, [])
+
+  const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current
+    if (!container) return
+    const rect = container.getBoundingClientRect()
+    const cx = e.clientX - rect.left
+    const cy = e.clientY - rect.top
+    for (const [key, p] of labelPlacements.current) {
+      if (cx >= p.x1 && cx <= p.x2 && cy >= p.y1 && cy <= p.y2) {
+        manualLabelPositions.current.delete(key)
+        forceUpdate(n => n + 1)
+        return
+      }
+    }
+  }, [])
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current
+    if (!container) return
+    if (dragState.current) {
+      const rect = container.getBoundingClientRect()
+      setDragging({ containerX: e.clientX - rect.left, containerY: e.clientY - rect.top })
+      return
+    }
+    // Update cursor based on hover over labels
+    const rect = container.getBoundingClientRect()
+    const cx = e.clientX - rect.left
+    const cy = e.clientY - rect.top
+    for (const p of labelPlacements.current.values()) {
+      if (cx >= p.x1 && cx <= p.x2 && cy >= p.y1 && cy <= p.y2) {
+        container.style.cursor = 'grab'
+        return
+      }
+    }
+    container.style.cursor = clickable ? 'pointer' : ''
+  }
+
+  useEffect(() => {
+    const onUp = (e: MouseEvent) => {
+      if (!dragState.current) return
+      const container = containerRef.current
+      if (container) {
+        const rect = container.getBoundingClientRect()
+        const cx = e.clientX - rect.left
+        const cy = e.clientY - rect.top
+        const { startMouseX, startMouseY, startLabelX, startLabelY, key } = dragState.current
+        manualLabelPositions.current.set(key, {
+          x: startLabelX + (cx - startMouseX),
+          y: startLabelY + (cy - startMouseY),
+        })
+        forceUpdate(n => n + 1)
+      }
+      dragState.current = null
+      setDragging(null)
+    }
+    window.addEventListener('mouseup', onUp)
+    return () => window.removeEventListener('mouseup', onUp)
+  }, [])
+
+  // ── Events ────────────────────────────────────────────────────────────────
 
   const onEvents = onChartClick ? {
     click: (params: Record<string, unknown>) => {
-      onChartClick(params)
-    }
+      if (!dragState.current) onChartClick(params)
+    },
   } : undefined
+
+  const isDraggingNow = !!dragState.current
 
   return (
     <div className="h-full flex flex-col">
       {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
-      <div className={`flex-1 min-h-0 ${clickable ? 'cursor-pointer' : ''}`}>
+      <div
+        ref={containerRef}
+        className={`flex-1 min-h-0 relative select-none${isDraggingNow ? ' cursor-grabbing' : (clickable ? ' cursor-pointer' : '')}`}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onDoubleClick={handleDoubleClick}
+      >
         <ReactECharts
           ref={chartRef}
           option={option}
@@ -512,6 +539,27 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
           opts={{ renderer: 'canvas' }}
           onEvents={onEvents}
         />
+        {isDraggingNow && dragging && (
+          <div
+            style={{
+              position: 'absolute',
+              left: dragging.containerX,
+              top: dragging.containerY,
+              transform: 'translate(-50%, -120%)',
+              pointerEvents: 'none',
+              background: isDark ? 'rgba(30,30,46,0.92)' : 'rgba(255,255,255,0.92)',
+              border: `1px dashed ${isDark ? '#888' : '#aaa'}`,
+              borderRadius: 3,
+              padding: '1px 8px',
+              fontSize: 10,
+              color: isDark ? '#ccc' : '#444',
+              zIndex: 10,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ↕ перетащить
+          </div>
+        )}
       </div>
     </div>
   )

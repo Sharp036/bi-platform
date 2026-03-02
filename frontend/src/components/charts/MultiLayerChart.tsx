@@ -8,6 +8,7 @@ import { buildRichTooltip } from '@/components/charts/buildRichTooltip'
 import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
 import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
 import { useTranslation } from 'react-i18next'
+import { createCollisionFreeLayout } from '@/components/charts/labelLayout'
 
 function defaultAxisDecimals(format: string): number {
   if (format === 'currency') return 0
@@ -221,100 +222,6 @@ interface Props {
   tooltipConfig?: TooltipConfigItem
 }
 
-/**
- * Creates a top-level labelLayout function that prevents label overlap
- * using greedy rectangle-packing. All series share the same `placed` array
- * so cross-series collision is handled.
- */
-function createCollisionFreeLayout(getChartWidth?: () => number) {
-  const placed: { x1: number; y1: number; x2: number; y2: number }[] = []
-  let lastTs = 0
-  const GAP = 4
-
-  function collides(r: { x1: number; y1: number; x2: number; y2: number }) {
-    return placed.some(p =>
-      r.x1 < p.x2 + GAP && r.x2 > p.x1 - GAP &&
-      r.y1 < p.y2 + GAP && r.y2 > p.y1 - GAP
-    )
-  }
-
-  return (params: {
-    rect?: { x: number; y: number; width: number; height: number }
-    labelRect?: { x: number; y: number; width: number; height: number }
-    dataIndex: number
-    seriesIndex: number
-  }) => {
-    const now = Date.now()
-    if (now - lastTs > 50) placed.length = 0
-    lastTs = now
-
-    const { rect, labelRect } = params
-    if (!rect || !labelRect || labelRect.width < 1) return {}
-
-    const anchorX = rect.x + rect.width / 2
-    const anchorY = rect.y
-    const lw = labelRect.width
-    const lh = labelRect.height
-    const ROW_H = lh + GAP
-    const chartW = getChartWidth?.() ?? 0
-
-    // For labels near the right edge, try left offsets first; near the left — right first
-    const preferLeft = chartW > 0 && anchorX > chartW * 0.6
-
-    for (let row = 0; row < 20; row++) {
-      const baseY = 8 + row * ROW_H
-      const offsets = [0]
-      for (let i = 1; i <= 6; i++) {
-        if (preferLeft) {
-          offsets.push(-(lw * 0.5 + GAP) * i)
-          offsets.push((lw * 0.5 + GAP) * i)
-        } else {
-          offsets.push((lw * 0.5 + GAP) * i)
-          offsets.push(-(lw * 0.5 + GAP) * i)
-        }
-      }
-      for (const dx of offsets) {
-        const cx = anchorX + dx
-        const candidate = {
-          x1: cx - lw / 2,
-          y1: baseY,
-          x2: cx + lw / 2,
-          y2: baseY + lh,
-        }
-        if (candidate.x1 < 0) continue
-        if (chartW > 0 && candidate.x2 > chartW) continue
-        if (!collides(candidate)) {
-          placed.push(candidate)
-          return {
-            x: cx,
-            y: baseY,
-            align: 'center' as const,
-            verticalAlign: 'top' as const,
-            labelLinePoints: [
-              [cx, baseY + lh],
-              [anchorX, anchorY],
-            ],
-          }
-        }
-      }
-    }
-
-    // Fallback — clamp within chart bounds
-    const y = 8 + placed.length * ROW_H
-    const clampedX = chartW > 0 ? Math.max(lw / 2, Math.min(anchorX, chartW - lw / 2)) : anchorX
-    placed.push({ x1: clampedX - lw / 2, y1: y, x2: clampedX + lw / 2, y2: y + lh })
-    return {
-      x: clampedX,
-      y,
-      align: 'center' as const,
-      verticalAlign: 'top' as const,
-      labelLinePoints: [
-        [clampedX, y + lh],
-        [anchorX, anchorY],
-      ],
-    }
-  }
-}
 
 function parseConfig(raw?: string): Record<string, unknown> {
   if (!raw) return {}
