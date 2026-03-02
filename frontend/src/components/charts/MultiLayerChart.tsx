@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 import type { WidgetData, ChartLayerItem } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
@@ -9,6 +9,7 @@ import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
 import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
 import { useTranslation } from 'react-i18next'
 import { createCollisionFreeLayout } from '@/components/charts/labelLayout'
+import type { LabelPlacement } from '@/components/charts/labelLayout'
 
 function defaultAxisDecimals(format: string): number {
   if (format === 'currency') return 0
@@ -228,6 +229,14 @@ function parseConfig(raw?: string): Record<string, unknown> {
   try { return JSON.parse(raw) } catch { return {} }
 }
 
+interface DragState {
+  key: string
+  startMouseX: number
+  startMouseY: number
+  startLabelX: number
+  startLabelY: number
+}
+
 export default function MultiLayerChart({
   data, chartConfig, title, layers = [], layerData = {},
   onChartClick, highlightField, highlightValue,
@@ -237,7 +246,14 @@ export default function MultiLayerChart({
   const { t } = useTranslation()
   const config = parseConfig(chartConfig)
   const chartRef = useRef<ReactECharts>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const getChartWidth = useCallback(() => chartRef.current?.getEchartsInstance()?.getWidth() ?? 0, [])
+
+  const manualLabelPositions = useRef(new Map<string, { x: number; y: number }>())
+  const labelPlacements = useRef(new Map<string, LabelPlacement>())
+  const dragState = useRef<DragState | null>(null)
+  const [labelVersion, forceUpdate] = useState(0)
+  const [dragging, setDragging] = useState<{ containerX: number; containerY: number } | null>(null)
 
   // Local visibility state (overrides layer.isVisible for toggling without API call)
   const [visibilityMap, setVisibilityMap] = useState<Record<number, boolean>>(() => {
@@ -534,7 +550,7 @@ export default function MultiLayerChart({
       } : {}),
       series,
       ...(showDataLabels && !isPie ? {
-        labelLayout: createCollisionFreeLayout(getChartWidth, undefined, undefined, dataLabelSpread),
+        labelLayout: createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread),
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),
@@ -545,7 +561,110 @@ export default function MultiLayerChart({
     }
 
     return ensureXAxisLabelsVisible(result)
-  }, [data, config, layersWithVisibility, layerData, highlightField, highlightValue, annotations, tooltipConfig, isDark])
+  }, [data, config, layersWithVisibility, layerData, highlightField, highlightValue, annotations, tooltipConfig, isDark, labelVersion])
+
+  // ── Drag handlers ─────────────────────────────────────────────────────────
+
+  const getCanvas = () =>
+    containerRef.current?.querySelector('canvas') as HTMLElement | null
+
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current
+    if (!container) return
+    const rect = container.getBoundingClientRect()
+    const cx = e.clientX - rect.left
+    const cy = e.clientY - rect.top
+    const HIT_PAD = 6
+    for (const [key, p] of labelPlacements.current) {
+      if (cx >= p.x1 - HIT_PAD && cx <= p.x2 + HIT_PAD &&
+          cy >= p.y1 - HIT_PAD && cy <= p.y2 + HIT_PAD) {
+        e.preventDefault()
+        e.stopPropagation()
+        dragState.current = {
+          key,
+          startMouseX: cx,
+          startMouseY: cy,
+          startLabelX: (p.x1 + p.x2) / 2,
+          startLabelY: p.y1,
+        }
+        setDragging({ containerX: cx, containerY: cy })
+        return
+      }
+    }
+  }, [])
+
+  const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current
+    if (!container) return
+    const rect = container.getBoundingClientRect()
+    const cx = e.clientX - rect.left
+    const cy = e.clientY - rect.top
+    for (const [key, p] of labelPlacements.current) {
+      if (cx >= p.x1 && cx <= p.x2 && cy >= p.y1 && cy <= p.y2) {
+        manualLabelPositions.current.delete(key)
+        forceUpdate(n => n + 1)
+        return
+      }
+    }
+  }, [])
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current
+    if (!container) return
+    if (dragState.current) {
+      const rect = container.getBoundingClientRect()
+      setDragging({ containerX: e.clientX - rect.left, containerY: e.clientY - rect.top })
+      return
+    }
+    const rect = container.getBoundingClientRect()
+    const cx = e.clientX - rect.left
+    const cy = e.clientY - rect.top
+    const HIT_PAD = 6
+    const canvas = getCanvas()
+    for (const p of labelPlacements.current.values()) {
+      if (cx >= p.x1 - HIT_PAD && cx <= p.x2 + HIT_PAD &&
+          cy >= p.y1 - HIT_PAD && cy <= p.y2 + HIT_PAD) {
+        if (canvas) canvas.style.cursor = 'grab'
+        return
+      }
+    }
+    if (canvas) canvas.style.cursor = ''
+  }
+
+  useEffect(() => {
+    const onMove = (_e: MouseEvent) => {
+      if (!dragState.current) return
+      const canvas = getCanvas()
+      if (canvas) canvas.style.cursor = 'grabbing'
+    }
+    const onUp = (e: MouseEvent) => {
+      if (!dragState.current) return
+      const container = containerRef.current
+      if (container) {
+        const rect = container.getBoundingClientRect()
+        const cx = e.clientX - rect.left
+        const cy = e.clientY - rect.top
+        const { startMouseX, startMouseY, startLabelX, startLabelY, key } = dragState.current
+        manualLabelPositions.current.set(key, {
+          x: startLabelX + (cx - startMouseX),
+          y: startLabelY + (cy - startMouseY),
+        })
+        forceUpdate(n => n + 1)
+      }
+      const canvas = getCanvas()
+      if (canvas) canvas.style.cursor = ''
+      dragState.current = null
+      setDragging(null)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [])
+
+  // ── Chart click ───────────────────────────────────────────────────────────
 
   const handleClick = useCallback((params: any) => {
     if (!onChartClick) return
@@ -588,7 +707,13 @@ export default function MultiLayerChart({
       </div>
 
       {/* Chart */}
-      <div className="flex-1 min-h-0">
+      <div
+        ref={containerRef}
+        className={`flex-1 min-h-0 relative select-none${dragState.current ? ' cursor-grabbing' : ''}`}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onDoubleClick={handleDoubleClick}
+      >
         <ReactECharts
           ref={chartRef}
           option={option}
@@ -598,6 +723,27 @@ export default function MultiLayerChart({
           opts={{ renderer: 'canvas' }}
           onEvents={onEvents}
         />
+        {!!dragging && (
+          <div
+            style={{
+              position: 'absolute',
+              left: dragging.containerX,
+              top: dragging.containerY,
+              transform: 'translate(-50%, -120%)',
+              pointerEvents: 'none',
+              background: isDark ? 'rgba(30,30,46,0.92)' : 'rgba(255,255,255,0.92)',
+              border: `1px dashed ${isDark ? '#888' : '#aaa'}`,
+              borderRadius: 3,
+              padding: '1px 8px',
+              fontSize: 10,
+              color: isDark ? '#ccc' : '#444',
+              zIndex: 10,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ↕ перетащить
+          </div>
+        )}
       </div>
     </div>
   )
