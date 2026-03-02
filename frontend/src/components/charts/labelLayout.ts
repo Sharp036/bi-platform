@@ -141,9 +141,14 @@ export function createCollisionFreeLayout(
       for (let row = 0; row < 20; row++) {
         const baseY = 8 + row * ROW_H
         for (const dx of offsetSteps) {
-          const cx = anchorX + dx
-          if (cx - lw / 2 < 0) continue
-          if (chartW > 0 && cx + lw / 2 > chartW) continue
+          // At offset=0 clamp to chart bounds; for other offsets skip if out of bounds
+          let cx = anchorX + dx
+          if (dx === 0 && chartW > 0) {
+            cx = Math.max(lw / 2, Math.min(cx, chartW - lw / 2))
+          } else {
+            if (cx - lw / 2 < 0) continue
+            if (chartW > 0 && cx + lw / 2 > chartW) continue
+          }
           const result = tryPlace(cx, baseY, lw, lh, key, anchorX, anchorY)
           if (result) return result
         }
@@ -156,10 +161,17 @@ export function createCollisionFreeLayout(
       //
       // Each label tries all rows directly above its anchor before shifting
       // sideways, so labels stay as close as possible to their data points.
+      //
+      // At offset=0 we clamp to chart bounds instead of skipping — this
+      // prevents right-edge labels (e.g. W09) from jumping far left.
       for (const dx of offsetSteps) {
-        const cx = anchorX + dx
-        if (cx - lw / 2 < 0) continue
-        if (chartW > 0 && cx + lw / 2 > chartW) continue
+        let cx = anchorX + dx
+        if (dx === 0 && chartW > 0) {
+          cx = Math.max(lw / 2, Math.min(cx, chartW - lw / 2))
+        } else {
+          if (cx - lw / 2 < 0) continue
+          if (chartW > 0 && cx + lw / 2 > chartW) continue
+        }
         for (let row = 0; row < 20; row++) {
           const baseY = 8 + row * ROW_H
           const result = tryPlace(cx, baseY, lw, lh, key, anchorX, anchorY)
