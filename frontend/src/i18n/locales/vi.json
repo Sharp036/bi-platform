@@ -262,6 +262,7 @@
   "designer.data_labels": "Nhãn dữ liệu",
   "designer.show_data_labels": "Hiển thị giá trị trên biểu đồ",
   "designer.data_label_boxed": "Nhãn có viền màu",
+  "designer.data_label_spread": "Spread labels horizontally",
   "designer.data_label_decimals": "Chữ số thập phân",
   "designer.data_label_thousands_sep": "Phân cách hàng nghìn",
   "designer.label_mode.all": "All",

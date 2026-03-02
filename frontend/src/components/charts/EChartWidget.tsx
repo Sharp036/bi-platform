@@ -248,6 +248,7 @@ function buildOption(
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
   const dataLabelCount = Number(config.dataLabelCount) || 3
   const dataLabelTopSpacingMode = (config.dataLabelTopSpacingMode as string) || 'dynamic'
+  const dataLabelSpread = !!config.dataLabelSpread
   const dataLabelRotation = Number(config.dataLabelRotation) || 0
   const dataLabelBoxed = !!config.dataLabelBoxed
   const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
@@ -387,7 +388,7 @@ function buildOption(
     } : {}),
     series,
     ...(showDataLabels && hasAxis ? {
-      labelLayout: createCollisionFreeLayout(getChartWidth, manualPositions, placementsRef),
+      labelLayout: createCollisionFreeLayout(getChartWidth, manualPositions, placementsRef, dataLabelSpread),
     } : {}),
   }
 
@@ -435,8 +436,10 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
     const rect = container.getBoundingClientRect()
     const cx = e.clientX - rect.left
     const cy = e.clientY - rect.top
+    const HIT_PAD = 6
     for (const [key, p] of labelPlacements.current) {
-      if (cx >= p.x1 && cx <= p.x2 && cy >= p.y1 && cy <= p.y2) {
+      if (cx >= p.x1 - HIT_PAD && cx <= p.x2 + HIT_PAD &&
+          cy >= p.y1 - HIT_PAD && cy <= p.y2 + HIT_PAD) {
         e.preventDefault()
         e.stopPropagation()
         dragState.current = {
@@ -467,6 +470,9 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
     }
   }, [])
 
+  const getCanvas = () =>
+    containerRef.current?.querySelector('canvas') as HTMLElement | null
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const container = containerRef.current
     if (!container) return
@@ -475,20 +481,29 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
       setDragging({ containerX: e.clientX - rect.left, containerY: e.clientY - rect.top })
       return
     }
-    // Update cursor based on hover over labels
+    // Update cursor on the canvas element so it overrides ECharts default
     const rect = container.getBoundingClientRect()
     const cx = e.clientX - rect.left
     const cy = e.clientY - rect.top
+    const HIT_PAD = 6
+    const canvas = getCanvas()
     for (const p of labelPlacements.current.values()) {
-      if (cx >= p.x1 && cx <= p.x2 && cy >= p.y1 && cy <= p.y2) {
-        container.style.cursor = 'grab'
+      if (cx >= p.x1 - HIT_PAD && cx <= p.x2 + HIT_PAD &&
+          cy >= p.y1 - HIT_PAD && cy <= p.y2 + HIT_PAD) {
+        if (canvas) canvas.style.cursor = 'grab'
         return
       }
     }
-    container.style.cursor = clickable ? 'pointer' : ''
+    if (canvas) canvas.style.cursor = clickable ? 'pointer' : ''
   }
 
   useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!dragState.current) return
+      // Keep grabbing cursor on canvas during drag (ECharts resets it on mousemove)
+      const canvas = getCanvas()
+      if (canvas) canvas.style.cursor = 'grabbing'
+    }
     const onUp = (e: MouseEvent) => {
       if (!dragState.current) return
       const container = containerRef.current
@@ -503,11 +518,17 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
         })
         forceUpdate(n => n + 1)
       }
+      const canvas = getCanvas()
+      if (canvas) canvas.style.cursor = ''
       dragState.current = null
       setDragging(null)
     }
+    window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
-    return () => window.removeEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
   }, [])
 
   // ── Events ────────────────────────────────────────────────────────────────

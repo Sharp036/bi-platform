@@ -262,6 +262,7 @@
   "designer.data_labels": "Ετικέτες δεδομένων",
   "designer.show_data_labels": "Εμφάνιση τιμών στο γράφημα",
   "designer.data_label_boxed": "Ετικέτες σε χρωματιστό πλαίσιο",
+  "designer.data_label_spread": "Spread labels horizontally",
   "designer.data_label_decimals": "Δεκαδικά ψηφία",
   "designer.data_label_thousands_sep": "Διαχωριστικό χιλιάδων",
   "designer.label_mode.all": "All",

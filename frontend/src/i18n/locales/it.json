@@ -262,6 +262,7 @@
   "designer.data_labels": "Etichette dati",
   "designer.show_data_labels": "Mostra valori sul grafico",
   "designer.data_label_boxed": "Etichette con bordo colorato",
+  "designer.data_label_spread": "Spread labels horizontally",
   "designer.data_label_decimals": "Decimali",
   "designer.data_label_thousands_sep": "Separatore migliaia",
   "designer.label_mode.all": "All",

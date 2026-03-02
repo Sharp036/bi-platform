@@ -563,6 +563,15 @@ export default function PropertyPanel() {
                           />
                           {t('designer.data_label_boxed')}
                         </label>
+                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={!!cc.dataLabelSpread}
+                            onChange={e => update({ chartConfig: { ...cc, dataLabelSpread: e.target.checked } })}
+                            className="rounded border-slate-300"
+                          />
+                          {t('designer.data_label_spread')}
+                        </label>
                         <select
                           value={String(cc.dataLabelRotation || 0)}
                           onChange={e => update({ chartConfig: { ...cc, dataLabelRotation: Number(e.target.value) } })}

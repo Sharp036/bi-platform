@@ -262,6 +262,7 @@
   "designer.data_labels": "Datenbeschriftungen",
   "designer.show_data_labels": "Werte im Diagramm anzeigen",
   "designer.data_label_boxed": "Labels in farbigem Rahmen",
+  "designer.data_label_spread": "Spread labels horizontally",
   "designer.data_label_decimals": "Dezimalstellen",
   "designer.data_label_thousands_sep": "Tausendertrennzeichen",
   "designer.label_mode.all": "All",

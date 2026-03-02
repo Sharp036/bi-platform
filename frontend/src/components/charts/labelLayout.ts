@@ -2,9 +2,8 @@
  * Shared label layout algorithm for ECharts data-point labels.
  *
  * Provides a greedy rectangle-packing placement that:
- *  - Keeps every label as close to its anchor X as possible (offset=0 tried across
- *    all rows before trying ±1 label-width, then ±2, etc.)
  *  - Prevents label overlap with a 4 px gap
+ *  - Supports two search strategies (see spreadHorizontally)
  *  - Supports manual (user-dragged) position overrides
  *  - Writes placed rects back to a ref for drag hit-detection
  */
@@ -19,17 +18,22 @@ export interface LabelPlacement {
 /**
  * Creates a top-level labelLayout callback for ECharts.
  *
- * @param getChartWidth  - returns current canvas width (used to clamp labels)
- * @param manualPositions - optional map `"${seriesIndex}-${dataIndex}" → {x, y}`
- *                          for user-dragged positions; bypasses the auto algorithm
- * @param placementsRef  - optional mutable ref whose `.current` map is filled
- *                         with every placed label rect, keyed by the same string;
- *                         used for drag hit-detection
+ * @param getChartWidth     - returns current canvas width (used to clamp labels)
+ * @param manualPositions   - optional map `"${seriesIndex}-${dataIndex}" → {x, y}`
+ *                            for user-dragged positions; bypasses the auto algorithm
+ * @param placementsRef     - optional mutable ref whose `.current` map is filled
+ *                            with every placed label rect, keyed by the same string;
+ *                            used for drag hit-detection
+ * @param spreadHorizontally - when true, fills rows top-to-bottom first (labels spread
+ *                             sideways, fewer vertical rows used); when false (default)
+ *                             each label tries all rows directly above its anchor before
+ *                             shifting horizontally (labels stay close to their data point)
  */
 export function createCollisionFreeLayout(
   getChartWidth?: () => number,
   manualPositions?: Map<string, { x: number; y: number }>,
   placementsRef?: { current: Map<string, LabelPlacement> },
+  spreadHorizontally?: boolean,
 ) {
   const placed: (LabelPlacement & { key: string })[] = []
   let lastTs = 0
@@ -43,6 +47,31 @@ export function createCollisionFreeLayout(
         r.y1 < p.y2 + GAP &&
         r.y2 > p.y1 - GAP,
     )
+  }
+
+  function tryPlace(cx: number, baseY: number, lw: number, lh: number, key: string, anchorX: number, anchorY: number) {
+    const candidate: LabelPlacement = {
+      x1: cx - lw / 2,
+      y1: baseY,
+      x2: cx + lw / 2,
+      y2: baseY + lh,
+    }
+    if (!collides(candidate)) {
+      const entry = { ...candidate, key }
+      placed.push(entry)
+      placementsRef?.current.set(key, entry)
+      return {
+        x: cx,
+        y: baseY,
+        align: 'center' as const,
+        verticalAlign: 'top' as const,
+        labelLinePoints: [
+          [cx, baseY + lh],
+          [anchorX, anchorY],
+        ],
+      }
+    }
+    return null
   }
 
   return (params: {
@@ -94,49 +123,47 @@ export function createCollisionFreeLayout(
       }
     }
 
-    // ── Auto algorithm ───────────────────────────────────────────────────────
-    //
-    // Outer loop = horizontal offsets (0, +lw, -lw, +2lw, -2lw, …)
-    // Inner loop = rows (top-down from y=8)
-    //
-    // This ensures a label tries to stay directly above its anchor across ALL
-    // available rows before shifting sideways, so left-to-right ordering of
-    // labels mirrors the left-to-right order of the data points.
-
     const offsetSteps = [0]
     for (let i = 1; i <= 6; i++) {
       offsetSteps.push(i * (lw + GAP))
       offsetSteps.push(-i * (lw + GAP))
     }
 
-    for (const dx of offsetSteps) {
-      const cx = anchorX + dx
-      // Quick bounds check before scanning all rows
-      if (cx - lw / 2 < 0) continue
-      if (chartW > 0 && cx + lw / 2 > chartW) continue
-
+    if (spreadHorizontally) {
+      // ── Spread mode ───────────────────────────────────────────────────────
+      //
+      // Outer loop = rows (top-down from y=8)
+      // Inner loop = horizontal offsets (0, +lw, -lw, …)
+      //
+      // Labels fill the top row first, spreading sideways, then spill into
+      // the next row. Results in fewer rows used but labels may shift away
+      // from their anchor X.
       for (let row = 0; row < 20; row++) {
         const baseY = 8 + row * ROW_H
-        const candidate: LabelPlacement = {
-          x1: cx - lw / 2,
-          y1: baseY,
-          x2: cx + lw / 2,
-          y2: baseY + lh,
+        for (const dx of offsetSteps) {
+          const cx = anchorX + dx
+          if (cx - lw / 2 < 0) continue
+          if (chartW > 0 && cx + lw / 2 > chartW) continue
+          const result = tryPlace(cx, baseY, lw, lh, key, anchorX, anchorY)
+          if (result) return result
         }
-        if (!collides(candidate)) {
-          const entry = { ...candidate, key }
-          placed.push(entry)
-          placementsRef?.current.set(key, entry)
-          return {
-            x: cx,
-            y: baseY,
-            align: 'center' as const,
-            verticalAlign: 'top' as const,
-            labelLinePoints: [
-              [cx, baseY + lh],
-              [anchorX, anchorY],
-            ],
-          }
+      }
+    } else {
+      // ── Anchor mode (default) ─────────────────────────────────────────────
+      //
+      // Outer loop = horizontal offsets (0, +lw, -lw, +2lw, -2lw, …)
+      // Inner loop = rows (top-down from y=8)
+      //
+      // Each label tries all rows directly above its anchor before shifting
+      // sideways, so labels stay as close as possible to their data points.
+      for (const dx of offsetSteps) {
+        const cx = anchorX + dx
+        if (cx - lw / 2 < 0) continue
+        if (chartW > 0 && cx + lw / 2 > chartW) continue
+        for (let row = 0; row < 20; row++) {
+          const baseY = 8 + row * ROW_H
+          const result = tryPlace(cx, baseY, lw, lh, key, anchorX, anchorY)
+          if (result) return result
         }
       }
     }
