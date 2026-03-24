@@ -27,6 +27,7 @@ import ModelListPage from '@/components/modeling/ModelListPage'
 import ModelEditorPage from '@/components/modeling/ModelEditorPage'
 import ExplorePage from '@/components/modeling/ExplorePage'
 import TemplateGalleryPage from '@/components/templates/TemplateGalleryPage'
+import ImportPage from '@/components/imports/ImportPage'
 
 function NotFoundPage() {
   const { t } = useTranslation()
@@ -93,6 +94,7 @@ export default function App() {
           <Route path="/models/:id" element={<ModelEditorPage />} />
           <Route path="/explore/:modelId" element={<ExplorePage />} />
           <Route path="/templates" element={<TemplateGalleryPage />} />
+          <Route path="/import" element={<ImportPage />} />
         </Route>
       </Route>
 
