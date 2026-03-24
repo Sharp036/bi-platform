@@ -10,6 +10,7 @@ export interface ImportSource {
   keyColumns?: string[]
   filenamePattern?: string
   fileEncoding: string
+  jsonArrayPath?: string
   mappings: ImportSourceMapping[]
   createdAt: string
 }
@@ -30,6 +31,7 @@ export interface ImportSourceForm {
   keyColumns?: string[]
   filenamePattern?: string
   fileEncoding: string
+  jsonArrayPath?: string
   mappings: ImportSourceMappingForm[]
 }
 

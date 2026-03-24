@@ -53,6 +53,9 @@ data class ImportSource(
     @Column(name = "file_encoding", nullable = false, length = 20)
     var fileEncoding: String = "UTF-8",
 
+    @Column(name = "json_array_path", length = 500)
+    var jsonArrayPath: String? = null,
+
     @OneToMany(mappedBy = "source", cascade = [CascadeType.ALL], orphanRemoval = true)
     @OrderBy("id ASC")
     var mappings: MutableList<ImportSourceMapping> = mutableListOf(),

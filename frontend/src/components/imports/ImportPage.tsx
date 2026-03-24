@@ -33,7 +33,7 @@ const emptyForm = (): ImportSourceForm => ({
   sourceFormat: 'xlsx', sheetName: '', headerRow: 1, skipRows: 0,
   targetSchema: 'public', targetTable: '',
   loadMode: 'append', keyColumns: [],
-  filenamePattern: '', fileEncoding: 'UTF-8',
+  filenamePattern: '', fileEncoding: 'UTF-8', jsonArrayPath: '',
   mappings: [emptyMapping()],
 })
 
@@ -239,6 +239,19 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
               </div>
             )}
           </div>
+
+          {(form.sourceFormat === 'json' || form.sourceFormat === 'zip') && (
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.json_array_path')}</label>
+              <input
+                value={form.jsonArrayPath || ''}
+                onChange={e => setField('jsonArrayPath', e.target.value)}
+                placeholder="clusters.*.group_ax.*.brand.*"
+                className="input font-mono text-xs"
+              />
+              <p className="text-xs text-slate-400 mt-1">{t('import.json_array_path_hint')}</p>
+            </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -684,6 +697,7 @@ export default function ImportPage() {
                 keyColumns: editingSource.keyColumns,
                 filenamePattern: editingSource.filenamePattern,
                 fileEncoding: editingSource.fileEncoding,
+                jsonArrayPath: editingSource.jsonArrayPath,
                 mappings: editingSource.mappings.map(m => ({
                   sourceColumn: m.sourceColumn,
                   targetColumn: m.targetColumn,

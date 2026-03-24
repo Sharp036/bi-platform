@@ -67,6 +67,7 @@ class ImportService(
             keyColumns = req.keyColumns?.toTypedArray(),
             filenamePattern = req.filenamePattern,
             fileEncoding = req.fileEncoding.ifBlank { "UTF-8" },
+            jsonArrayPath = req.jsonArrayPath?.trim()?.ifEmpty { null },
             createdBy = user,
         )
         req.mappings.forEach { m ->
@@ -101,6 +102,7 @@ class ImportService(
         source.keyColumns = req.keyColumns?.toTypedArray()
         source.filenamePattern = req.filenamePattern
         source.fileEncoding = req.fileEncoding.ifBlank { "UTF-8" }
+        source.jsonArrayPath = req.jsonArrayPath?.trim()?.ifEmpty { null }
         source.updatedAt = java.time.OffsetDateTime.now()
         source.mappings.clear()
         req.mappings.forEach { m ->
@@ -423,16 +425,77 @@ class ImportService(
         val charset = runCatching { Charset.forName(source.fileEncoding) }.getOrDefault(Charsets.UTF_8)
         val rootNode = jsonMapper.readTree(stream.reader(charset))
 
-        if (!rootNode.isArray) throw IllegalArgumentException("JSON root must be an array")
+        val path = source.jsonArrayPath?.trim()?.takeIf { it.isNotEmpty() }
+
+        if (path != null) {
+            // Navigate to nested array using dot-path with * wildcards.
+            // Example: "clusters.*.group_ax.*.brand.*"
+            // Each * iterates all keys of that object level and adds the key
+            // as a column named after the preceding path element.
+            val parts = path.split(".")
+            val result = mutableListOf<Map<String, String?>>()
+            collectJsonPath(rootNode, parts, 0, emptyMap(), result, source, maxRows)
+            return result
+        }
+
+        // No path: root must be an array
+        if (!rootNode.isArray) throw IllegalArgumentException(
+            "JSON root must be an array. For nested JSON specify 'JSON array path' (e.g. clusters.*.group_ax.*.brand.*)"
+        )
+        return parseJsonArray(rootNode, source, maxRows)
+    }
+
+    private fun collectJsonPath(
+        node: com.fasterxml.jackson.databind.JsonNode,
+        parts: List<String>,
+        idx: Int,
+        context: Map<String, String>,
+        result: MutableList<Map<String, String?>>,
+        source: ImportSource,
+        maxRows: Int,
+    ) {
+        if (result.size >= maxRows) return
+
+        if (idx >= parts.size) {
+            // Reached target node — should be an array of objects
+            if (node.isArray) {
+                for (elem in node) {
+                    if (result.size >= maxRows) break
+                    if (!elem.isObject) continue
+                    val map = mutableMapOf<String, String?>()
+                    map.putAll(context)
+                    elem.fields().forEach { (k, v) ->
+                        map[k] = if (v.isNull || v.isMissingNode) null else v.asText().trim().ifEmpty { null }
+                    }
+                    result.add(map)
+                }
+            }
+            return
+        }
+
+        val part = parts[idx]
+        if (part == "*") {
+            // Iterate all keys; column name = previous path part
+            val colName = if (idx > 0) parts[idx - 1] else "key"
+            node.fields().forEach { (key, child) ->
+                collectJsonPath(child, parts, idx + 1, context + (colName to key), result, source, maxRows)
+            }
+        } else {
+            val child = node.get(part) ?: return
+            collectJsonPath(child, parts, idx + 1, context, result, source, maxRows)
+        }
+    }
+
+    private fun parseJsonArray(
+        rootNode: com.fasterxml.jackson.databind.JsonNode,
+        source: ImportSource,
+        maxRows: Int,
+    ): List<Map<String, String?>> {
         if (rootNode.size() == 0) return emptyList()
-
-        val firstElem = rootNode.get(source.skipRows)
-            ?: return emptyList()
-
+        val firstElem = rootNode.get(source.skipRows) ?: return emptyList()
         val result = mutableListOf<Map<String, String?>>()
 
         if (firstElem.isObject) {
-            // Array of objects: [{"col": "val"}, ...]
             for (i in source.skipRows until rootNode.size()) {
                 if (result.size >= maxRows) break
                 val elem = rootNode.get(i)
@@ -444,7 +507,6 @@ class ImportService(
                 result.add(map)
             }
         } else if (firstElem.isArray) {
-            // Array of arrays: first row = headers, rest = data
             val headerIdx = source.headerRow - 1
             if (headerIdx >= rootNode.size()) throw IllegalArgumentException("Header row ${source.headerRow} not found in JSON")
             val headers = rootNode.get(headerIdx).map { it.asText().trim() }
@@ -454,9 +516,9 @@ class ImportService(
                 val elem = rootNode.get(i)
                 if (!elem.isArray) continue
                 val map = mutableMapOf<String, String?>()
-                headers.forEachIndexed { idx, h ->
+                headers.forEachIndexed { ci, h ->
                     if (h.isNotEmpty()) {
-                        val v = elem.get(idx)
+                        val v = elem.get(ci)
                         map[h] = if (v == null || v.isNull) null else v.asText().trim().ifEmpty { null }
                     }
                 }
@@ -465,7 +527,6 @@ class ImportService(
         } else {
             throw IllegalArgumentException("JSON array elements must be objects or arrays")
         }
-
         return result
     }
 
@@ -635,6 +696,7 @@ class ImportService(
         keyColumns = keyColumns?.toList(),
         filenamePattern = filenamePattern,
         fileEncoding = fileEncoding,
+        jsonArrayPath = jsonArrayPath,
         mappings = mappings.map { m ->
             ImportSourceMappingResponse(m.id, m.sourceColumn, m.targetColumn, m.dataType, m.nullable, m.dateFormat)
         },
