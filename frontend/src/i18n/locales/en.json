@@ -809,6 +809,8 @@
   "import.file_encoding": "File encoding",
   "import.filename_pattern": "Filename pattern (ZIP filter)",
   "import.target_table_placeholder": "Select or type table name",
+  "import.json_array_path": "JSON array path",
+  "import.json_array_path_hint": "Dot-separated path to nested array. Use * to iterate all keys (key becomes a column). Example: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Manage data import configurations",
   "admin.permission_description.IMPORT_UPLOAD": "Upload files for data import"
 }

@@ -700,6 +700,8 @@
   "import.file_encoding": "Кодировка файла",
   "import.filename_pattern": "Маска имени файла (фильтр ZIP)",
   "import.target_table_placeholder": "Выберите или введите название таблицы",
+  "import.json_array_path": "Путь к массиву в JSON",
+  "import.json_array_path_hint": "Путь через точку до вложенного массива. * обходит все ключи объекта (ключ становится колонкой). Пример: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Управление настройками импорта",
   "admin.permission_description.IMPORT_UPLOAD": "Загрузка файлов для импорта"
 }

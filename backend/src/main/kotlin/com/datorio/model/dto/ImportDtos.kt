@@ -18,6 +18,7 @@ data class ImportSourceRequest(
     val keyColumns: List<String>? = null,
     val filenamePattern: String? = null,
     val fileEncoding: String = "UTF-8",
+    val jsonArrayPath: String? = null,
     @field:Valid val mappings: List<ImportSourceMappingRequest> = emptyList()
 )
 
@@ -54,6 +55,7 @@ data class ImportSourceResponse(
     val keyColumns: List<String>?,
     val filenamePattern: String?,
     val fileEncoding: String,
+    val jsonArrayPath: String?,
     val mappings: List<ImportSourceMappingResponse>,
     val createdAt: String
 )
