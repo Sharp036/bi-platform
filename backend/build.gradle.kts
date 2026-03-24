@@ -55,8 +55,9 @@ dependencies {
     implementation("org.graalvm.polyglot:polyglot:24.0.2")
     implementation("org.graalvm.polyglot:js:24.0.2")
 
-    // ── Export ──
+    // ── Export / Import ──
     implementation("org.apache.poi:poi-ooxml:5.3.0")  // Excel
+    implementation("org.apache.commons:commons-csv:1.11.0")  // CSV/TSV parsing
     implementation("jakarta.mail:jakarta.mail-api:2.1.3")
     implementation("org.eclipse.angus:angus-mail:2.0.3")
 

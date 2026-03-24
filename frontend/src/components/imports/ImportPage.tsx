@@ -1,0 +1,704 @@
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  Upload, Database, FileSpreadsheet, CheckCircle, XCircle,
+  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown,
+} from 'lucide-react'
+import toast from 'react-hot-toast'
+import { importApi } from '@/api/import'
+import type {
+  ImportSource, ImportSourceForm, ImportSourceMappingForm,
+  ImportLog, ImportPreviewResponse, ImportUploadResult, ImportErrorDetail,
+} from '@/api/import'
+import { datasourceApi } from '@/api/datasources'
+import type { TableInfo } from '@/api/datasources'
+import type { DataSource } from '@/types'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
+import { useAuthStore } from '@/store/authStore'
+
+type Tab = 'sources' | 'upload' | 'history'
+
+const DATA_TYPES = ['string', 'integer', 'float', 'date', 'datetime', 'boolean'] as const
+const LOAD_MODES = ['append', 'replace', 'upsert'] as const
+const SOURCE_FORMATS = ['xlsx', 'csv', 'tsv', 'json', 'zip'] as const
+const COMMON_ENCODINGS = ['UTF-8', 'UTF-16', 'windows-1251', 'windows-1252', 'ISO-8859-1', 'KOI8-R'] as const
+
+const emptyMapping = (): ImportSourceMappingForm => ({
+  sourceColumn: '', targetColumn: '', dataType: 'string', nullable: true,
+})
+
+const emptyForm = (): ImportSourceForm => ({
+  name: '', description: '', datasourceId: 0,
+  sourceFormat: 'xlsx', sheetName: '', headerRow: 1, skipRows: 0,
+  targetSchema: 'public', targetTable: '',
+  loadMode: 'append', keyColumns: [],
+  filenamePattern: '', fileEncoding: 'UTF-8',
+  mappings: [emptyMapping()],
+})
+
+function statusBadge(status: ImportLog['status'], t: (k: string) => string) {
+  const map: Record<ImportLog['status'], string> = {
+    validating: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+    valid: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    importing: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    success: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+    error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+  }
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${map[status]}`}>
+      {t(`import.status.${status}`)}
+    </span>
+  )
+}
+
+// ---- Source Form Modal ----
+
+interface SourceFormModalProps {
+  datasources: DataSource[]
+  initial: ImportSourceForm
+  editingId: number | null
+  onClose: () => void
+  onSaved: () => void
+}
+
+function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: SourceFormModalProps) {
+  const { t } = useTranslation()
+  const [form, setForm] = useState<ImportSourceForm>(initial)
+  const [saving, setSaving] = useState(false)
+  const [availableTables, setAvailableTables] = useState<TableInfo[]>([])
+
+  useEffect(() => {
+    if (!form.datasourceId) { setAvailableTables([]); return }
+    datasourceApi.schema(form.datasourceId).then(setAvailableTables).catch(() => setAvailableTables([]))
+  }, [form.datasourceId])
+
+  const setField = <K extends keyof ImportSourceForm>(key: K, value: ImportSourceForm[K]) =>
+    setForm(f => ({ ...f, [key]: value }))
+
+  const setMapping = (idx: number, patch: Partial<ImportSourceMappingForm>) =>
+    setForm(f => {
+      const mappings = [...f.mappings]
+      mappings[idx] = { ...mappings[idx], ...patch }
+      return { ...f, mappings }
+    })
+
+  const addMapping = () => setForm(f => ({ ...f, mappings: [...f.mappings, emptyMapping()] }))
+
+  const removeMapping = (idx: number) =>
+    setForm(f => ({ ...f, mappings: f.mappings.filter((_, i) => i !== idx) }))
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      if (editingId) {
+        await importApi.updateSource(editingId, form)
+        toast.success(t('import.updated'))
+      } else {
+        await importApi.createSource(form)
+        toast.success(t('import.created'))
+      }
+      onSaved()
+      onClose()
+    } catch {
+      toast.error(editingId ? t('import.failed_update') : t('import.failed_create'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-auto py-6">
+      <div className="card w-full max-w-2xl p-6 mx-4 my-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
+            {editingId ? t('common.edit') : t('import.new_source')}
+          </h2>
+          <button onClick={onClose} className="btn-ghost p-1"><X className="w-5 h-5" /></button>
+        </div>
+
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+          <input
+            value={form.name}
+            onChange={e => setField('name', e.target.value)}
+            placeholder={t('import.source_name')}
+            className="input"
+          />
+          <input
+            value={form.description || ''}
+            onChange={e => setField('description', e.target.value)}
+            placeholder={t('common.description')}
+            className="input"
+          />
+
+          <select
+            value={form.datasourceId}
+            onChange={e => {
+              const id = Number(e.target.value)
+              const ds = datasources.find(d => d.id === id)
+              setField('datasourceId', id)
+              if (ds) setField('targetSchema', ds.type === 'CLICKHOUSE' ? ds.databaseName : 'public')
+            }}
+            className="input"
+          >
+            <option value={0} disabled>{t('common.type')}...</option>
+            {datasources.map(ds => (
+              <option key={ds.id} value={ds.id}>{ds.name}</option>
+            ))}
+          </select>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.source_format')}</label>
+              <select value={form.sourceFormat} onChange={e => setField('sourceFormat', e.target.value as ImportSourceForm['sourceFormat'])} className="input">
+                {SOURCE_FORMATS.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
+              </select>
+            </div>
+            {form.sourceFormat === 'xlsx' && (
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">{t('import.sheet_name')}</label>
+                <input value={form.sheetName || ''} onChange={e => setField('sheetName', e.target.value)} className="input" />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.header_row')}</label>
+              <input type="number" min={1} value={form.headerRow} onChange={e => setField('headerRow', Number(e.target.value))} className="input" />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.skip_rows')}</label>
+              <input type="number" min={0} value={form.skipRows} onChange={e => setField('skipRows', Number(e.target.value))} className="input" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.target_schema')}</label>
+              <input value={form.targetSchema} onChange={e => setField('targetSchema', e.target.value)} className="input" />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.target_table')}</label>
+              <input
+                list="import-tables-list"
+                value={form.targetTable}
+                onChange={e => setField('targetTable', e.target.value)}
+                placeholder={t('import.target_table_placeholder')}
+                className="input"
+              />
+              {availableTables.length > 0 && (
+                <datalist id="import-tables-list">
+                  {availableTables.map(t => <option key={t.name} value={t.name} />)}
+                </datalist>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">{t('import.load_mode')}</label>
+            <select value={form.loadMode} onChange={e => setField('loadMode', e.target.value as ImportSourceForm['loadMode'])} className="input">
+              {LOAD_MODES.map(m => <option key={m} value={m}>{t(`import.load_mode.${m}`)}</option>)}
+            </select>
+          </div>
+
+          {form.loadMode === 'upsert' && (
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.key_columns')}</label>
+              <input
+                value={(form.keyColumns || []).join(', ')}
+                onChange={e => setField('keyColumns', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                placeholder="id, code"
+                className="input"
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.file_encoding')}</label>
+              <input
+                list="import-encodings-list"
+                value={form.fileEncoding}
+                onChange={e => setField('fileEncoding', e.target.value)}
+                className="input"
+              />
+              <datalist id="import-encodings-list">
+                {COMMON_ENCODINGS.map(enc => <option key={enc} value={enc} />)}
+              </datalist>
+            </div>
+            {form.sourceFormat === 'zip' && (
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">{t('import.filename_pattern')}</label>
+                <input
+                  value={form.filenamePattern || ''}
+                  onChange={e => setField('filenamePattern', e.target.value)}
+                  placeholder="*.xlsx"
+                  className="input"
+                />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('import.mappings')}</label>
+              <button onClick={addMapping} className="btn-ghost text-xs py-1 px-2 flex items-center gap-1">
+                <Plus className="w-3 h-3" /> {t('import.add_mapping')}
+              </button>
+            </div>
+            <div className="space-y-2">
+              <div className="grid grid-cols-12 gap-1 text-xs text-slate-500 dark:text-slate-400 px-1">
+                <span className="col-span-3">{t('import.mapping.source_column')}</span>
+                <span className="col-span-3">{t('import.mapping.target_column')}</span>
+                <span className="col-span-2">{t('import.mapping.data_type')}</span>
+                <span className="col-span-2">{t('import.mapping.date_format')}</span>
+                <span className="col-span-1 text-center">{t('import.mapping.nullable')}</span>
+                <span className="col-span-1" />
+              </div>
+              {form.mappings.map((m, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-1 items-center">
+                  <input value={m.sourceColumn} onChange={e => setMapping(idx, { sourceColumn: e.target.value })} className="input py-1 text-xs col-span-3" />
+                  <input value={m.targetColumn} onChange={e => setMapping(idx, { targetColumn: e.target.value })} className="input py-1 text-xs col-span-3" />
+                  <select value={m.dataType} onChange={e => setMapping(idx, { dataType: e.target.value as ImportSourceMappingForm['dataType'] })} className="input py-1 text-xs col-span-2">
+                    {DATA_TYPES.map(dt => <option key={dt} value={dt}>{dt}</option>)}
+                  </select>
+                  <input
+                    value={m.dateFormat || ''}
+                    onChange={e => setMapping(idx, { dateFormat: e.target.value })}
+                    placeholder={m.dataType === 'date' || m.dataType === 'datetime' ? 'yyyy-MM-dd' : ''}
+                    disabled={m.dataType !== 'date' && m.dataType !== 'datetime'}
+                    className="input py-1 text-xs col-span-2 disabled:opacity-40"
+                  />
+                  <div className="col-span-1 flex justify-center">
+                    <input type="checkbox" checked={m.nullable} onChange={e => setMapping(idx, { nullable: e.target.checked })} className="w-4 h-4" />
+                  </div>
+                  <button onClick={() => removeMapping(idx)} className="col-span-1 btn-ghost p-1 text-red-400">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-5">
+          <button onClick={onClose} className="btn-secondary">{t('common.cancel')}</button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !form.name || !form.datasourceId || !form.targetTable}
+            className="btn-primary"
+          >
+            {saving ? t('common.saving') : editingId ? t('common.save') : t('common.create')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---- Upload Card ----
+
+interface UploadCardProps {
+  source: ImportSource
+}
+
+function UploadCard({ source }: UploadCardProps) {
+  const { t } = useTranslation()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<ImportPreviewResponse | null>(null)
+  const [result, setResult] = useState<ImportUploadResult | null>(null)
+  const [errors, setErrors] = useState<ImportErrorDetail[]>([])
+  const [previewing, setPreviewing] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [showErrors, setShowErrors] = useState(false)
+
+  const handlePreview = async () => {
+    if (!file) return
+    setPreviewing(true)
+    setPreview(null)
+    try {
+      const res = await importApi.preview(source.id, file)
+      setPreview(res)
+    } catch {
+      toast.error(t('common.failed_to_load'))
+    } finally {
+      setPreviewing(false)
+    }
+  }
+
+  const handleImport = async () => {
+    if (!file) return
+    setImporting(true)
+    setResult(null)
+    setErrors([])
+    try {
+      const res = await importApi.upload(source.id, file)
+      setResult(res)
+      if (res.status === 'success') {
+        toast.success(t('import.upload_success'))
+      } else {
+        toast.error(t('import.upload_error'))
+        setErrors(res.errors.slice(0, 10))
+      }
+    } catch {
+      toast.error(t('common.operation_failed'))
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  const formatAccept: Record<string, string> = {
+    xlsx: '.xlsx', csv: '.csv', tsv: '.tsv', json: '.json', zip: '.zip',
+  }
+  const accept = formatAccept[source.sourceFormat] ?? '.xlsx'
+
+  return (
+    <div className="card p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-lg bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center flex-shrink-0">
+            <FileSpreadsheet className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium text-slate-800 dark:text-white truncate">{source.name}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {source.targetSchema}.{source.targetTable} &middot; {source.sourceFormat.toUpperCase()} &middot; {source.loadMode}
+            </p>
+          </div>
+        </div>
+        <button onClick={() => fileRef.current?.click()} className="btn-primary flex-shrink-0 flex items-center gap-2">
+          <Upload className="w-4 h-4" /> {t('import.upload_file')}
+        </button>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={e => {
+          setFile(e.target.files?.[0] || null)
+          setPreview(null)
+          setResult(null)
+          setErrors([])
+        }}
+      />
+
+      {file && (
+        <div className="mt-3 pt-3 border-t border-surface-200 dark:border-dark-surface-100">
+          <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 mb-3">
+            <FileSpreadsheet className="w-4 h-4 text-slate-400" />
+            <span className="truncate">{file.name}</span>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={handlePreview} disabled={previewing} className="btn-secondary text-xs flex items-center gap-1">
+              <Eye className="w-3 h-3" />
+              {previewing ? t('import.previewing') : t('import.preview')}
+            </button>
+            <button onClick={handleImport} disabled={importing} className="btn-primary text-xs flex items-center gap-1">
+              <Upload className="w-3 h-3" />
+              {importing ? t('import.importing') : t('import.import')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {preview && (
+        <div className="mt-3 pt-3 border-t border-surface-200 dark:border-dark-surface-100">
+          <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">{t('import.preview_title')}</p>
+          <div className="overflow-x-auto">
+            <table className="text-xs w-full">
+              <thead>
+                <tr>
+                  {preview.columns.map(c => (
+                    <th key={c} className="text-left px-2 py-1 bg-surface-50 dark:bg-dark-surface-100 font-medium text-slate-600 dark:text-slate-400 border border-surface-200 dark:border-dark-surface-100">{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {preview.rows.map((row, ri) => (
+                  <tr key={ri}>
+                    {row.map((cell, ci) => (
+                      <td key={ci} className="px-2 py-1 border border-surface-200 dark:border-dark-surface-100 text-slate-700 dark:text-slate-300">{String(cell ?? '')}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {result && (
+        <div className="mt-3 pt-3 border-t border-surface-200 dark:border-dark-surface-100">
+          <div className="flex items-center gap-2 mb-1">
+            {result.status === 'success'
+              ? <CheckCircle className="w-4 h-4 text-emerald-500" />
+              : <XCircle className="w-4 h-4 text-red-500" />}
+            <span className="text-sm text-slate-700 dark:text-slate-300">
+              {t('import.rows_imported', { count: result.rowsImported })}
+              {' | '}
+              {t('import.rows_failed', { count: result.rowsFailed })}
+              {' | '}
+              {t('import.rows_total', { count: result.rowsTotal })}
+            </span>
+          </div>
+          {errors.length > 0 && (
+            <div>
+              <button onClick={() => setShowErrors(s => !s)} className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                <ChevronDown className={`w-3 h-3 transition-transform ${showErrors ? 'rotate-180' : ''}`} />
+                {errors.length} errors
+              </button>
+              {showErrors && (
+                <div className="mt-2 space-y-1">
+                  {errors.map((err, i) => (
+                    <div key={i} className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded px-2 py-1">
+                      Row {err.rowNumber}{err.columnName ? ` / ${err.columnName}` : ''}: {err.errorMessage}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---- History Tab ----
+
+function HistoryTab() {
+  const { t } = useTranslation()
+  const [logs, setLogs] = useState<ImportLog[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [logErrors, setLogErrors] = useState<Record<number, ImportErrorDetail[]>>({})
+
+  useEffect(() => {
+    importApi.listLogs()
+      .then(setLogs)
+      .catch(() => toast.error(t('common.failed_to_load')))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleExpand = async (log: ImportLog) => {
+    if (log.status !== 'error') return
+    if (expandedId === log.id) { setExpandedId(null); return }
+    setExpandedId(log.id)
+    if (!logErrors[log.id]) {
+      try {
+        const errs = await importApi.getLogErrors(log.id)
+        setLogErrors(m => ({ ...m, [log.id]: errs }))
+      } catch {
+        toast.error(t('common.failed_to_load'))
+      }
+    }
+  }
+
+  if (loading) return <LoadingSpinner />
+  if (logs.length === 0) return <EmptyState icon={<Clock className="w-12 h-12" />} title={t('import.no_history')} />
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left text-xs text-slate-500 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
+            <th className="pb-2 pr-4 font-medium">{t('import.source_name')}</th>
+            <th className="pb-2 pr-4 font-medium">File</th>
+            <th className="pb-2 pr-4 font-medium">Date</th>
+            <th className="pb-2 pr-3 text-right font-medium">Total</th>
+            <th className="pb-2 pr-3 text-right font-medium">OK</th>
+            <th className="pb-2 pr-3 text-right font-medium">Err</th>
+            <th className="pb-2 font-medium">{t('common.status')}</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-surface-100 dark:divide-dark-surface-100">
+          {logs.map(log => (
+            <>
+              <tr
+                key={log.id}
+                className={log.status === 'error' ? 'cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10' : ''}
+                onClick={() => handleExpand(log)}
+              >
+                <td className="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300">{log.sourceName}</td>
+                <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate max-w-[160px]">{log.filename}</td>
+                <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">{new Date(log.uploadedAt).toLocaleString()}</td>
+                <td className="py-2 pr-3 text-right text-slate-500 dark:text-slate-400">{log.rowsTotal ?? '-'}</td>
+                <td className="py-2 pr-3 text-right text-emerald-600 dark:text-emerald-400">{log.rowsImported ?? '-'}</td>
+                <td className="py-2 pr-3 text-right text-red-500">{log.rowsFailed ?? '-'}</td>
+                <td className="py-2">{statusBadge(log.status, t)}</td>
+              </tr>
+              {expandedId === log.id && logErrors[log.id] && (
+                <tr key={`${log.id}-errors`}>
+                  <td colSpan={7} className="pb-3 pt-1 px-4 bg-red-50 dark:bg-red-900/10">
+                    <div className="space-y-1">
+                      {logErrors[log.id].slice(0, 20).map((err, i) => (
+                        <div key={i} className="text-xs text-red-600 dark:text-red-400">
+                          Row {err.rowNumber}{err.columnName ? ` / ${err.columnName}` : ''}: {err.errorMessage}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// ---- Main Page ----
+
+export default function ImportPage() {
+  const { t } = useTranslation()
+  const permissions = useAuthStore(s => s.user?.permissions ?? [])
+  const canManage = permissions.includes('IMPORT_MANAGE')
+
+  const [activeTab, setActiveTab] = useState<Tab>(canManage ? 'sources' : 'upload')
+  const [sources, setSources] = useState<ImportSource[]>([])
+  const [datasources, setDatasources] = useState<DataSource[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingSource, setEditingSource] = useState<ImportSource | null>(null)
+
+  const loadSources = () => {
+    setLoading(true)
+    importApi.listSources()
+      .then(setSources)
+      .catch(() => toast.error(t('common.failed_to_load')))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadSources()
+    datasourceApi.list().then(setDatasources).catch(() => {})
+  }, [])
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(t('import.delete_confirm'))) return
+    try {
+      await importApi.deleteSource(id)
+      toast.success(t('common.deleted'))
+      loadSources()
+    } catch {
+      toast.error(t('common.failed_to_delete'))
+    }
+  }
+
+  const tabs: { key: Tab; label: string; show: boolean }[] = [
+    { key: 'sources', label: t('import.sources_tab'), show: canManage },
+    { key: 'upload', label: t('import.upload_tab'), show: true },
+    { key: 'history', label: t('import.history_tab'), show: true },
+  ]
+
+  return (
+    <div className="max-w-[1000px] mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('import.title')}</h1>
+        {activeTab === 'sources' && canManage && (
+          <button onClick={() => { setEditingSource(null); setShowForm(true) }} className="btn-primary flex items-center gap-2">
+            <Plus className="w-4 h-4" /> {t('import.new_source')}
+          </button>
+        )}
+      </div>
+
+      <div className="flex gap-1 mb-6 border-b border-surface-200 dark:border-dark-surface-100">
+        {tabs.filter(tab => tab.show).map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              activeTab === tab.key
+                ? 'border-brand-600 text-brand-700 dark:text-brand-400'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'sources' && canManage && (
+        loading ? <LoadingSpinner /> : sources.length === 0 ? (
+          <EmptyState icon={<Database className="w-12 h-12" />} title={t('import.no_sources')} />
+        ) : (
+          <div className="space-y-3">
+            {sources.map(src => (
+              <div key={src.id} className="card p-4 flex items-center justify-between">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center flex-shrink-0">
+                    <FileSpreadsheet className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-800 dark:text-white truncate">{src.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {src.datasourceName} &middot; {src.targetSchema}.{src.targetTable} &middot; {src.sourceFormat.toUpperCase()} &middot; {t(`import.load_mode.${src.loadMode}`)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => { setEditingSource(src); setShowForm(true) }} className="btn-ghost p-2">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDelete(src.id)} className="btn-ghost p-2 text-red-500">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
+
+      {activeTab === 'upload' && (
+        loading ? <LoadingSpinner /> : sources.length === 0 ? (
+          <EmptyState icon={<Upload className="w-12 h-12" />} title={t('import.no_sources')} />
+        ) : (
+          <div className="space-y-4">
+            {sources.map(src => <UploadCard key={src.id} source={src} />)}
+          </div>
+        )
+      )}
+
+      {activeTab === 'history' && <HistoryTab />}
+
+      {showForm && (
+        <SourceFormModal
+          datasources={datasources}
+          initial={editingSource
+            ? {
+                name: editingSource.name,
+                description: editingSource.description,
+                datasourceId: editingSource.datasourceId,
+                sourceFormat: editingSource.sourceFormat,
+                sheetName: editingSource.sheetName,
+                headerRow: editingSource.headerRow,
+                skipRows: editingSource.skipRows,
+                targetSchema: editingSource.targetSchema,
+                targetTable: editingSource.targetTable,
+                loadMode: editingSource.loadMode,
+                keyColumns: editingSource.keyColumns,
+                filenamePattern: editingSource.filenamePattern,
+                fileEncoding: editingSource.fileEncoding,
+                mappings: editingSource.mappings.map(m => ({
+                  sourceColumn: m.sourceColumn,
+                  targetColumn: m.targetColumn,
+                  dataType: m.dataType,
+                  nullable: m.nullable,
+                  dateFormat: m.dateFormat,
+                })),
+              }
+            : emptyForm()
+          }
+          editingId={editingSource?.id ?? null}
+          onClose={() => { setShowForm(false); setEditingSource(null) }}
+          onSaved={loadSources}
+        />
+      )}
+    </div>
+  )
+}

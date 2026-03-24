@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, ChevronLeft, ChevronRight, Bell, Activity, Settings, KeyRound, Share2, Home, Boxes, LayoutTemplate } from 'lucide-react'
+import { LayoutDashboard, FileBarChart, Database, Code2, Braces, CalendarClock, ChevronLeft, ChevronRight, Bell, Activity, Settings, KeyRound, Share2, Home, Boxes, LayoutTemplate, Upload } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
@@ -8,15 +8,16 @@ import { useAuthStore } from '@/store/authStore'
 const navItems = [
   { to: '/', icon: Home, i18nKey: 'nav.home' },
   { to: '/reports', icon: FileBarChart, i18nKey: 'nav.reports', permission: 'REPORT_VIEW' },
-  { to: '/queries', icon: Code2, i18nKey: 'nav.queries' },
-  { to: '/scripts', icon: Braces, i18nKey: 'nav.scripts' },
+  { to: '/queries', icon: Code2, i18nKey: 'nav.queries', permission: 'QUERY_EXECUTE' },
+  { to: '/scripts', icon: Braces, i18nKey: 'nav.scripts', permission: 'QUERY_CREATE' },
   { to: '/datasources', icon: Database, i18nKey: 'nav.datasources', permission: 'DATASOURCE_VIEW' },
-  { to: '/models', icon: Boxes, i18nKey: 'nav.models' },
-  { to: '/templates', icon: LayoutTemplate, i18nKey: 'nav.templates' },
-  { to: '/schedules', icon: CalendarClock, i18nKey: 'nav.schedules' },
-  { to: '/alerts', icon: Bell, i18nKey: 'nav.alerts' },
-  { to: '/monitoring', icon: Activity, i18nKey: 'nav.monitoring' },
-  { to: '/shared', icon: Share2, i18nKey: 'nav.shared' },
+  { to: '/import', icon: Upload, i18nKey: 'nav.import', permission: 'IMPORT_UPLOAD' },
+  { to: '/models', icon: Boxes, i18nKey: 'nav.models', permission: 'REPORT_VIEW' },
+  { to: '/templates', icon: LayoutTemplate, i18nKey: 'nav.templates', permission: 'REPORT_VIEW' },
+  { to: '/schedules', icon: CalendarClock, i18nKey: 'nav.schedules', permission: 'REPORT_CREATE' },
+  { to: '/alerts', icon: Bell, i18nKey: 'nav.alerts', permission: 'REPORT_VIEW' },
+  { to: '/monitoring', icon: Activity, i18nKey: 'nav.monitoring', permission: 'SYSTEM_ADMIN' },
+  { to: '/shared', icon: Share2, i18nKey: 'nav.shared', permission: 'REPORT_VIEW' },
   { to: '/admin', icon: Settings, i18nKey: 'nav.admin', permission: 'USER_MANAGE' },
   { to: '/profile/password', icon: KeyRound, i18nKey: 'nav.password' },
 ]
