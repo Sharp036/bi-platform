@@ -16,8 +16,6 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.charset.Charset
-import java.sql.Date
-import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -743,12 +741,15 @@ class ImportService(
             "date" -> {
                 val fmt = mapping.dateFormat ?: "yyyy-MM-dd"
                 val ld = LocalDate.parse(raw, DateTimeFormatter.ofPattern(fmt))
-                ps.setDate(idx, Date.valueOf(ld))
+                // Use setObject with LocalDate to avoid java.sql.Date timezone conversion.
+                // Date.valueOf(ld) creates midnight in JVM default timezone which JDBC then
+                // converts to UTC epoch, potentially shifting the date by +-1 day.
+                ps.setObject(idx, ld)
             }
             "datetime" -> {
                 val fmt = mapping.dateFormat ?: "yyyy-MM-dd HH:mm:ss"
                 val ldt = LocalDateTime.parse(raw, DateTimeFormatter.ofPattern(fmt))
-                ps.setTimestamp(idx, Timestamp.valueOf(ldt))
+                ps.setObject(idx, ldt)
             }
             else -> ps.setString(idx, raw)
         }

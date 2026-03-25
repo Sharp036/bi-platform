@@ -237,6 +237,7 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
           )}
 
           <div className="grid grid-cols-2 gap-2">
+            {form.sourceFormat !== 'xlsx' && (
             <div>
               <label className="block text-xs text-slate-500 mb-1">{t('import.file_encoding')}</label>
               <input
@@ -249,6 +250,7 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
                 {COMMON_ENCODINGS.map(enc => <option key={enc} value={enc} />)}
               </datalist>
             </div>
+            )}
             {form.sourceFormat === 'zip' && (
               <div>
                 <label className="block text-xs text-slate-500 mb-1">{t('import.filename_pattern')}</label>
