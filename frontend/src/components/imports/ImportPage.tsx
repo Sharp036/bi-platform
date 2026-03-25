@@ -86,6 +86,9 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
   const [form, setForm] = useState<ImportSourceForm>(initial)
   const [saving, setSaving] = useState(false)
   const [availableTables, setAvailableTables] = useState<TableInfo[]>([])
+  const [previewColumns, setPreviewColumns] = useState<string[]>([])
+  const [loadingColumns, setLoadingColumns] = useState(false)
+  const sampleFileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!form.datasourceId) { setAvailableTables([]); return }
@@ -275,10 +278,61 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('import.mappings')}</label>
-              <button onClick={addMapping} className="btn-ghost text-xs py-1 px-2 flex items-center gap-1">
-                <Plus className="w-3 h-3" /> {t('import.add_mapping')}
-              </button>
+              <div className="flex items-center gap-2">
+                {editingId && (
+                  <>
+                    <input
+                      ref={sampleFileRef}
+                      type="file"
+                      className="hidden"
+                      onChange={async e => {
+                        const file = e.target.files?.[0]
+                        if (!file || !editingId) return
+                        setLoadingColumns(true)
+                        try {
+                          const res = await importApi.preview(editingId, file)
+                          setPreviewColumns(res.columns)
+                          toast.success(t('import.columns_discovered', { count: res.columns.length }))
+                        } catch (err) {
+                          toast.error(extractError(err, t('common.failed_to_load')), { duration: 6000 })
+                        } finally {
+                          setLoadingColumns(false)
+                          e.target.value = ''
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => sampleFileRef.current?.click()}
+                      disabled={loadingColumns}
+                      className="btn-ghost text-xs py-1 px-2 flex items-center gap-1"
+                      title={t('import.discover_columns_hint')}
+                    >
+                      <Eye className="w-3 h-3" />
+                      {loadingColumns ? t('common.loading') : t('import.discover_columns')}
+                    </button>
+                  </>
+                )}
+                <button onClick={addMapping} className="btn-ghost text-xs py-1 px-2 flex items-center gap-1">
+                  <Plus className="w-3 h-3" /> {t('import.add_mapping')}
+                </button>
+              </div>
             </div>
+            {previewColumns.length > 0 && (
+              <div className="mb-2 p-2 rounded bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('import.available_columns')}:</p>
+                <div className="flex flex-wrap gap-1">
+                  {previewColumns.map(col => (
+                    <span key={col} className="inline-block px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-xs font-mono text-slate-700 dark:text-slate-300">
+                      {col}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <datalist id="import-source-columns">
+              {previewColumns.map(col => <option key={col} value={col} />)}
+            </datalist>
             <div className="space-y-2">
               <div className="grid grid-cols-12 gap-1 text-xs text-slate-500 dark:text-slate-400 px-1">
                 <span className="col-span-2">{t('import.mapping.source_column')}</span>
@@ -291,7 +345,7 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
               </div>
               {form.mappings.map((m, idx) => (
                 <div key={idx} className="grid grid-cols-12 gap-1 items-center">
-                  <input value={m.sourceColumn || ''} onChange={e => setMapping(idx, { sourceColumn: e.target.value })} className="input py-1 text-xs col-span-2" placeholder={t('import.mapping.source_column_hint')} />
+                  <input list="import-source-columns" value={m.sourceColumn || ''} onChange={e => setMapping(idx, { sourceColumn: e.target.value })} className="input py-1 text-xs col-span-2" placeholder={t('import.mapping.source_column_hint')} />
                   <input value={m.constValue || ''} onChange={e => setMapping(idx, { constValue: e.target.value })} className="input py-1 text-xs col-span-2" placeholder="{today}" />
                   <input value={m.targetColumn} onChange={e => setMapping(idx, { targetColumn: e.target.value })} className="input py-1 text-xs col-span-2" />
                   <select value={m.dataType} onChange={e => setMapping(idx, { dataType: e.target.value as ImportSourceMappingForm['dataType'] })} className="input py-1 text-xs col-span-2">
