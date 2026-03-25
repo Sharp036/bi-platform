@@ -245,7 +245,7 @@ class ImportService(
         filename: String,
     ): Map<String, String?> {
         val today = java.time.LocalDate.now().toString()  // yyyy-MM-dd
-        val constMappings = mappings.filter { it.constValue != null }
+        val constMappings = mappings.filter { !it.constValue.isNullOrEmpty() }
         if (constMappings.isEmpty()) return row
         val result = row.toMutableMap()
         constMappings.forEach { m ->
@@ -615,7 +615,7 @@ class ImportService(
             val rowNumber = rowIdx + 1
             mappings.forEach { m ->
                 // Const-value mappings store their value under targetColumn (see applyConstValues).
-                val rowKey = if (m.constValue != null) m.targetColumn else m.sourceColumn ?: m.targetColumn
+                val rowKey = if (!m.constValue.isNullOrEmpty()) m.targetColumn else m.sourceColumn ?: m.targetColumn
                 val value = row[rowKey]
                 if (value == null || value.isBlank()) {
                     if (!m.nullable) {
@@ -681,7 +681,7 @@ class ImportService(
                         try {
                             mappings.forEachIndexed { i, m ->
                                 // Const-value mappings are stored under targetColumn in the row map.
-                                val raw = row[if (m.constValue != null) m.targetColumn else m.sourceColumn ?: m.targetColumn]
+                                val raw = row[if (!m.constValue.isNullOrEmpty()) m.targetColumn else m.sourceColumn ?: m.targetColumn]
                                 setParam(ps, i + 1, raw, m)
                             }
                             ps.addBatch()
