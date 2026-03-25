@@ -360,6 +360,19 @@ class ImportService(
             workbook.getSheetAt(0)
 
         val headerRowIdx = source.headerRow - 1
+
+        // Collect pre-header cells (e.g. A1 = date) as synthetic columns.
+        // All non-empty cells in rows before the header are exposed by cell address
+        // (A1, B2, etc.) so they can be referenced in mappings via sourceColumn="A1".
+        val preHeaderContext = mutableMapOf<String, String>()
+        for (rIdx in 0 until headerRowIdx) {
+            val row = sheet.getRow(rIdx) ?: continue
+            for (cIdx in 0 until row.lastCellNum) {
+                val value = cellToString(row.getCell(cIdx))?.takeIf { it.isNotEmpty() } ?: continue
+                preHeaderContext["${columnIndexToLetter(cIdx)}${rIdx + 1}"] = value
+            }
+        }
+
         val headerRow = sheet.getRow(headerRowIdx)
             ?: throw IllegalArgumentException("Header row ${source.headerRow} not found in sheet")
 
@@ -374,6 +387,7 @@ class ImportService(
             if (result.size >= maxRows) break
             val row = sheet.getRow(rowIdx) ?: continue
             val map = mutableMapOf<String, String?>()
+            map.putAll(preHeaderContext)
             headers.forEachIndexed { i, header ->
                 if (header.isNotEmpty()) {
                     val cell = row.getCell(i)
@@ -384,6 +398,16 @@ class ImportService(
         }
         workbook.close()
         return result
+    }
+
+    private fun columnIndexToLetter(index: Int): String {
+        var idx = index
+        val sb = StringBuilder()
+        do {
+            sb.insert(0, 'A' + idx % 26)
+            idx = idx / 26 - 1
+        } while (idx >= 0)
+        return sb.toString()
     }
 
     private fun cellToString(cell: org.apache.poi.ss.usermodel.Cell?): String? {
@@ -468,13 +492,21 @@ class ImportService(
         val path = source.jsonArrayPath?.trim()?.takeIf { it.isNotEmpty() }
 
         if (path != null) {
+            // Extract root-level scalar fields (strings, numbers, booleans) and inject
+            // them into every row so mappings like sourceColumn="date" work for fields
+            // that sit at the JSON root rather than inside the nested array.
+            val rootContext = mutableMapOf<String, String>()
+            rootNode.fields().forEach { (k, v) ->
+                if (v.isValueNode && !v.isNull) rootContext[k] = v.asText().trim()
+            }
+
             // Navigate to nested array using dot-path with * wildcards.
             // Example: "clusters.*.group_ax.*.brand.*"
             // Each * iterates all keys of that object level and adds the key
             // as a column named after the preceding path element.
             val parts = path.split(".")
             val result = mutableListOf<Map<String, String?>>()
-            collectJsonPath(rootNode, parts, 0, emptyMap(), result, source, maxRows)
+            collectJsonPath(rootNode, parts, 0, rootContext, result, source, maxRows)
             return result
         }
 
