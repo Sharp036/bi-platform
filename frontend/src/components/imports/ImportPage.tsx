@@ -25,7 +25,7 @@ const SOURCE_FORMATS = ['xlsx', 'csv', 'tsv', 'json', 'zip'] as const
 const COMMON_ENCODINGS = ['UTF-8', 'UTF-16', 'windows-1251', 'windows-1252', 'ISO-8859-1', 'KOI8-R'] as const
 
 const emptyMapping = (): ImportSourceMappingForm => ({
-  sourceColumn: '', targetColumn: '', dataType: 'string', nullable: true,
+  sourceColumn: '', targetColumn: '', dataType: 'string', nullable: true, constValue: '',
 })
 
 const emptyForm = (): ImportSourceForm => ({
@@ -262,8 +262,9 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
             </div>
             <div className="space-y-2">
               <div className="grid grid-cols-12 gap-1 text-xs text-slate-500 dark:text-slate-400 px-1">
-                <span className="col-span-3">{t('import.mapping.source_column')}</span>
-                <span className="col-span-3">{t('import.mapping.target_column')}</span>
+                <span className="col-span-2">{t('import.mapping.source_column')}</span>
+                <span className="col-span-2">{t('import.mapping.const_value')}</span>
+                <span className="col-span-2">{t('import.mapping.target_column')}</span>
                 <span className="col-span-2">{t('import.mapping.data_type')}</span>
                 <span className="col-span-2">{t('import.mapping.date_format')}</span>
                 <span className="col-span-1 text-center">{t('import.mapping.nullable')}</span>
@@ -271,8 +272,9 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
               </div>
               {form.mappings.map((m, idx) => (
                 <div key={idx} className="grid grid-cols-12 gap-1 items-center">
-                  <input value={m.sourceColumn} onChange={e => setMapping(idx, { sourceColumn: e.target.value })} className="input py-1 text-xs col-span-3" />
-                  <input value={m.targetColumn} onChange={e => setMapping(idx, { targetColumn: e.target.value })} className="input py-1 text-xs col-span-3" />
+                  <input value={m.sourceColumn || ''} onChange={e => setMapping(idx, { sourceColumn: e.target.value })} className="input py-1 text-xs col-span-2" placeholder={t('import.mapping.source_column_hint')} />
+                  <input value={m.constValue || ''} onChange={e => setMapping(idx, { constValue: e.target.value })} className="input py-1 text-xs col-span-2" placeholder="{today}" />
+                  <input value={m.targetColumn} onChange={e => setMapping(idx, { targetColumn: e.target.value })} className="input py-1 text-xs col-span-2" />
                   <select value={m.dataType} onChange={e => setMapping(idx, { dataType: e.target.value as ImportSourceMappingForm['dataType'] })} className="input py-1 text-xs col-span-2">
                     {DATA_TYPES.map(dt => <option key={dt} value={dt}>{dt}</option>)}
                   </select>
@@ -704,6 +706,7 @@ export default function ImportPage() {
                   dataType: m.dataType,
                   nullable: m.nullable,
                   dateFormat: m.dateFormat,
+                  constValue: m.constValue,
                 })),
               }
             : emptyForm()

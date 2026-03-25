@@ -42,9 +42,11 @@ class ImportService(
 
     // ── Source CRUD ───────────────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     fun findAll(): List<ImportSourceResponse> =
         sourceRepo.findAll().map { it.toResponse() }
 
+    @Transactional(readOnly = true)
     fun findById(id: Long): ImportSourceResponse =
         sourceRepo.findById(id).orElseThrow { NoSuchElementException("Import source $id not found") }.toResponse()
 
@@ -78,6 +80,7 @@ class ImportService(
                 dataType = m.dataType,
                 nullable = m.nullable,
                 dateFormat = m.dateFormat,
+                constValue = m.constValue,
             ))
         }
         return sourceRepo.save(source).toResponse()
@@ -113,6 +116,7 @@ class ImportService(
                 dataType = m.dataType,
                 nullable = m.nullable,
                 dateFormat = m.dateFormat,
+                constValue = m.constValue,
             ))
         }
         return sourceRepo.save(source).toResponse()
@@ -129,7 +133,9 @@ class ImportService(
     fun preview(id: Long, file: MultipartFile): ImportPreviewResponse {
         val source = sourceRepo.findById(id)
             .orElseThrow { NoSuchElementException("Import source $id not found") }
-        val rows = parseFile(file.inputStream, file.originalFilename ?: file.name, source, maxRows = PREVIEW_ROWS)
+        val filename = file.originalFilename ?: file.name
+        val rows = parseFile(file.inputStream, filename, source, maxRows = PREVIEW_ROWS)
+            .map { applyConstValues(it, source.mappings, filename) }
         val columns = if (rows.isNotEmpty()) rows[0].keys.toList() else emptyList()
         val data = rows.map { row -> columns.map { col -> row[col] } }
         return ImportPreviewResponse(columns = columns, rows = data)
@@ -151,7 +157,9 @@ class ImportService(
         ))
 
         return try {
-            val rows = parseFile(file.inputStream, file.originalFilename ?: file.name, source)
+            val filename = file.originalFilename ?: file.name
+            val rows = parseFile(file.inputStream, filename, source)
+                .map { applyConstValues(it, source.mappings, filename) }
             importLog.rowsTotal = rows.size
 
             val errors = validateRows(rows, source.mappings)
@@ -217,6 +225,7 @@ class ImportService(
 
     // ── Logs ──────────────────────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     fun getLogs(): List<ImportLogResponse> =
         logRepo.findAllByOrderByUploadedAtDesc().map { it.toResponse() }
 
@@ -224,6 +233,27 @@ class ImportService(
         errorRepo.findAllByLogId(logId).map {
             ImportErrorDetail(it.rowNumber, it.columnName, it.errorMessage)
         }
+
+    // ── Constant value injection ──────────────────────────────────────────────
+
+    private fun applyConstValues(
+        row: Map<String, String?>,
+        mappings: List<ImportSourceMapping>,
+        filename: String,
+    ): Map<String, String?> {
+        val today = java.time.LocalDate.now().toString()  // yyyy-MM-dd
+        val constMappings = mappings.filter { it.constValue != null }
+        if (constMappings.isEmpty()) return row
+        val result = row.toMutableMap()
+        constMappings.forEach { m ->
+            val value = m.constValue!!
+                .replace("{filename}", filename)
+                .replace("{today}", today)
+            // Key by sourceColumn if set, otherwise by targetColumn (so validateRows can find it)
+            result[m.sourceColumn ?: m.targetColumn] = value
+        }
+        return result
+    }
 
     // ── File parsing ──────────────────────────────────────────────────────────
 
@@ -698,7 +728,7 @@ class ImportService(
         fileEncoding = fileEncoding,
         jsonArrayPath = jsonArrayPath,
         mappings = mappings.map { m ->
-            ImportSourceMappingResponse(m.id, m.sourceColumn, m.targetColumn, m.dataType, m.nullable, m.dateFormat)
+            ImportSourceMappingResponse(m.id, m.sourceColumn, m.targetColumn, m.dataType, m.nullable, m.dateFormat, m.constValue)
         },
         createdAt = createdAt.toString(),
     )
