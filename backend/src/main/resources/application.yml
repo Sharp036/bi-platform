@@ -2,6 +2,11 @@ spring:
   application:
     name: datorio
 
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+
   # ── Metadata Database (internal) ──
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:datorio}?stringtype=unspecified
