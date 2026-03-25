@@ -16,9 +16,9 @@ export interface ImportSource {
 }
 
 export interface ImportSourceMapping {
-  id: number; sourceColumn: string; targetColumn: string
+  id: number; sourceColumn?: string; targetColumn: string
   dataType: 'string' | 'integer' | 'float' | 'date' | 'datetime' | 'boolean'
-  nullable: boolean; dateFormat?: string
+  nullable: boolean; dateFormat?: string; constValue?: string
 }
 
 export interface ImportSourceForm {
@@ -38,7 +38,7 @@ export interface ImportSourceForm {
 export interface ImportSourceMappingForm {
   sourceColumn: string; targetColumn: string
   dataType: 'string' | 'integer' | 'float' | 'date' | 'datetime' | 'boolean'
-  nullable: boolean; dateFormat?: string
+  nullable: boolean; dateFormat?: string; constValue?: string
 }
 
 export interface ImportPreviewResponse {

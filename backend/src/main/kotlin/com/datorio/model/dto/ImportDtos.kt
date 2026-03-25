@@ -23,20 +23,22 @@ data class ImportSourceRequest(
 )
 
 data class ImportSourceMappingRequest(
-    @field:NotBlank val sourceColumn: String,
+    val sourceColumn: String? = null,
     @field:NotBlank val targetColumn: String,
     @field:NotBlank val dataType: String,
     val nullable: Boolean = true,
-    val dateFormat: String? = null
+    val dateFormat: String? = null,
+    val constValue: String? = null
 )
 
 data class ImportSourceMappingResponse(
     val id: Long,
-    val sourceColumn: String,
+    val sourceColumn: String?,
     val targetColumn: String,
     val dataType: String,
     val nullable: Boolean,
-    val dateFormat: String?
+    val dateFormat: String?,
+    val constValue: String?
 )
 
 data class ImportSourceResponse(

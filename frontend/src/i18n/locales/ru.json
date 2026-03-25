@@ -669,6 +669,8 @@
   "import.key_columns": "Ключевые колонки (для upsert)",
   "import.mappings": "Маппинг полей",
   "import.mapping.source_column": "Колонка файла",
+  "import.mapping.source_column_hint": "из файла",
+  "import.mapping.const_value": "Константа",
   "import.mapping.target_column": "Колонка таблицы",
   "import.mapping.data_type": "Тип",
   "import.mapping.nullable": "Nullable",
