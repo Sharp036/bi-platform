@@ -226,8 +226,11 @@ class ImportService(
     // ── Logs ──────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    fun getLogs(): List<ImportLogResponse> =
-        logRepo.findAllByOrderByUploadedAtDesc().map { it.toResponse() }
+    fun getLogs(username: String, showAll: Boolean): List<ImportLogResponse> {
+        val logs = if (showAll) logRepo.findAllByOrderByUploadedAtDesc()
+                   else logRepo.findAllByUploadedByUsernameOrderByUploadedAtDesc(username)
+        return logs.map { it.toResponse() }
+    }
 
     fun getErrors(logId: Long): List<ImportErrorDetail> =
         errorRepo.findAllByLogId(logId).map {
@@ -249,8 +252,10 @@ class ImportService(
             val value = m.constValue!!
                 .replace("{filename}", filename)
                 .replace("{today}", today)
-            // Key by sourceColumn if set, otherwise by targetColumn (so validateRows can find it)
-            result[m.sourceColumn ?: m.targetColumn] = value
+            // Use targetColumn as the key for const mappings: sourceColumn is empty/null
+            // for const values, so using it would cause collisions when multiple mappings
+            // have no source column. targetColumn is always unique (it's the DB column name).
+            result[m.targetColumn] = value
         }
         return result
     }
@@ -273,11 +278,14 @@ class ImportService(
     // ── ZIP ──────────────────────────────────────────────────────────────────
 
     private fun parseZip(stream: InputStream, source: ImportSource, maxRows: Int): List<Map<String, String?>> {
-        val pattern = source.filenamePattern
+        val pattern = source.filenamePattern?.trim()?.takeIf { it.isNotEmpty() }
         val allRows = mutableListOf<Map<String, String?>>()
         var totalUncompressed = 0L
 
-        ZipInputStream(stream).use { zip ->
+        // Use ISO-8859-1 for reading ZIP entry names: it maps all 256 byte values without
+        // throwing, so ZIPs created on Windows with CP866/CP1251 Cyrillic filenames are handled
+        // correctly. File extensions are always ASCII so format detection still works.
+        ZipInputStream(stream, Charsets.ISO_8859_1).use { zip ->
             var entry = zip.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory) {
@@ -574,7 +582,9 @@ class ImportService(
             if (errors.size >= MAX_ERRORS_STORED) return errors
             val rowNumber = rowIdx + 1
             mappings.forEach { m ->
-                val value = row[m.sourceColumn]
+                // Const-value mappings store their value under targetColumn (see applyConstValues).
+                val rowKey = if (m.constValue != null) m.targetColumn else m.sourceColumn ?: m.targetColumn
+                val value = row[rowKey]
                 if (value == null || value.isBlank()) {
                     if (!m.nullable) {
                         errors.add(ImportErrorDetail(rowNumber, m.sourceColumn, "Required value is missing"))
@@ -598,7 +608,7 @@ class ImportService(
                     else -> null
                 }
                 if (parseError != null) {
-                    errors.add(ImportErrorDetail(rowNumber, m.sourceColumn, parseError))
+                    errors.add(ImportErrorDetail(rowNumber, m.targetColumn, parseError))
                 }
             }
         }
@@ -638,7 +648,8 @@ class ImportService(
                     rows.forEachIndexed { rowIdx, row ->
                         try {
                             mappings.forEachIndexed { i, m ->
-                                val raw = row[m.sourceColumn]
+                                // Const-value mappings are stored under targetColumn in the row map.
+                                val raw = row[if (m.constValue != null) m.targetColumn else m.sourceColumn ?: m.targetColumn]
                                 setParam(ps, i + 1, raw, m)
                             }
                             ps.addBatch()
