@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Upload, Database, FileSpreadsheet, CheckCircle, XCircle,
-  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown,
+  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown, Download,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { importApi } from '@/api/import'
@@ -16,8 +16,10 @@ import type { DataSource } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 import { useAuthStore } from '@/store/authStore'
+import { apiKeyApi } from '@/api/apikeys'
+import type { ApiKey, ApiKeyCreated } from '@/api/apikeys'
 
-type Tab = 'sources' | 'upload' | 'history'
+type Tab = 'sources' | 'upload' | 'history' | 'apikeys'
 
 function extractError(err: unknown, fallback: string): string {
   if (err && typeof err === 'object') {
@@ -583,6 +585,135 @@ function HistoryTab() {
   )
 }
 
+// ---- API Keys Tab ----
+
+function ApiKeysTab() {
+  const { t } = useTranslation()
+  const [keys, setKeys] = useState<ApiKey[]>([])
+  const [loading, setLoading] = useState(true)
+  const [newName, setNewName] = useState('')
+  const [newExpiry, setNewExpiry] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [created, setCreated] = useState<ApiKeyCreated | null>(null)
+
+  const load = () => {
+    apiKeyApi.list()
+      .then(setKeys)
+      .catch((err) => toast.error(extractError(err, t('common.failed_to_load'))))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { load() }, [])
+
+  const handleCreate = async () => {
+    if (!newName.trim()) return
+    setCreating(true)
+    try {
+      const result = await apiKeyApi.create(newName.trim(), newExpiry || undefined)
+      setCreated(result)
+      setNewName('')
+      setNewExpiry('')
+      load()
+    } catch (err) {
+      toast.error(extractError(err, t('common.operation_failed')))
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const handleRevoke = async (id: number) => {
+    if (!confirm(t('import.apikeys.revoke_confirm'))) return
+    try {
+      await apiKeyApi.revoke(id)
+      setKeys(k => k.filter(x => x.id !== id))
+      toast.success(t('import.apikeys.revoked'))
+    } catch (err) {
+      toast.error(extractError(err, t('common.failed_to_delete')))
+    }
+  }
+
+  if (loading) return <LoadingSpinner />
+
+  return (
+    <div className="space-y-6">
+      {created && (
+        <div className="card p-4 border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20">
+          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300 mb-2">{t('import.apikeys.created_notice')}</p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 font-mono text-xs bg-white dark:bg-dark-surface-100 border border-surface-200 dark:border-dark-surface-100 rounded px-3 py-2 select-all break-all">
+              {created.key}
+            </code>
+            <button
+              onClick={() => { navigator.clipboard.writeText(created.key); toast.success(t('common.copied')) }}
+              className="btn-secondary text-xs flex-shrink-0"
+            >
+              {t('common.copy')}
+            </button>
+          </div>
+          <button onClick={() => setCreated(null)} className="mt-2 text-xs text-slate-500 hover:text-slate-700">
+            {t('import.apikeys.dismiss')}
+          </button>
+        </div>
+      )}
+
+      <div className="card p-4">
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">{t('import.apikeys.new')}</h3>
+        <div className="flex gap-2 flex-wrap">
+          <input
+            value={newName}
+            onChange={e => setNewName(e.target.value)}
+            placeholder={t('import.apikeys.name_placeholder')}
+            className="input flex-1 min-w-40"
+          />
+          <input
+            type="date"
+            value={newExpiry}
+            onChange={e => setNewExpiry(e.target.value)}
+            title={t('import.apikeys.expires_hint')}
+            className="input w-40"
+          />
+          <button onClick={handleCreate} disabled={creating || !newName.trim()} className="btn-primary">
+            {creating ? t('common.saving') : t('import.apikeys.generate')}
+          </button>
+        </div>
+        <p className="text-xs text-slate-400 mt-1">{t('import.apikeys.expires_hint')}</p>
+      </div>
+
+      {keys.length === 0 ? (
+        <EmptyState icon={<Database className="w-12 h-12" />} title={t('import.apikeys.empty')} />
+      ) : (
+        <div className="space-y-2">
+          {keys.map(k => (
+            <div key={k.id} className="card p-3 flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="font-medium text-sm text-slate-800 dark:text-white">{k.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                  {k.keyPrefix}...
+                  {k.expiresAt && <span className="ml-3 not-italic">{t('import.apikeys.expires')}: {k.expiresAt.slice(0, 10)}</span>}
+                  {k.lastUsedAt && <span className="ml-3 not-italic">{t('import.apikeys.last_used')}: {k.lastUsedAt.slice(0, 10)}</span>}
+                  {!k.lastUsedAt && <span className="ml-3 not-italic text-slate-400">{t('import.apikeys.never_used')}</span>}
+                </p>
+              </div>
+              <button onClick={() => handleRevoke(k.id)} className="btn-ghost p-2 text-red-500 flex-shrink-0">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="card p-4 bg-slate-50 dark:bg-dark-surface-50">
+        <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">{t('import.apikeys.usage_title')}</p>
+        <code className="block text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+          {`curl -X POST https://datorio.rbtdigitalmobile.ru/api/import/sources/{source_id}/upload \\
+  -H "Authorization: Bearer dat_YOUR_API_KEY" \\
+  -F "file=@/path/to/file.zip"`}
+        </code>
+      </div>
+    </div>
+  )
+}
+
 // ---- Main Page ----
 
 export default function ImportPage() {
@@ -610,6 +741,16 @@ export default function ImportPage() {
     datasourceApi.list().then(setDatasources).catch(() => {})
   }, [])
 
+  const handleExport = (src: ImportSource) => {
+    const blob = new Blob([JSON.stringify(src, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `import-source-${src.name.replace(/[^a-zA-Z0-9а-яА-Я]/g, '_')}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const handleDelete = async (id: number) => {
     if (!confirm(t('import.delete_confirm'))) return
     try {
@@ -625,6 +766,7 @@ export default function ImportPage() {
     { key: 'sources', label: t('import.sources_tab'), show: canManage },
     { key: 'upload', label: t('import.upload_tab'), show: true },
     { key: 'history', label: t('import.history_tab'), show: true },
+    { key: 'apikeys', label: t('import.apikeys_tab'), show: canManage },
   ]
 
   return (
@@ -673,6 +815,9 @@ export default function ImportPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <button onClick={() => handleExport(src)} className="btn-ghost p-2" title={t('import.export')}>
+                    <Download className="w-4 h-4" />
+                  </button>
                   <button onClick={() => { setEditingSource(src); setShowForm(true) }} className="btn-ghost p-2">
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -697,6 +842,7 @@ export default function ImportPage() {
       )}
 
       {activeTab === 'history' && <HistoryTab />}
+      {activeTab === 'apikeys' && canManage && <ApiKeysTab />}
 
       {showForm && (
         <SourceFormModal

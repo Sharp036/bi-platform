@@ -27,6 +27,10 @@ and role-based access control.
 | Database | PostgreSQL (metadata) + any PG/CH (data) |
 | CI/CD | GitLab CI + GitHub Actions |
 
+## Documentation
+
+- [Deployment Guide](docs/DEPLOYMENT.md) — production setup, nginx configuration, API keys, environment variables
+
 ## Quick Start
 
 ### Prerequisites
