@@ -778,6 +778,8 @@
   "import.key_columns": "Key columns (for upsert)",
   "import.mappings": "Field mappings",
   "import.mapping.source_column": "File column",
+  "import.mapping.source_column_hint": "from file",
+  "import.mapping.const_value": "Const value",
   "import.mapping.target_column": "Table column",
   "import.mapping.data_type": "Type",
   "import.mapping.nullable": "Nullable",

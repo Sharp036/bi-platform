@@ -85,8 +85,8 @@ data class ImportSourceMapping(
     @JoinColumn(name = "source_id", nullable = false)
     var source: ImportSource,
 
-    @Column(name = "source_column", nullable = false, length = 255)
-    var sourceColumn: String,
+    @Column(name = "source_column", nullable = true, length = 255)
+    var sourceColumn: String?,
 
     @Column(name = "target_column", nullable = false, length = 255)
     var targetColumn: String,
@@ -98,7 +98,12 @@ data class ImportSourceMapping(
     var nullable: Boolean = true,
 
     @Column(name = "date_format", length = 50)
-    var dateFormat: String? = null
+    var dateFormat: String? = null,
+
+    // When set, this literal value is used instead of reading from the file.
+    // Special tokens: {filename}, {today}
+    @Column(name = "const_value", length = 500)
+    var constValue: String? = null
 ) {
     override fun equals(other: Any?): Boolean = other is ImportSourceMapping && id == other.id
     override fun hashCode(): Int = id.hashCode()
