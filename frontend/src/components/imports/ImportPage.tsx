@@ -237,6 +237,7 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
           )}
 
           <div className="grid grid-cols-2 gap-2">
+            {form.sourceFormat !== 'xlsx' && (
             <div>
               <label className="block text-xs text-slate-500 mb-1">{t('import.file_encoding')}</label>
               <input
@@ -249,6 +250,7 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
                 {COMMON_ENCODINGS.map(enc => <option key={enc} value={enc} />)}
               </datalist>
             </div>
+            )}
             {form.sourceFormat === 'zip' && (
               <div>
                 <label className="block text-xs text-slate-500 mb-1">{t('import.filename_pattern')}</label>
@@ -592,17 +594,17 @@ function HistoryTab({ canManage }: { canManage: boolean }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm" style={{ tableLayout: 'fixed', minWidth: '700px' }}>
         <thead>
           <tr className="text-left text-xs text-slate-500 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
-            <th className="pb-2 pr-4 font-medium">{t('import.source_name')}</th>
-            <th className="pb-2 pr-4 font-medium">{t('import.history.file')}</th>
-            {canManage && <th className="pb-2 pr-4 font-medium">{t('import.history.user')}</th>}
-            <th className="pb-2 pr-4 font-medium">{t('import.history.date')}</th>
-            <th className="pb-2 pr-3 text-right font-medium">{t('import.rows_total_short')}</th>
-            <th className="pb-2 pr-3 text-right font-medium">{t('import.rows_imported_short')}</th>
-            <th className="pb-2 pr-3 text-right font-medium">{t('import.rows_failed_short')}</th>
-            <th className="pb-2 font-medium">{t('common.status')}</th>
+            <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '22%', minWidth: '120px' }}>{t('import.source_name')}</th>
+            <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '18%', minWidth: '100px' }}>{t('import.history.file')}</th>
+            {canManage && <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '10%', minWidth: '80px' }}>{t('import.history.user')}</th>}
+            <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '15%', minWidth: '130px' }}>{t('import.history.date')}</th>
+            <th className="pb-2 pr-3 text-right font-medium" style={{ width: '8%', minWidth: '50px' }}>{t('import.rows_total_short')}</th>
+            <th className="pb-2 pr-3 text-right font-medium" style={{ width: '8%', minWidth: '50px' }}>{t('import.rows_imported_short')}</th>
+            <th className="pb-2 pr-3 text-right font-medium" style={{ width: '8%', minWidth: '50px' }}>{t('import.rows_failed_short')}</th>
+            <th className="pb-2 font-medium" style={{ width: '11%', minWidth: '80px' }}>{t('common.status')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-surface-100 dark:divide-dark-surface-100">
@@ -613,10 +615,10 @@ function HistoryTab({ canManage }: { canManage: boolean }) {
                 className={log.status === 'error' ? 'cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10' : ''}
                 onClick={() => handleExpand(log)}
               >
-                <td className="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300">{log.sourceName}</td>
-                <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate max-w-[160px]">{log.filename}</td>
+                <td className="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300 truncate" title={log.sourceName}>{log.sourceName}</td>
+                <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate" title={log.filename}>{log.filename}</td>
                 {canManage && (
-                  <td className="py-2 pr-4 text-slate-500 dark:text-slate-400">{log.uploadedBy ?? '-'}</td>
+                  <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate" title={log.uploadedBy ?? '-'}>{log.uploadedBy ?? '-'}</td>
                 )}
                 <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">{new Date(log.uploadedAt).toLocaleString()}</td>
                 <td className="py-2 pr-3 text-right text-slate-500 dark:text-slate-400">{log.rowsTotal ?? '-'}</td>
@@ -835,7 +837,7 @@ export default function ImportPage() {
   ]
 
   return (
-    <div className="max-w-[1000px] mx-auto">
+    <div className={`mx-auto ${activeTab === 'history' ? 'max-w-full px-6' : 'max-w-[1000px]'}`}>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('import.title')}</h1>
         {activeTab === 'sources' && canManage && (
