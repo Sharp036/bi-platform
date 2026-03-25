@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Upload, Database, FileSpreadsheet, CheckCircle, XCircle,
-  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown, Download,
+  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown, ChevronUp, ChevronsUpDown, Download, Copy, FolderOpen,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { importApi } from '@/api/import'
@@ -559,12 +559,20 @@ function UploadCard({ source }: UploadCardProps) {
 
 // ---- History Tab ----
 
+type SortKey = 'sourceName' | 'filename' | 'uploadedBy' | 'uploadedAt' | 'rowsTotal' | 'rowsImported' | 'rowsFailed' | 'status'
+
 function HistoryTab({ canManage }: { canManage: boolean }) {
   const { t } = useTranslation()
   const [logs, setLogs] = useState<ImportLog[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [logErrors, setLogErrors] = useState<Record<number, ImportErrorDetail[]>>({})
+  const [sortKey, setSortKey] = useState<SortKey>('uploadedAt')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [filterName, setFilterName] = useState('')
+  const [filterFile, setFilterFile] = useState('')
+  const [filterUser, setFilterUser] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
 
   useEffect(() => {
     importApi.listLogs()
@@ -587,28 +595,84 @@ function HistoryTab({ canManage }: { canManage: boolean }) {
     }
   }
 
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('asc') }
+  }
+
+  const displayed = useMemo(() => {
+    let result = logs
+    if (filterName) result = result.filter(l => l.sourceName.toLowerCase().includes(filterName.toLowerCase()))
+    if (filterFile) result = result.filter(l => l.filename.toLowerCase().includes(filterFile.toLowerCase()))
+    if (filterUser) result = result.filter(l => (l.uploadedBy ?? '').toLowerCase().includes(filterUser.toLowerCase()))
+    if (filterStatus) result = result.filter(l => l.status === filterStatus)
+    return [...result].sort((a, b) => {
+      const av = a[sortKey] ?? ''
+      const bv = b[sortKey] ?? ''
+      const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true })
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [logs, filterName, filterFile, filterUser, filterStatus, sortKey, sortDir])
+
   if (loading) return <LoadingSpinner />
   if (logs.length === 0) return <EmptyState icon={<Clock className="w-12 h-12" />} title={t('import.no_history')} />
 
   const colSpan = canManage ? 8 : 7
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 ml-1 opacity-40 inline-block flex-shrink-0" />
+    return sortDir === 'asc'
+      ? <ChevronUp className="w-3 h-3 ml-1 inline-block flex-shrink-0" />
+      : <ChevronDown className="w-3 h-3 ml-1 inline-block flex-shrink-0" />
+  }
+
+  const thSortCls = 'pb-1 pr-4 font-medium overflow-hidden cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200'
+  const filterInputCls = 'w-full text-xs border border-surface-200 dark:border-dark-surface-100 rounded px-1.5 py-0.5 bg-white dark:bg-dark-surface-200 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-brand-400 mt-1 font-normal cursor-text'
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm" style={{ tableLayout: 'fixed', minWidth: '700px' }}>
         <thead>
           <tr className="text-left text-xs text-slate-500 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
-            <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '22%', minWidth: '120px' }}>{t('import.source_name')}</th>
-            <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '18%', minWidth: '100px' }}>{t('import.history.file')}</th>
-            {canManage && <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '10%', minWidth: '80px' }}>{t('import.history.user')}</th>}
-            <th className="pb-2 pr-4 font-medium overflow-hidden" style={{ resize: 'horizontal', width: '15%', minWidth: '130px' }}>{t('import.history.date')}</th>
-            <th className="pb-2 pr-3 text-right font-medium" style={{ width: '8%', minWidth: '50px' }}>{t('import.rows_total_short')}</th>
-            <th className="pb-2 pr-3 text-right font-medium" style={{ width: '8%', minWidth: '50px' }}>{t('import.rows_imported_short')}</th>
-            <th className="pb-2 pr-3 text-right font-medium" style={{ width: '8%', minWidth: '50px' }}>{t('import.rows_failed_short')}</th>
-            <th className="pb-2 font-medium" style={{ width: '11%', minWidth: '80px' }}>{t('common.status')}</th>
+            <th className={thSortCls} style={{ resize: 'horizontal', width: '22%', minWidth: '120px' }} onClick={() => handleSort('sourceName')}>
+              <span className="flex items-center">{t('import.source_name')}<SortIcon col="sourceName" /></span>
+              <input className={filterInputCls} value={filterName} onChange={e => setFilterName(e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
+            </th>
+            <th className={thSortCls} style={{ resize: 'horizontal', width: '18%', minWidth: '100px' }} onClick={() => handleSort('filename')}>
+              <span className="flex items-center">{t('import.history.file')}<SortIcon col="filename" /></span>
+              <input className={filterInputCls} value={filterFile} onChange={e => setFilterFile(e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
+            </th>
+            {canManage && (
+              <th className={thSortCls} style={{ resize: 'horizontal', width: '10%', minWidth: '80px' }} onClick={() => handleSort('uploadedBy')}>
+                <span className="flex items-center">{t('import.history.user')}<SortIcon col="uploadedBy" /></span>
+                <input className={filterInputCls} value={filterUser} onChange={e => setFilterUser(e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
+              </th>
+            )}
+            <th className={thSortCls} style={{ resize: 'horizontal', width: '15%', minWidth: '130px' }} onClick={() => handleSort('uploadedAt')}>
+              <span className="flex items-center">{t('import.history.date')}<SortIcon col="uploadedAt" /></span>
+            </th>
+            <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsTotal')}>
+              <span className="flex items-center justify-end">{t('import.rows_total_short')}<SortIcon col="rowsTotal" /></span>
+            </th>
+            <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsImported')}>
+              <span className="flex items-center justify-end">{t('import.rows_imported_short')}<SortIcon col="rowsImported" /></span>
+            </th>
+            <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsFailed')}>
+              <span className="flex items-center justify-end">{t('import.rows_failed_short')}<SortIcon col="rowsFailed" /></span>
+            </th>
+            <th className={thSortCls} style={{ resize: 'horizontal', width: '11%', minWidth: '80px' }} onClick={() => handleSort('status')}>
+              <span className="flex items-center">{t('common.status')}<SortIcon col="status" /></span>
+              <select className={filterInputCls} value={filterStatus} onChange={e => setFilterStatus(e.target.value)} onClick={e => e.stopPropagation()}>
+                <option value="">{t('common.all')}</option>
+                {(['success', 'error', 'importing', 'validating', 'valid'] as ImportLog['status'][]).map(s => (
+                  <option key={s} value={s}>{t(`import.status.${s}`)}</option>
+                ))}
+              </select>
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-surface-100 dark:divide-dark-surface-100">
-          {logs.map(log => (
+          {displayed.map(log => (
             <>
               <tr
                 key={log.id}
@@ -794,6 +858,8 @@ export default function ImportPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingSource, setEditingSource] = useState<ImportSource | null>(null)
+  const [pendingForm, setPendingForm] = useState<ImportSourceForm | null>(null)
+  const importFileRef = useRef<HTMLInputElement>(null)
 
   const loadSources = () => {
     setLoading(true)
@@ -829,6 +895,61 @@ export default function ImportPage() {
     }
   }
 
+  const sourceToForm = (src: ImportSource): ImportSourceForm => ({
+    name: src.name,
+    description: src.description,
+    datasourceId: src.datasourceId,
+    sourceFormat: src.sourceFormat,
+    sheetName: src.sheetName,
+    headerRow: src.headerRow,
+    skipRows: src.skipRows,
+    targetSchema: src.targetSchema,
+    targetTable: src.targetTable,
+    loadMode: src.loadMode,
+    keyColumns: src.keyColumns,
+    filenamePattern: src.filenamePattern,
+    fileEncoding: src.fileEncoding,
+    jsonArrayPath: src.jsonArrayPath,
+    mappings: src.mappings.map(m => ({
+      sourceColumn: m.sourceColumn,
+      targetColumn: m.targetColumn,
+      dataType: m.dataType,
+      nullable: m.nullable,
+      dateFormat: m.dateFormat,
+      constValue: m.constValue,
+    })),
+  })
+
+  const handleCopy = (src: ImportSource) => {
+    const form = sourceToForm(src)
+    form.name = src.name + t('import.copy_suffix')
+    setPendingForm(form)
+    setEditingSource(null)
+    setShowForm(true)
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string) as ImportSource
+        if (!data.name || !Array.isArray(data.mappings)) {
+          toast.error(t('import.import_file_invalid'))
+          return
+        }
+        setPendingForm(sourceToForm(data))
+        setEditingSource(null)
+        setShowForm(true)
+      } catch {
+        toast.error(t('import.import_file_invalid'))
+      }
+    }
+    reader.readAsText(file)
+  }
+
   const tabs: { key: Tab; label: string; show: boolean }[] = [
     { key: 'sources', label: t('import.sources_tab'), show: canManage },
     { key: 'upload', label: t('import.upload_tab'), show: true },
@@ -837,31 +958,41 @@ export default function ImportPage() {
   ]
 
   return (
-    <div className={`mx-auto ${activeTab === 'history' ? 'max-w-full px-6' : 'max-w-[1000px]'}`}>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('import.title')}</h1>
-        {activeTab === 'sources' && canManage && (
-          <button onClick={() => { setEditingSource(null); setShowForm(true) }} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> {t('import.new_source')}
-          </button>
-        )}
+    <div>
+      <div className="max-w-[1000px] mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('import.title')}</h1>
+          {activeTab === 'sources' && canManage && (
+            <div className="flex items-center gap-2">
+              <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImportFile} />
+              <button onClick={() => importFileRef.current?.click()} className="btn-ghost flex items-center gap-2" title={t('import.import_from_file')}>
+                <FolderOpen className="w-4 h-4" /> {t('import.import_from_file')}
+              </button>
+              <button onClick={() => { setEditingSource(null); setPendingForm(null); setShowForm(true) }} className="btn-primary flex items-center gap-2">
+                <Plus className="w-4 h-4" /> {t('import.new_source')}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-1 mb-6 border-b border-surface-200 dark:border-dark-surface-100">
+          {tabs.filter(tab => tab.show).map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                activeTab === tab.key
+                  ? 'border-brand-600 text-brand-700 dark:text-brand-400'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="flex gap-1 mb-6 border-b border-surface-200 dark:border-dark-surface-100">
-        {tabs.filter(tab => tab.show).map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              activeTab === tab.key
-                ? 'border-brand-600 text-brand-700 dark:text-brand-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className={activeTab === 'history' ? 'px-6' : 'max-w-[1000px] mx-auto'}>
 
       {activeTab === 'sources' && canManage && (
         loading ? <LoadingSpinner /> : sources.length === 0 ? (
@@ -885,7 +1016,10 @@ export default function ImportPage() {
                   <button onClick={() => handleExport(src)} className="btn-ghost p-2" title={t('import.export')}>
                     <Download className="w-4 h-4" />
                   </button>
-                  <button onClick={() => { setEditingSource(src); setShowForm(true) }} className="btn-ghost p-2">
+                  <button onClick={() => handleCopy(src)} className="btn-ghost p-2" title={t('import.copy_source')}>
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => { setEditingSource(src); setPendingForm(null); setShowForm(true) }} className="btn-ghost p-2">
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button onClick={() => handleDelete(src.id)} className="btn-ghost p-2 text-red-500">
@@ -911,38 +1045,20 @@ export default function ImportPage() {
       {activeTab === 'history' && <HistoryTab canManage={canManage} />}
       {activeTab === 'apikeys' && canManage && <ApiKeysTab />}
 
+      </div>
+
       {showForm && (
         <SourceFormModal
           datasources={datasources}
-          initial={editingSource
-            ? {
-                name: editingSource.name,
-                description: editingSource.description,
-                datasourceId: editingSource.datasourceId,
-                sourceFormat: editingSource.sourceFormat,
-                sheetName: editingSource.sheetName,
-                headerRow: editingSource.headerRow,
-                skipRows: editingSource.skipRows,
-                targetSchema: editingSource.targetSchema,
-                targetTable: editingSource.targetTable,
-                loadMode: editingSource.loadMode,
-                keyColumns: editingSource.keyColumns,
-                filenamePattern: editingSource.filenamePattern,
-                fileEncoding: editingSource.fileEncoding,
-                jsonArrayPath: editingSource.jsonArrayPath,
-                mappings: editingSource.mappings.map(m => ({
-                  sourceColumn: m.sourceColumn,
-                  targetColumn: m.targetColumn,
-                  dataType: m.dataType,
-                  nullable: m.nullable,
-                  dateFormat: m.dateFormat,
-                  constValue: m.constValue,
-                })),
-              }
-            : emptyForm()
+          initial={
+            pendingForm
+              ? pendingForm
+              : editingSource
+                ? sourceToForm(editingSource)
+                : emptyForm()
           }
-          editingId={editingSource?.id ?? null}
-          onClose={() => { setShowForm(false); setEditingSource(null) }}
+          editingId={pendingForm ? null : (editingSource?.id ?? null)}
+          onClose={() => { setShowForm(false); setEditingSource(null); setPendingForm(null) }}
           onSaved={loadSources}
         />
       )}
