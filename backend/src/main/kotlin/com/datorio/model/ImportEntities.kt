@@ -50,6 +50,13 @@ data class ImportSource(
     @Column(name = "filename_pattern", length = 255)
     var filenamePattern: String? = null,
 
+    @Column(name = "strict_columns", nullable = false)
+    var strictColumns: Boolean = false,
+
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "forbidden_columns", columnDefinition = "TEXT[]")
+    var forbiddenColumns: Array<String>? = null,
+
     @Column(name = "file_encoding", nullable = false, length = 20)
     var fileEncoding: String = "UTF-8",
 
