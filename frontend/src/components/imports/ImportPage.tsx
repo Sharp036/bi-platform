@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Upload, Database, FileSpreadsheet, CheckCircle, XCircle,
-  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown, ChevronUp, ChevronsUpDown, Download,
+  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown, ChevronUp, ChevronsUpDown, Download, Copy, FolderOpen,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { importApi } from '@/api/import'
@@ -858,6 +858,8 @@ export default function ImportPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingSource, setEditingSource] = useState<ImportSource | null>(null)
+  const [pendingForm, setPendingForm] = useState<ImportSourceForm | null>(null)
+  const importFileRef = useRef<HTMLInputElement>(null)
 
   const loadSources = () => {
     setLoading(true)
@@ -893,6 +895,61 @@ export default function ImportPage() {
     }
   }
 
+  const sourceToForm = (src: ImportSource): ImportSourceForm => ({
+    name: src.name,
+    description: src.description,
+    datasourceId: src.datasourceId,
+    sourceFormat: src.sourceFormat,
+    sheetName: src.sheetName,
+    headerRow: src.headerRow,
+    skipRows: src.skipRows,
+    targetSchema: src.targetSchema,
+    targetTable: src.targetTable,
+    loadMode: src.loadMode,
+    keyColumns: src.keyColumns,
+    filenamePattern: src.filenamePattern,
+    fileEncoding: src.fileEncoding,
+    jsonArrayPath: src.jsonArrayPath,
+    mappings: src.mappings.map(m => ({
+      sourceColumn: m.sourceColumn,
+      targetColumn: m.targetColumn,
+      dataType: m.dataType,
+      nullable: m.nullable,
+      dateFormat: m.dateFormat,
+      constValue: m.constValue,
+    })),
+  })
+
+  const handleCopy = (src: ImportSource) => {
+    const form = sourceToForm(src)
+    form.name = src.name + t('import.copy_suffix')
+    setPendingForm(form)
+    setEditingSource(null)
+    setShowForm(true)
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string) as ImportSource
+        if (!data.name || !Array.isArray(data.mappings)) {
+          toast.error(t('import.import_file_invalid'))
+          return
+        }
+        setPendingForm(sourceToForm(data))
+        setEditingSource(null)
+        setShowForm(true)
+      } catch {
+        toast.error(t('import.import_file_invalid'))
+      }
+    }
+    reader.readAsText(file)
+  }
+
   const tabs: { key: Tab; label: string; show: boolean }[] = [
     { key: 'sources', label: t('import.sources_tab'), show: canManage },
     { key: 'upload', label: t('import.upload_tab'), show: true },
@@ -906,9 +963,15 @@ export default function ImportPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('import.title')}</h1>
           {activeTab === 'sources' && canManage && (
-            <button onClick={() => { setEditingSource(null); setShowForm(true) }} className="btn-primary flex items-center gap-2">
-              <Plus className="w-4 h-4" /> {t('import.new_source')}
-            </button>
+            <div className="flex items-center gap-2">
+              <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImportFile} />
+              <button onClick={() => importFileRef.current?.click()} className="btn-ghost flex items-center gap-2" title={t('import.import_from_file')}>
+                <FolderOpen className="w-4 h-4" /> {t('import.import_from_file')}
+              </button>
+              <button onClick={() => { setEditingSource(null); setPendingForm(null); setShowForm(true) }} className="btn-primary flex items-center gap-2">
+                <Plus className="w-4 h-4" /> {t('import.new_source')}
+              </button>
+            </div>
           )}
         </div>
 
@@ -953,7 +1016,10 @@ export default function ImportPage() {
                   <button onClick={() => handleExport(src)} className="btn-ghost p-2" title={t('import.export')}>
                     <Download className="w-4 h-4" />
                   </button>
-                  <button onClick={() => { setEditingSource(src); setShowForm(true) }} className="btn-ghost p-2">
+                  <button onClick={() => handleCopy(src)} className="btn-ghost p-2" title={t('import.copy_source')}>
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => { setEditingSource(src); setPendingForm(null); setShowForm(true) }} className="btn-ghost p-2">
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button onClick={() => handleDelete(src.id)} className="btn-ghost p-2 text-red-500">
@@ -984,35 +1050,15 @@ export default function ImportPage() {
       {showForm && (
         <SourceFormModal
           datasources={datasources}
-          initial={editingSource
-            ? {
-                name: editingSource.name,
-                description: editingSource.description,
-                datasourceId: editingSource.datasourceId,
-                sourceFormat: editingSource.sourceFormat,
-                sheetName: editingSource.sheetName,
-                headerRow: editingSource.headerRow,
-                skipRows: editingSource.skipRows,
-                targetSchema: editingSource.targetSchema,
-                targetTable: editingSource.targetTable,
-                loadMode: editingSource.loadMode,
-                keyColumns: editingSource.keyColumns,
-                filenamePattern: editingSource.filenamePattern,
-                fileEncoding: editingSource.fileEncoding,
-                jsonArrayPath: editingSource.jsonArrayPath,
-                mappings: editingSource.mappings.map(m => ({
-                  sourceColumn: m.sourceColumn,
-                  targetColumn: m.targetColumn,
-                  dataType: m.dataType,
-                  nullable: m.nullable,
-                  dateFormat: m.dateFormat,
-                  constValue: m.constValue,
-                })),
-              }
-            : emptyForm()
+          initial={
+            pendingForm
+              ? pendingForm
+              : editingSource
+                ? sourceToForm(editingSource)
+                : emptyForm()
           }
-          editingId={editingSource?.id ?? null}
-          onClose={() => { setShowForm(false); setEditingSource(null) }}
+          editingId={pendingForm ? null : (editingSource?.id ?? null)}
+          onClose={() => { setShowForm(false); setEditingSource(null); setPendingForm(null) }}
           onSaved={loadSources}
         />
       )}
