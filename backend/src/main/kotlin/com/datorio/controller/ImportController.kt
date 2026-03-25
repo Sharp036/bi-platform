@@ -66,8 +66,10 @@ class ImportController(private val importService: ImportService) {
 
     @GetMapping("/logs")
     @PreAuthorize("hasAnyAuthority('IMPORT_MANAGE', 'IMPORT_UPLOAD')")
-    fun getLogs(): ResponseEntity<List<ImportLogResponse>> =
-        ResponseEntity.ok(importService.getLogs())
+    fun getLogs(@AuthenticationPrincipal user: UserDetails): ResponseEntity<List<ImportLogResponse>> {
+        val showAll = user.authorities.any { it.authority == "IMPORT_MANAGE" }
+        return ResponseEntity.ok(importService.getLogs(user.username, showAll))
+    }
 
     @GetMapping("/logs/{id}/errors")
     @PreAuthorize("hasAnyAuthority('IMPORT_MANAGE', 'IMPORT_UPLOAD')")
