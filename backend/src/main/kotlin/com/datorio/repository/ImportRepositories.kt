@@ -12,6 +12,7 @@ interface ImportSourceRepository : JpaRepository<ImportSource, Long>
 @Repository
 interface ImportLogRepository : JpaRepository<ImportLog, Long> {
     fun findAllByOrderByUploadedAtDesc(): List<ImportLog>
+    fun findAllByUploadedByUsernameOrderByUploadedAtDesc(username: String): List<ImportLog>
 }
 
 @Repository

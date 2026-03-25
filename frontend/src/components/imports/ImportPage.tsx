@@ -503,7 +503,7 @@ function UploadCard({ source }: UploadCardProps) {
 
 // ---- History Tab ----
 
-function HistoryTab() {
+function HistoryTab({ canManage }: { canManage: boolean }) {
   const { t } = useTranslation()
   const [logs, setLogs] = useState<ImportLog[]>([])
   const [loading, setLoading] = useState(true)
@@ -534,17 +534,20 @@ function HistoryTab() {
   if (loading) return <LoadingSpinner />
   if (logs.length === 0) return <EmptyState icon={<Clock className="w-12 h-12" />} title={t('import.no_history')} />
 
+  const colSpan = canManage ? 8 : 7
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left text-xs text-slate-500 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
             <th className="pb-2 pr-4 font-medium">{t('import.source_name')}</th>
-            <th className="pb-2 pr-4 font-medium">File</th>
-            <th className="pb-2 pr-4 font-medium">Date</th>
-            <th className="pb-2 pr-3 text-right font-medium">Total</th>
-            <th className="pb-2 pr-3 text-right font-medium">OK</th>
-            <th className="pb-2 pr-3 text-right font-medium">Err</th>
+            <th className="pb-2 pr-4 font-medium">{t('import.history.file')}</th>
+            {canManage && <th className="pb-2 pr-4 font-medium">{t('import.history.user')}</th>}
+            <th className="pb-2 pr-4 font-medium">{t('import.history.date')}</th>
+            <th className="pb-2 pr-3 text-right font-medium">{t('import.rows_total_short')}</th>
+            <th className="pb-2 pr-3 text-right font-medium">{t('import.rows_imported_short')}</th>
+            <th className="pb-2 pr-3 text-right font-medium">{t('import.rows_failed_short')}</th>
             <th className="pb-2 font-medium">{t('common.status')}</th>
           </tr>
         </thead>
@@ -558,19 +561,27 @@ function HistoryTab() {
               >
                 <td className="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300">{log.sourceName}</td>
                 <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate max-w-[160px]">{log.filename}</td>
+                {canManage && (
+                  <td className="py-2 pr-4 text-slate-500 dark:text-slate-400">{log.uploadedBy ?? '-'}</td>
+                )}
                 <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">{new Date(log.uploadedAt).toLocaleString()}</td>
                 <td className="py-2 pr-3 text-right text-slate-500 dark:text-slate-400">{log.rowsTotal ?? '-'}</td>
                 <td className="py-2 pr-3 text-right text-emerald-600 dark:text-emerald-400">{log.rowsImported ?? '-'}</td>
                 <td className="py-2 pr-3 text-right text-red-500">{log.rowsFailed ?? '-'}</td>
                 <td className="py-2">{statusBadge(log.status, t)}</td>
               </tr>
-              {expandedId === log.id && logErrors[log.id] && (
+              {expandedId === log.id && (
                 <tr key={`${log.id}-errors`}>
-                  <td colSpan={7} className="pb-3 pt-1 px-4 bg-red-50 dark:bg-red-900/10">
+                  <td colSpan={colSpan} className="pb-3 pt-1 px-4 bg-red-50 dark:bg-red-900/10">
                     <div className="space-y-1">
-                      {logErrors[log.id].slice(0, 20).map((err, i) => (
+                      {log.errorDetail && (
+                        <div className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">
+                          {log.errorDetail}
+                        </div>
+                      )}
+                      {logErrors[log.id]?.slice(0, 20).map((err, i) => (
                         <div key={i} className="text-xs text-red-600 dark:text-red-400">
-                          Row {err.rowNumber}{err.columnName ? ` / ${err.columnName}` : ''}: {err.errorMessage}
+                          {t('import.history.row')} {err.rowNumber}{err.columnName ? ` / ${err.columnName}` : ''}: {err.errorMessage}
                         </div>
                       ))}
                     </div>
@@ -841,7 +852,7 @@ export default function ImportPage() {
         )
       )}
 
-      {activeTab === 'history' && <HistoryTab />}
+      {activeTab === 'history' && <HistoryTab canManage={canManage} />}
       {activeTab === 'apikeys' && canManage && <ApiKeysTab />}
 
       {showForm && (
