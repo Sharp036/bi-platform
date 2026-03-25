@@ -130,6 +130,7 @@ class ImportService(
 
     // ── Preview ───────────────────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     fun preview(id: Long, file: MultipartFile): ImportPreviewResponse {
         val source = sourceRepo.findById(id)
             .orElseThrow { NoSuchElementException("Import source $id not found") }
