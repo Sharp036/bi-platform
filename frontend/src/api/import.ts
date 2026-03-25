@@ -36,7 +36,7 @@ export interface ImportSourceForm {
 }
 
 export interface ImportSourceMappingForm {
-  sourceColumn: string; targetColumn: string
+  sourceColumn?: string; targetColumn: string
   dataType: 'string' | 'integer' | 'float' | 'date' | 'datetime' | 'boolean'
   nullable: boolean; dateFormat?: string; constValue?: string
 }
