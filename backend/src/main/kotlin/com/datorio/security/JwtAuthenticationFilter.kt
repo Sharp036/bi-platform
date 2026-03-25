@@ -1,5 +1,6 @@
 package com.datorio.security
 
+import com.datorio.service.ApiKeyService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -13,7 +14,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class JwtAuthenticationFilter(
     private val jwtTokenProvider: JwtTokenProvider,
-    private val userDetailsService: UserDetailsService
+    private val userDetailsService: UserDetailsService,
+    private val apiKeyService: ApiKeyService,
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -23,15 +25,28 @@ class JwtAuthenticationFilter(
     ) {
         val token = extractToken(request)
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            val username = jwtTokenProvider.getUsernameFromToken(token)
-            val userDetails = userDetailsService.loadUserByUsername(username)
-
-            val authentication = UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.authorities
-            )
-            authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
-            SecurityContextHolder.getContext().authentication = authentication
+        if (token != null) {
+            if (jwtTokenProvider.validateToken(token)) {
+                // Standard JWT authentication
+                val username = jwtTokenProvider.getUsernameFromToken(token)
+                val userDetails = userDetailsService.loadUserByUsername(username)
+                val authentication = UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.authorities
+                )
+                authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
+                SecurityContextHolder.getContext().authentication = authentication
+            } else if (token.startsWith("dat_")) {
+                // API key authentication
+                val apiKey = apiKeyService.authenticateByRawKey(token)
+                if (apiKey.isPresent) {
+                    val userDetails = userDetailsService.loadUserByUsername(apiKey.get().user.username)
+                    val authentication = UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.authorities
+                    )
+                    authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
+                    SecurityContextHolder.getContext().authentication = authentication
+                }
+            }
         }
 
         filterChain.doFilter(request, response)

@@ -452,8 +452,10 @@ class ImportService(
     // ── JSON ──────────────────────────────────────────────────────────────────
 
     private fun parseJson(stream: InputStream, source: ImportSource, maxRows: Int): List<Map<String, String?>> {
-        val charset = runCatching { Charset.forName(source.fileEncoding) }.getOrDefault(Charsets.UTF_8)
-        val rootNode = jsonMapper.readTree(stream.reader(charset))
+        // Jackson auto-detects JSON encoding (UTF-8/UTF-16/UTF-32, with or without BOM).
+        // Using raw stream instead of charset-decoded Reader avoids MalformedInputException
+        // when the file has a UTF-16 BOM or any non-UTF-8 Unicode encoding.
+        val rootNode = jsonMapper.readTree(stream)
 
         val path = source.jsonArrayPath?.trim()?.takeIf { it.isNotEmpty() }
 
