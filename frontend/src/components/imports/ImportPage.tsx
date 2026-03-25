@@ -19,6 +19,23 @@ import { useAuthStore } from '@/store/authStore'
 
 type Tab = 'sources' | 'upload' | 'history'
 
+function extractError(err: unknown, fallback: string): string {
+  if (err && typeof err === 'object') {
+    const e = err as Record<string, unknown>
+    const data = e['response'] && typeof e['response'] === 'object'
+      ? (e['response'] as Record<string, unknown>)['data']
+      : null
+    if (typeof data === 'string' && data) return data
+    if (data && typeof data === 'object') {
+      const d = data as Record<string, unknown>
+      if (typeof d['message'] === 'string' && d['message']) return d['message']
+      if (typeof d['error'] === 'string' && d['error']) return d['error']
+    }
+    if (typeof e['message'] === 'string' && e['message']) return e['message']
+  }
+  return fallback
+}
+
 const DATA_TYPES = ['string', 'integer', 'float', 'date', 'datetime', 'boolean'] as const
 const LOAD_MODES = ['append', 'replace', 'upsert'] as const
 const SOURCE_FORMATS = ['xlsx', 'csv', 'tsv', 'json', 'zip'] as const
@@ -100,8 +117,8 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
       }
       onSaved()
       onClose()
-    } catch {
-      toast.error(editingId ? t('import.failed_update') : t('import.failed_create'))
+    } catch (err) {
+      toast.error(extractError(err, editingId ? t('import.failed_update') : t('import.failed_create')), { duration: 6000 })
     } finally {
       setSaving(false)
     }
@@ -336,8 +353,8 @@ function UploadCard({ source }: UploadCardProps) {
     try {
       const res = await importApi.preview(source.id, file)
       setPreview(res)
-    } catch {
-      toast.error(t('common.failed_to_load'))
+    } catch (err) {
+      toast.error(extractError(err, t('common.failed_to_load')), { duration: 6000 })
     } finally {
       setPreviewing(false)
     }
@@ -357,8 +374,8 @@ function UploadCard({ source }: UploadCardProps) {
         toast.error(t('import.upload_error'))
         setErrors(res.errors.slice(0, 10))
       }
-    } catch {
-      toast.error(t('common.operation_failed'))
+    } catch (err) {
+      toast.error(extractError(err, t('common.operation_failed')), { duration: 6000 })
     } finally {
       setImporting(false)
     }
@@ -584,7 +601,7 @@ export default function ImportPage() {
     setLoading(true)
     importApi.listSources()
       .then(setSources)
-      .catch(() => toast.error(t('common.failed_to_load')))
+      .catch((err) => toast.error(extractError(err, t('common.failed_to_load')), { duration: 6000 }))
       .finally(() => setLoading(false))
   }
 
