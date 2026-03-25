@@ -958,9 +958,8 @@ export default function ImportPage() {
   ]
 
   return (
-    <div>
-      <div className="max-w-[1000px] mx-auto">
-        <div className="flex items-center justify-between mb-6">
+    <div className="px-6">
+      <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('import.title')}</h1>
           {activeTab === 'sources' && canManage && (
             <div className="flex items-center gap-2">
@@ -990,9 +989,6 @@ export default function ImportPage() {
             </button>
           ))}
         </div>
-      </div>
-
-      <div className={activeTab === 'history' ? 'px-6' : 'max-w-[1000px] mx-auto'}>
 
       {activeTab === 'sources' && canManage && (
         loading ? <LoadingSpinner /> : sources.length === 0 ? (
@@ -1044,8 +1040,6 @@ export default function ImportPage() {
 
       {activeTab === 'history' && <HistoryTab canManage={canManage} />}
       {activeTab === 'apikeys' && canManage && <ApiKeysTab />}
-
-      </div>
 
       {showForm && (
         <SourceFormModal

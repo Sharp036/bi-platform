@@ -66,6 +66,8 @@ class ImportService(
             loadMode = req.loadMode,
             keyColumns = req.keyColumns?.toTypedArray(),
             filenamePattern = req.filenamePattern,
+            strictColumns = req.strictColumns,
+            forbiddenColumns = req.forbiddenColumns?.toTypedArray(),
             fileEncoding = req.fileEncoding.ifBlank { "UTF-8" },
             jsonArrayPath = req.jsonArrayPath?.trim()?.ifEmpty { null },
             createdBy = user,
@@ -102,6 +104,8 @@ class ImportService(
         source.loadMode = req.loadMode
         source.keyColumns = req.keyColumns?.toTypedArray()
         source.filenamePattern = req.filenamePattern
+        source.strictColumns = req.strictColumns
+        source.forbiddenColumns = req.forbiddenColumns?.toTypedArray()
         source.fileEncoding = req.fileEncoding.ifBlank { "UTF-8" }
         source.jsonArrayPath = req.jsonArrayPath?.trim()?.ifEmpty { null }
         source.updatedAt = java.time.OffsetDateTime.now()
@@ -160,6 +164,23 @@ class ImportService(
             val rows = parseFile(file.inputStream, filename, source)
                 .map { applyConstValues(it, source.mappings, filename) }
             importLog.rowsTotal = rows.size
+
+            val headerErrors = validateFileHeaders(rows, source)
+            if (headerErrors.isNotEmpty()) {
+                importLog.rowsImported = 0
+                importLog.rowsFailed = rows.size
+                importLog.status = "error"
+                importLog.errorDetail = headerErrors.first().errorMessage
+                logRepo.save(importLog)
+                return ImportUploadResult(
+                    logId = importLog.id,
+                    rowsTotal = rows.size,
+                    rowsImported = 0,
+                    rowsFailed = rows.size,
+                    status = "error",
+                    errors = headerErrors,
+                )
+            }
 
             val errors = validateRows(rows, source.mappings)
             val savedErrors = mutableListOf<ImportLogError>()
@@ -603,6 +624,45 @@ class ImportService(
 
     // ── Validation ────────────────────────────────────────────────────────────
 
+    // Cell-address keys injected by pre-header context (e.g. "A1", "BC12") are
+    // not real file columns and must be excluded from header checks.
+    private val cellAddressRegex = Regex("^[A-Z]+\\d+$")
+
+    private fun validateFileHeaders(
+        rows: List<Map<String, String?>>,
+        source: ImportSource,
+    ): List<ImportErrorDetail> {
+        if (rows.isEmpty()) return emptyList()
+        val errors = mutableListOf<ImportErrorDetail>()
+
+        val fileColumns = rows.first().keys
+            .filter { !cellAddressRegex.matches(it) }
+            .toSet()
+
+        val forbidden = source.forbiddenColumns
+        if (!forbidden.isNullOrEmpty()) {
+            val found = fileColumns.intersect(forbidden.toSet())
+            if (found.isNotEmpty()) {
+                errors.add(ImportErrorDetail(0, null,
+                    "File contains forbidden column(s): ${found.sorted().joinToString(", ")}"))
+            }
+        }
+
+        if (source.strictColumns) {
+            val mappedColumns = source.mappings
+                .mapNotNull { it.sourceColumn }
+                .filter { it.isNotBlank() && !cellAddressRegex.matches(it) }
+                .toSet()
+            val unmapped = fileColumns - mappedColumns
+            if (unmapped.isNotEmpty()) {
+                errors.add(ImportErrorDetail(0, null,
+                    "File contains unmapped column(s): ${unmapped.sorted().joinToString(", ")}"))
+            }
+        }
+
+        return errors
+    }
+
     private fun validateRows(
         rows: List<Map<String, String?>>,
         mappings: List<ImportSourceMapping>,
@@ -772,6 +832,8 @@ class ImportService(
         loadMode = loadMode,
         keyColumns = keyColumns?.toList(),
         filenamePattern = filenamePattern,
+        strictColumns = strictColumns,
+        forbiddenColumns = forbiddenColumns?.toList(),
         fileEncoding = fileEncoding,
         jsonArrayPath = jsonArrayPath,
         mappings = mappings.map { m ->
