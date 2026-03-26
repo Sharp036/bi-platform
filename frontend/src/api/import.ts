@@ -9,6 +9,8 @@ export interface ImportSource {
   loadMode: 'append' | 'replace' | 'upsert'
   keyColumns?: string[]
   filenamePattern?: string
+  strictColumns: boolean
+  forbiddenColumns?: string[]
   fileEncoding: string
   jsonArrayPath?: string
   mappings: ImportSourceMapping[]
@@ -30,6 +32,8 @@ export interface ImportSourceForm {
   loadMode: 'append' | 'replace' | 'upsert'
   keyColumns?: string[]
   filenamePattern?: string
+  strictColumns: boolean
+  forbiddenColumns?: string[]
   fileEncoding: string
   jsonArrayPath?: string
   mappings: ImportSourceMappingForm[]
