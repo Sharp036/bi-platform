@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Upload, Database, FileSpreadsheet, CheckCircle, XCircle,
-  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown, ChevronUp, ChevronsUpDown, Download, Copy, FolderOpen,
+  Clock, Plus, Trash2, Pencil, Eye, X, ChevronDown, ChevronUp, ChevronsUpDown, Download, Copy, FolderOpen, Share2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { importApi } from '@/api/import'
@@ -18,6 +18,7 @@ import EmptyState from '@/components/common/EmptyState'
 import { useAuthStore } from '@/store/authStore'
 import { apiKeyApi } from '@/api/apikeys'
 import type { ApiKey, ApiKeyCreated } from '@/api/apikeys'
+import ShareDialog from '@/components/sharing/ShareDialog'
 
 type Tab = 'sources' | 'upload' | 'history' | 'apikeys'
 
@@ -40,7 +41,7 @@ function extractError(err: unknown, fallback: string): string {
 
 const DATA_TYPES = ['string', 'integer', 'float', 'date', 'datetime', 'boolean'] as const
 const LOAD_MODES = ['append', 'replace', 'upsert'] as const
-const SOURCE_FORMATS = ['xlsx', 'csv', 'tsv', 'json', 'zip'] as const
+const SOURCE_FORMATS = ['xlsx', 'csv', 'tsv', 'json', 'zip', 'api'] as const
 const COMMON_ENCODINGS = ['UTF-8', 'UTF-16', 'windows-1251', 'windows-1252', 'ISO-8859-1', 'KOI8-R'] as const
 
 const emptyMapping = (): ImportSourceMappingForm => ({
@@ -172,7 +173,14 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs text-slate-500 mb-1">{t('import.source_format')}</label>
-              <select value={form.sourceFormat} onChange={e => setField('sourceFormat', e.target.value as ImportSourceForm['sourceFormat'])} className="input">
+              <select value={form.sourceFormat} onChange={e => {
+                const fmt = e.target.value as ImportSourceForm['sourceFormat']
+                setForm(f => ({
+                  ...f,
+                  sourceFormat: fmt,
+                  ...(fmt === 'api' ? { headerRow: 1, skipRows: 0 } : {}),
+                }))
+              }} className="input">
                 {SOURCE_FORMATS.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
               </select>
             </div>
@@ -184,16 +192,18 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">{t('import.header_row')}</label>
-              <input type="number" min={1} value={form.headerRow} onChange={e => setField('headerRow', Number(e.target.value))} className="input" />
+          {form.sourceFormat !== 'api' && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">{t('import.header_row')}</label>
+                <input type="number" min={1} value={form.headerRow} onChange={e => setField('headerRow', Number(e.target.value))} className="input" />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">{t('import.skip_rows')}</label>
+                <input type="number" min={0} value={form.skipRows} onChange={e => setField('skipRows', Number(e.target.value))} className="input" />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">{t('import.skip_rows')}</label>
-              <input type="number" min={0} value={form.skipRows} onChange={e => setField('skipRows', Number(e.target.value))} className="input" />
-            </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -237,7 +247,7 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
           )}
 
           <div className="grid grid-cols-2 gap-2">
-            {form.sourceFormat !== 'xlsx' && (
+            {form.sourceFormat !== 'xlsx' && form.sourceFormat !== 'api' && (
             <div>
               <label className="block text-xs text-slate-500 mb-1">{t('import.file_encoding')}</label>
               <input
@@ -465,7 +475,7 @@ function UploadCard({ source }: UploadCardProps) {
   }
 
   const formatAccept: Record<string, string> = {
-    xlsx: '.xlsx', csv: '.csv', tsv: '.tsv', json: '.json', zip: '.zip',
+    xlsx: '.xlsx', csv: '.csv', tsv: '.tsv', json: '.json', zip: '.zip', api: '.xlsx',
   }
   const accept = formatAccept[source.sourceFormat] ?? '.xlsx'
 
@@ -483,22 +493,26 @@ function UploadCard({ source }: UploadCardProps) {
             </p>
           </div>
         </div>
-        <button onClick={() => fileRef.current?.click()} className="btn-primary flex-shrink-0 flex items-center gap-2">
-          <Upload className="w-4 h-4" /> {t('import.upload_file')}
-        </button>
+        {source.sourceFormat !== 'api' && (
+          <button onClick={() => fileRef.current?.click()} className="btn-primary flex-shrink-0 flex items-center gap-2">
+            <Upload className="w-4 h-4" /> {t('import.upload_file')}
+          </button>
+        )}
       </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={e => {
-          setFile(e.target.files?.[0] || null)
-          setPreview(null)
-          setResult(null)
-          setErrors([])
-        }}
-      />
+      {source.sourceFormat !== 'api' && (
+        <input
+          ref={fileRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={e => {
+            setFile(e.target.files?.[0] || null)
+            setPreview(null)
+            setResult(null)
+            setErrors([])
+          }}
+        />
+      )}
 
       {file && (
         <div className="mt-3 pt-3 border-t border-surface-200 dark:border-dark-surface-100">
@@ -883,6 +897,7 @@ export default function ImportPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingSource, setEditingSource] = useState<ImportSource | null>(null)
+  const [sharingSource, setSharingSource] = useState<ImportSource | null>(null)
   const [pendingForm, setPendingForm] = useState<ImportSourceForm | null>(null)
   const importFileRef = useRef<HTMLInputElement>(null)
 
@@ -1045,6 +1060,9 @@ export default function ImportPage() {
                   <button onClick={() => handleCopy(src)} className="btn-ghost p-2" title={t('import.copy_source')}>
                     <Copy className="w-4 h-4" />
                   </button>
+                  <button onClick={() => setSharingSource(src)} className="btn-ghost p-2" title={t('common.share')}>
+                    <Share2 className="w-4 h-4" />
+                  </button>
                   <button onClick={() => { setEditingSource(src); setPendingForm(null); setShowForm(true) }} className="btn-ghost p-2">
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -1084,6 +1102,15 @@ export default function ImportPage() {
           editingId={pendingForm ? null : (editingSource?.id ?? null)}
           onClose={() => { setShowForm(false); setEditingSource(null); setPendingForm(null) }}
           onSaved={loadSources}
+        />
+      )}
+
+      {sharingSource && (
+        <ShareDialog
+          objectType="IMPORT_SOURCE"
+          objectId={sharingSource.id}
+          objectName={sharingSource.name}
+          onClose={() => setSharingSource(null)}
         />
       )}
     </div>

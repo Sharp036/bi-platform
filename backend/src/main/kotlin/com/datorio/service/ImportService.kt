@@ -37,12 +37,17 @@ class ImportService(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
     private val jsonMapper = ObjectMapper()
+    private val dataFormatter = org.apache.poi.ss.usermodel.DataFormatter()
 
     // ── Source CRUD ───────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    fun findAll(): List<ImportSourceResponse> =
-        sourceRepo.findAll().map { it.toResponse() }
+    fun findAll(username: String = "", canSeeAll: Boolean = true): List<ImportSourceResponse> {
+        if (canSeeAll) return sourceRepo.findAll().map { it.toResponse() }
+        val user = userRepo.findByUsername(username).orElse(null) ?: return emptyList()
+        val roleIds = user.roles.map { it.id }.ifEmpty { listOf(-1L) }
+        return sourceRepo.findAccessibleSources(user.id, roleIds).map { it.toResponse() }
+    }
 
     @Transactional(readOnly = true)
     fun findById(id: Long): ImportSourceResponse =
@@ -152,15 +157,17 @@ class ImportService(
             .orElseThrow { NoSuchElementException("Import source $id not found") }
         val user = userRepo.findByUsername(username).orElse(null)
 
+        val filename = if (source.sourceFormat == "api") source.name
+                      else (file.originalFilename ?: file.name)
+
         val importLog = logRepo.save(ImportLog(
             source = source,
-            filename = file.originalFilename ?: file.name,
+            filename = filename,
             uploadedBy = user,
             status = "validating",
         ))
 
         return try {
-            val filename = file.originalFilename ?: file.name
             val rows = parseFile(file.inputStream, filename, source)
                 .map { applyConstValues(it, source.mappings, filename) }
             importLog.rowsTotal = rows.size
@@ -292,7 +299,7 @@ class ImportService(
         "tsv"  -> parseCsvWithCommons(stream, source, maxRows, '\t')
         "json" -> parseJson(stream, source, maxRows)
         "csv"  -> parseCsvWithCommons(stream, source, maxRows, null)
-        else   -> parseXlsx(stream, source, maxRows)
+        else   -> parseXlsx(stream, source, maxRows)  // 'xlsx' and 'api' both use XLSX parsing
     }
 
     // ── ZIP ──────────────────────────────────────────────────────────────────
@@ -439,14 +446,12 @@ class ImportService(
                 if (DateUtil.isCellDateFormatted(cell)) {
                     cell.localDateTimeCellValue.toLocalDate().toString()
                 } else {
-                    val d = cell.numericCellValue
-                    if (d == kotlin.math.floor(d) && !d.isInfinite()) d.toLong().toString()
-                    else d.toString()
+                    dataFormatter.formatCellValue(cell).trim().ifEmpty { null }
                 }
             }
             CellType.FORMULA -> {
-                try { cell.numericCellValue.toString() }
-                catch (_: Exception) { cell.stringCellValue?.trim() }
+                try { dataFormatter.formatCellValue(cell).trim().ifEmpty { null } }
+                catch (_: Exception) { cell.stringCellValue?.trim()?.ifEmpty { null } }
             }
             else -> cell.stringCellValue?.trim()?.ifEmpty { null }
         }

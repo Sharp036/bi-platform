@@ -3,7 +3,7 @@ import api from './client'
 export interface ImportSource {
   id: number; name: string; description?: string
   datasourceId: number; datasourceName: string
-  sourceFormat: 'xlsx' | 'csv' | 'tsv' | 'json' | 'zip'
+  sourceFormat: 'xlsx' | 'csv' | 'tsv' | 'json' | 'zip' | 'api'
   sheetName?: string; headerRow: number; skipRows: number
   targetSchema: string; targetTable: string
   loadMode: 'append' | 'replace' | 'upsert'
@@ -26,7 +26,7 @@ export interface ImportSourceMapping {
 export interface ImportSourceForm {
   name: string; description?: string
   datasourceId: number
-  sourceFormat: 'xlsx' | 'csv' | 'tsv' | 'json' | 'zip'
+  sourceFormat: 'xlsx' | 'csv' | 'tsv' | 'json' | 'zip' | 'api'
   sheetName?: string; headerRow: number; skipRows: number
   targetSchema: string; targetTable: string
   loadMode: 'append' | 'replace' | 'upsert'

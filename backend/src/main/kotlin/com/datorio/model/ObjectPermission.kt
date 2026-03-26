@@ -32,7 +32,7 @@ class ObjectPermission(
 )
 
 enum class ObjectType {
-    DATASOURCE, REPORT, DASHBOARD
+    DATASOURCE, REPORT, DASHBOARD, IMPORT_SOURCE
 }
 
 enum class AccessLevel {
