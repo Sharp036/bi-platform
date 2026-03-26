@@ -156,10 +156,31 @@ class ImportService(
         val source = sourceRepo.findById(id)
             .orElseThrow { NoSuchElementException("Import source $id not found") }
         val user = userRepo.findByUsername(username).orElse(null)
+        val filename = file.originalFilename ?: file.name
+        val rows = parseFile(file.inputStream, filename, source)
+            .map { applyConstValues(it, source.mappings, filename) }
+        return processImport(id, source, user, filename, rows)
+    }
 
-        val filename = if (source.sourceFormat == "api") source.name
-                      else (file.originalFilename ?: file.name)
+    @Transactional
+    fun uploadRows(id: Long, rawRows: List<Map<String, Any?>>, username: String): ImportUploadResult {
+        val source = sourceRepo.findById(id)
+            .orElseThrow { NoSuchElementException("Import source $id not found") }
+        val user = userRepo.findByUsername(username).orElse(null)
+        val filename = source.name
+        val rows = rawRows
+            .map { raw -> raw.mapValues { (_, v) -> v?.toString()?.trim()?.ifEmpty { null } } }
+            .map { applyConstValues(it, source.mappings, filename) }
+        return processImport(id, source, user, filename, rows)
+    }
 
+    private fun processImport(
+        id: Long,
+        source: ImportSource,
+        user: com.datorio.model.User?,
+        filename: String,
+        rows: List<Map<String, String?>>,
+    ): ImportUploadResult {
         val importLog = logRepo.save(ImportLog(
             source = source,
             filename = filename,
@@ -168,8 +189,6 @@ class ImportService(
         ))
 
         return try {
-            val rows = parseFile(file.inputStream, filename, source)
-                .map { applyConstValues(it, source.mappings, filename) }
             importLog.rowsTotal = rows.size
 
             val headerErrors = validateFileHeaders(rows, source)
@@ -190,14 +209,13 @@ class ImportService(
             }
 
             val errors = validateRows(rows, source.mappings)
-            val savedErrors = mutableListOf<ImportLogError>()
             errors.take(MAX_ERRORS_STORED).forEach { e ->
-                savedErrors.add(errorRepo.save(ImportLogError(
+                errorRepo.save(ImportLogError(
                     log = importLog,
                     rowNumber = e.rowNumber,
                     columnName = e.columnName,
                     errorMessage = e.errorMessage,
-                )))
+                ))
             }
 
             if (errors.isNotEmpty()) {

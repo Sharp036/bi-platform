@@ -915,7 +915,10 @@ export default function ImportPage() {
   }, [])
 
   const handleExport = (src: ImportSource) => {
-    const blob = new Blob([JSON.stringify(src, null, 2)], { type: 'application/json' })
+    const exported = src.sourceFormat === 'api'
+      ? (({ sheetName: _s, fileEncoding: _f, ...rest }) => rest)(src)
+      : src
+    const blob = new Blob([JSON.stringify(exported, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -940,9 +943,9 @@ export default function ImportPage() {
     description: src.description,
     datasourceId: src.datasourceId,
     sourceFormat: src.sourceFormat,
-    sheetName: src.sheetName,
-    headerRow: src.headerRow,
-    skipRows: src.skipRows,
+    sheetName: src.sourceFormat === 'api' ? '' : src.sheetName,
+    headerRow: src.sourceFormat === 'api' ? 1 : src.headerRow,
+    skipRows: src.sourceFormat === 'api' ? 0 : src.skipRows,
     targetSchema: src.targetSchema,
     targetTable: src.targetTable,
     loadMode: src.loadMode,
@@ -950,7 +953,7 @@ export default function ImportPage() {
     filenamePattern: src.filenamePattern,
     strictColumns: src.strictColumns,
     forbiddenColumns: src.forbiddenColumns,
-    fileEncoding: src.fileEncoding,
+    fileEncoding: src.sourceFormat === 'api' ? 'UTF-8' : src.fileEncoding,
     jsonArrayPath: src.jsonArrayPath,
     mappings: src.mappings.map(m => ({
       sourceColumn: m.sourceColumn,
