@@ -52,7 +52,7 @@ const emptyForm = (): ImportSourceForm => ({
   sourceFormat: 'xlsx', sheetName: '', headerRow: 1, skipRows: 0,
   targetSchema: 'public', targetTable: '',
   loadMode: 'append', keyColumns: [],
-  filenamePattern: '', fileEncoding: 'UTF-8', jsonArrayPath: '',
+  filenamePattern: '', strictColumns: false, forbiddenColumns: [], fileEncoding: 'UTF-8', jsonArrayPath: '',
   mappings: [emptyMapping()],
 })
 
@@ -276,6 +276,31 @@ function SourceFormModal({ datasources, initial, editingId, onClose, onSaved }: 
               <p className="text-xs text-slate-400 mt-1">{t('import.json_array_path_hint')}</p>
             </div>
           )}
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <input
+                id="strict-columns"
+                type="checkbox"
+                checked={form.strictColumns}
+                onChange={e => setField('strictColumns', e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600"
+              />
+              <label htmlFor="strict-columns" className="text-sm text-slate-700 dark:text-slate-300">
+                {t('import.strict_columns')}
+              </label>
+            </div>
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">{t('import.forbidden_columns')}</label>
+              <input
+                value={(form.forbiddenColumns ?? []).join(', ')}
+                onChange={e => setField('forbiddenColumns', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                placeholder="brand, extra_col"
+                className="input font-mono text-xs"
+              />
+              <p className="text-xs text-slate-400 mt-1">{t('import.forbidden_columns_hint')}</p>
+            </div>
+          </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -908,6 +933,8 @@ export default function ImportPage() {
     loadMode: src.loadMode,
     keyColumns: src.keyColumns,
     filenamePattern: src.filenamePattern,
+    strictColumns: src.strictColumns,
+    forbiddenColumns: src.forbiddenColumns,
     fileEncoding: src.fileEncoding,
     jsonArrayPath: src.jsonArrayPath,
     mappings: src.mappings.map(m => ({
