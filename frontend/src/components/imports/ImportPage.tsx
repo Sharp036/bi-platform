@@ -1029,7 +1029,10 @@ export default function ImportPage() {
                     <FileSpreadsheet className="w-5 h-5 text-brand-600 dark:text-brand-400" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-slate-800 dark:text-white truncate">{src.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-800 dark:text-white truncate">{src.name}</p>
+                      <span className="text-xs font-mono text-slate-400 dark:text-slate-500 flex-shrink-0">#{src.id}</span>
+                    </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {src.datasourceName} &middot; {src.targetSchema}.{src.targetTable} &middot; {src.sourceFormat.toUpperCase()} &middot; {t(`import.load_mode.${src.loadMode}`)}
                     </p>
