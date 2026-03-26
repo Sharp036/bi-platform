@@ -28,8 +28,8 @@ interface ReportRepository : JpaRepository<Report, Long> {
     fun searchByName(term: String, pageable: Pageable): Page<Report>
 
     @Query("""
-        SELECT r FROM Report r 
-        WHERE (:status IS NULL OR r.status = :status) 
+        SELECT r FROM Report r
+        WHERE (:status IS NULL OR r.status = :status)
         AND (:createdBy IS NULL OR r.createdBy = :createdBy)
         AND (:folderId IS NULL OR r.folderId = :folderId)
         ORDER BY r.updatedAt DESC
@@ -38,6 +38,47 @@ interface ReportRepository : JpaRepository<Report, Long> {
         status: ReportStatus?,
         createdBy: Long?,
         folderId: Long?,
+        pageable: Pageable
+    ): Page<Report>
+
+    @Query("""
+        SELECT DISTINCT r FROM Report r
+        WHERE (:status IS NULL OR r.status = :status)
+        AND (:folderId IS NULL OR r.folderId = :folderId)
+        AND (
+            r.createdBy = :userId
+            OR EXISTS (
+                SELECT p FROM ObjectPermission p
+                WHERE p.objectType = 'REPORT' AND p.objectId = r.id
+                AND (p.user.id = :userId OR p.role.id IN :roleIds)
+            )
+        )
+        ORDER BY r.updatedAt DESC
+    """)
+    fun findFilteredForViewer(
+        status: ReportStatus?,
+        folderId: Long?,
+        userId: Long,
+        roleIds: Collection<Long>,
+        pageable: Pageable
+    ): Page<Report>
+
+    @Query("""
+        SELECT DISTINCT r FROM Report r
+        WHERE LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%'))
+        AND (
+            r.createdBy = :userId
+            OR EXISTS (
+                SELECT p FROM ObjectPermission p
+                WHERE p.objectType = 'REPORT' AND p.objectId = r.id
+                AND (p.user.id = :userId OR p.role.id IN :roleIds)
+            )
+        )
+    """)
+    fun searchByNameForViewer(
+        term: String,
+        userId: Long,
+        roleIds: Collection<Long>,
         pageable: Pageable
     ): Page<Report>
 }
