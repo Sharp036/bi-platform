@@ -148,7 +148,7 @@ class ReportServiceTest {
             val page = PageImpl(reports, PageRequest.of(0, 20), 1)
             whenever(reportRepo.searchByName(eq("Sales"), any())).thenReturn(page)
 
-            val result = reportService.searchReports("Sales", PageRequest.of(0, 20))
+            val result = reportService.searchReports("Sales", pageable = PageRequest.of(0, 20))
 
             assertEquals(1, result.totalElements)
             assertEquals("Sales Report", result.content[0].name)
