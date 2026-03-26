@@ -90,6 +90,18 @@ class ImportController(
         return ResponseEntity.ok(importService.upload(id, file, user.username))
     }
 
+    @PostMapping("/sources/{id}/upload", consumes = ["application/json"])
+    @PreAuthorize("hasAuthority('IMPORT_UPLOAD')")
+    fun uploadJson(
+        @PathVariable id: Long,
+        @RequestBody rows: List<Map<String, Any?>>,
+        @AuthenticationPrincipal user: UserDetails,
+        auth: Authentication,
+    ): ResponseEntity<ImportUploadResult> {
+        if (!canAccessSource(id, auth)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        return ResponseEntity.ok(importService.uploadRows(id, rows, user.username))
+    }
+
     @GetMapping("/logs")
     @PreAuthorize("hasAnyAuthority('IMPORT_MANAGE', 'IMPORT_UPLOAD')")
     fun getLogs(@AuthenticationPrincipal user: UserDetails): ResponseEntity<List<ImportLogResponse>> {
