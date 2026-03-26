@@ -17,6 +17,7 @@
   "common.publish": "Publish",
   "common.unpublish": "Unpublish",
   "common.export": "Export",
+  "common.copy": "Copy",
   "common.share": "Share",
   "common.name": "Name",
   "common.description": "Description",
