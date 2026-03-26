@@ -89,17 +89,35 @@ class ReportService(
     @Transactional(readOnly = true)
     fun listReports(
         status: ReportStatus? = null,
-        createdBy: Long? = null,
         folderId: Long? = null,
+        viewerUserId: Long? = null,
+        viewerRoleIds: List<Long> = emptyList(),
         pageable: Pageable = PageRequest.of(0, 20)
     ): Page<ReportListItem> {
-        return reportRepo.findFiltered(status, createdBy, folderId, pageable)
-            .map { toListItem(it) }
+        return if (viewerUserId != null) {
+            val roleIds = viewerRoleIds.ifEmpty { listOf(-1L) }
+            reportRepo.findFilteredForViewer(status, folderId, viewerUserId, roleIds, pageable)
+                .map { toListItem(it) }
+        } else {
+            reportRepo.findFiltered(status, null, folderId, pageable)
+                .map { toListItem(it) }
+        }
     }
 
     @Transactional(readOnly = true)
-    fun searchReports(term: String, pageable: Pageable): Page<ReportListItem> {
-        return reportRepo.searchByName(term, pageable).map { toListItem(it) }
+    fun searchReports(
+        term: String,
+        viewerUserId: Long? = null,
+        viewerRoleIds: List<Long> = emptyList(),
+        pageable: Pageable
+    ): Page<ReportListItem> {
+        return if (viewerUserId != null) {
+            val roleIds = viewerRoleIds.ifEmpty { listOf(-1L) }
+            reportRepo.searchByNameForViewer(term, viewerUserId, roleIds, pageable)
+                .map { toListItem(it) }
+        } else {
+            reportRepo.searchByName(term, pageable).map { toListItem(it) }
+        }
     }
 
     @Transactional(readOnly = true)

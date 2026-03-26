@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.*
 class ReportController(
     private val reportService: ReportService,
     private val renderService: ReportRenderService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val objectPermissionService: ObjectPermissionService
 ) {
 
     @PostMapping
@@ -36,7 +37,14 @@ class ReportController(
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('REPORT_VIEW')")
-    fun getReport(@PathVariable id: Long): ResponseEntity<ReportResponse> {
+    fun getReport(@PathVariable id: Long, auth: Authentication): ResponseEntity<ReportResponse> {
+        val canSeeAll = auth.authorities.any { it.authority in listOf("REPORT_EDIT", "SYSTEM_ADMIN") }
+        if (!canSeeAll) {
+            val userId = getUserId(auth)
+            if (!objectPermissionService.canAccess("REPORT", id, userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
+        }
         return ResponseEntity.ok(reportService.getReport(id))
     }
 
@@ -49,9 +57,13 @@ class ReportController(
         @RequestParam(defaultValue = "20") size: Int,
         auth: Authentication
     ): ResponseEntity<Any> {
+        val canSeeAll = auth.authorities.any { it.authority in listOf("REPORT_EDIT", "SYSTEM_ADMIN") }
+        val (viewerUserId, viewerRoleIds) = if (canSeeAll) null to emptyList() else getUserContext(auth)
         val result = reportService.listReports(
             status = status,
             folderId = folderId,
+            viewerUserId = viewerUserId,
+            viewerRoleIds = viewerRoleIds,
             pageable = PageRequest.of(page, size)
         )
         return ResponseEntity.ok(mapOf(
@@ -67,9 +79,17 @@ class ReportController(
     fun searchReports(
         @RequestParam q: String,
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") size: Int
+        @RequestParam(defaultValue = "20") size: Int,
+        auth: Authentication
     ): ResponseEntity<Any> {
-        val result = reportService.searchReports(q, PageRequest.of(page, size))
+        val canSeeAll = auth.authorities.any { it.authority in listOf("REPORT_EDIT", "SYSTEM_ADMIN") }
+        val (viewerUserId, viewerRoleIds) = if (canSeeAll) null to emptyList() else getUserContext(auth)
+        val result = reportService.searchReports(
+            term = q,
+            viewerUserId = viewerUserId,
+            viewerRoleIds = viewerRoleIds,
+            pageable = PageRequest.of(page, size)
+        )
         return ResponseEntity.ok(mapOf(
             "content" to result.content,
             "totalElements" to result.totalElements,
@@ -266,11 +286,16 @@ class ReportController(
 
     private fun getUserId(auth: Authentication): Long {
         return try {
-            val username = auth.name
-            userRepository.findByUsername(username)
-                .map { it.id }
-                .orElse(0L)
+            userRepository.findByUsername(auth.name).map { it.id }.orElse(0L)
         } catch (_: Exception) { 0L }
+    }
+
+    private fun getUserContext(auth: Authentication): Pair<Long, List<Long>> {
+        return try {
+            val user = userRepository.findByUsername(auth.name).orElse(null)
+                ?: return 0L to emptyList()
+            user.id to user.roles.map { it.id }
+        } catch (_: Exception) { 0L to emptyList() }
     }
 }
 
