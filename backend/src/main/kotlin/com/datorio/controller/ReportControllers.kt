@@ -161,7 +161,7 @@ class ReportController(
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('REPORT_EDIT')")
+    @PreAuthorize("hasAuthority('REPORT_DELETE')")
     fun deleteReport(@PathVariable id: Long): ResponseEntity<Void> {
         reportService.deleteReport(id)
         return ResponseEntity.noContent().build()
