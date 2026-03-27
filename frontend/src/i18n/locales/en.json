@@ -178,6 +178,7 @@
   "designer.undo": "Undo (Ctrl+Z)",
   "designer.redo": "Redo (Ctrl+Y)",
   "designer.preview": "Preview",
+  "designer.open_in_viewer": "Open report in viewer (new tab)",
   "designer.settings": "Settings",
   "designer.filter_panel_position": "Filter panel position",
   "designer.filter_panel_collapsed_default": "Collapsed by default",

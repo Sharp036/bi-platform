@@ -273,9 +273,9 @@ export default function ReportViewerPage() {
   }
 
   const renderWidgets = () => {
-    // All widget IDs that belong to any TABS container — excluded from flat grid
-    const tabsContainers = containers.filter(c => c.containerType === 'TABS')
-    const widgetIdsInTabs = new Set(tabsContainers.flatMap(c => c.childWidgetIds.flat()))
+    // All widget IDs that belong to any container — excluded from flat grid
+    const tabsContainers = containers
+    const widgetIdsInTabs = new Set(containers.flatMap(c => c.childWidgetIds.flat()))
 
     const widgetById = renderResult
       ? Object.fromEntries(renderResult.widgets.map(w => [w.widgetId, w]))
@@ -307,11 +307,16 @@ export default function ReportViewerPage() {
           <div className="space-y-4">
             {/* TABS containers */}
             {tabsContainers.map(container => {
-              // Each group = one tab; filter out hidden widgets
-              const tabGroups = container.childWidgetIds.map(group =>
-                group.map(wid => widgetById[wid]).filter(Boolean).filter(w => !hiddenWidgetIds.includes(w.widgetId))
-              ).filter(g => g.length > 0)
-              if (tabGroups.length === 0) return null
+              // Each group = one tab; filter out hidden widgets, keep original index for labels
+              const tabGroupsWithIdx = container.childWidgetIds
+                .map((group, origIdx) => ({
+                  origIdx,
+                  widgets: group.map(wid => widgetById[wid]).filter(Boolean).filter(w => !hiddenWidgetIds.includes(w.widgetId)),
+                }))
+                .filter(g => g.widgets.length > 0)
+              if (tabGroupsWithIdx.length === 0) return null
+
+              const tabGroups = tabGroupsWithIdx.map(g => g.widgets)
 
               // Tab height = max total height of widgets in any single tab
               const tabH = Math.max(...tabGroups.map(group =>
@@ -321,8 +326,8 @@ export default function ReportViewerPage() {
                 }, 0)
               ))
 
-              const tabLabels = tabGroups.map((_, i) =>
-                container.tabNames[i] || ''
+              const tabLabels = tabGroupsWithIdx.map(g =>
+                container.tabNames[g.origIdx] || ''
               )
 
               return (

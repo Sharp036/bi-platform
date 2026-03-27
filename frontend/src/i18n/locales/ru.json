@@ -186,6 +186,7 @@
   "designer.undo": "Отменить (Ctrl+Z)",
   "designer.redo": "Повторить (Ctrl+Y)",
   "designer.preview": "Предпросмотр",
+  "designer.open_in_viewer": "Открыть отчёт в просмотрщике (новая вкладка)",
   "designer.settings": "Настройки",
   "designer.filter_panel_position": "Расположение панели фильтров",
   "designer.filter_panel_collapsed_default": "Свернуть по умолчанию",

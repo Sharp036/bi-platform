@@ -14,7 +14,7 @@ import ContainerDesigner, { DesignerContainer, genContainerId } from './Containe
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Save, Undo2, Redo2, Eye, EyeOff, ArrowLeft,
-  Upload, Download, Settings2, Layers, SlidersHorizontal
+  Upload, Download, Settings2, Layers, SlidersHorizontal, ExternalLink
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
@@ -349,6 +349,15 @@ export default function ReportDesignerPage() {
           <button onClick={togglePreview} className="btn-ghost p-2" title={t('designer.preview')}>
             {previewMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
+          {reportId && (
+            <button
+              onClick={() => window.open(`/reports/${reportId}`, '_blank')}
+              className="btn-ghost p-2"
+              title={t('designer.open_in_viewer')}
+            >
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          )}
           <button onClick={() => setShowSettings(!showSettings)} className="btn-ghost p-2" title={t('designer.settings')}>
             <Settings2 className="w-4 h-4" />
           </button>
@@ -439,7 +448,7 @@ export default function ReportDesignerPage() {
 
         {/* Center: Canvas */}
         <div className="flex-1 overflow-auto p-4 bg-surface-100/50 dark:bg-dark-surface-100/20">
-          <DesignerCanvas />
+          <DesignerCanvas containers={containers} />
         </div>
 
         {/* Right: Property Panel / Container Designer */}
