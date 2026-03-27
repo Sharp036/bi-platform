@@ -187,6 +187,7 @@
   "designer.filter_panel_position.right": "Right",
   "designer.select_widget": "Select a widget to edit its properties",
   "designer.delete_widget_confirm": "Delete widget?",
+  "designer.widget_type": "Widget type",
   "designer.widget_title": "Title",
   "designer.widget_title_placeholder": "Widget title",
   "designer.layout": "Layout (grid: 12 columns)",
