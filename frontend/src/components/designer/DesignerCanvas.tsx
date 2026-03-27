@@ -1,7 +1,8 @@
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { DesignerWidget } from '@/store/useDesignerStore'
+import type { DesignerContainer } from './ContainerDesigner'
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play } from 'lucide-react'
+import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play, ChevronDown, ChevronRight } from 'lucide-react'
 import { queryApi } from '@/api/queries'
 import { buildDesignerParameterValues } from '@/utils/designerParameters'
 import EChartWidget from '@/components/charts/EChartWidget'
@@ -18,7 +19,11 @@ const ICON_MAP: Record<string, React.ElementType> = {
 const ROW_HEIGHT = 70   // px per grid row unit
 const COLS = 12
 
-export default function DesignerCanvas() {
+interface DesignerCanvasProps {
+  containers?: DesignerContainer[]
+}
+
+export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps) {
   const { t } = useTranslation()
   const widgets = useDesignerStore(s => s.widgets)
   const selectedId = useDesignerStore(s => s.selectedWidgetId)
@@ -26,42 +31,56 @@ export default function DesignerCanvas() {
   const previewMode = useDesignerStore(s => s.previewMode)
   const parameters = useDesignerStore(s => s.parameters)
 
-  // Calculate total canvas height
-  const maxY = widgets.length > 0
-    ? Math.max(...widgets.map(w => (w.position.y + w.position.h)))
-    : 4
-  const canvasHeight = Math.max(maxY * ROW_HEIGHT + 100, 400)
+  // Widgets that live inside a container
+  const widgetIdsInContainers = new Set(containers.flatMap(c => c.tabGroups.flat()))
+
+  // Widgets not assigned to any container -> flat grid
+  const freeWidgets = widgets.filter(w => !widgetIdsInContainers.has(w.id))
+
+  // Canvas height for the free-widget grid
+  const maxY = freeWidgets.length > 0
+    ? Math.max(...freeWidgets.map(w => w.position.y + w.position.h))
+    : 0
+  const freeCanvasHeight = freeWidgets.length > 0
+    ? Math.max(maxY * ROW_HEIGHT + 100, 200)
+    : 0
+
+  const sharedProps = { parameters, selectedId, onSelect: selectWidget, previewMode }
 
   return (
     <div
-      className="relative bg-white dark:bg-dark-surface-50 rounded-xl border-2 border-dashed border-surface-200 dark:border-dark-surface-100"
-      style={{ minHeight: `${canvasHeight}px` }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) selectWidget(null)
-      }}
+      className="bg-white dark:bg-dark-surface-50 rounded-xl border-2 border-dashed border-surface-200 dark:border-dark-surface-100 overflow-hidden"
+      onClick={(e) => { if (e.target === e.currentTarget) selectWidget(null) }}
     >
-      {/* Grid lines (subtle) */}
-      <div className="absolute inset-0 pointer-events-none opacity-30" style={{
-        backgroundSize: `${100 / COLS}% ${ROW_HEIGHT}px`,
-        backgroundImage: 'linear-gradient(to right, rgb(148 163 184 / 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgb(148 163 184 / 0.15) 1px, transparent 1px)',
-      }} />
-
-      {/* Widgets */}
-      {widgets.map(widget => (
-        <WidgetBlock
-          key={widget.id}
-          widget={widget}
-          parameters={parameters}
-          isSelected={widget.id === selectedId}
-          onSelect={() => selectWidget(widget.id)}
-          previewMode={previewMode}
-        />
+      {/* ── Containers ── */}
+      {containers.map(c => (
+        <ContainerBlock key={c.clientId} container={c} widgets={widgets} {...sharedProps} />
       ))}
 
-      {/* Empty state */}
-      {widgets.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center text-slate-400 dark:text-slate-500">
-          <div className="text-center">
+      {/* ── Free widget grid ── */}
+      {freeWidgets.length > 0 && (
+        <div
+          className={clsx(
+            'relative',
+            containers.length > 0 && 'border-t-2 border-dashed border-surface-200 dark:border-dark-surface-100 mt-2 pt-2',
+          )}
+          style={{ minHeight: `${freeCanvasHeight}px` }}
+        >
+          {/* Grid lines */}
+          <div className="absolute inset-0 pointer-events-none opacity-30" style={{
+            backgroundSize: `${100 / COLS}% ${ROW_HEIGHT}px`,
+            backgroundImage: 'linear-gradient(to right, rgb(148 163 184 / 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgb(148 163 184 / 0.15) 1px, transparent 1px)',
+          }} />
+          {freeWidgets.map(widget => (
+            <WidgetBlock key={widget.id} widget={widget} {...sharedProps} />
+          ))}
+        </div>
+      )}
+
+      {/* ── Empty state ── */}
+      {widgets.length === 0 && containers.length === 0 && (
+        <div className="flex items-center justify-center" style={{ minHeight: '400px' }}>
+          <div className="text-center text-slate-400 dark:text-slate-500">
             <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-40" />
             <p className="text-sm">{t('designer.canvas_hint')}</p>
           </div>
@@ -71,18 +90,138 @@ export default function DesignerCanvas() {
   )
 }
 
+// ── Container block (tabs or accordion) ──────────────────────────────────────
+
+function ContainerBlock({
+  container, widgets, parameters, selectedId, onSelect, previewMode,
+}: {
+  container: DesignerContainer
+  widgets: DesignerWidget[]
+  parameters: Array<{ name: string; paramType: string; defaultValue: string }>
+  selectedId: string | null
+  onSelect: (id: string | null) => void
+  previewMode: boolean
+}) {
+  const { t } = useTranslation()
+  const [activeTab, setActiveTab] = useState(0)
+  const [expandedSet, setExpandedSet] = useState<Set<number>>(new Set([0]))
+
+  const resolveGroup = (groupIdx: number): DesignerWidget[] =>
+    (container.tabGroups[groupIdx] || [])
+      .map(id => widgets.find(w => w.id === id))
+      .filter((w): w is DesignerWidget => !!w)
+
+  const groupHeight = (group: DesignerWidget[]) => {
+    if (group.length === 0) return 200
+    return Math.max(...group.map(w => w.position.y + w.position.h)) * ROW_HEIGHT
+  }
+
+  const sharedProps = { parameters, selectedId, onSelect, previewMode, insideContainer: true }
+
+  return (
+    <div className="border-2 border-brand-200 dark:border-brand-800 rounded-xl m-3 overflow-hidden">
+      {/* Container header */}
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-50 dark:bg-brand-900/20 border-b border-brand-200 dark:border-brand-800">
+        <span className="text-xs font-semibold text-brand-700 dark:text-brand-300 flex-1">{container.name}</span>
+        <span className="text-[10px] text-brand-400 uppercase tracking-wide">
+          {container.containerType === 'ACCORDION'
+            ? t('designer.tabs.type.accordion')
+            : t('designer.tabs.type.tabs')}
+        </span>
+      </div>
+
+      {container.containerType === 'TABS' ? (
+        <>
+          {/* Tab bar */}
+          <div className="flex border-b border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/40">
+            {container.tabNames.map((name, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveTab(i)}
+                className={clsx(
+                  'px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors',
+                  i === activeTab
+                    ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                )}
+              >
+                {name || `${t('designer.tabs.tab_name_placeholder')} ${i + 1}`}
+              </button>
+            ))}
+          </div>
+          {/* Active tab content */}
+          {(() => {
+            const group = resolveGroup(activeTab)
+            const h = groupHeight(group)
+            return (
+              <div className="relative" style={{ minHeight: `${h}px` }}>
+                {group.length === 0 ? (
+                  <div className="flex items-center justify-center h-24 text-xs text-slate-400">
+                    {t('designer.tabs.add_widget')}
+                  </div>
+                ) : group.map(w => (
+                  <WidgetBlock key={w.id} widget={w} {...sharedProps} />
+                ))}
+              </div>
+            )
+          })()}
+        </>
+      ) : (
+        /* ACCORDION */
+        <div>
+          {container.tabNames.map((name, i) => {
+            const expanded = expandedSet.has(i)
+            const group = resolveGroup(i)
+            const h = groupHeight(group)
+            return (
+              <div key={i} className="border-b border-surface-100 dark:border-dark-surface-100 last:border-0">
+                <button
+                  onClick={() => setExpandedSet(prev => {
+                    const next = new Set(prev)
+                    next.has(i) ? next.delete(i) : next.add(i)
+                    return next
+                  })}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-surface-50 dark:hover:bg-dark-surface-100"
+                >
+                  {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                  {name || `${t('designer.tabs.tab_name_placeholder')} ${i + 1}`}
+                </button>
+                {expanded && (
+                  <div className="relative border-t border-surface-100 dark:border-dark-surface-100" style={{ minHeight: `${h}px` }}>
+                    {group.length === 0 ? (
+                      <div className="flex items-center justify-center h-16 text-xs text-slate-400">
+                        {t('designer.tabs.add_widget')}
+                      </div>
+                    ) : group.map(w => (
+                      <WidgetBlock key={w.id} widget={w} {...sharedProps} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Widget block ──────────────────────────────────────────────────────────────
+
 function WidgetBlock({
-  widget, parameters, isSelected, onSelect, previewMode,
+  widget, parameters, selectedId, onSelect, previewMode, insideContainer,
 }: {
   widget: DesignerWidget
   parameters: Array<{ name: string; paramType: string; defaultValue: string }>
-  isSelected: boolean
-  onSelect: () => void
+  selectedId: string | null
+  onSelect: (id: string | null) => void
   previewMode: boolean
+  insideContainer?: boolean
 }) {
   const { t } = useTranslation()
   const Icon = ICON_MAP[widget.widgetType] || BarChart3
   const colWidth = 100 / COLS
+  const isSelected = widget.id === selectedId
 
   const [previewData, setPreviewData] = useState<WidgetData | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -98,7 +237,6 @@ function WidgetBlock({
     try {
       const paramValues = buildDesignerParameterValues(parameters)
       let res
-      // Prefer inline SQL when configured to avoid stale query bindings.
       if (widget.datasourceId && widget.rawSql?.trim()) {
         res = await queryApi.executeAdHoc({
           datasourceId: widget.datasourceId,
@@ -132,17 +270,12 @@ function WidgetBlock({
     width: `${widget.position.w * colWidth}%`,
     height: `${widget.position.h * ROW_HEIGHT}px`,
     padding: '4px',
-    zIndex: Number((widget.style as Record<string, unknown>)?.zIndex ?? 0),
-  }
-
-  if (!widget.isVisible && !previewMode) {
-    // Show as ghost in design mode
+    zIndex: Number((widget.style as Record<string, unknown>)?.zIndex ?? (isSelected ? 10 : 1)),
   }
 
   const cc = widget.chartConfig as Record<string, unknown>
   const chartConfigStr = widget.widgetType === 'CHART' && previewData ? JSON.stringify(cc) : undefined
 
-  // Build filtered data for TABLE preview (apply visibleColumns)
   const tablePreviewData = widget.widgetType === 'TABLE' && previewData ? (() => {
     const visCols = cc.visibleColumns as string[] | undefined
     const cols = Array.isArray(visCols) && visCols.length > 0
@@ -151,7 +284,6 @@ function WidgetBlock({
     return { ...previewData, columns: cols }
   })() : null
 
-  // Build KPI preview value
   const kpiPreview = widget.widgetType === 'KPI' && previewData ? (() => {
     const valCol = (cc.valueColumn as string) || previewData.columns[0]
     const rows = previewData.rows || []
@@ -180,7 +312,6 @@ function WidgetBlock({
     return { display: `${prefix}${display}${suffix}`, label }
   })() : null
 
-  // FILTER preview: show distinct values
   const filterPreview = widget.widgetType === 'FILTER' && previewData ? (() => {
     const filterCol = (cc.filterColumn as string) || previewData.columns[0]
     if (!filterCol) return null
@@ -189,7 +320,7 @@ function WidgetBlock({
   })() : null
 
   return (
-    <div style={style} onClick={(e) => { e.stopPropagation(); onSelect() }}>
+    <div style={style} onClick={(e) => { e.stopPropagation(); onSelect(widget.id) }}>
       <div className={clsx(
         'h-full rounded-lg border-2 transition-all cursor-pointer overflow-hidden flex flex-col',
         isSelected
@@ -219,28 +350,20 @@ function WidgetBlock({
 
         {/* Body */}
         <div className="flex-1 flex items-center justify-center p-2 min-h-0">
-          {/* CHART preview */}
           {widget.widgetType === 'CHART' && previewData ? (
             <div className="w-full h-full">
               <EChartWidget data={previewData} chartConfig={chartConfigStr} />
             </div>
-          ) : /* TABLE preview */
-          tablePreviewData ? (
+          ) : tablePreviewData ? (
             <div className="w-full h-full overflow-hidden">
               <TableWidget data={tablePreviewData} />
             </div>
-          ) : /* KPI preview */
-          kpiPreview ? (
+          ) : kpiPreview ? (
             <div className="text-center w-full">
-              <p className="text-2xl font-bold text-slate-800 dark:text-white truncate">
-                {kpiPreview.display}
-              </p>
-              {kpiPreview.label && (
-                <p className="text-xs text-slate-400 mt-0.5 truncate">{kpiPreview.label}</p>
-              )}
+              <p className="text-2xl font-bold text-slate-800 dark:text-white truncate">{kpiPreview.display}</p>
+              {kpiPreview.label && <p className="text-xs text-slate-400 mt-0.5 truncate">{kpiPreview.label}</p>}
             </div>
-          ) : /* FILTER preview */
-          filterPreview ? (
+          ) : filterPreview ? (
             <div className="w-full">
               <p className="text-[10px] text-slate-400 mb-1">{filterPreview.column}</p>
               {filterPreview.filterType === 'select' || filterPreview.filterType === 'multi_select' ? (
@@ -257,12 +380,10 @@ function WidgetBlock({
                 </div>
               )}
             </div>
-          ) : /* TEXT */
-          widget.widgetType === 'TEXT' ? (
+          ) : widget.widgetType === 'TEXT' ? (
             <div className="text-xs text-slate-500 dark:text-slate-400 overflow-hidden line-clamp-4 w-full"
                  dangerouslySetInnerHTML={{ __html: widget.title || '<p>Text content</p>' }} />
-          ) : /* IMAGE */
-          widget.widgetType === 'IMAGE' && ((cc.src as string) || (cc.url as string)) ? (
+          ) : widget.widgetType === 'IMAGE' && ((cc.src as string) || (cc.url as string)) ? (
             <img
               src={(cc.src as string) || (cc.url as string)}
               alt={widget.title}
