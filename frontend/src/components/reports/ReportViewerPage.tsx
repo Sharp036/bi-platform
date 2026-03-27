@@ -318,11 +318,11 @@ export default function ReportViewerPage() {
 
               const tabGroups = tabGroupsWithIdx.map(g => g.widgets)
 
-              // Tab height = max total height of widgets in any single tab
+              // Tab height = max(y + h) across all widgets in the tallest tab
               const tabH = Math.max(...tabGroups.map(group =>
-                group.reduce((sum, w) => {
+                group.reduce((maxH, w) => {
                   const pos = parsePosition(w.position)
-                  return sum + Math.max(1, Number(pos.h) || 4)
+                  return Math.max(maxH, (Number(pos.y) || 0) + Math.max(1, Number(pos.h) || 4))
                 }, 0)
               ))
 
@@ -334,8 +334,22 @@ export default function ReportViewerPage() {
                 <div key={container.id} className="card p-2" style={{ minHeight: `${tabH * 70 + 56}px` }}>
                   <TabContainer container={container} labels={tabLabels}>
                     {tabGroups.map((group, tabIdx) => (
-                      <div key={tabIdx} className="space-y-4 pt-2">
-                        {group.map(w => renderSingleWidget(w))}
+                      <div key={tabIdx} className="grid grid-cols-12 pt-2" style={{ gridAutoRows: '70px' }}>
+                        {group.map(w => {
+                          const pos = parsePosition(w.position)
+                          const x = Math.max(0, Number(pos.x) || 0)
+                          const y = Math.max(0, Number(pos.y) || 0)
+                          const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+                          const hSpan = Math.max(1, Number(pos.h) || 4)
+                          return (
+                            <div key={w.widgetId} style={{
+                              gridColumn: `${x + 1} / span ${wSpan}`,
+                              gridRow: `${y + 1} / span ${hSpan}`,
+                            }}>
+                              {renderSingleWidget(w)}
+                            </div>
+                          )
+                        })}
                       </div>
                     ))}
                   </TabContainer>

@@ -96,6 +96,7 @@ data class CreateWidgetRequest(
 )
 
 data class UpdateWidgetRequest(
+    val widgetType: WidgetType? = null,
     val title: String? = null,
     val queryId: Long? = null,
     val datasourceId: Long? = null,

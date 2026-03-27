@@ -283,6 +283,7 @@ class ReportService(
         val widget = widgetRepo.findById(widgetId)
             .orElseThrow { IllegalArgumentException("Widget not found: $widgetId") }
 
+        request.widgetType?.let { widget.widgetType = it }
         request.title?.let { widget.title = it }
         request.queryId?.let { widget.queryId = it }
         request.datasourceId?.let { widget.datasourceId = it }
