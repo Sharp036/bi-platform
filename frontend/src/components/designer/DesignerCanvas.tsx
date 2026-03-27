@@ -111,9 +111,17 @@ function ContainerBlock({
       .map(id => widgets.find(w => w.id === id))
       .filter((w): w is DesignerWidget => !!w)
 
-  const groupHeight = (group: DesignerWidget[]) => {
-    if (group.length === 0) return 200
-    return Math.max(...group.map(w => w.position.y + w.position.h)) * ROW_HEIGHT
+  // Group widgets by their y-position so they render as rows (no absolute-top overlap)
+  const groupIntoRows = (group: DesignerWidget[]): DesignerWidget[][] => {
+    const byY = new Map<number, DesignerWidget[]>()
+    for (const w of group) {
+      const row = byY.get(w.position.y) ?? []
+      row.push(w)
+      byY.set(w.position.y, row)
+    }
+    return [...byY.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([, row]) => row.sort((a, b) => a.position.x - b.position.x))
   }
 
   const sharedProps = { parameters, selectedId, onSelect, previewMode, insideContainer: true }
@@ -152,16 +160,21 @@ function ContainerBlock({
           {/* Active tab content */}
           {(() => {
             const group = resolveGroup(activeTab)
-            const h = groupHeight(group)
+            if (group.length === 0) return (
+              <div className="flex items-center justify-center h-24 text-xs text-slate-400">
+                {t('designer.tabs.add_widget')}
+              </div>
+            )
             return (
-              <div className="relative" style={{ minHeight: `${h}px` }}>
-                {group.length === 0 ? (
-                  <div className="flex items-center justify-center h-24 text-xs text-slate-400">
-                    {t('designer.tabs.add_widget')}
-                  </div>
-                ) : group.map(w => (
-                  <WidgetBlock key={w.id} widget={w} {...sharedProps} />
-                ))}
+              <div>
+                {groupIntoRows(group).map((row, ri) => {
+                  const rowH = Math.max(...row.map(w => w.position.h)) * ROW_HEIGHT
+                  return (
+                    <div key={ri} className="relative" style={{ height: `${rowH}px` }}>
+                      {row.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} rowRelative />)}
+                    </div>
+                  )
+                })}
               </div>
             )
           })()}
@@ -172,7 +185,6 @@ function ContainerBlock({
           {container.tabNames.map((name, i) => {
             const expanded = expandedSet.has(i)
             const group = resolveGroup(i)
-            const h = groupHeight(group)
             return (
               <div key={i} className="border-b border-surface-100 dark:border-dark-surface-100 last:border-0">
                 <button
@@ -187,14 +199,19 @@ function ContainerBlock({
                   {name || `${t('designer.tabs.tab_name_placeholder')} ${i + 1}`}
                 </button>
                 {expanded && (
-                  <div className="relative border-t border-surface-100 dark:border-dark-surface-100" style={{ minHeight: `${h}px` }}>
+                  <div className="border-t border-surface-100 dark:border-dark-surface-100">
                     {group.length === 0 ? (
                       <div className="flex items-center justify-center h-16 text-xs text-slate-400">
                         {t('designer.tabs.add_widget')}
                       </div>
-                    ) : group.map(w => (
-                      <WidgetBlock key={w.id} widget={w} {...sharedProps} />
-                    ))}
+                    ) : groupIntoRows(group).map((row, ri) => {
+                      const rowH = Math.max(...row.map(w => w.position.h)) * ROW_HEIGHT
+                      return (
+                        <div key={ri} className="relative" style={{ height: `${rowH}px` }}>
+                          {row.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} rowRelative />)}
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -209,7 +226,7 @@ function ContainerBlock({
 // ── Widget block ──────────────────────────────────────────────────────────────
 
 function WidgetBlock({
-  widget, parameters, selectedId, onSelect, previewMode, insideContainer,
+  widget, parameters, selectedId, onSelect, previewMode, insideContainer, rowRelative,
 }: {
   widget: DesignerWidget
   parameters: Array<{ name: string; paramType: string; defaultValue: string }>
@@ -217,6 +234,7 @@ function WidgetBlock({
   onSelect: (id: string | null) => void
   previewMode: boolean
   insideContainer?: boolean
+  rowRelative?: boolean  // inside container row: use x for left, ignore y (row handles vertical)
 }) {
   const { t } = useTranslation()
   const Icon = ICON_MAP[widget.widgetType] || BarChart3
@@ -263,7 +281,15 @@ function WidgetBlock({
     }
   }, [widget.queryId, widget.datasourceId, widget.rawSql, hasDataSource, parameters, t])
 
-  const style: React.CSSProperties = {
+  const style: React.CSSProperties = rowRelative ? {
+    position: 'absolute',
+    left: `${widget.position.x * colWidth}%`,
+    top: 0,
+    width: `${widget.position.w * colWidth}%`,
+    height: `${widget.position.h * ROW_HEIGHT}px`,
+    padding: '4px',
+    zIndex: Number((widget.style as Record<string, unknown>)?.zIndex ?? (isSelected ? 10 : 1)),
+  } : {
     position: 'absolute',
     left: `${widget.position.x * colWidth}%`,
     top: `${widget.position.y * ROW_HEIGHT}px`,
