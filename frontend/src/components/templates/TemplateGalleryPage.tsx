@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { templateApi, type TemplateItem, type ReportExportConfig } from '@/api/templates'
 import { datasourceApi } from '@/api/datasources'
+import { reportApi } from '@/api/reports'
 import type { DataSource } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
@@ -38,6 +39,8 @@ export default function TemplateGalleryPage() {
   // Export modal
   const [showExport, setShowExport] = useState(false)
   const [exportReportId, setExportReportId] = useState('')
+  const [exportReportName, setExportReportName] = useState<string | null>(null)
+  const [exportNameLoading, setExportNameLoading] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -50,6 +53,20 @@ export default function TemplateGalleryPage() {
   }
 
   useEffect(load, [activeCategory])
+
+  useEffect(() => {
+    const id = Number(exportReportId)
+    if (!id) { setExportReportName(null); return }
+    setExportNameLoading(true)
+    setExportReportName(null)
+    const timer = setTimeout(() => {
+      reportApi.get(id)
+        .then(r => setExportReportName(r.name))
+        .catch(() => setExportReportName(null))
+        .finally(() => setExportNameLoading(false))
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [exportReportId])
 
   // ─── Use template ───
   const handleUseTemplate = (tmpl: TemplateItem) => {
@@ -142,7 +159,7 @@ export default function TemplateGalleryPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('templates.title')}</h1>
         <div className="flex gap-2">
-          <button onClick={() => setShowExport(true)} className="btn-secondary">
+          <button onClick={() => { setShowExport(true); setExportReportId(''); setExportReportName(null) }} className="btn-secondary">
             <Download className="w-4 h-4" /> {t('common.export')}
           </button>
           <button onClick={() => fileInputRef.current?.click()} className="btn-secondary">
@@ -231,13 +248,21 @@ export default function TemplateGalleryPage() {
           <div className="card w-full max-w-sm p-6 mx-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-800 dark:text-white">{t('common.export')}</h2>
-              <button onClick={() => setShowExport(false)} className="btn-ghost p-1"><X className="w-5 h-5" /></button>
+              <button onClick={() => { setShowExport(false); setExportReportName(null) }} className="btn-ghost p-1"><X className="w-5 h-5" /></button>
             </div>
             <input type="number" value={exportReportId} onChange={e => setExportReportId(e.target.value)}
                    placeholder="Report ID" className="input mb-1" autoFocus />
-            <p className="text-xs text-slate-400 mb-4">Enter the ID of any report to export its configuration</p>
+            <div className="h-5 mb-3">
+              {exportNameLoading && <p className="text-xs text-slate-400">...</p>}
+              {!exportNameLoading && exportReportName && (
+                <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">{exportReportName}</p>
+              )}
+              {!exportNameLoading && exportReportId && !exportReportName && Number(exportReportId) > 0 && (
+                <p className="text-xs text-red-400">Report not found</p>
+              )}
+            </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowExport(false)} className="btn-secondary">{t('common.cancel')}</button>
+              <button onClick={() => { setShowExport(false); setExportReportName(null) }} className="btn-secondary">{t('common.cancel')}</button>
               <button onClick={handleExport} disabled={!exportReportId} className="btn-primary">
                 <Download className="w-4 h-4" /> {t('common.export')}
               </button>

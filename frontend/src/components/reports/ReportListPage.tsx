@@ -5,7 +5,7 @@ import { reportApi } from '@/api/reports'
 import type { ReportListItem } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2, Trash2 } from 'lucide-react'
+import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2, Trash2, LayoutGrid, List } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
@@ -29,8 +29,16 @@ export default function ReportListPage() {
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('')
   const [shareReport, setShareReport] = useState<ReportListItem | null>(null)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>(() =>
+    (localStorage.getItem('reports_view_mode') as 'grid' | 'table') ?? 'grid'
+  )
   const permissions = useAuthStore(s => s.user?.permissions ?? [])
   const canDelete = permissions.includes('REPORT_DELETE')
+
+  const setView = (mode: 'grid' | 'table') => {
+    setViewMode(mode)
+    localStorage.setItem('reports_view_mode', mode)
+  }
 
   const load = () => {
     setLoading(true)
@@ -56,8 +64,37 @@ export default function ReportListPage() {
     return labels[status] || status
   }
 
+  const rowActions = (r: ReportListItem) => (
+    <div className="flex items-center gap-1">
+      <FavoriteButton objectType="REPORT" objectId={r.id} size={14} />
+      <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs" title={t('common.edit')}><Pencil className="w-3.5 h-3.5" /></Link>
+      <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
+      <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
+      <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
+      <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs" title={t('common.share')}><Share2 className="w-3.5 h-3.5" /></button>
+      {canDelete && (
+        <button
+          onClick={async () => {
+            if (!window.confirm(t('common.confirm_delete'))) return
+            try {
+              await reportApi.delete(r.id)
+              toast.success(t('common.deleted'))
+              setReports(prev => prev.filter(x => x.id !== r.id))
+            } catch {
+              toast.error(t('common.error'))
+            }
+          }}
+          className="btn-ghost p-1.5 text-xs text-red-500 hover:text-red-600 dark:text-red-400"
+          title={t('common.delete')}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
+    </div>
+  )
+
   return (
-    <div className="max-w-[1200px] mx-auto">
+    <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('reports.title')}</h1>
         <Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.new_report')}</Link>
@@ -78,6 +115,26 @@ export default function ReportListPage() {
           <option value="PUBLISHED">{t('common.status.published')}</option>
           <option value="ARCHIVED">{t('common.status.archived')}</option>
         </select>
+        <div className="flex items-center rounded-lg border border-surface-200 dark:border-dark-surface-200 overflow-hidden">
+          <button
+            onClick={() => setView('grid')}
+            className={clsx('p-2 transition-colors', viewMode === 'grid'
+              ? 'bg-brand-600 text-white'
+              : 'bg-white dark:bg-dark-surface-100 text-slate-500 hover:bg-surface-100 dark:hover:bg-dark-surface-200')}
+            title={t('reports.view_grid')}
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setView('table')}
+            className={clsx('p-2 transition-colors', viewMode === 'table'
+              ? 'bg-brand-600 text-white'
+              : 'bg-white dark:bg-dark-surface-100 text-slate-500 hover:bg-surface-100 dark:hover:bg-dark-surface-200')}
+            title={t('reports.view_table')}
+          >
+            <List className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
@@ -87,15 +144,60 @@ export default function ReportListPage() {
           description={t('reports.create_first')}
           action={<Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.create_report')}</Link>}
         />
+      ) : viewMode === 'table' ? (
+        <div className="card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-200 dark:border-dark-surface-200 bg-surface-50 dark:bg-dark-surface-50">
+                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-16">ID</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">{t('common.name')}</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-32">{t('common.status')}</th>
+                <th className="text-right px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-24">{t('reports.col_widgets')}</th>
+                <th className="text-right px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-24">{t('reports.col_params')}</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-32">{t('common.updated')}</th>
+                <th className="px-4 py-3 w-48"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(r => (
+                <tr key={r.id} className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-50 group">
+                  <td className="px-4 py-3 text-slate-400 dark:text-slate-500 font-mono text-xs">#{r.id}</td>
+                  <td className="px-4 py-3">
+                    <Link to={`/reports/${r.id}`} className="font-medium text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400">
+                      {r.name}
+                    </Link>
+                    {r.description && <p className="text-xs text-slate-400 truncate max-w-xs">{r.description}</p>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium', statusBadge(r.status))}>
+                      {statusLabel(r.status)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400">{r.widgetCount ?? 0}</td>
+                  <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400">{r.parameterCount ?? 0}</td>
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">{new Date(r.updatedAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      {rowActions(r)}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(r => (
             <div key={r.id} className="card p-4 hover:shadow-md transition-shadow group">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1 min-w-0">
-                  <Link to={`/reports/${r.id}`} className="text-base font-semibold text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
-                    {r.name}
-                  </Link>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">#{r.id}</span>
+                    <Link to={`/reports/${r.id}`} className="text-base font-semibold text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
+                      {r.name}
+                    </Link>
+                  </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{r.description || t('reports.no_description')}</p>
                 </div>
                 <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium ml-2 flex-shrink-0', statusBadge(r.status))}>
@@ -115,31 +217,8 @@ export default function ReportListPage() {
                 <TagManager objectType="REPORT" objectId={r.id} compact />
               </div>
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <FavoriteButton objectType="REPORT" objectId={r.id} size={14} />
-                <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs"><Pencil className="w-3.5 h-3.5" /></Link>
-                <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs"><Eye className="w-3.5 h-3.5" /></Link>
-                <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs"><Copy className="w-3.5 h-3.5" /></button>
-                <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs"><Archive className="w-3.5 h-3.5" /></button>
-                <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs"><Share2 className="w-3.5 h-3.5" /></button>
-                {canDelete && (
-                  <button
-                    onClick={async () => {
-                      if (!window.confirm(t('common.confirm_delete'))) return
-                      try {
-                        await reportApi.delete(r.id)
-                        toast.success(t('common.deleted'))
-                        setReports(prev => prev.filter(x => x.id !== r.id))
-                      } catch {
-                        toast.error(t('common.error'))
-                      }
-                    }}
-                    className="btn-ghost p-1.5 text-xs text-red-500 hover:text-red-600 dark:text-red-400"
-                    title={t('common.delete')}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                {rowActions(r)}
               </div>
             </div>
           ))}
