@@ -174,9 +174,16 @@ export default function PropertyPanel() {
         >
           <Trash2 className="w-4 h-4" />
         </button>
-        <span className="ml-auto text-xs px-2 py-0.5 rounded bg-surface-100 dark:bg-dark-surface-100 text-slate-500">
-          {widget.widgetType}
-        </span>
+        <select
+          value={widget.widgetType}
+          onChange={e => update({ widgetType: e.target.value as DesignerWidget['widgetType'] })}
+          className="ml-auto input text-xs py-0.5 h-auto"
+          title={t('designer.widget_type')}
+        >
+          {(['CHART', 'TABLE', 'KPI', 'TEXT', 'FILTER', 'IMAGE'] as const).map(wt => (
+            <option key={wt} value={wt}>{wt}</option>
+          ))}
+        </select>
       </div>
 
       {/* Title */}
