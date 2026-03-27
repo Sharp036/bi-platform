@@ -7,14 +7,17 @@ import type { ContainerItem } from '@/api/visualization'
 interface TabContainerProps {
   container: ContainerItem
   children: React.ReactNode[]   // child widget elements in order of childWidgetIds
+  labels?: string[]             // optional tab labels; falls back to "Tab N"
 }
 
-export default function TabContainer({ container, children }: TabContainerProps) {
+export default function TabContainer({ container, children, labels: propLabels }: TabContainerProps) {
   const { t } = useTranslation()
   const [activeIdx, setActiveIdx] = useState(container.activeTab || 0)
   const [expandedSet, setExpandedSet] = useState<Set<number>>(new Set([0]))
 
-  const labels = children.map((_, i) => t('interactive.tab_default', { number: i + 1 }))
+  const labels = children.map((_, i) =>
+    propLabels?.[i] || t('interactive.tab_default', { number: i + 1 })
+  )
 
   if (container.containerType === 'TABS') {
     return (

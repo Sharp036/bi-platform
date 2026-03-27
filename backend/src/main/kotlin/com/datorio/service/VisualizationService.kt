@@ -111,11 +111,15 @@ class VisualizationService(
 
     @Transactional
     fun createContainer(req: ContainerRequest): ContainerResponse {
+        val config = req.config.toMutableMap().apply {
+            if (req.tabNames.isNotEmpty()) put("tabNames", req.tabNames)
+        }
         val c = WidgetContainer(
             reportId = req.reportId, containerType = req.containerType,
-            name = req.name, childWidgetIds = req.childWidgetIds.joinToString(","),
+            name = req.name,
+            childWidgetIds = objectMapper.writeValueAsString(req.childWidgetIds),
             activeTab = req.activeTab, autoDistribute = req.autoDistribute,
-            config = objectMapper.writeValueAsString(req.config),
+            config = objectMapper.writeValueAsString(config),
             sortOrder = req.sortOrder
         )
         return containerRepo.save(c).toResponse()
@@ -125,10 +129,14 @@ class VisualizationService(
     fun updateContainer(id: Long, req: ContainerRequest): ContainerResponse {
         val c = containerRepo.findById(id)
             .orElseThrow { NoSuchElementException("Container not found: $id") }
+        val config = req.config.toMutableMap().apply {
+            if (req.tabNames.isNotEmpty()) put("tabNames", req.tabNames)
+            else remove("tabNames")
+        }
         c.containerType = req.containerType; c.name = req.name
-        c.childWidgetIds = req.childWidgetIds.joinToString(",")
+        c.childWidgetIds = objectMapper.writeValueAsString(req.childWidgetIds)
         c.activeTab = req.activeTab; c.autoDistribute = req.autoDistribute
-        c.config = objectMapper.writeValueAsString(req.config)
+        c.config = objectMapper.writeValueAsString(config)
         c.sortOrder = req.sortOrder
         return containerRepo.save(c).toResponse()
     }
@@ -164,13 +172,29 @@ class VisualizationService(
         )
     }
 
-    private fun WidgetContainer.toResponse() = ContainerResponse(
-        id = id, reportId = reportId, containerType = containerType,
-        name = name,
-        childWidgetIds = childWidgetIds.split(",").mapNotNull { it.trim().toLongOrNull() },
-        activeTab = activeTab, autoDistribute = autoDistribute,
-        config = parseJson(config), sortOrder = sortOrder, createdAt = createdAt
-    )
+    private fun WidgetContainer.toResponse(): ContainerResponse {
+        val configMap = parseJson(config)
+        @Suppress("UNCHECKED_CAST")
+        val tabNames = (configMap["tabNames"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+        // childWidgetIds stored as JSON array of arrays; fall back to legacy comma-separated flat list
+        val grouped: List<List<Long>> = try {
+            val parsed = objectMapper.readTree(childWidgetIds)
+            if (parsed.isArray && parsed.firstOrNull()?.isArray == true) {
+                parsed.map { tab -> tab.mapNotNull { it.longValue().takeIf { v -> v != 0L } } }
+            } else {
+                // Legacy: flat JSON array or comma-separated — wrap each element as its own group
+                childWidgetIds.split(",").mapNotNull { it.trim().toLongOrNull() }.map { listOf(it) }
+            }
+        } catch (_: Exception) {
+            childWidgetIds.split(",").mapNotNull { it.trim().toLongOrNull() }.map { listOf(it) }
+        }
+        return ContainerResponse(
+            id = id, reportId = reportId, containerType = containerType,
+            name = name, childWidgetIds = grouped, tabNames = tabNames,
+            activeTab = activeTab, autoDistribute = autoDistribute,
+            config = configMap, sortOrder = sortOrder, createdAt = createdAt
+        )
+    }
 
     private fun parseJson(raw: String): Map<String, Any?> = try {
         objectMapper.readValue(raw)

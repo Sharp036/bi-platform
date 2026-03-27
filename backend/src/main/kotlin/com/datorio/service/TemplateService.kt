@@ -3,6 +3,7 @@ package com.datorio.service
 import com.datorio.model.*
 import com.datorio.model.dto.*
 import com.datorio.repository.ReportRepository
+import com.datorio.model.dto.ContainerRequest
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -12,7 +13,8 @@ import java.time.Instant
 @Service
 class TemplateService(
     private val reportRepo: ReportRepository,
-    private val reportService: ReportService
+    private val reportService: ReportService,
+    private val vizService: VisualizationService
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -75,6 +77,22 @@ class TemplateService(
         val report = reportRepo.findById(reportId)
             .orElseThrow { NoSuchElementException("Report not found: $reportId") }
 
+        // Build a map from widget DB ID -> sortOrder to resolve container child references
+        val widgetIdToSortOrder: Map<Long, Int> = report.widgets.associate { it.id to it.sortOrder }
+
+        val containers = vizService.getContainers(reportId).map { c ->
+            ContainerExportConfig(
+                containerType = c.containerType,
+                name = c.name,
+                childWidgetSortOrders = c.childWidgetIds.map { group ->
+                    group.mapNotNull { widgetIdToSortOrder[it] }
+                },
+                tabNames = c.tabNames,
+                activeTab = c.activeTab,
+                sortOrder = c.sortOrder
+            )
+        }
+
         return ReportExportConfig(
             name = report.name,
             description = report.description,
@@ -97,7 +115,8 @@ class TemplateService(
                     paramMapping = w.paramMapping, sortOrder = w.sortOrder,
                     isVisible = w.isVisible
                 )
-            }
+            },
+            containers = containers
         )
     }
 
@@ -138,6 +157,25 @@ class TemplateService(
         )
 
         val created = reportService.createReport(createReq, userId)
+
+        // Build sortOrder -> new widget ID map to resolve container child references
+        val sortOrderToWidgetId: Map<Int, Long> = created.widgets.associate { it.sortOrder to it.id }
+        cfg.containers.forEach { c ->
+            val childIds = c.childWidgetSortOrders.map { group ->
+                group.mapNotNull { sortOrderToWidgetId[it] }
+            }.filter { it.isNotEmpty() }
+            if (childIds.isNotEmpty()) {
+                vizService.createContainer(ContainerRequest(
+                    reportId = created.id,
+                    containerType = c.containerType,
+                    name = c.name,
+                    childWidgetIds = childIds,
+                    tabNames = c.tabNames,
+                    activeTab = c.activeTab,
+                    sortOrder = c.sortOrder
+                ))
+            }
+        }
 
         // Set category if importing as template
         if (req.asTemplate && cfg.category != null) {

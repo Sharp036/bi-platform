@@ -30,7 +30,10 @@ export interface TooltipConfigItem {
 
 export interface ContainerItem {
   id: number; reportId: number; containerType: string
-  name: string | null; childWidgetIds: number[]
+  name: string | null
+  // Each inner array = one tab group (for TABS) or layout group
+  childWidgetIds: number[][]
+  tabNames: string[]
   activeTab: number; autoDistribute: boolean
   config: Record<string, unknown>; sortOrder: number; createdAt: string
 }
@@ -73,10 +76,10 @@ export const vizApi = {
   getContainers: (reportId: number) =>
     api.get<ContainerItem[]>(`/visualization/containers/${reportId}`).then(r => r.data),
 
-  createContainer: (data: { reportId: number; containerType: string; name?: string; childWidgetIds: number[]; activeTab?: number }) =>
+  createContainer: (data: { reportId: number; containerType: string; name?: string; childWidgetIds: number[][]; tabNames?: string[]; activeTab?: number }) =>
     api.post<ContainerItem>('/visualization/containers', data).then(r => r.data),
 
-  updateContainer: (id: number, data: { reportId: number; containerType: string; name?: string; childWidgetIds: number[]; activeTab?: number }) =>
+  updateContainer: (id: number, data: { reportId: number; containerType: string; name?: string; childWidgetIds: number[][]; tabNames?: string[]; activeTab?: number }) =>
     api.put<ContainerItem>(`/visualization/containers/${id}`, data).then(r => r.data),
 
   deleteContainer: (id: number) =>
