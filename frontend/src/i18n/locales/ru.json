@@ -195,6 +195,7 @@
   "designer.filter_panel_position.right": "Справа",
   "designer.select_widget": "Выберите виджет для редактирования его свойств",
   "designer.delete_widget_confirm": "Удалить виджет?",
+  "designer.widget_type": "Тип виджета",
   "designer.widget_title": "Заголовок",
   "designer.widget_title_placeholder": "Заголовок виджета",
   "designer.layout": "Макет (сетка: 12 столбцов)",
