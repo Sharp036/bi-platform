@@ -95,7 +95,9 @@ data class ContainerRequest(
     val reportId: Long,
     val containerType: String = "TABS",     // TABS, ACCORDION, HORIZONTAL, VERTICAL
     val name: String? = null,
-    val childWidgetIds: List<Long>,
+    // Each inner list = one tab (for TABS) or one group; for non-TABS types treated as flat
+    val childWidgetIds: List<List<Long>>,
+    val tabNames: List<String> = emptyList(),
     val activeTab: Int = 0,
     val autoDistribute: Boolean = true,
     val config: Map<String, Any?> = emptyMap(),
@@ -107,7 +109,8 @@ data class ContainerResponse(
     val reportId: Long,
     val containerType: String,
     val name: String?,
-    val childWidgetIds: List<Long>,
+    val childWidgetIds: List<List<Long>>,
+    val tabNames: List<String>,
     val activeTab: Int,
     val autoDistribute: Boolean,
     val config: Map<String, Any?>,

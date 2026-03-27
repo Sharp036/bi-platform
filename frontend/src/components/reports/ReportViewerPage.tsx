@@ -22,6 +22,9 @@ import { workspaceApi } from '@/api/workspace'
 import FavoriteButton from '@/components/workspace/FavoriteButton'
 import { useLiveData } from '@/hooks/useLiveData'
 import LiveIndicator from './LiveIndicator'
+import { vizApi } from '@/api/visualization'
+import type { ContainerItem } from '@/api/visualization'
+import TabContainer from '@/components/interactive/TabContainer'
 
 type FilterPanelPosition = 'top' | 'bottom' | 'left' | 'right'
 
@@ -63,6 +66,8 @@ export default function ReportViewerPage() {
   const [filterPanelPosition, setFilterPanelPosition] = useState<FilterPanelPosition>('top')
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
 
+  const [containers, setContainers] = useState<ContainerItem[]>([])
+
   const [liveEnabled, setLiveEnabled] = useState(false)
   const { status: liveStatus, lastUpdate: liveLastUpdate, reconnect: liveReconnect } = useLiveData({
     enabled: liveEnabled,
@@ -73,9 +78,12 @@ export default function ReportViewerPage() {
   useEffect(() => {
     if (!id) return
     const reportId = Number(id)
-    reportApi.get(reportId)
-      .then(r => {
+    Promise.all([
+      reportApi.get(reportId),
+      vizApi.getContainers(reportId).catch(() => [] as ContainerItem[]),
+    ]).then(([r, c]) => {
         setReport(r)
+        setContainers(c)
         const filterPanelLayout = getFilterPanelLayout(r.layout)
         setFilterPanelPosition(filterPanelLayout.position)
         setFilterPanelCollapsed(filterPanelLayout.collapsed)
@@ -233,84 +241,145 @@ export default function ReportViewerPage() {
     try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
   }
 
-  const renderWidgets = () => (
-    <>
-      {(() => {
-        const bookmarkOffsetClass =
-          (filterPanelPosition === 'left' && filterPanelCollapsed) ? 'pl-20' :
-            (filterPanelPosition === 'right' && filterPanelCollapsed) ? 'pr-20' :
-              ''
-        return (
-      <BookmarkBar
-        reportId={currentReportId || Number(id)}
-        currentParameters={currentParams}
-        className={bookmarkOffsetClass}
-        onApplyBookmark={(params) => {
-          setCurrentParams(params)
-          handleRender(params)
-        }}
-      />
-        )
-      })()}
+  const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
+    const widgetDrillActions = drillActions[w.widgetId] || []
+    const hasDrill = widgetDrillActions.length > 0
+    return (
+      <div
+        key={w.widgetId}
+        className={`card p-4 overflow-hidden h-full ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
+        style={{ position: 'relative' }}
+      >
+        {hasDrill && (
+          <div className="text-[10px] text-brand-500 dark:text-brand-400 mb-1 flex items-center gap-1">
+            <span>{'->'}</span>
+            <span>{t('reports.drill_to', { name: widgetDrillActions[0].targetReportName })}</span>
+          </div>
+        )}
+        <WidgetRenderer
+          widget={w}
+          drillActions={widgetDrillActions}
+          onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
+          layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}
+          reportId={currentReportId || Number(id)}
+          onToggleWidgets={handleToggleWidgets}
+          onApplyFilter={handleApplyFilter}
+          onChartClick={(data) => {
+            useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
+          }}
+        />
+      </div>
+    )
+  }
 
-      {rendering && !renderResult ? (
-        <LoadingSpinner />
-      ) : renderResult ? (
-        <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
-          {renderResult.widgets
-            .filter(w => !hiddenWidgetIds.includes(w.widgetId))
-            .map((w) => {
-              const pos = parsePosition(w.position)
-              const x = Math.max(0, Number(pos.x) || 0)
-              const y = Math.max(0, Number(pos.y) || 0)
-              const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
-              const hSpan = Math.max(1, Number(pos.h) || 4)
-              const styleCfg = parseStyle(w.style)
-              const zIndex = Number(styleCfg.zIndex ?? 0)
-              const widgetDrillActions = drillActions[w.widgetId] || []
-              const hasDrill = widgetDrillActions.length > 0
+  const renderWidgets = () => {
+    // All widget IDs that belong to any TABS container — excluded from flat grid
+    const tabsContainers = containers.filter(c => c.containerType === 'TABS')
+    const widgetIdsInTabs = new Set(tabsContainers.flatMap(c => c.childWidgetIds.flat()))
+
+    const widgetById = renderResult
+      ? Object.fromEntries(renderResult.widgets.map(w => [w.widgetId, w]))
+      : {}
+
+    return (
+      <>
+        {(() => {
+          const bookmarkOffsetClass =
+            (filterPanelPosition === 'left' && filterPanelCollapsed) ? 'pl-20' :
+              (filterPanelPosition === 'right' && filterPanelCollapsed) ? 'pr-20' :
+                ''
+          return (
+            <BookmarkBar
+              reportId={currentReportId || Number(id)}
+              currentParameters={currentParams}
+              className={bookmarkOffsetClass}
+              onApplyBookmark={(params) => {
+                setCurrentParams(params)
+                handleRender(params)
+              }}
+            />
+          )
+        })()}
+
+        {rendering && !renderResult ? (
+          <LoadingSpinner />
+        ) : renderResult ? (
+          <div className="space-y-4">
+            {/* TABS containers */}
+            {tabsContainers.map(container => {
+              // Each group = one tab; filter out hidden widgets
+              const tabGroups = container.childWidgetIds.map(group =>
+                group.map(wid => widgetById[wid]).filter(Boolean).filter(w => !hiddenWidgetIds.includes(w.widgetId))
+              ).filter(g => g.length > 0)
+              if (tabGroups.length === 0) return null
+
+              // Tab height = max total height of widgets in any single tab
+              const tabH = Math.max(...tabGroups.map(group =>
+                group.reduce((sum, w) => {
+                  const pos = parsePosition(w.position)
+                  return sum + Math.max(1, Number(pos.h) || 4)
+                }, 0)
+              ))
+
+              const tabLabels = tabGroups.map((_, i) =>
+                container.tabNames[i] || ''
+              )
+
               return (
-                <div
-                  key={w.widgetId}
-                  className={`card p-4 overflow-hidden ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
-                  style={{
-                    gridColumn: `${x + 1} / span ${wSpan}`,
-                    gridRow: `${y + 1} / span ${hSpan}`,
-                    zIndex,
-                    position: 'relative',
-                  }}
-                >
-                  {hasDrill && (
-                    <div className="text-[10px] text-brand-500 dark:text-brand-400 mb-1 flex items-center gap-1">
-                      <span>{'->'}</span>
-                      <span>{t('reports.drill_to', { name: widgetDrillActions[0].targetReportName })}</span>
-                    </div>
-                  )}
-                  <WidgetRenderer
-                    widget={w}
-                    drillActions={widgetDrillActions}
-                    onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
-                    layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}
-                    reportId={currentReportId || Number(id)}
-                    onToggleWidgets={handleToggleWidgets}
-                    onApplyFilter={handleApplyFilter}
-                    onChartClick={(data) => {
-                      useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
-                    }}
-                  />
+                <div key={container.id} className="card p-2" style={{ minHeight: `${tabH * 70 + 56}px` }}>
+                  <TabContainer container={container} labels={tabLabels}>
+                    {tabGroups.map((group, tabIdx) => (
+                      <div key={tabIdx} className="space-y-4 pt-2">
+                        {group.map(w => renderSingleWidget(w))}
+                      </div>
+                    ))}
+                  </TabContainer>
                 </div>
               )
             })}
-        </div>
-      ) : null}
 
-      {interactiveMeta?.overlays && interactiveMeta.overlays.length > 0 && (
-        <div className="relative">
-          <OverlayLayer overlays={interactiveMeta.overlays} />
-        </div>
-      )}
-    </>
-  )
+            {/* Flat grid for widgets not in any container */}
+            {renderResult.widgets.filter(w =>
+              !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId)
+            ).length > 0 && (
+              <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
+                {renderResult.widgets
+                  .filter(w => !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId))
+                  .map((w) => {
+                    const pos = parsePosition(w.position)
+                    const x = Math.max(0, Number(pos.x) || 0)
+                    const y = Math.max(0, Number(pos.y) || 0)
+                    const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+                    const hSpan = Math.max(1, Number(pos.h) || 4)
+                    const styleCfg = parseStyle(w.style)
+                    const zIndex = Number(styleCfg.zIndex ?? 0)
+                    return (
+                      <div
+                        key={w.widgetId}
+                        style={{
+                          gridColumn: `${x + 1} / span ${wSpan}`,
+                          gridRow: `${y + 1} / span ${hSpan}`,
+                          zIndex,
+                          position: 'relative',
+                        }}
+                      >
+                        {renderSingleWidget(w)}
+                      </div>
+                    )
+                  })}
+              </div>
+            )}
+          </div>
+        ) : null}
+
+        {interactiveMeta?.overlays && interactiveMeta.overlays.length > 0 && (
+          <div className="relative">
+            <OverlayLayer overlays={interactiveMeta.overlays} />
+          </div>
+        )}
+      </>
+    )
+  }
 
   const sidePanel = report.parameters.length > 0 && (
     <div className={`${filterPanelCollapsed ? 'w-0 overflow-hidden' : 'w-80'} flex-shrink-0`}>

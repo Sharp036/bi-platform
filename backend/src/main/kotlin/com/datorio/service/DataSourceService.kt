@@ -74,7 +74,13 @@ class DataSourceService(
     fun executeQuery(request: QueryExecuteRequest): QueryResult {
         val ds = getEntity(request.datasourceId)
         // Basic SQL injection prevention: block DDL/DML
-        val normalizedSql = request.sql.trim().uppercase()
+        // Strip leading single-line comments before checking query type
+        val normalizedSql = request.sql.trim()
+            .lines()
+            .dropWhile { it.trimStart().startsWith("--") || it.isBlank() }
+            .joinToString("\n")
+            .trim()
+            .uppercase()
         require(normalizedSql.startsWith("SELECT") || normalizedSql.startsWith("WITH")) {
             "Only SELECT queries are allowed. Use the database admin tools for DDL/DML operations."
         }

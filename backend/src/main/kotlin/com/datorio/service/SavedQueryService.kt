@@ -343,7 +343,13 @@ class SavedQueryService(
         ipAddress: String?
     ): QueryResult {
         // Security: only SELECT/WITH allowed
-        val normalized = sql.trim().uppercase()
+        // Strip leading single-line comments before checking query type
+        val normalized = sql.trim()
+            .lines()
+            .dropWhile { it.trimStart().startsWith("--") || it.isBlank() }
+            .joinToString("\n")
+            .trim()
+            .uppercase()
         require(normalized.startsWith("SELECT") || normalized.startsWith("WITH")) {
             "Only SELECT queries are allowed"
         }
