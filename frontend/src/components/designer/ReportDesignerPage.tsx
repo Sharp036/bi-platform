@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
+import { vizApi } from '@/api/visualization'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { ReportParameter } from '@/types'
 import ComponentPalette from './ComponentPalette'
@@ -9,10 +10,11 @@ import DesignerCanvas from './DesignerCanvas'
 import PropertyPanel from './PropertyPanel'
 import ParameterDesigner from './ParameterDesigner'
 import ParameterControlConfigPanel from '@/components/interactive/ParameterControlConfigPanel'
+import ContainerDesigner, { DesignerContainer, genContainerId } from './ContainerDesigner'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Save, Undo2, Redo2, Eye, EyeOff, ArrowLeft,
-  Upload, Download, Settings2
+  Upload, Download, Settings2, Layers, SlidersHorizontal
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
@@ -67,6 +69,8 @@ export default function ReportDesignerPage() {
   const [showSettings, setShowSettings] = useState(false)
   const [filterPanelPosition, setFilterPanelPosition] = useState<FilterPanelPosition>('top')
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
+  const [containers, setContainers] = useState<DesignerContainer[]>([])
+  const [rightPanel, setRightPanel] = useState<'props' | 'containers'>('props')
   const controlParams: ReportParameter[] = parameters.map(p => ({
     name: p.name,
     label: p.label,
@@ -80,6 +84,7 @@ export default function ReportDesignerPage() {
   useEffect(() => {
     if (isNew) {
       reset()
+      setContainers([])
       setReportMeta(t('designer.new_report_name'), '')
       const defaults = parseReportLayout()
       setFilterPanelPosition(defaults.filterPanel.position)
@@ -90,7 +95,7 @@ export default function ReportDesignerPage() {
     nameEditedRef.current = true
     setLoading(true)
     reportApi.get(Number(id))
-      .then(data => {
+      .then(async data => {
         const parsedLayout = parseReportLayout(data.layout)
         setFilterPanelPosition(parsedLayout.filterPanel.position)
         setFilterPanelCollapsed(parsedLayout.filterPanel.collapsed)
@@ -102,6 +107,30 @@ export default function ReportDesignerPage() {
           widgets: data.widgets as unknown as Array<Record<string, unknown>>,
           parameters: data.parameters as unknown as Array<Record<string, unknown>>,
         })
+
+        // Load containers and map server widget IDs -> designer client IDs
+        // The store widgets are set synchronously by loadReport above
+        const storeWidgets = useDesignerStore.getState().widgets
+        try {
+          const serverContainers = await vizApi.getContainers(data.id)
+          const mapped: DesignerContainer[] = serverContainers.map(sc => ({
+            clientId: genContainerId(),
+            serverId: sc.id,
+            containerType: (sc.containerType === 'ACCORDION' ? 'ACCORDION' : 'TABS') as DesignerContainer['containerType'],
+            name: sc.name ?? '',
+            tabNames: sc.tabNames,
+            // Map server widget IDs to client IDs via sortOrder position in the widget list
+            tabGroups: sc.childWidgetIds.map(group =>
+              group
+                .map(servId => storeWidgets.find(w => w.serverId === servId)?.id ?? null)
+                .filter((id): id is string => id !== null)
+            ),
+          }))
+          setContainers(mapped)
+        } catch {
+          // Containers are optional — non-fatal
+          setContainers([])
+        }
       })
       .catch(() => toast.error(t('designer.failed_load')))
       .finally(() => setLoading(false))
@@ -181,6 +210,27 @@ export default function ReportDesignerPage() {
           widgets: created.widgets as any,
           parameters: created.parameters as any,
         })
+        // Save containers using the freshly assigned server widget IDs
+        if (containers.length > 0) {
+          const createdWidgets = (created.widgets as unknown as Array<{ id: number; sortOrder: number }>)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+          // client widget at index i -> server widget id createdWidgets[i].id
+          const clientIdToServerId = new Map<string, number>(
+            widgets.map((w, i) => [w.id, createdWidgets[i]?.id ?? -1])
+          )
+          for (const c of containers) {
+            await vizApi.createContainer({
+              reportId: created.id,
+              containerType: c.containerType,
+              name: c.name,
+              tabNames: c.tabNames,
+              activeTab: 0,
+              childWidgetIds: c.tabGroups.map(g =>
+                g.map(cid => clientIdToServerId.get(cid) ?? -1).filter(id => id !== -1)
+              ),
+            })
+          }
+        }
         navigate(`/reports/${created.id}/edit`, { replace: true })
         toast.success(t('designer.report_created'))
         setDirty(false)
@@ -202,8 +252,31 @@ export default function ReportDesignerPage() {
         for (const ew of existingWidgets) {
           await reportApi.deleteWidget(ew.id)
         }
+        const newWidgets: Array<{ id: number; sortOrder: number }> = []
         for (const wp of widgetPayloads) {
-          await reportApi.addWidget(reportId, wp)
+          const created = await reportApi.addWidget(reportId, wp) as { id: number; sortOrder: number }
+          newWidgets.push(created)
+        }
+
+        // Re-save containers: delete all old, then create fresh
+        const clientIdToServerId = new Map<string, number>(
+          widgets.map((w, i) => [w.id, newWidgets[i]?.id ?? -1])
+        )
+        const existingContainers = await vizApi.getContainers(reportId)
+        for (const ec of existingContainers) {
+          await vizApi.deleteContainer(ec.id)
+        }
+        for (const c of containers) {
+          await vizApi.createContainer({
+            reportId,
+            containerType: c.containerType,
+            name: c.name,
+            tabNames: c.tabNames,
+            activeTab: 0,
+            childWidgetIds: c.tabGroups.map(g =>
+              g.map(cid => clientIdToServerId.get(cid) ?? -1).filter(id => id !== -1)
+            ),
+          })
         }
 
         toast.success(t('designer.report_saved'))
@@ -220,6 +293,7 @@ export default function ReportDesignerPage() {
     reportDescription,
     widgets,
     parameters,
+    containers,
     filterPanelPosition,
     filterPanelCollapsed,
     isNew,
@@ -368,10 +442,47 @@ export default function ReportDesignerPage() {
           <DesignerCanvas />
         </div>
 
-        {/* Right: Property Panel */}
+        {/* Right: Property Panel / Container Designer */}
         {!previewMode && (
-          <div className="w-72 flex-shrink-0 overflow-y-auto border-l border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30">
-            <PropertyPanel />
+          <div className="w-72 flex-shrink-0 flex flex-col border-l border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30">
+            {/* Panel toggle */}
+            <div className="flex border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
+              <button
+                onClick={() => setRightPanel('props')}
+                className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
+                  rightPanel === 'props'
+                    ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+                title={t('designer.tabs.properties_panel')}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                {t('designer.tabs.properties_panel')}
+              </button>
+              <button
+                onClick={() => setRightPanel('containers')}
+                className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
+                  rightPanel === 'containers'
+                    ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+                title={t('designer.tabs.panel_title')}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                {t('designer.tabs.panel_title')}
+                {containers.length > 0 && (
+                  <span className="ml-1 bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                    {containers.length}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {rightPanel === 'props'
+                ? <PropertyPanel />
+                : <ContainerDesigner containers={containers} onChange={setContainers} />
+              }
+            </div>
           </div>
         )}
       </div>
