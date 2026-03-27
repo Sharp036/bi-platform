@@ -180,8 +180,15 @@ export default function PropertyPanel() {
           className="ml-auto input text-xs py-0.5 h-auto"
           title={t('designer.widget_type')}
         >
-          {(['CHART', 'TABLE', 'KPI', 'TEXT', 'FILTER', 'IMAGE'] as const).map(wt => (
-            <option key={wt} value={wt}>{wt}</option>
+          {([
+            ['CHART', t('widgets.type.chart')],
+            ['TABLE', t('widgets.type.table')],
+            ['KPI',   t('widgets.type.kpi')],
+            ['TEXT',  t('widgets.type.text')],
+            ['FILTER',t('widgets.type.filter')],
+            ['IMAGE', t('widgets.type.image')],
+          ] as const).map(([wt, label]) => (
+            <option key={wt} value={wt}>{label}</option>
           ))}
         </select>
       </div>
