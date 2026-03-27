@@ -5,12 +5,13 @@ import { reportApi } from '@/api/reports'
 import type { ReportListItem } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2 } from 'lucide-react'
+import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
 import FavoriteButton from '@/components/workspace/FavoriteButton'
 import TagManager from '@/components/tags/TagManager'
+import { useAuthStore } from '@/store/authStore'
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -28,6 +29,8 @@ export default function ReportListPage() {
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('')
   const [shareReport, setShareReport] = useState<ReportListItem | null>(null)
+  const permissions = useAuthStore(s => s.user?.permissions ?? [])
+  const canDelete = permissions.includes('REPORT_DELETE')
 
   const load = () => {
     setLoading(true)
@@ -119,6 +122,24 @@ export default function ReportListPage() {
                 <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs"><Copy className="w-3.5 h-3.5" /></button>
                 <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs"><Archive className="w-3.5 h-3.5" /></button>
                 <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs"><Share2 className="w-3.5 h-3.5" /></button>
+                {canDelete && (
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm(t('common.confirm_delete'))) return
+                      try {
+                        await reportApi.delete(r.id)
+                        toast.success(t('common.deleted'))
+                        setReports(prev => prev.filter(x => x.id !== r.id))
+                      } catch {
+                        toast.error(t('common.error'))
+                      }
+                    }}
+                    className="btn-ghost p-1.5 text-xs text-red-500 hover:text-red-600 dark:text-red-400"
+                    title={t('common.delete')}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
