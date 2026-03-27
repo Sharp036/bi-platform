@@ -73,6 +73,7 @@ class TemplateService(
     //  JSON Export
     // ═══════════════════════════════════════════
 
+    @Transactional(readOnly = true)
     fun exportReport(reportId: Long): ReportExportConfig {
         val report = reportRepo.findById(reportId)
             .orElseThrow { NoSuchElementException("Report not found: $reportId") }
