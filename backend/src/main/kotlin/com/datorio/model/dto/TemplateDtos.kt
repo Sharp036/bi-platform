@@ -35,6 +35,15 @@ data class CreateFromTemplateRequest(
 //  JSON Export / Import
 // ═══════════════════════════════════════════════
 
+data class ContainerExportConfig(
+    val containerType: String,
+    val name: String?,
+    // References widgets by their sortOrder (stable across import — IDs change)
+    val childWidgetSortOrders: List<Int>,
+    val activeTab: Int = 0,
+    val sortOrder: Int = 0
+)
+
 data class ReportExportConfig(
     val formatVersion: Int = 1,
     val name: String,
@@ -44,7 +53,8 @@ data class ReportExportConfig(
     val settings: String,
     val category: String?,
     val parameters: List<ParameterExportConfig>,
-    val widgets: List<WidgetExportConfig>
+    val widgets: List<WidgetExportConfig>,
+    val containers: List<ContainerExportConfig> = emptyList()
 )
 
 data class ParameterExportConfig(
