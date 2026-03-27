@@ -273,9 +273,9 @@ export default function ReportViewerPage() {
   }
 
   const renderWidgets = () => {
-    // Widget IDs that belong to a TABS container — excluded from flat grid
+    // All widget IDs that belong to any TABS container — excluded from flat grid
     const tabsContainers = containers.filter(c => c.containerType === 'TABS')
-    const widgetIdsInTabs = new Set(tabsContainers.flatMap(c => c.childWidgetIds))
+    const widgetIdsInTabs = new Set(tabsContainers.flatMap(c => c.childWidgetIds.flat()))
 
     const widgetById = renderResult
       ? Object.fromEntries(renderResult.widgets.map(w => [w.widgetId, w]))
@@ -307,20 +307,32 @@ export default function ReportViewerPage() {
           <div className="space-y-4">
             {/* TABS containers */}
             {tabsContainers.map(container => {
-              const childWidgets = container.childWidgetIds
-                .map(wid => widgetById[wid])
-                .filter(Boolean)
-                .filter(w => !hiddenWidgetIds.includes(w.widgetId))
-              if (childWidgets.length === 0) return null
-              const maxH = Math.max(...childWidgets.map(w => {
-                const pos = parsePosition(w.position)
-                return Math.max(1, Number(pos.h) || 4)
-              }))
-              const tabLabels = childWidgets.map(w => w.title || '')
+              // Each group = one tab; filter out hidden widgets
+              const tabGroups = container.childWidgetIds.map(group =>
+                group.map(wid => widgetById[wid]).filter(Boolean).filter(w => !hiddenWidgetIds.includes(w.widgetId))
+              ).filter(g => g.length > 0)
+              if (tabGroups.length === 0) return null
+
+              // Tab height = max total height of widgets in any single tab
+              const tabH = Math.max(...tabGroups.map(group =>
+                group.reduce((sum, w) => {
+                  const pos = parsePosition(w.position)
+                  return sum + Math.max(1, Number(pos.h) || 4)
+                }, 0)
+              ))
+
+              const tabLabels = tabGroups.map((_, i) =>
+                container.tabNames[i] || ''
+              )
+
               return (
-                <div key={container.id} className="card p-2" style={{ height: `${maxH * 70 + 48}px` }}>
+                <div key={container.id} className="card p-2" style={{ minHeight: `${tabH * 70 + 56}px` }}>
                   <TabContainer container={container} labels={tabLabels}>
-                    {childWidgets.map(w => renderSingleWidget(w))}
+                    {tabGroups.map((group, tabIdx) => (
+                      <div key={tabIdx} className="space-y-4 pt-2">
+                        {group.map(w => renderSingleWidget(w))}
+                      </div>
+                    ))}
                   </TabContainer>
                 </div>
               )
@@ -328,8 +340,7 @@ export default function ReportViewerPage() {
 
             {/* Flat grid for widgets not in any container */}
             {renderResult.widgets.filter(w =>
-              !hiddenWidgetIds.includes(w.widgetId) &&
-              !widgetIdsInTabs.has(w.widgetId)
+              !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId)
             ).length > 0 && (
               <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
                 {renderResult.widgets

@@ -38,8 +38,9 @@ data class CreateFromTemplateRequest(
 data class ContainerExportConfig(
     val containerType: String,
     val name: String?,
-    // References widgets by their sortOrder (stable across import — IDs change)
-    val childWidgetSortOrders: List<Int>,
+    // Each inner list = one tab; references widgets by sortOrder (stable across import — IDs change)
+    val childWidgetSortOrders: List<List<Int>>,
+    val tabNames: List<String> = emptyList(),
     val activeTab: Int = 0,
     val sortOrder: Int = 0
 )

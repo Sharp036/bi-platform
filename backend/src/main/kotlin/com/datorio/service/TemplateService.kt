@@ -84,7 +84,10 @@ class TemplateService(
             ContainerExportConfig(
                 containerType = c.containerType,
                 name = c.name,
-                childWidgetSortOrders = c.childWidgetIds.mapNotNull { widgetIdToSortOrder[it] },
+                childWidgetSortOrders = c.childWidgetIds.map { group ->
+                    group.mapNotNull { widgetIdToSortOrder[it] }
+                },
+                tabNames = c.tabNames,
                 activeTab = c.activeTab,
                 sortOrder = c.sortOrder
             )
@@ -158,13 +161,16 @@ class TemplateService(
         // Build sortOrder -> new widget ID map to resolve container child references
         val sortOrderToWidgetId: Map<Int, Long> = created.widgets.associate { it.sortOrder to it.id }
         cfg.containers.forEach { c ->
-            val childIds = c.childWidgetSortOrders.mapNotNull { sortOrderToWidgetId[it] }
+            val childIds = c.childWidgetSortOrders.map { group ->
+                group.mapNotNull { sortOrderToWidgetId[it] }
+            }.filter { it.isNotEmpty() }
             if (childIds.isNotEmpty()) {
                 vizService.createContainer(ContainerRequest(
                     reportId = created.id,
                     containerType = c.containerType,
                     name = c.name,
                     childWidgetIds = childIds,
+                    tabNames = c.tabNames,
                     activeTab = c.activeTab,
                     sortOrder = c.sortOrder
                 ))
