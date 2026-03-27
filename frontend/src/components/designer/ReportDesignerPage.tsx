@@ -246,22 +246,31 @@ export default function ReportDesignerPage() {
         // Update parameters
         await reportApi.setParameters(reportId, paramPayloads)
 
-        // Delete existing widgets & re-create
-        // (simpler than diffing; server handles cascade)
+        // Update existing widgets in-place (preserves server IDs) or create new ones.
+        // Never delete-all-recreate — that breaks container ID references.
         const existingWidgets = await reportApi.getWidgets(reportId) as Array<{ id: number }>
-        for (const ew of existingWidgets) {
-          await reportApi.deleteWidget(ew.id)
-        }
-        const newWidgets: Array<{ id: number; sortOrder: number }> = []
-        for (const wp of widgetPayloads) {
-          const created = await reportApi.addWidget(reportId, wp) as { id: number; sortOrder: number }
-          newWidgets.push(created)
+        const existingServerIdSet = new Set(existingWidgets.map(w => w.id))
+
+        const clientIdToServerId = new Map<string, number>()
+        for (let i = 0; i < widgets.length; i++) {
+          const w = widgets[i]
+          const wp = widgetPayloads[i]
+          if (w.serverId && existingServerIdSet.has(w.serverId)) {
+            await reportApi.updateWidget(w.serverId, wp)
+            clientIdToServerId.set(w.id, w.serverId)
+          } else {
+            const created = await reportApi.addWidget(reportId, wp) as { id: number }
+            clientIdToServerId.set(w.id, created.id)
+          }
         }
 
-        // Re-save containers: delete all old, then create fresh
-        const clientIdToServerId = new Map<string, number>(
-          widgets.map((w, i) => [w.id, newWidgets[i]?.id ?? -1])
-        )
+        // Delete any server widgets that no longer exist in the store
+        const keptServerIds = new Set(clientIdToServerId.values())
+        for (const ew of existingWidgets) {
+          if (!keptServerIds.has(ew.id)) {
+            await reportApi.deleteWidget(ew.id)
+          }
+        }
         const existingContainers = await vizApi.getContainers(reportId)
         for (const ec of existingContainers) {
           await vizApi.deleteContainer(ec.id)
