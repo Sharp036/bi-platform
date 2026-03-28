@@ -57,8 +57,8 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
         controlType: update.controlType ?? existing?.controlType ?? 'INPUT',
         datasourceId: update.datasourceId ?? existing?.datasourceId ?? undefined,
         optionsQuery: update.optionsQuery ?? existing?.optionsQuery ?? undefined,
-        cascadeParent: update.cascadeParent ?? existing?.cascadeParent ?? undefined,
-        cascadeField: update.cascadeField ?? existing?.cascadeField ?? undefined,
+        cascadeParent: 'cascadeParent' in update ? (update.cascadeParent || undefined) : (existing?.cascadeParent ?? undefined),
+        cascadeField: 'cascadeField' in update ? (update.cascadeField || undefined) : (existing?.cascadeField ?? undefined),
         sliderMin: update.sliderMin ?? existing?.sliderMin ?? undefined,
         sliderMax: update.sliderMax ?? existing?.sliderMax ?? undefined,
         sliderStep: update.sliderStep ?? existing?.sliderStep ?? undefined,
@@ -218,7 +218,7 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
                     <div>
                       <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.cascade_parent')}</label>
                       <select value={ctrl?.cascadeParent || ''}
-                        onChange={e => save(p.name, { cascadeParent: e.target.value || undefined })}
+                        onChange={e => save(p.name, { cascadeParent: e.target.value || null })}
                         className="input text-xs py-1 w-36">
                         <option value="">{t('common.none')}</option>
                         {parameters.filter(pp => pp.name !== p.name).map(pp => (
