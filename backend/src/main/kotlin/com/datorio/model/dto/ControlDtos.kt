@@ -64,7 +64,9 @@ data class ParameterControlResponse(
 
 data class ParameterOptionsResponse(
     val parameterName: String,
-    val options: List<String>
+    val options: List<String>,
+    val hasMore: Boolean = false,
+    val columnName: String? = null
 )
 
 // ═══════════════════════════════════════════

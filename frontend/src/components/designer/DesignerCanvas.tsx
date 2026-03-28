@@ -9,7 +9,7 @@ import EChartWidget from '@/components/charts/EChartWidget'
 import TableWidget from '@/components/charts/TableWidget'
 import type { WidgetData } from '@/types'
 import clsx from 'clsx'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   CHART: BarChart3, TABLE: Table, KPI: Hash,
@@ -126,6 +126,26 @@ function ContainerBlock({
 
   const sharedProps = { parameters, selectedId, onSelect, previewMode, insideContainer: true }
 
+  // Render a list of widgets grouped into y-rows, with spacers for y-gaps
+  const renderRows = (group: DesignerWidget[]) => {
+    const rows = groupIntoRows(group)
+    let prevEndY = 0
+    return rows.map((row, ri) => {
+      const rowY = row[0].position.y
+      const rowH = Math.max(...row.map(w => w.position.h)) * ROW_HEIGHT
+      const gap = Math.max(0, rowY - prevEndY) * ROW_HEIGHT
+      prevEndY = rowY + Math.max(...row.map(w => w.position.h))
+      return (
+        <div key={ri}>
+          {gap > 0 && <div style={{ height: `${gap}px` }} />}
+          <div className="relative" style={{ height: `${rowH}px` }}>
+            {row.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} rowRelative />)}
+          </div>
+        </div>
+      )
+    })
+  }
+
   return (
     <div className="border-2 border-brand-200 dark:border-brand-800 rounded-xl m-3 overflow-hidden">
       {/* Container header */}
@@ -165,18 +185,7 @@ function ContainerBlock({
                 {t('designer.tabs.add_widget')}
               </div>
             )
-            return (
-              <div>
-                {groupIntoRows(group).map((row, ri) => {
-                  const rowH = Math.max(...row.map(w => w.position.h)) * ROW_HEIGHT
-                  return (
-                    <div key={ri} className="relative" style={{ height: `${rowH}px` }}>
-                      {row.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} rowRelative />)}
-                    </div>
-                  )
-                })}
-              </div>
-            )
+            return <div>{renderRows(group)}</div>
           })()}
         </>
       ) : (
@@ -204,14 +213,7 @@ function ContainerBlock({
                       <div className="flex items-center justify-center h-16 text-xs text-slate-400">
                         {t('designer.tabs.add_widget')}
                       </div>
-                    ) : groupIntoRows(group).map((row, ri) => {
-                      const rowH = Math.max(...row.map(w => w.position.h)) * ROW_HEIGHT
-                      return (
-                        <div key={ri} className="relative" style={{ height: `${rowH}px` }}>
-                          {row.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} rowRelative />)}
-                        </div>
-                      )
-                    })}
+                    ) : renderRows(group)}
                   </div>
                 )}
               </div>
@@ -240,6 +242,54 @@ function WidgetBlock({
   const Icon = ICON_MAP[widget.widgetType] || BarChart3
   const colWidth = 100 / COLS
   const isSelected = widget.id === selectedId
+
+  const moveWidget = useDesignerStore(s => s.moveWidget)
+  const outerRef = useRef<HTMLDivElement>(null)
+  const [dragPos, setDragPos] = useState<typeof widget.position | null>(null)
+
+  const startDrag = useCallback((e: React.MouseEvent, mode: 'move' | 'resize') => {
+    e.preventDefault()
+    e.stopPropagation()
+    const parent = outerRef.current?.parentElement
+    if (!parent) return
+    const colPx = parent.getBoundingClientRect().width / COLS
+    const startX = e.clientX
+    const startY = e.clientY
+    const startPos = { ...widget.position }
+
+    const onMove = (me: MouseEvent) => {
+      const dCol = Math.round((me.clientX - startX) / colPx)
+      const dRow = Math.round((me.clientY - startY) / ROW_HEIGHT)
+      if (mode === 'move') {
+        setDragPos({
+          ...startPos,
+          x: Math.max(0, Math.min(COLS - startPos.w, startPos.x + dCol)),
+          y: Math.max(0, startPos.y + dRow),
+        })
+      } else {
+        setDragPos({
+          ...startPos,
+          w: Math.max(1, Math.min(COLS - startPos.x, startPos.w + dCol)),
+          h: Math.max(1, startPos.h + dRow),
+        })
+      }
+    }
+
+    const onUp = (ue: MouseEvent) => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      const dCol = Math.round((ue.clientX - startX) / colPx)
+      const dRow = Math.round((ue.clientY - startY) / ROW_HEIGHT)
+      const finalPos = mode === 'move'
+        ? { ...startPos, x: Math.max(0, Math.min(COLS - startPos.w, startPos.x + dCol)), y: Math.max(0, startPos.y + dRow) }
+        : { ...startPos, w: Math.max(1, Math.min(COLS - startPos.x, startPos.w + dCol)), h: Math.max(1, startPos.h + dRow) }
+      moveWidget(widget.id, finalPos)
+      setDragPos(null)
+    }
+
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }, [widget.id, widget.position, moveWidget])
 
   const [previewData, setPreviewData] = useState<WidgetData | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -281,22 +331,28 @@ function WidgetBlock({
     }
   }, [widget.queryId, widget.datasourceId, widget.rawSql, hasDataSource, parameters, t])
 
+  const dp = dragPos || widget.position
+  const zIdx = Number((widget.style as Record<string, unknown>)?.zIndex ?? (isSelected ? 10 : 1))
   const style: React.CSSProperties = rowRelative ? {
     position: 'absolute',
-    left: `${widget.position.x * colWidth}%`,
+    left: `${dp.x * colWidth}%`,
     top: 0,
-    width: `${widget.position.w * colWidth}%`,
-    height: `${widget.position.h * ROW_HEIGHT}px`,
+    width: `${dp.w * colWidth}%`,
+    height: `${dp.h * ROW_HEIGHT}px`,
     padding: '4px',
-    zIndex: Number((widget.style as Record<string, unknown>)?.zIndex ?? (isSelected ? 10 : 1)),
+    zIndex: dragPos ? 50 : zIdx,
+    opacity: dragPos ? 0.85 : 1,
+    transition: dragPos ? 'none' : undefined,
   } : {
     position: 'absolute',
-    left: `${widget.position.x * colWidth}%`,
-    top: `${widget.position.y * ROW_HEIGHT}px`,
-    width: `${widget.position.w * colWidth}%`,
-    height: `${widget.position.h * ROW_HEIGHT}px`,
+    left: `${dp.x * colWidth}%`,
+    top: `${dp.y * ROW_HEIGHT}px`,
+    width: `${dp.w * colWidth}%`,
+    height: `${dp.h * ROW_HEIGHT}px`,
     padding: '4px',
-    zIndex: Number((widget.style as Record<string, unknown>)?.zIndex ?? (isSelected ? 10 : 1)),
+    zIndex: dragPos ? 50 : zIdx,
+    opacity: dragPos ? 0.85 : 1,
+    transition: dragPos ? 'none' : undefined,
   }
 
   const cc = widget.chartConfig as Record<string, unknown>
@@ -346,9 +402,9 @@ function WidgetBlock({
   })() : null
 
   return (
-    <div style={style} onClick={(e) => { e.stopPropagation(); onSelect(widget.id) }}>
+    <div ref={outerRef} style={style} onClick={(e) => { e.stopPropagation(); onSelect(widget.id) }}>
       <div className={clsx(
-        'h-full rounded-lg border-2 transition-all cursor-pointer overflow-hidden flex flex-col',
+        'h-full rounded-lg border-2 transition-all cursor-pointer overflow-hidden flex flex-col relative',
         isSelected
           ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 shadow-lg shadow-brand-200/50 dark:shadow-brand-900/30'
           : 'border-surface-200 dark:border-dark-surface-100 bg-white dark:bg-dark-surface-50 hover:border-brand-300 dark:hover:border-brand-700',
@@ -356,7 +412,10 @@ function WidgetBlock({
       )}>
         {/* Header */}
         <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-surface-100 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/50 flex-shrink-0">
-          <GripVertical className="w-3 h-3 text-slate-300 dark:text-slate-600 cursor-grab" />
+          <GripVertical
+            className="w-3 h-3 text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing flex-shrink-0"
+            onMouseDown={!previewMode ? (e) => startDrag(e, 'move') : undefined}
+          />
           <Icon className="w-3.5 h-3.5 text-brand-500" />
           <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
             {widget.title || widget.widgetType}
@@ -435,6 +494,16 @@ function WidgetBlock({
             </div>
           )}
         </div>
+
+        {/* Resize handle */}
+        {!previewMode && (
+          <div
+            className="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize flex items-end justify-end p-1"
+            onMouseDown={(e) => startDrag(e, 'resize')}
+          >
+            <div className="w-2.5 h-2.5 border-b-2 border-r-2 border-slate-400 dark:border-slate-500 rounded-br-sm" />
+          </div>
+        )}
       </div>
     </div>
   )

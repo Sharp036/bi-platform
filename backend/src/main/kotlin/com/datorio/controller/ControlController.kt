@@ -81,4 +81,16 @@ class ControlController(
         ResponseEntity.ok(
             controlService.loadParameterOptions(reportId, parameterName, parentValues ?: emptyMap())
         )
+
+    @GetMapping("/parameters/{reportId}/{parameterName}/search")
+    fun searchOptions(
+        @PathVariable reportId: Long,
+        @PathVariable parameterName: String,
+        @RequestParam q: String,
+        @RequestParam column: String,
+        @RequestParam(defaultValue = "50") limit: Int
+    ): ResponseEntity<ParameterOptionsResponse> =
+        ResponseEntity.ok(
+            controlService.searchParameterOptions(reportId, parameterName, q, column, limit)
+        )
 }

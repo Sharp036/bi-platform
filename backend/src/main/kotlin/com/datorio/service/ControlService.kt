@@ -149,15 +149,66 @@ class ControlService(
             query = query.replace(":${control.cascadeParent}", "'${parentVal.replace("'", "''")}'")
         }
 
+        val threshold = 1000
         return try {
-            val result = connectionManager.executeQuery(ds, query, 500)
+            val result = connectionManager.executeQuery(ds, query, threshold + 1)
             val firstCol = result.columns.firstOrNull()?.name
-            val options = result.rows.map { row ->
-                (if (firstCol != null) row[firstCol] else null)?.toString() ?: ""
-            }.filter { it.isNotBlank() }.distinct()
-            ParameterOptionsResponse(parameterName, options)
+            val allOptions = result.rows.mapNotNull { row ->
+                (if (firstCol != null) row[firstCol] else null)?.toString()?.takeIf { it.isNotBlank() }
+            }.distinct()
+            val hasMore = allOptions.size > threshold
+            ParameterOptionsResponse(
+                parameterName = parameterName,
+                options = if (hasMore) allOptions.take(threshold) else allOptions,
+                hasMore = hasMore,
+                columnName = firstCol
+            )
         } catch (e: Exception) {
             log.error("Failed to load options for parameter {}: {}", parameterName, e.message)
+            ParameterOptionsResponse(parameterName, emptyList())
+        }
+    }
+
+    /**
+     * Search options for a parameter using a case-insensitive substring match.
+     * Wraps the stored optionsQuery in a subquery filtered by the given column.
+     */
+    fun searchParameterOptions(
+        reportId: Long,
+        parameterName: String,
+        searchQuery: String,
+        columnName: String,
+        limit: Int = 50
+    ): ParameterOptionsResponse {
+        val control = paramControlRepo.findByReportIdAndParameterName(reportId, parameterName)
+            ?: return ParameterOptionsResponse(parameterName, emptyList())
+
+        if (control.optionsQuery.isNullOrBlank() || control.datasourceId == null) {
+            return ParameterOptionsResponse(parameterName, emptyList())
+        }
+
+        val ds = dataSourceRepository.findById(control.datasourceId!!)
+            .orElseThrow { NoSuchElementException("DataSource not found: ${control.datasourceId}") }
+
+        // Sanitize inputs to prevent injection (column name must be a simple identifier)
+        val safeCol = columnName.replace(Regex("[^A-Za-z0-9_]"), "")
+        val safeSearch = searchQuery.replace("'", "''")
+
+        val wrappedQuery = """
+            SELECT $safeCol FROM (${control.optionsQuery}) AS _opts
+            WHERE positionCaseInsensitive(toString($safeCol), '$safeSearch') > 0
+            LIMIT $limit
+        """.trimIndent()
+
+        return try {
+            val result = connectionManager.executeQuery(ds, wrappedQuery, limit)
+            val firstCol = result.columns.firstOrNull()?.name
+            val options = result.rows.mapNotNull { row ->
+                (if (firstCol != null) row[firstCol] else null)?.toString()?.takeIf { it.isNotBlank() }
+            }.distinct()
+            ParameterOptionsResponse(parameterName, options, false, columnName)
+        } catch (e: Exception) {
+            log.error("Failed to search options for parameter {}: {}", parameterName, e.message)
             ParameterOptionsResponse(parameterName, emptyList())
         }
     }
