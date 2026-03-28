@@ -53,12 +53,6 @@ class ParameterControl(
     @Column(name = "options_query")
     var optionsQuery: String? = null,
 
-    @Column(name = "cascade_parent", length = 100)
-    var cascadeParent: String? = null,
-
-    @Column(name = "cascade_field", length = 200)
-    var cascadeField: String? = null,
-
     @Column(name = "slider_min")
     var sliderMin: Double? = null,
 

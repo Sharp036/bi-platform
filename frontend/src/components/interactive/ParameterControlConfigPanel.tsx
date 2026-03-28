@@ -57,8 +57,6 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
         controlType: update.controlType ?? existing?.controlType ?? 'INPUT',
         datasourceId: update.datasourceId ?? existing?.datasourceId ?? undefined,
         optionsQuery: update.optionsQuery ?? existing?.optionsQuery ?? undefined,
-        cascadeParent: 'cascadeParent' in update ? (update.cascadeParent || undefined) : (existing?.cascadeParent ?? undefined),
-        cascadeField: 'cascadeField' in update ? (update.cascadeField || undefined) : (existing?.cascadeField ?? undefined),
         sliderMin: update.sliderMin ?? existing?.sliderMin ?? undefined,
         sliderMax: update.sliderMax ?? existing?.sliderMax ?? undefined,
         sliderStep: update.sliderStep ?? existing?.sliderStep ?? undefined,
@@ -83,17 +81,11 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
   const openPicker = async (paramName: string) => {
     setPicker({ paramName, options: [], hasMore: false, columnName: '', loading: true, open: true, query: '' })
     try {
-      // Build parent values from default values of ancestor parameters in the cascade chain
+      // Pass default values of ALL other parameters so any :param in SQL gets substituted
       const parentValues: Record<string, string> = {}
-      let currentName = paramName
-      for (let depth = 0; depth < 10; depth++) {
-        const ctrl = controls.find(c => c.parameterName === currentName)
-        if (!ctrl?.cascadeParent) break
-        const parentParam = parameters.find(p => p.name === ctrl.cascadeParent)
-        if (parentParam?.defaultValue) {
-          parentValues[ctrl.cascadeParent] = parentParam.defaultValue
-        }
-        currentName = ctrl.cascadeParent
+      for (const p of parameters) {
+        if (p.name === paramName) continue
+        if (p.defaultValue) parentValues[p.name] = p.defaultValue
       }
       const res = await controlsApi.loadOptions(reportId, paramName, Object.keys(parentValues).length > 0 ? parentValues : undefined)
       setPicker(prev => prev ? {
@@ -233,17 +225,6 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
                         onChange={e => save(p.name, { optionsQuery: e.target.value })}
                         placeholder={t('interactive.control.sql_placeholder')}
                         className="input text-xs py-1 w-64" />
-                    </div>
-                    <div>
-                      <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.cascade_parent')}</label>
-                      <select value={ctrl?.cascadeParent || ''}
-                        onChange={e => save(p.name, { cascadeParent: e.target.value || null })}
-                        className="input text-xs py-1 w-36">
-                        <option value="">{t('common.none')}</option>
-                        {parameters.filter(pp => pp.name !== p.name).map(pp => (
-                          <option key={pp.name} value={pp.name}>{pp.label || pp.name}</option>
-                        ))}
-                      </select>
                     </div>
                     {ctrl?.optionsQuery && ctrl?.datasourceId && (
                       <div className="flex items-end">

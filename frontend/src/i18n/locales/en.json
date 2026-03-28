@@ -739,7 +739,6 @@
   "interactive.control.step": "Step",
   "interactive.control.options_sql": "Options SQL",
   "interactive.control.sql_placeholder": "SELECT DISTINCT col FROM table",
-  "interactive.control.cascade_parent": "Cascade Parent",
   "interactive.control.pick_default": "Pick default",
   "interactive.button.export_started": "{{format}} export started",
   "interactive.button.export_failed": "Export failed",
