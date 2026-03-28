@@ -222,7 +222,7 @@
   "designer.param_name": "ad",
   "designer.param_label": "etiket",
   "designer.param_default": "varsayılan",
-  "designer.param_required": "Zor",
+  "designer.param_required": "Zorunlu",
   "designer.chart_fields": "Grafik alanları",
   "designer.load_columns": "Sütunları yükle",
   "designer.loading_columns": "Yükleniyor...",

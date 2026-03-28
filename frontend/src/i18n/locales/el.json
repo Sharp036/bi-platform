@@ -222,7 +222,7 @@
   "designer.param_name": "όνομα",
   "designer.param_label": "ετικέτα",
   "designer.param_default": "προεπιλογή",
-  "designer.param_required": "Υποχ",
+  "designer.param_required": "Υποχρεωτικό",
   "designer.chart_fields": "Πεδία γραφήματος",
   "designer.load_columns": "Φόρτωση στηλών",
   "designer.loading_columns": "Φόρτωση...",

@@ -83,7 +83,19 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
   const openPicker = async (paramName: string) => {
     setPicker({ paramName, options: [], hasMore: false, columnName: '', loading: true, open: true, query: '' })
     try {
-      const res = await controlsApi.loadOptions(reportId, paramName)
+      // Build parent values from default values of ancestor parameters in the cascade chain
+      const parentValues: Record<string, string> = {}
+      let currentName = paramName
+      for (let depth = 0; depth < 10; depth++) {
+        const ctrl = controls.find(c => c.parameterName === currentName)
+        if (!ctrl?.cascadeParent) break
+        const parentParam = parameters.find(p => p.name === ctrl.cascadeParent)
+        if (parentParam?.defaultValue) {
+          parentValues[ctrl.cascadeParent] = parentParam.defaultValue
+        }
+        currentName = ctrl.cascadeParent
+      }
+      const res = await controlsApi.loadOptions(reportId, paramName, Object.keys(parentValues).length > 0 ? parentValues : undefined)
       setPicker(prev => prev ? {
         ...prev,
         options: res.options,
@@ -93,7 +105,7 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
       } : null)
     } catch {
       setPicker(null)
-      toast.error(t('interactive.control.failed_remove'))
+      toast.error(t('common.operation_failed'))
     }
   }
 
@@ -263,7 +275,10 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
             />
             <div className="flex-1 overflow-y-auto space-y-0.5">
               {picker.loading ? (
-                <p className="text-xs text-slate-400 p-2">...</p>
+                <div className="flex items-center gap-2 p-3 text-xs text-slate-400">
+                  <div className="w-4 h-4 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
+                  {t('common.loading')}
+                </div>
               ) : pickerVisible.length === 0 ? (
                 <p className="text-xs text-slate-400 p-2">{t('common.no_results')}</p>
               ) : (

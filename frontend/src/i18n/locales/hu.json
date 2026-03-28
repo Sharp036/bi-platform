@@ -222,7 +222,7 @@
   "designer.param_name": "név",
   "designer.param_label": "címke",
   "designer.param_default": "alapértelmezett",
-  "designer.param_required": "Köt",
+  "designer.param_required": "Kötelező",
   "designer.chart_fields": "Diagram mezők",
   "designer.load_columns": "Oszlopok betöltése",
   "designer.loading_columns": "Betöltés...",

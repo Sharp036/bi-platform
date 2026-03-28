@@ -222,7 +222,7 @@
   "designer.param_name": "namn",
   "designer.param_label": "etikett",
   "designer.param_default": "standard",
-  "designer.param_required": "Obl",
+  "designer.param_required": "Obligatorisk",
   "designer.chart_fields": "Diagramfält",
   "designer.load_columns": "Ladda kolumner",
   "designer.loading_columns": "Laddar...",

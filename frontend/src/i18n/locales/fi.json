@@ -222,7 +222,7 @@
   "designer.param_name": "nimi",
   "designer.param_label": "otsikko",
   "designer.param_default": "oletus",
-  "designer.param_required": "Pak",
+  "designer.param_required": "Pakollinen",
   "designer.chart_fields": "Kaavion kentät",
   "designer.load_columns": "Lataa sarakkeet",
   "designer.loading_columns": "Ladataan...",

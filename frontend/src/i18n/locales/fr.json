@@ -222,7 +222,7 @@
   "designer.param_name": "nom",
   "designer.param_label": "libellé",
   "designer.param_default": "par défaut",
-  "designer.param_required": "Req",
+  "designer.param_required": "Requis",
   "designer.chart_fields": "Champs du graphique",
   "designer.load_columns": "Charger les colonnes",
   "designer.loading_columns": "Chargement...",

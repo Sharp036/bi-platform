@@ -222,7 +222,7 @@
   "designer.param_name": "nombre",
   "designer.param_label": "etiqueta",
   "designer.param_default": "predeterminado",
-  "designer.param_required": "Req",
+  "designer.param_required": "Requerido",
   "designer.chart_fields": "Campos del gráfico",
   "designer.load_columns": "Cargar columnas",
   "designer.loading_columns": "Cargando...",

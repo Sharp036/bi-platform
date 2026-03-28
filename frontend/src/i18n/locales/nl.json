@@ -222,7 +222,7 @@
   "designer.param_name": "naam",
   "designer.param_label": "label",
   "designer.param_default": "standaard",
-  "designer.param_required": "Verpl",
+  "designer.param_required": "Verplicht",
   "designer.chart_fields": "Grafiekvelden",
   "designer.load_columns": "Kolommen laden",
   "designer.loading_columns": "Laden...",

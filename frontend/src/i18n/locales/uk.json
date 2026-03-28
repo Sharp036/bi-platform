@@ -222,7 +222,7 @@
   "designer.param_name": "назва",
   "designer.param_label": "мітка",
   "designer.param_default": "за замовчуванням",
-  "designer.param_required": "Обов.",
+  "designer.param_required": "Обов'язковий",
   "designer.chart_fields": "Поля діаграми",
   "designer.load_columns": "Завантажити стовпці",
   "designer.loading_columns": "Завантаження...",
