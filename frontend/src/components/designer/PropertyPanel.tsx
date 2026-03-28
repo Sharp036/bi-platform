@@ -880,6 +880,7 @@ function ParamMappingEditor({
   }
 
   return (
+    <div className="border border-dashed border-violet-300 dark:border-violet-700 rounded-lg p-2.5 bg-violet-50/50 dark:bg-violet-900/10">
     <Field label={t('designer.param_mapping')}>
       <p className="text-[10px] text-slate-400 mb-2">{t('designer.param_mapping_hint')}</p>
       {entries.length > 0 && (
@@ -926,6 +927,7 @@ function ParamMappingEditor({
         <Plus className="w-3 h-3" /> {t('designer.param_mapping_add')}
       </button>
     </Field>
+    </div>
   )
 }
 

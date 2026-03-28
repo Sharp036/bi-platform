@@ -14,7 +14,8 @@ import ContainerDesigner, { DesignerContainer, genContainerId } from './Containe
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Save, Undo2, Redo2, Eye, EyeOff, ArrowLeft,
-  Upload, Download, Settings2, Layers, SlidersHorizontal, ExternalLink
+  Upload, Download, Settings2, Layers, SlidersHorizontal, ExternalLink,
+  PanelRightClose, PanelRightOpen,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
@@ -71,6 +72,8 @@ export default function ReportDesignerPage() {
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
   const [containers, setContainers] = useState<DesignerContainer[]>([])
   const [rightPanel, setRightPanel] = useState<'props' | 'containers'>('props')
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false)
+  const [rightPanelWidth, setRightPanelWidth] = useState(288) // 18rem = 288px (w-72)
   const controlParams: ReportParameter[] = parameters.map(p => ({
     name: p.name,
     label: p.label,
@@ -467,46 +470,89 @@ export default function ReportDesignerPage() {
 
         {/* Right: Property Panel / Container Designer */}
         {!previewMode && (
-          <div className="w-72 flex-shrink-0 flex flex-col border-l border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30">
-            {/* Panel toggle */}
-            <div className="flex border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
-              <button
-                onClick={() => setRightPanel('props')}
-                className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
-                  rightPanel === 'props'
-                    ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-                title={t('designer.tabs.properties_panel')}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                {t('designer.tabs.properties_panel')}
-              </button>
-              <button
-                onClick={() => setRightPanel('containers')}
-                className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
-                  rightPanel === 'containers'
-                    ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-                title={t('designer.tabs.panel_title')}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                {t('designer.tabs.panel_title')}
-                {containers.length > 0 && (
-                  <span className="ml-1 bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                    {containers.length}
-                  </span>
-                )}
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              {rightPanel === 'props'
-                ? <PropertyPanel />
-                : <ContainerDesigner containers={containers} onChange={setContainers} />
-              }
-            </div>
-          </div>
+          <>
+            {/* Collapsed: thin strip with expand button */}
+            {rightPanelCollapsed ? (
+              <div className="w-8 flex-shrink-0 flex flex-col items-center border-l border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30">
+                <button
+                  onClick={() => setRightPanelCollapsed(false)}
+                  className="p-1.5 mt-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                  title={t('designer.tabs.properties_panel')}
+                >
+                  <PanelRightOpen className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex-shrink-0 flex" style={{ width: `${rightPanelWidth}px` }}>
+                {/* Drag-resize handle on left edge */}
+                <div
+                  className="w-1 cursor-col-resize hover:bg-brand-300 dark:hover:bg-brand-700 active:bg-brand-400 transition-colors flex-shrink-0"
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    const startX = e.clientX
+                    const startW = rightPanelWidth
+                    const onMove = (me: MouseEvent) => {
+                      const newW = Math.max(200, Math.min(600, startW - (me.clientX - startX)))
+                      setRightPanelWidth(newW)
+                    }
+                    const onUp = () => {
+                      document.removeEventListener('mousemove', onMove)
+                      document.removeEventListener('mouseup', onUp)
+                    }
+                    document.addEventListener('mousemove', onMove)
+                    document.addEventListener('mouseup', onUp)
+                  }}
+                />
+                <div className="flex-1 flex flex-col border-l border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30 min-w-0">
+                  {/* Panel tabs + collapse button */}
+                  <div className="flex border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
+                    <button
+                      onClick={() => setRightPanelCollapsed(true)}
+                      className="px-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex-shrink-0"
+                      title="Collapse"
+                    >
+                      <PanelRightClose className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setRightPanel('props')}
+                      className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
+                        rightPanel === 'props'
+                          ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500'
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                      title={t('designer.tabs.properties_panel')}
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      {t('designer.tabs.properties_panel')}
+                    </button>
+                    <button
+                      onClick={() => setRightPanel('containers')}
+                      className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
+                        rightPanel === 'containers'
+                          ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500'
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                      title={t('designer.tabs.panel_title')}
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      {t('designer.tabs.panel_title')}
+                      {containers.length > 0 && (
+                        <span className="ml-1 bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                          {containers.length}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {rightPanel === 'props'
+                      ? <PropertyPanel />
+                      : <ContainerDesigner containers={containers} onChange={setContainers} />
+                    }
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
