@@ -128,10 +128,17 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
 
   const selectDefault = async (paramName: string, value: string) => {
     try {
-      const updated = parameters.map(p =>
-        p.name === paramName ? { ...p, defaultValue: value } : p
-      )
-      await reportApi.setParameters(reportId, updated as unknown as Array<Record<string, unknown>>)
+      const payload = parameters.map((p, i) => ({
+        id: p.id,
+        name: p.name,
+        label: p.label || '',
+        paramType: p.paramType,
+        defaultValue: p.name === paramName ? value : (p.defaultValue || ''),
+        isRequired: p.isRequired,
+        sortOrder: i,
+        config: typeof p.config === 'string' ? p.config : JSON.stringify(p.config || {}),
+      }))
+      await reportApi.setParameters(reportId, payload as unknown as Array<Record<string, unknown>>)
       onParameterDefaultChange?.(paramName, value)
       toast.success(t('interactive.control.saved'))
     } catch {
