@@ -80,14 +80,25 @@ export default function EnhancedParameterPanel({
     } catch { /* ignore */ }
   }, [reportId])
 
+  // Collect all ancestor values for a parameter (walk up the cascade chain)
+  const collectAncestorValues = useCallback((paramName: string, vals: Record<string, string>) => {
+    const result: Record<string, string> = {}
+    let current = paramName
+    for (let depth = 0; depth < 10; depth++) {
+      const ctrl = controls.find(c => c.parameterName === current)
+      if (!ctrl?.cascadeParent) break
+      const parentVal = vals[ctrl.cascadeParent]
+      if (parentVal) result[ctrl.cascadeParent] = parentVal
+      current = ctrl.cascadeParent
+    }
+    return result
+  }, [controls])
+
   // Load initial options for data-driven dropdowns
   useEffect(() => {
     controls.forEach(c => {
       if (c.optionsQuery && c.datasourceId) {
-        const parentValues: Record<string, string> = {}
-        if (c.cascadeParent && values[c.cascadeParent]) {
-          parentValues[c.cascadeParent] = values[c.cascadeParent]
-        }
+        const parentValues = collectAncestorValues(c.parameterName, values)
         loadOptions(c.parameterName, parentValues)
       }
     })
@@ -108,13 +119,17 @@ export default function EnhancedParameterPanel({
 
   // Handle cascading: when parent changes, reload child options
   const handleChange = (paramName: string, value: string) => {
-    setValues(prev => ({ ...prev, [paramName]: value }))
+    setValues(prev => {
+      const next = { ...prev, [paramName]: value }
 
-    // Find dependent children
-    controls.filter(c => c.cascadeParent === paramName).forEach(child => {
-      loadOptions(child.parameterName, { [paramName]: value })
-      // Reset child value
-      setValues(prev => ({ ...prev, [child.parameterName]: '' }))
+      // Find dependent children and reset + reload them
+      controls.filter(c => c.cascadeParent === paramName).forEach(child => {
+        next[child.parameterName] = ''
+        const parentVals = collectAncestorValues(child.parameterName, next)
+        loadOptions(child.parameterName, parentVals)
+      })
+
+      return next
     })
   }
 
