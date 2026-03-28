@@ -1,11 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { WidgetData } from '@/types'
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, ZoomIn, ZoomOut } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
-const ROW_HEIGHT = 33 // px per row (text-sm + py-2)
-const HEADER_HEIGHT = 37 // sticky header
+const DENSITY_CONFIG = {
+  compact:  { rowHeight: 25, textClass: 'text-xs',  cellPad: 'px-2 py-0.5', headerHeight: 29 },
+  default:  { rowHeight: 33, textClass: 'text-sm',  cellPad: 'px-3 py-2',   headerHeight: 37 },
+  large:    { rowHeight: 44, textClass: 'text-base', cellPad: 'px-3 py-3',   headerHeight: 46 },
+} as const
+type Density = keyof typeof DENSITY_CONFIG
+
 const FOOTER_HEIGHT = 36 // pagination bar + stats + controls
 
 interface Props {
@@ -58,6 +63,10 @@ function exportXlsx(cols: string[], rows: Record<string, unknown>[], filename: s
 export default function TableWidget({ data, title, chartConfig, onRowClick, clickable }: Props) {
   const { t } = useTranslation()
   const config = parseConfig(chartConfig)
+  const density: Density = (config.tableDensity as string) in DENSITY_CONFIG
+    ? (config.tableDensity as Density)
+    : 'default'
+  const { rowHeight, textClass, cellPad, headerHeight } = DENSITY_CONFIG[density]
   const cols = data.columns || []
   const allRows = data.rows || []
 
@@ -68,6 +77,40 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
 
   // Configurable page size from chartConfig, 0 or undefined = auto
   const configPageSize = Number(config.tablePageSize) || 0
+
+  // Sorting
+  const [sortCol, setSortCol] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
+  const sortedRows = sortCol
+    ? [...allRows].sort((a, b) => {
+        const av = a[sortCol], bv = b[sortCol]
+        if (av == null && bv == null) return 0
+        if (av == null) return 1
+        if (bv == null) return -1
+        const an = Number(av), bn = Number(bv)
+        const cmp = (!isNaN(an) && !isNaN(bn))
+          ? an - bn
+          : String(av).localeCompare(String(bv))
+        return sortDir === 'asc' ? cmp : -cmp
+      })
+    : allRows
+
+  const handleSort = useCallback((col: string) => {
+    if (sortCol === col) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortCol(col)
+      setSortDir('asc')
+    }
+    setPage(0)
+  }, [sortCol])
+
+  // Zoom (50% - 200%)
+  const [zoom, setZoom] = useState(100)
+  const zoomFactor = zoom / 100
+  const effectiveRowHeight = Math.round(rowHeight * zoomFactor)
+  const effectiveHeaderHeight = Math.round(headerHeight * zoomFactor)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [autoPageSize, setAutoPageSize] = useState(20)
@@ -81,20 +124,20 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
       const h = entry.contentRect.height
-      const available = h - HEADER_HEIGHT - FOOTER_HEIGHT - (title ? 28 : 0)
-      const rows = Math.max(5, Math.floor(available / ROW_HEIGHT))
+      const available = h - effectiveHeaderHeight - FOOTER_HEIGHT - (title ? 28 : 0)
+      const rows = Math.max(5, Math.floor(available / effectiveRowHeight))
       setAutoPageSize(rows)
       setPage(0)
     })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [title, configPageSize, userPageSize])
+  }, [title, configPageSize, userPageSize, effectiveRowHeight, effectiveHeaderHeight])
 
   const pageSize = userPageSize > 0 ? userPageSize : configPageSize > 0 ? configPageSize : autoPageSize
 
-  const totalPages = Math.max(1, Math.ceil(allRows.length / pageSize))
+  const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize))
   const safeePage = Math.min(page, totalPages - 1)
-  const pageRows = allRows.slice(safeePage * pageSize, (safeePage + 1) * pageSize)
+  const pageRows = sortedRows.slice(safeePage * pageSize, (safeePage + 1) * pageSize)
 
   const goTo = useCallback((p: number) => {
     setPage(Math.max(0, Math.min(p, totalPages - 1)))
@@ -112,12 +155,19 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
     <div ref={containerRef} className="h-full flex flex-col overflow-hidden">
       {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
       <div className="flex-1 overflow-auto rounded-lg border border-surface-200 dark:border-dark-surface-100">
-        <table className="w-full text-sm">
+        <table className={`w-full ${textClass}`} style={{ fontSize: `${zoom}%` }}>
           <thead className="sticky top-0 bg-surface-100 dark:bg-dark-surface-100">
             <tr>
               {visibleCols.map((col) => (
-                <th key={col} className="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                <th
+                  key={col}
+                  onClick={() => handleSort(col)}
+                  className={`${cellPad} text-left font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap cursor-pointer select-none hover:text-slate-800 dark:hover:text-slate-200`}
+                >
                   {col}
+                  {sortCol === col && (
+                    <span className="ml-1 text-brand-500">{sortDir === 'asc' ? ' ^' : ' v'}</span>
+                  )}
                 </th>
               ))}
             </tr>
@@ -132,7 +182,7 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
                 }`}
               >
                 {visibleCols.map((col) => (
-                  <td key={col} className="px-3 py-2 whitespace-nowrap text-slate-700 dark:text-slate-300">
+                  <td key={col} className={`${cellPad} whitespace-nowrap text-slate-700 dark:text-slate-300`}>
                     {row[col] != null ? String(row[col]) : <span className="text-slate-400">null</span>}
                   </td>
                 ))}
@@ -163,6 +213,33 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
             <option value="500">500</option>
           </select>
         </div>
+        {/* Zoom controls */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setZoom(z => Math.max(50, z - 10))}
+            disabled={zoom <= 50}
+            className="p-0.5 rounded hover:bg-surface-100 dark:hover:bg-dark-surface-100 disabled:opacity-30 text-slate-500"
+            title="Zoom out"
+          >
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+          <span
+            className="text-[10px] text-slate-400 min-w-[32px] text-center cursor-pointer"
+            onClick={() => setZoom(100)}
+            title="Reset zoom"
+          >
+            {zoom}%
+          </span>
+          <button
+            onClick={() => setZoom(z => Math.min(200, z + 10))}
+            disabled={zoom >= 200}
+            className="p-0.5 rounded hover:bg-surface-100 dark:hover:bg-dark-surface-100 disabled:opacity-30 text-slate-500"
+            title="Zoom in"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         <div className="flex items-center gap-1">
           {allRows.length > 0 && (
             <>
