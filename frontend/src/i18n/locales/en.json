@@ -222,7 +222,7 @@
   "designer.param_name": "name",
   "designer.param_label": "label",
   "designer.param_default": "default",
-  "designer.param_required": "Req",
+  "designer.param_required": "Required",
   "designer.chart_fields": "Chart Fields",
   "designer.load_columns": "Load columns",
   "designer.loading_columns": "Loading...",

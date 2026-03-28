@@ -222,7 +222,7 @@
   "designer.param_name": "nome",
   "designer.param_label": "rótulo",
   "designer.param_default": "padrão",
-  "designer.param_required": "Obrig",
+  "designer.param_required": "Obrigatório",
   "designer.chart_fields": "Campos do gráfico",
   "designer.load_columns": "Carregar colunas",
   "designer.loading_columns": "Carregando...",

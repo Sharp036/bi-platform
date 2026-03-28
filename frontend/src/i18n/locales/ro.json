@@ -222,7 +222,7 @@
   "designer.param_name": "nume",
   "designer.param_label": "etichetă",
   "designer.param_default": "implicit",
-  "designer.param_required": "Obl",
+  "designer.param_required": "Obligatoriu",
   "designer.chart_fields": "Câmpuri grafic",
   "designer.load_columns": "Încarcă coloanele",
   "designer.loading_columns": "Se încarcă...",

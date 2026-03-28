@@ -222,7 +222,7 @@
   "designer.param_name": "nome",
   "designer.param_label": "etichetta",
   "designer.param_default": "predefinito",
-  "designer.param_required": "Obb",
+  "designer.param_required": "Obbligatorio",
   "designer.chart_fields": "Campi del grafico",
   "designer.load_columns": "Carica colonne",
   "designer.loading_columns": "Caricamento...",

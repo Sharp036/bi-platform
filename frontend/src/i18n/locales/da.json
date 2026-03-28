@@ -222,7 +222,7 @@
   "designer.param_name": "navn",
   "designer.param_label": "etiket",
   "designer.param_default": "standard",
-  "designer.param_required": "Påk",
+  "designer.param_required": "Påkrævet",
   "designer.chart_fields": "Diagramfelter",
   "designer.load_columns": "Indlæs kolonner",
   "designer.loading_columns": "Indlæser...",

@@ -222,7 +222,7 @@
   "designer.param_name": "Name",
   "designer.param_label": "Bezeichnung",
   "designer.param_default": "Standard",
-  "designer.param_required": "Erf",
+  "designer.param_required": "Erforderlich",
   "designer.chart_fields": "Diagrammfelder",
   "designer.load_columns": "Spalten laden",
   "designer.loading_columns": "Laden...",

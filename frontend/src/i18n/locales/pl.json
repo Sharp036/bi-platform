@@ -222,7 +222,7 @@
   "designer.param_name": "nazwa",
   "designer.param_label": "etykieta",
   "designer.param_default": "domyślna",
-  "designer.param_required": "Wym",
+  "designer.param_required": "Wymagane",
   "designer.chart_fields": "Pola wykresu",
   "designer.load_columns": "Załaduj kolumny",
   "designer.loading_columns": "Ładowanie...",
