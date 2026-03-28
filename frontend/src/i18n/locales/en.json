@@ -19,6 +19,8 @@
   "common.unpublish": "Unpublish",
   "common.export": "Export",
   "common.import": "Import",
+  "common.move_up": "Move up",
+  "common.move_down": "Move down",
   "common.copy": "Copy",
   "common.share": "Share",
   "common.name": "Name",

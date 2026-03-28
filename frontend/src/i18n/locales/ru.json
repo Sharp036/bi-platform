@@ -20,6 +20,8 @@
   "common.unpublish": "Снять с публикации",
   "common.export": "Экспорт",
   "common.import": "Импорт",
+  "common.move_up": "Переместить выше",
+  "common.move_down": "Переместить ниже",
   "common.copy": "Копировать",
   "common.share": "Поделиться",
   "common.name": "Название",
