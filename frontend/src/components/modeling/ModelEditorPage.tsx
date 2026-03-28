@@ -5,7 +5,7 @@ import { modelingApi, type DataModelDetail, type ModelTableItem, type ModelField
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Boxes, Plus, Trash2, ChevronDown, ChevronRight, ArrowRight,
-  Download, Play, Table2, Hash, Calendar, Type, ToggleLeft, Eye, EyeOff,
+  Download, Upload, Play, Table2, Hash, Calendar, Type, ToggleLeft, Eye, EyeOff,
   Link2, Unlink
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -32,6 +32,11 @@ export default function ModelEditorPage() {
   const [selectedImport, setSelectedImport] = useState<Set<string>>(new Set())
   const [showImport, setShowImport] = useState(false)
   const [importing, setImporting] = useState(false)
+
+  // Add relationship form
+  const [showAddRel, setShowAddRel] = useState(false)
+  const [relForm, setRelForm] = useState({ leftTableId: 0, leftColumn: '', rightTableId: 0, rightColumn: '', joinType: 'LEFT' })
+  const [addingRel, setAddingRel] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -127,9 +132,35 @@ export default function ModelEditorPage() {
   }
 
   // ─── Relationship actions ───
+  const handleAddRelationship = async () => {
+    if (!relForm.leftTableId || !relForm.leftColumn || !relForm.rightTableId || !relForm.rightColumn) return
+    setAddingRel(true)
+    try {
+      await modelingApi.addRelationship(modelId, relForm)
+      toast.success(t('common.saved'))
+      setShowAddRel(false)
+      setRelForm({ leftTableId: 0, leftColumn: '', rightTableId: 0, rightColumn: '', joinType: 'LEFT' })
+      load()
+    } catch { toast.error(t('common.operation_failed')) }
+    finally { setAddingRel(false) }
+  }
+
   const handleRemoveRelationship = async (relId: number) => {
     try { await modelingApi.removeRelationship(relId); toast.success(t('common.deleted')); load() }
     catch { toast.error(t('common.failed_to_delete')) }
+  }
+
+  const handleExport = async () => {
+    try {
+      const cfg = await modelingApi.exportModel(modelId)
+      const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `model_${(model?.name || 'export').replace(/\s+/g, '_')}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch { toast.error(t('common.operation_failed')) }
   }
 
   const toggleTable = (tableId: number) => {
@@ -156,6 +187,7 @@ export default function ModelEditorPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button onClick={handleExport} className="btn-ghost text-xs" title={t('common.export')}><Upload className="w-4 h-4" /> JSON</button>
           <button onClick={loadSchema} className="btn-secondary"><Download className="w-4 h-4" /> {t('models.add_table')}</button>
           <button onClick={() => navigate(`/explore/${modelId}`)} className="btn-primary"><Play className="w-4 h-4" /> {t('models.explore')}</button>
         </div>
@@ -280,9 +312,76 @@ export default function ModelEditorPage() {
 
         {/* Relationships (1 col) */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('models.relationships')}</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('models.relationships')}</h2>
+            {model.tables.length >= 2 && (
+              <button onClick={() => setShowAddRel(!showAddRel)} className="btn-ghost text-xs text-violet-500 gap-1">
+                <Plus className="w-3.5 h-3.5" /> {t('models.add_relationship')}
+              </button>
+            )}
+          </div>
 
-          {model.relationships.length === 0 ? (
+          {/* Add relationship form */}
+          {showAddRel && (() => {
+            const leftTable = model.tables.find(t => t.id === relForm.leftTableId)
+            const rightTable = model.tables.find(t => t.id === relForm.rightTableId)
+            return (
+              <div className="card p-3 border-2 border-violet-200 dark:border-violet-800 space-y-2">
+                {/* Left side */}
+                <div className="grid grid-cols-2 gap-2">
+                  <select value={relForm.leftTableId}
+                    onChange={e => setRelForm(f => ({ ...f, leftTableId: Number(e.target.value), leftColumn: '' }))}
+                    className="input text-xs py-1">
+                    <option value={0}>-- table --</option>
+                    {model.tables.map(tb => <option key={tb.id} value={tb.id}>{tb.alias} ({tb.tableName})</option>)}
+                  </select>
+                  <select value={relForm.leftColumn}
+                    onChange={e => setRelForm(f => ({ ...f, leftColumn: e.target.value }))}
+                    className="input text-xs py-1">
+                    <option value="">-- column --</option>
+                    {leftTable?.fields.map(f => <option key={f.id} value={f.columnName || f.label}>{f.columnName || f.label}</option>)}
+                  </select>
+                </div>
+                {/* Join type + arrow */}
+                <div className="flex items-center gap-2">
+                  <select value={relForm.joinType}
+                    onChange={e => setRelForm(f => ({ ...f, joinType: e.target.value }))}
+                    className="input text-xs py-1 w-24">
+                    <option value="LEFT">LEFT</option>
+                    <option value="INNER">INNER</option>
+                    <option value="FULL">FULL</option>
+                  </select>
+                  <span className="text-xs text-slate-400">JOIN</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-violet-400" />
+                </div>
+                {/* Right side */}
+                <div className="grid grid-cols-2 gap-2">
+                  <select value={relForm.rightTableId}
+                    onChange={e => setRelForm(f => ({ ...f, rightTableId: Number(e.target.value), rightColumn: '' }))}
+                    className="input text-xs py-1">
+                    <option value={0}>-- table --</option>
+                    {model.tables.map(tb => <option key={tb.id} value={tb.id}>{tb.alias} ({tb.tableName})</option>)}
+                  </select>
+                  <select value={relForm.rightColumn}
+                    onChange={e => setRelForm(f => ({ ...f, rightColumn: e.target.value }))}
+                    className="input text-xs py-1">
+                    <option value="">-- column --</option>
+                    {rightTable?.fields.map(f => <option key={f.id} value={f.columnName || f.label}>{f.columnName || f.label}</option>)}
+                  </select>
+                </div>
+                {/* Buttons */}
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => setShowAddRel(false)} className="btn-secondary text-xs flex-1">{t('common.cancel')}</button>
+                  <button onClick={handleAddRelationship} disabled={addingRel || !relForm.leftColumn || !relForm.rightColumn}
+                    className="btn-primary text-xs flex-1">
+                    {addingRel ? t('common.loading') : t('common.save')}
+                  </button>
+                </div>
+              </div>
+            )
+          })()}
+
+          {model.relationships.length === 0 && !showAddRel ? (
             <div className="card p-4 text-center text-sm text-slate-500">
               <Unlink className="w-8 h-8 mx-auto mb-2 text-slate-300" />
               {t('common.no_results')}

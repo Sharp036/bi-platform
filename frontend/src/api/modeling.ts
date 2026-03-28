@@ -45,6 +45,32 @@ export interface DataModelDetail {
   createdAt: string; updatedAt: string
 }
 
+export interface ModelExportConfig {
+  formatVersion: number; name: string; description: string | null
+  datasourceName: string | null; config: string
+  tables: {
+    tableSchema: string | null; tableName: string; alias: string
+    label: string | null; description: string | null
+    isPrimary: boolean; sqlExpression: string | null; sortOrder: number
+    fields: {
+      columnName: string | null; fieldRole: string; label: string
+      description: string | null; dataType: string | null
+      aggregation: string | null; expression: string | null
+      format: string | null; hidden: boolean; sortOrder: number
+    }[]
+  }[]
+  relationships: {
+    leftTableAlias: string; leftColumn: string
+    rightTableAlias: string; rightColumn: string
+    joinType: string; label: string | null; isActive: boolean
+  }[]
+}
+
+export interface ImportModelResult {
+  modelId: number; name: string
+  tableCount: number; fieldCount: number; relationshipCount: number
+}
+
 export interface ExploreResult {
   sql: string; columns: string[]
   rows: Record<string, unknown>[]; rowCount: number; executionMs: number
@@ -98,6 +124,13 @@ export const modelingApi = {
 
   removeRelationship: (relId: number) =>
     api.delete(`/modeling/relationships/${relId}`),
+
+  // Export / Import
+  exportModel: (id: number) =>
+    api.get<ModelExportConfig>(`/modeling/models/${id}/export`).then(r => r.data),
+
+  importModel: (data: { config: ModelExportConfig; name?: string; datasourceId: number }) =>
+    api.post<ImportModelResult>('/modeling/models/import', data).then(r => r.data),
 
   // Auto-Import
   autoImport: (modelId: number, data: { tableNames: string[]; tableSchema?: string; detectRelationships?: boolean }) =>
