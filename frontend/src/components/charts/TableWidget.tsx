@@ -155,7 +155,11 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
     <div ref={containerRef} className="h-full flex flex-col overflow-hidden">
       {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
       <div className="flex-1 overflow-auto rounded-lg border border-surface-200 dark:border-dark-surface-100">
-        <table className={`w-full ${textClass}`} style={{ fontSize: `${zoom}%` }}>
+        <table className={`w-full ${textClass}`} style={{
+          transform: `scale(${zoomFactor})`,
+          transformOrigin: 'top left',
+          width: `${100 / zoomFactor}%`,
+        }}>
           <thead className="sticky top-0 bg-surface-100 dark:bg-dark-surface-100">
             <tr>
               {visibleCols.map((col) => (

@@ -3,7 +3,7 @@ import type { WidgetData } from '@/types'
 import { useThemeStore } from '@/store/themeStore'
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { createCollisionFreeLayout } from '@/components/charts/labelLayout'
+import { createCollisionFreeLayout, createInlineLabelLayout } from '@/components/charts/labelLayout'
 import type { LabelPlacement } from '@/components/charts/labelLayout'
 
 interface Props {
@@ -247,6 +247,8 @@ function buildOption(
   const showDataLabels = !!config.showDataLabels
   const dataLabelMode = (config.dataLabelMode as string) || 'all'
   const dataLabelCount = Number(config.dataLabelCount) || 3
+  const dataLabelPosition = (config.dataLabelPosition as string) || 'top'
+  const isInlineLabels = dataLabelPosition === 'inline'
   const dataLabelTopSpacingMode = (config.dataLabelTopSpacingMode as string) || 'dynamic'
   const dataLabelSpread = !!config.dataLabelSpread
   const dataLabelRotation = Number(config.dataLabelRotation) || 0
@@ -292,7 +294,7 @@ function buildOption(
         label: {
           show: true,
           position: chartType === 'pie' ? 'outside' : 'top',
-          distance: 8,
+          distance: isInlineLabels ? 6 : 8,
           rotate: chartType === 'pie' ? undefined : (dataLabelRotation || undefined),
           fontSize: 10,
           formatter: chartType === 'pie'
@@ -306,7 +308,7 @@ function buildOption(
             backgroundColor: labelBg,
           } : {}),
         },
-        ...(chartType !== 'pie' ? {
+        ...(chartType !== 'pie' && !isInlineLabels ? {
           labelLine: { show: true, lineStyle: { color: seriesColor, width: 1.5, opacity: 0.95 } },
         } : {}),
       } : {}),
@@ -350,7 +352,8 @@ function buildOption(
     dataLabelCount
   )
   const fixedLabelTopPad = showDataLabels && hasAxis ? 120 : 0
-  const labelTopPad = dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
+  const labelTopPad = isInlineLabels ? 0
+    : dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
   const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
   // containLabel: true already accounts for x-axis label height, so gridBottom
   // only needs space for the legend (when at bottom) plus a small gap.
@@ -388,7 +391,9 @@ function buildOption(
     } : {}),
     series,
     ...(showDataLabels && hasAxis ? {
-      labelLayout: createCollisionFreeLayout(getChartWidth, manualPositions, placementsRef, dataLabelSpread),
+      labelLayout: isInlineLabels
+        ? createInlineLabelLayout(getChartWidth)
+        : createCollisionFreeLayout(getChartWidth, manualPositions, placementsRef, dataLabelSpread),
     } : {}),
   }
 
