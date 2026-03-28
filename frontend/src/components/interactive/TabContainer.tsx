@@ -8,11 +8,17 @@ interface TabContainerProps {
   container: ContainerItem
   children: React.ReactNode[]   // child widget elements in order of childWidgetIds
   labels?: string[]             // optional tab labels; falls back to "Tab N"
+  onTabChange?: (idx: number) => void
 }
 
-export default function TabContainer({ container, children, labels: propLabels }: TabContainerProps) {
+export default function TabContainer({ container, children, labels: propLabels, onTabChange }: TabContainerProps) {
   const { t } = useTranslation()
   const [activeIdx, setActiveIdx] = useState(container.activeTab || 0)
+
+  const handleTabChange = (i: number) => {
+    setActiveIdx(i)
+    onTabChange?.(i)
+  }
   const [expandedSet, setExpandedSet] = useState<Set<number>>(new Set([0]))
 
   const labels = children.map((_, i) =>
@@ -27,7 +33,7 @@ export default function TabContainer({ container, children, labels: propLabels }
           {labels.map((label, i) => (
             <button
               key={i}
-              onClick={() => setActiveIdx(i)}
+              onClick={() => handleTabChange(i)}
               className={clsx(
                 'px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px',
                 i === activeIdx

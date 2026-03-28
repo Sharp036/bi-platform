@@ -60,7 +60,7 @@ export default function ReportDesignerPage() {
     reportId, reportName, reportDescription, reportStatus,
     widgets, parameters, dirty, previewMode,
     setReportMeta, loadReport, togglePreview,
-    undo, redo, canUndo, canRedo, reset, setDirty,
+    undo, redo, canUndo, canRedo, reset, setDirty, setParameters,
   } = useDesignerStore()
 
   const isPublished = reportStatus === 'PUBLISHED'
@@ -442,6 +442,11 @@ export default function ReportDesignerPage() {
                 <ParameterControlConfigPanel
                   reportId={reportId}
                   parameters={controlParams}
+                  onParameterDefaultChange={(paramName, value) => {
+                    setParameters(parameters.map(p =>
+                      p.name === paramName ? { ...p, defaultValue: value } : p
+                    ))
+                  }}
                 />
               </div>
             )}

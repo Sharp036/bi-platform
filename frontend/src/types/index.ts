@@ -54,9 +54,11 @@ export interface ReportParameter {
   defaultValue?: string; isRequired: boolean; config?: Record<string, unknown>
 }
 export interface Widget {
-  widgetId: number; widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE' | 'BUTTON' | 'WEBPAGE' | 'SPACER' | 'DIVIDER'
+  id?: number; widgetId?: number
+  widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE' | 'BUTTON' | 'WEBPAGE' | 'SPACER' | 'DIVIDER'
   title?: string; chartConfig?: string; position?: string; style?: string
   queryId?: number; datasourceId?: number; rawSql?: string
+  paramMapping?: string; sortOrder?: number; isVisible?: boolean
 }
 
 // ── Rendered Report ──

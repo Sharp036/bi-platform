@@ -109,13 +109,14 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
 
       <div className="space-y-2">
         {widgets.map(w => {
-          const config = configs.find(c => c.widgetId === w.widgetId)
+          const wid = (w.id ?? w.widgetId) as number
+          const config = configs.find(c => c.widgetId === wid)
           const isSource = config?.isFilterSource ?? false
 
           return (
-            <div key={w.widgetId}
+            <div key={wid}
               className="card p-3 flex items-center gap-3 text-sm">
-              <button onClick={() => toggleSource(w.widgetId)}
+              <button onClick={() => toggleSource(wid)}
                 className="flex-shrink-0">
                 {isSource
                   ? <ToggleRight className="w-5 h-5 text-brand-500" />
@@ -124,7 +125,7 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
 
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-slate-700 dark:text-slate-200 truncate">
-                  {w.title || `Widget #${w.widgetId}`}
+                  {w.title || `Widget #${wid}`}
                 </p>
                 <p className="text-xs text-slate-400">{w.widgetType}</p>
               </div>
@@ -133,18 +134,18 @@ export default function GlobalFilterConfigPanel({ reportId, widgets }: Props) {
                 <>
                   <input
                     value={config.filterField || ''}
-                    onChange={e => updateField(w.widgetId, e.target.value)}
+                    onChange={e => updateField(wid, e.target.value)}
                     placeholder={t('interactive.filter.field_placeholder')}
                     className="input text-xs w-32 py-1"
                   />
                   <input
                     value={config.excludedTargets || ''}
-                    onChange={e => updateExcluded(w.widgetId, e.target.value)}
+                    onChange={e => updateExcluded(wid, e.target.value)}
                     placeholder={t('interactive.filter.exclude_placeholder')}
                     className="input text-xs w-28 py-1"
                     title={t('interactive.filter.exclude_tooltip')}
                   />
-                  <button onClick={() => remove(w.widgetId)}
+                  <button onClick={() => remove(wid)}
                     className="p-1 text-slate-400 hover:text-red-500">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
