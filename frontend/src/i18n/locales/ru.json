@@ -92,6 +92,7 @@
   "auth.password_min_length": "Новый пароль должен содержать не менее 6 символов",
   "auth.password_changed": "Пароль успешно изменён",
   "auth.password_change_failed": "Не удалось изменить пароль",
+  "auth.session_expired": "Сеанс истёк. Пожалуйста, войдите снова.",
   "header.search_placeholder": "Поиск... (Ctrl+K)",
   "header.searching": "Поиск...",
   "header.no_results_for": "Нет результатов для «{{query}}»",
