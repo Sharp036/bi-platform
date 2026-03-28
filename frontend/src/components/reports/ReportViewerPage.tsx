@@ -253,22 +253,54 @@ export default function ReportViewerPage() {
     return ids
   }, [containers, activeTabByContainer, hiddenWidgetIds, report])
 
-  // Parameters actually used by currently visible widgets
-  const visibleParameters = useMemo(() => {
-    if (!report) return []
-    const usedNames = new Set<string>()
+  // Collect report-param names referenced by visible non-filter widgets
+  const usedParamNames = useMemo(() => {
+    if (!report) return null
+    const names = new Set<string>()
+    let anyMapping = false
     for (const w of report.widgets) {
+      if (w.widgetType === 'FILTER') continue
       const wid = w.id ?? w.widgetId
       if (wid === undefined || !visibleWidgetIds.has(wid)) continue
       try {
-        const mapping = JSON.parse(w.paramMapping || '{}') as Record<string, unknown>
-        Object.keys(mapping).forEach(k => usedNames.add(k))
+        const mapping = JSON.parse(w.paramMapping || '{}') as Record<string, string>
+        const vals = Object.values(mapping)
+        if (vals.length > 0) {
+          anyMapping = true
+          vals.forEach(v => names.add(v))
+        }
+        // keys are query-param names -- also used by the parameter panel
+        Object.keys(mapping).forEach(k => names.add(k))
       } catch { /* ignore */ }
     }
-    // Fallback: if no widget has any paramMapping, show all params
-    if (usedNames.size === 0) return report.parameters
-    return report.parameters.filter(p => usedNames.has(p.name))
+    // null = no widget has paramMapping, so show everything
+    return anyMapping ? names : null
   }, [report, visibleWidgetIds])
+
+  // Parameters actually used by currently visible widgets
+  const visibleParameters = useMemo(() => {
+    if (!report) return []
+    if (!usedParamNames) return report.parameters
+    return report.parameters.filter(p => usedParamNames.has(p.name))
+  }, [report, usedParamNames])
+
+  // IDs of free FILTER widgets whose filterColumn is not used on the current tab
+  const autoHiddenFilterIds = useMemo(() => {
+    if (!report || !usedParamNames) return new Set<number>()
+    const inContainers = new Set(containers.flatMap(c => c.childWidgetIds.flat()))
+    const ids = new Set<number>()
+    for (const w of report.widgets) {
+      if (w.widgetType !== 'FILTER') continue
+      const wid = w.id ?? w.widgetId
+      if (wid === undefined || inContainers.has(wid)) continue // skip filters inside containers
+      try {
+        const cc = JSON.parse(w.chartConfig || '{}') as Record<string, unknown>
+        const col = cc.filterColumn as string | undefined
+        if (col && !usedParamNames.has(col)) ids.add(wid)
+      } catch { /* ignore */ }
+    }
+    return ids
+  }, [report, usedParamNames, containers])
 
   if (loading) return <LoadingSpinner />
   if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
@@ -405,11 +437,11 @@ export default function ReportViewerPage() {
 
             {/* Flat grid for widgets not in any container */}
             {renderResult.widgets.filter(w =>
-              !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId)
+              !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId)
             ).length > 0 && (
               <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
                 {renderResult.widgets
-                  .filter(w => !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId))
+                  .filter(w => !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId))
                   .map((w) => {
                     const pos = parsePosition(w.position)
                     const x = Math.max(0, Number(pos.x) || 0)

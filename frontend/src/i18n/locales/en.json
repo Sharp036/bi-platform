@@ -84,6 +84,7 @@
   "auth.password_min_length": "New password must be at least 6 characters",
   "auth.password_changed": "Password changed successfully",
   "auth.password_change_failed": "Failed to change password",
+  "auth.session_expired": "Session expired. Please sign in again.",
   "header.search_placeholder": "Search... (Ctrl+K)",
   "header.searching": "Searching...",
   "header.no_results_for": "No results for \"{{query}}\"",
