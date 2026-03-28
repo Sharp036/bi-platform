@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { DesignerWidget } from '@/store/useDesignerStore'
@@ -6,7 +6,7 @@ import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
-import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown } from 'lucide-react'
+import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
@@ -308,6 +308,14 @@ export default function PropertyPanel() {
                 <p className="text-[10px] text-slate-400 mt-1">{t('designer.no_data_source_hint')}</p>
               )}
             </Field>
+
+            {/* ── Param Mapping ── */}
+            <ParamMappingEditor
+              mapping={widget.paramMapping}
+              onChange={(pm) => update({ paramMapping: pm })}
+              parameters={parameters}
+              widgets={widgets}
+            />
 
             {/* ── CHART Config ── */}
             {widget.widgetType === 'CHART' && (() => {
@@ -825,6 +833,100 @@ export default function PropertyPanel() {
           />
         </Field>
       )}
+    </div>
+  )
+}
+
+function ParamMappingEditor({
+  mapping, onChange, parameters, widgets,
+}: {
+  mapping: Record<string, string>
+  onChange: (m: Record<string, string>) => void
+  parameters: Array<{ name: string; label: string }>
+  widgets: DesignerWidget[]
+}) {
+  const { t } = useTranslation()
+  const entries = Object.entries(mapping)
+
+  // Suggest report-param names: explicit parameters + filterColumn from all FILTER widgets
+  const reportParamNames = useMemo(() => {
+    const names = new Set<string>()
+    parameters.forEach(p => names.add(p.name))
+    widgets.forEach(w => {
+      if (w.widgetType === 'FILTER') {
+        const col = (w.chartConfig as Record<string, unknown>).filterColumn as string | undefined
+        if (col) names.add(col)
+      }
+    })
+    return [...names].sort()
+  }, [parameters, widgets])
+
+  const handleAdd = () => onChange({ ...mapping, '': '' })
+  const handleRemove = (key: string) => {
+    const next = { ...mapping }
+    delete next[key]
+    onChange(next)
+  }
+  const handleChangeKey = (oldKey: string, newKey: string) => {
+    // Rebuild to preserve order
+    const next: Record<string, string> = {}
+    for (const [k, v] of entries) {
+      next[k === oldKey ? newKey : k] = v
+    }
+    onChange(next)
+  }
+  const handleChangeValue = (key: string, newVal: string) => {
+    onChange({ ...mapping, [key]: newVal })
+  }
+
+  return (
+    <div className="border border-dashed border-violet-300 dark:border-violet-700 rounded-lg p-2.5 bg-violet-50/50 dark:bg-violet-900/10">
+    <Field label={t('designer.param_mapping')}>
+      <p className="text-[10px] text-slate-400 mb-2">{t('designer.param_mapping_hint')}</p>
+      {entries.length > 0 && (
+        <div className="space-y-1.5 mb-2">
+          {entries.map(([key, val], i) => (
+            <div key={i} className="flex items-center gap-1">
+              <input
+                value={key}
+                onChange={e => handleChangeKey(key, e.target.value)}
+                placeholder={t('designer.param_mapping_query_param')}
+                className="input text-xs py-0.5 flex-1 min-w-0"
+              />
+              <span className="text-[10px] text-slate-400">{'->'}</span>
+              <select
+                value={reportParamNames.includes(val) ? val : '__custom__'}
+                onChange={e => {
+                  if (e.target.value === '__custom__') return
+                  handleChangeValue(key, e.target.value)
+                }}
+                className="input text-xs py-0.5 flex-1 min-w-0"
+              >
+                {!reportParamNames.includes(val) && val && (
+                  <option value="__custom__">{val}</option>
+                )}
+                <option value="">{t('designer.param_mapping_report_param')}</option>
+                {reportParamNames.map((n: string) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+              <input
+                value={val}
+                onChange={e => handleChangeValue(key, e.target.value)}
+                placeholder={t('designer.param_mapping_report_param')}
+                className="input text-xs py-0.5 flex-1 min-w-0"
+              />
+              <button onClick={() => handleRemove(key)} className="btn-ghost p-0.5 text-red-400 hover:text-red-500 flex-shrink-0">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <button onClick={handleAdd} className="btn-ghost text-[11px] gap-1 text-brand-500">
+        <Plus className="w-3 h-3" /> {t('designer.param_mapping_add')}
+      </button>
+    </Field>
     </div>
   )
 }

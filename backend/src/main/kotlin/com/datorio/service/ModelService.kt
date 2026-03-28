@@ -247,6 +247,117 @@ class ModelService(
     }
 
     // ═══════════════════════════════════════════
+    //  Export / Import
+    // ═══════════════════════════════════════════
+
+    @Transactional(readOnly = true)
+    fun exportModel(modelId: Long): ModelExportConfig {
+        val model = modelRepo.findById(modelId)
+            .orElseThrow { NoSuchElementException("Model not found: $modelId") }
+        val tables = tableRepo.findByModelIdOrderBySortOrder(modelId)
+        val allFields = fieldRepo.findByModelId(modelId)
+        val fieldsByTable = allFields.groupBy { it.modelTableId }
+        val relationships = relationshipRepo.findByModelId(modelId)
+        val tableAliases = tables.associate { it.id to it.alias }
+        val dsName = dataSourceRepo.findById(model.datasourceId).map { it.name }.orElse(null)
+
+        return ModelExportConfig(
+            name = model.name,
+            description = model.description,
+            datasourceName = dsName,
+            config = model.config,
+            tables = tables.map { t ->
+                ModelTableExport(
+                    tableSchema = t.tableSchema, tableName = t.tableName,
+                    alias = t.alias, label = t.label, description = t.description,
+                    isPrimary = t.isPrimary, sqlExpression = t.sqlExpression,
+                    sortOrder = t.sortOrder,
+                    fields = (fieldsByTable[t.id] ?: emptyList()).sortedBy { it.sortOrder }.map { f ->
+                        ModelFieldExport(
+                            columnName = f.columnName, fieldRole = f.fieldRole,
+                            label = f.label, description = f.description,
+                            dataType = f.dataType, aggregation = f.aggregation,
+                            expression = f.expression, format = f.format,
+                            hidden = f.hidden, sortOrder = f.sortOrder
+                        )
+                    }
+                )
+            },
+            relationships = relationships.map { r ->
+                ModelRelationshipExport(
+                    leftTableAlias = tableAliases[r.leftTableId] ?: "",
+                    leftColumn = r.leftColumn,
+                    rightTableAlias = tableAliases[r.rightTableId] ?: "",
+                    rightColumn = r.rightColumn,
+                    joinType = r.joinType, label = r.label,
+                    isActive = r.isActive
+                )
+            }
+        )
+    }
+
+    @Transactional
+    fun importModel(userId: Long, req: ImportModelRequest): ImportModelResult {
+        val cfg = req.config
+        val modelName = req.name ?: cfg.name
+
+        dataSourceRepo.findById(req.datasourceId)
+            .orElseThrow { NoSuchElementException("DataSource not found: ${req.datasourceId}") }
+
+        val model = modelRepo.save(DataModel(
+            name = modelName, description = cfg.description,
+            datasourceId = req.datasourceId, ownerId = userId,
+            config = cfg.config
+        ))
+
+        val aliasToTableId = mutableMapOf<String, Long>()
+        var totalFields = 0
+
+        for (t in cfg.tables) {
+            val table = tableRepo.save(ModelTable(
+                modelId = model.id, tableSchema = t.tableSchema,
+                tableName = t.tableName, alias = t.alias,
+                label = t.label, description = t.description,
+                isPrimary = t.isPrimary, sqlExpression = t.sqlExpression,
+                sortOrder = t.sortOrder
+            ))
+            aliasToTableId[t.alias] = table.id
+
+            for (f in t.fields) {
+                fieldRepo.save(ModelField(
+                    modelTableId = table.id,
+                    columnName = f.columnName, fieldRole = f.fieldRole,
+                    label = f.label, description = f.description,
+                    dataType = f.dataType, aggregation = f.aggregation,
+                    expression = f.expression, format = f.format,
+                    hidden = f.hidden, sortOrder = f.sortOrder
+                ))
+                totalFields++
+            }
+        }
+
+        var relCount = 0
+        for (r in cfg.relationships) {
+            val leftId = aliasToTableId[r.leftTableAlias] ?: continue
+            val rightId = aliasToTableId[r.rightTableAlias] ?: continue
+            relationshipRepo.save(ModelRelationship(
+                modelId = model.id,
+                leftTableId = leftId, leftColumn = r.leftColumn,
+                rightTableId = rightId, rightColumn = r.rightColumn,
+                joinType = r.joinType, label = r.label,
+                isActive = r.isActive
+            ))
+            relCount++
+        }
+
+        return ImportModelResult(
+            modelId = model.id, name = modelName,
+            tableCount = cfg.tables.size, fieldCount = totalFields,
+            relationshipCount = relCount
+        )
+    }
+
+    // ═══════════════════════════════════════════
     //  Explore: Generate SQL and Execute
     // ═══════════════════════════════════════════
 

@@ -102,6 +102,19 @@ class ModelController(
         return ResponseEntity.noContent().build()
     }
 
+    // ─── Export / Import ───
+
+    @GetMapping("/models/{id}/export")
+    fun exportModel(@PathVariable id: Long): ResponseEntity<ModelExportConfig> =
+        ResponseEntity.ok(modelService.exportModel(id))
+
+    @PostMapping("/models/import")
+    fun importModel(
+        @Valid @RequestBody request: ImportModelRequest,
+        @AuthenticationPrincipal user: UserDetails
+    ): ResponseEntity<ImportModelResult> =
+        ResponseEntity.ok(modelService.importModel(getUserId(user), request))
+
     // ─── Auto-Import ───
 
     @PostMapping("/models/{modelId}/auto-import")

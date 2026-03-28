@@ -247,7 +247,43 @@ function WidgetBlock({
   const outerRef = useRef<HTMLDivElement>(null)
   const [dragPos, setDragPos] = useState<typeof widget.position | null>(null)
 
-  const startDrag = useCallback((e: React.MouseEvent, mode: 'move' | 'resize') => {
+  type DragMode = 'move' | 'n' | 's' | 'e' | 'w' | 'nw' | 'ne' | 'sw' | 'se'
+
+  const calcPos = (startPos: typeof widget.position, dCol: number, dRow: number, mode: DragMode) => {
+    if (mode === 'move') {
+      return {
+        ...startPos,
+        x: Math.max(0, Math.min(COLS - startPos.w, startPos.x + dCol)),
+        y: Math.max(0, startPos.y + dRow),
+      }
+    }
+    const resizeN = mode === 'n' || mode === 'nw' || mode === 'ne'
+    const resizeS = mode === 's' || mode === 'sw' || mode === 'se'
+    const resizeW = mode === 'w' || mode === 'nw' || mode === 'sw'
+    const resizeE = mode === 'e' || mode === 'ne' || mode === 'se'
+
+    let { x, y, w, h } = startPos
+
+    if (resizeE) w = Math.max(1, Math.min(COLS - x, w + dCol))
+    if (resizeS) h = Math.max(1, h + dRow)
+
+    if (resizeW) {
+      const maxLeft = Math.min(dCol, w - 1)  // can't shrink below 1
+      const newX = Math.max(0, x + maxLeft)
+      w = w - (newX - x)
+      x = newX
+    }
+    if (resizeN) {
+      const maxUp = Math.min(dRow, h - 1)
+      const newY = Math.max(0, y + maxUp)
+      h = h - (newY - y)
+      y = newY
+    }
+
+    return { x, y, w, h }
+  }
+
+  const startDrag = useCallback((e: React.MouseEvent, mode: DragMode) => {
     e.preventDefault()
     e.stopPropagation()
     const parent = outerRef.current?.parentElement
@@ -260,19 +296,7 @@ function WidgetBlock({
     const onMove = (me: MouseEvent) => {
       const dCol = Math.round((me.clientX - startX) / colPx)
       const dRow = Math.round((me.clientY - startY) / ROW_HEIGHT)
-      if (mode === 'move') {
-        setDragPos({
-          ...startPos,
-          x: Math.max(0, Math.min(COLS - startPos.w, startPos.x + dCol)),
-          y: Math.max(0, startPos.y + dRow),
-        })
-      } else {
-        setDragPos({
-          ...startPos,
-          w: Math.max(1, Math.min(COLS - startPos.x, startPos.w + dCol)),
-          h: Math.max(1, startPos.h + dRow),
-        })
-      }
+      setDragPos(calcPos(startPos, dCol, dRow, mode))
     }
 
     const onUp = (ue: MouseEvent) => {
@@ -280,10 +304,7 @@ function WidgetBlock({
       document.removeEventListener('mouseup', onUp)
       const dCol = Math.round((ue.clientX - startX) / colPx)
       const dRow = Math.round((ue.clientY - startY) / ROW_HEIGHT)
-      const finalPos = mode === 'move'
-        ? { ...startPos, x: Math.max(0, Math.min(COLS - startPos.w, startPos.x + dCol)), y: Math.max(0, startPos.y + dRow) }
-        : { ...startPos, w: Math.max(1, Math.min(COLS - startPos.x, startPos.w + dCol)), h: Math.max(1, startPos.h + dRow) }
-      moveWidget(widget.id, finalPos)
+      moveWidget(widget.id, calcPos(startPos, dCol, dRow, mode))
       setDragPos(null)
     }
 
@@ -402,19 +423,21 @@ function WidgetBlock({
   })() : null
 
   return (
-    <div ref={outerRef} style={style} onClick={(e) => { e.stopPropagation(); onSelect(widget.id) }}>
+    <div ref={outerRef} style={style} className="relative" onClick={(e) => { e.stopPropagation(); onSelect(widget.id) }}>
       <div className={clsx(
-        'h-full rounded-lg border-2 transition-all cursor-pointer overflow-hidden flex flex-col relative',
+        'h-full rounded-lg border-2 transition-all cursor-pointer overflow-hidden flex flex-col',
         isSelected
           ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 shadow-lg shadow-brand-200/50 dark:shadow-brand-900/30'
           : 'border-surface-200 dark:border-dark-surface-100 bg-white dark:bg-dark-surface-50 hover:border-brand-300 dark:hover:border-brand-700',
         !widget.isVisible && 'opacity-40',
       )}>
-        {/* Header */}
-        <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-surface-100 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/50 flex-shrink-0">
+        {/* Header (draggable for move) */}
+        <div
+          className="flex items-center gap-1.5 px-2 py-1.5 border-b border-surface-100 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/50 flex-shrink-0 cursor-grab active:cursor-grabbing"
+          onMouseDown={!previewMode ? (e) => startDrag(e, 'move') : undefined}
+        >
           <GripVertical
-            className="w-3 h-3 text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing flex-shrink-0"
-            onMouseDown={!previewMode ? (e) => startDrag(e, 'move') : undefined}
+            className="w-3 h-3 text-slate-400 dark:text-slate-500 flex-shrink-0"
           />
           <Icon className="w-3.5 h-3.5 text-brand-500" />
           <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
@@ -453,7 +476,7 @@ function WidgetBlock({
               <p className="text-[10px] text-slate-400 mb-1">{filterPreview.column}</p>
               {filterPreview.filterType === 'select' || filterPreview.filterType === 'multi_select' ? (
                 <select className="input text-xs w-full" disabled>
-                  <option>— {filterPreview.values.length} {t('designer.filter_values')} —</option>
+                  <option>-- {filterPreview.values.length} {t('designer.filter_values')} --</option>
                   {filterPreview.values.map(v => <option key={v}>{v}</option>)}
                 </select>
               ) : filterPreview.filterType === 'text' ? (
@@ -494,17 +517,23 @@ function WidgetBlock({
             </div>
           )}
         </div>
-
-        {/* Resize handle */}
-        {!previewMode && (
-          <div
-            className="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize flex items-end justify-end p-1"
-            onMouseDown={(e) => startDrag(e, 'resize')}
-          >
-            <div className="w-2.5 h-2.5 border-b-2 border-r-2 border-slate-400 dark:border-slate-500 rounded-br-sm" />
-          </div>
-        )}
       </div>
+
+      {/* Resize handles: on the OUTER div so overflow-hidden doesn't clip them */}
+      {!previewMode && (<>
+        {/* Edges -- 6px wide/tall invisible strips along each border */}
+        <div className="absolute top-0 left-3 right-3 h-[6px] cursor-n-resize z-10" onMouseDown={(e) => startDrag(e, 'n')} />
+        <div className="absolute bottom-0 left-3 right-3 h-[6px] cursor-s-resize z-10" onMouseDown={(e) => startDrag(e, 's')} />
+        <div className="absolute top-3 bottom-3 left-0 w-[6px] cursor-w-resize z-10" onMouseDown={(e) => startDrag(e, 'w')} />
+        <div className="absolute top-3 bottom-3 right-0 w-[6px] cursor-e-resize z-10" onMouseDown={(e) => startDrag(e, 'e')} />
+        {/* Corners -- 10x10px squares at each corner */}
+        <div className="absolute top-0 left-0 w-[10px] h-[10px] cursor-nw-resize z-20" onMouseDown={(e) => startDrag(e, 'nw')} />
+        <div className="absolute top-0 right-0 w-[10px] h-[10px] cursor-ne-resize z-20" onMouseDown={(e) => startDrag(e, 'ne')} />
+        <div className="absolute bottom-0 left-0 w-[10px] h-[10px] cursor-sw-resize z-20" onMouseDown={(e) => startDrag(e, 'sw')} />
+        <div className="absolute bottom-0 right-0 w-[10px] h-[10px] cursor-se-resize z-20" onMouseDown={(e) => startDrag(e, 'se')}>
+          <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 border-b-2 border-r-2 border-slate-400 dark:border-slate-500 rounded-br-sm pointer-events-none" />
+        </div>
+      </>)}
     </div>
   )
 }

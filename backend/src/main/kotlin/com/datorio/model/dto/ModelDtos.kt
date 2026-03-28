@@ -180,3 +180,66 @@ data class AutoImportRequest(
     val tableSchema: String? = null,
     val detectRelationships: Boolean = true
 )
+
+// ═══════════════════════════════════════════
+//  Model Export / Import
+// ═══════════════════════════════════════════
+
+data class ModelExportConfig(
+    val formatVersion: Int = 1,
+    val name: String,
+    val description: String? = null,
+    val datasourceName: String? = null,
+    val config: String = "{}",
+    val tables: List<ModelTableExport> = emptyList(),
+    val relationships: List<ModelRelationshipExport> = emptyList()
+)
+
+data class ModelTableExport(
+    val tableSchema: String? = null,
+    val tableName: String,
+    val alias: String,
+    val label: String? = null,
+    val description: String? = null,
+    val isPrimary: Boolean = false,
+    val sqlExpression: String? = null,
+    val sortOrder: Int = 0,
+    val fields: List<ModelFieldExport> = emptyList()
+)
+
+data class ModelFieldExport(
+    val columnName: String? = null,
+    val fieldRole: String = "DIMENSION",
+    val label: String,
+    val description: String? = null,
+    val dataType: String? = null,
+    val aggregation: String? = null,
+    val expression: String? = null,
+    val format: String? = null,
+    val hidden: Boolean = false,
+    val sortOrder: Int = 0
+)
+
+data class ModelRelationshipExport(
+    val leftTableAlias: String,
+    val leftColumn: String,
+    val rightTableAlias: String,
+    val rightColumn: String,
+    val joinType: String = "LEFT",
+    val label: String? = null,
+    val isActive: Boolean = true
+)
+
+data class ImportModelRequest(
+    val config: ModelExportConfig,
+    val name: String? = null,
+    val datasourceId: Long
+)
+
+data class ImportModelResult(
+    val modelId: Long,
+    val name: String,
+    val tableCount: Int,
+    val fieldCount: Int,
+    val relationshipCount: Int
+)

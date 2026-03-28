@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { modelingApi, type DataModelItem } from '@/api/modeling'
+import { modelingApi, type DataModelItem, type ModelExportConfig } from '@/api/modeling'
 import { datasourceApi } from '@/api/datasources'
 import type { DataSource } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { Boxes, Plus, Trash2, X, Pencil, Globe, Lock } from 'lucide-react'
+import { Boxes, Plus, Trash2, X, Pencil, Globe, Lock, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function ModelListPage() {
@@ -51,6 +51,24 @@ export default function ModelListPage() {
     catch { toast.error(t('common.failed_to_delete')) }
   }
 
+  const handleImportJson = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file || !dsId) return
+      try {
+        const text = await file.text()
+        const config = JSON.parse(text) as ModelExportConfig
+        const result = await modelingApi.importModel({ config, datasourceId: dsId })
+        toast.success(`Imported "${result.name}": ${result.tableCount} tables, ${result.fieldCount} fields, ${result.relationshipCount} joins`)
+        navigate(`/models/${result.modelId}`)
+      } catch { toast.error(t('common.operation_failed')) }
+    }
+    input.click()
+  }
+
   const handleTogglePublish = async (m: DataModelItem) => {
     try {
       await modelingApi.updateModel(m.id, { isPublished: !m.isPublished })
@@ -65,7 +83,10 @@ export default function ModelListPage() {
     <div className="max-w-[900px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('models.title')}</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary"><Plus className="w-4 h-4" /> {t('models.new_model')}</button>
+        <div className="flex gap-2">
+          <button onClick={handleImportJson} className="btn-secondary"><Upload className="w-4 h-4" /> {t('common.import')}</button>
+          <button onClick={() => setShowForm(true)} className="btn-primary"><Plus className="w-4 h-4" /> {t('models.new_model')}</button>
+        </div>
       </div>
 
       {/* Create modal */}
