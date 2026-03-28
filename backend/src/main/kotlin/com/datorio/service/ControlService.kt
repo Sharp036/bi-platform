@@ -143,10 +143,9 @@ class ControlService(
 
         var query = control.optionsQuery!!
 
-        // Substitute cascade parent values
-        if (!control.cascadeParent.isNullOrBlank()) {
-            val parentVal = parentValues[control.cascadeParent!!] ?: ""
-            query = query.replace(":${control.cascadeParent}", "'${parentVal.replace("'", "''")}'")
+        // Substitute all parent values (direct parent + ancestors up the cascade chain)
+        for ((paramName, paramVal) in parentValues) {
+            query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
         }
 
         val threshold = 1000
