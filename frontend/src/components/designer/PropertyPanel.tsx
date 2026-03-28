@@ -58,6 +58,59 @@ export default function PropertyPanel() {
     if (hasDataSource) loadColumns()
   }, [selected]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-match SQL :params to report parameters and filter widget filterColumns
+  const autoMatchParamMapping = useCallback((w: DesignerWidget) => {
+    // Get SQL text
+    let sql = ''
+    if (w.datasourceId && w.rawSql?.trim()) {
+      sql = w.rawSql
+    } else if (w.queryId) {
+      const q = queries.find(q => q.id === w.queryId)
+      sql = (q as { sqlText?: string } | undefined)?.sqlText || ''
+    }
+    if (!sql) return
+
+    // Extract :param_name from SQL
+    const re = /(^|[^:]):([a-zA-Z_][a-zA-Z0-9_]*)/g
+    const sqlParams = new Set<string>()
+    let m: RegExpExecArray | null
+    while ((m = re.exec(sql)) !== null) {
+      const name = (m[2] || '').trim()
+      if (name) sqlParams.add(name)
+    }
+    if (sqlParams.size === 0) return
+
+    // Collect report-level param names: explicit parameters + filterColumn from FILTER widgets
+    const reportParamNames = new Set<string>()
+    parameters.forEach(p => reportParamNames.add(p.name))
+    widgets.forEach(ww => {
+      if (ww.widgetType === 'FILTER') {
+        const col = (ww.chartConfig as Record<string, unknown>).filterColumn as string | undefined
+        if (col) reportParamNames.add(col)
+      }
+    })
+
+    // Build new mapping: keep existing manual entries, add auto-matched ones
+    const current = { ...w.paramMapping }
+    let changed = false
+    for (const sqlParam of sqlParams) {
+      // Skip if already mapped (either as key or as value)
+      const alreadyMappedAsKey = sqlParam in current
+      const alreadyMappedAsValue = Object.values(current).includes(sqlParam)
+      if (alreadyMappedAsKey || alreadyMappedAsValue) continue
+
+      // Match: SQL param name === report param name
+      if (reportParamNames.has(sqlParam)) {
+        current[sqlParam] = sqlParam
+        changed = true
+      }
+    }
+
+    if (changed) {
+      updateWidget(w.id, { paramMapping: current })
+    }
+  }, [parameters, widgets, queries, updateWidget])
+
   const loadColumns = useCallback(async () => {
     if (!widget) return
     setLoadingCols(true)
@@ -138,6 +191,9 @@ export default function PropertyPanel() {
           updateWidget(widget.id, { chartConfig: nextCfg })
         }
       }
+
+      // Auto-match paramMapping: extract :param from SQL, match to report params / filterColumns
+      autoMatchParamMapping(widget)
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       toast.error(msg || t('common.operation_failed'))
@@ -531,6 +587,14 @@ export default function PropertyPanel() {
                     </label>
                     {!!cc.showDataLabels && (
                       <div className="mt-2 space-y-2">
+                        <select
+                          value={cc.dataLabelPosition as string || 'top'}
+                          onChange={e => update({ chartConfig: { ...cc, dataLabelPosition: e.target.value } })}
+                          className="input text-sm"
+                        >
+                          <option value="top">{t('designer.data_label_position.top')}</option>
+                          <option value="inline">{t('designer.data_label_position.inline')}</option>
+                        </select>
                         <select
                           value={cc.dataLabelMode as string || 'all'}
                           onChange={e => update({ chartConfig: { ...cc, dataLabelMode: e.target.value } })}

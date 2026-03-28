@@ -8,7 +8,7 @@ import { buildRichTooltip } from '@/components/charts/buildRichTooltip'
 import type { AnnotationItem, TooltipConfigItem } from '@/api/visualization'
 import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
 import { useTranslation } from 'react-i18next'
-import { createCollisionFreeLayout } from '@/components/charts/labelLayout'
+import { createCollisionFreeLayout, createInlineLabelLayout } from '@/components/charts/labelLayout'
 import type { LabelPlacement } from '@/components/charts/labelLayout'
 
 function defaultAxisDecimals(format: string): number {
@@ -319,6 +319,8 @@ export default function MultiLayerChart({
     const showDataLabels = !!config.showDataLabels
     const dataLabelMode = (config.dataLabelMode as string) || 'all'
     const dataLabelCount = Number(config.dataLabelCount) || 3
+    const dataLabelPosition = (config.dataLabelPosition as string) || 'top'
+    const isInlineLabels = dataLabelPosition === 'inline'
     const dataLabelTopSpacingMode = (config.dataLabelTopSpacingMode as string) || 'dynamic'
     const dataLabelSpread = !!config.dataLabelSpread
     const dataLabelRotation = Number(config.dataLabelRotation) || 0
@@ -367,7 +369,7 @@ export default function MultiLayerChart({
             z: 12,
             ...(showDataLabels ? {
               label: {
-                show: true, position: 'top', distance: 8,
+                show: true, position: 'top', distance: isInlineLabels ? 6 : 8,
                 rotate: dataLabelRotation || undefined,
                 fontSize: 10,
                 formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
@@ -379,7 +381,9 @@ export default function MultiLayerChart({
                   backgroundColor: labelBg,
                 } : {}),
               },
-              labelLine: { show: true, lineStyle: { color: seriesColor, width: 1.5, opacity: 0.95 } },
+              ...(!isInlineLabels ? {
+                labelLine: { show: true, lineStyle: { color: seriesColor, width: 1.5, opacity: 0.95 } },
+              } : {}),
             } : {}),
           })
         }
@@ -506,7 +510,8 @@ export default function MultiLayerChart({
       dataLabelCount
     )
     const fixedLabelTopPad = showDataLabels && !isPie ? 120 : 0
-    const labelTopPad = dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
+    const labelTopPad = isInlineLabels ? 0
+      : dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
     const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
     // containLabel: true already accounts for x-axis label height, so gridBottom
     // only needs space for the legend (when at bottom) plus a small gap.
@@ -550,7 +555,9 @@ export default function MultiLayerChart({
       } : {}),
       series,
       ...(showDataLabels && !isPie ? {
-        labelLayout: createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread),
+        labelLayout: isInlineLabels
+          ? createInlineLabelLayout(getChartWidth)
+          : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread),
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),
