@@ -90,8 +90,6 @@ class ControlService(
             existing.controlType = request.controlType
             existing.datasourceId = request.datasourceId
             existing.optionsQuery = request.optionsQuery
-            existing.cascadeParent = request.cascadeParent
-            existing.cascadeField = request.cascadeField
             existing.sliderMin = request.sliderMin
             existing.sliderMax = request.sliderMax
             existing.sliderStep = request.sliderStep
@@ -105,8 +103,6 @@ class ControlService(
                 controlType = request.controlType,
                 datasourceId = request.datasourceId,
                 optionsQuery = request.optionsQuery,
-                cascadeParent = request.cascadeParent,
-                cascadeField = request.cascadeField,
                 sliderMin = request.sliderMin,
                 sliderMax = request.sliderMax,
                 sliderStep = request.sliderStep,
@@ -230,8 +226,7 @@ class ControlService(
         return ParameterControlResponse(
             id = id, reportId = reportId, parameterName = parameterName,
             controlType = controlType, datasourceId = datasourceId,
-            optionsQuery = optionsQuery, cascadeParent = cascadeParent,
-            cascadeField = cascadeField, sliderMin = sliderMin,
+            optionsQuery = optionsQuery, sliderMin = sliderMin,
             sliderMax = sliderMax, sliderStep = sliderStep,
             config = configMap, sortOrder = sortOrder, createdAt = createdAt
         )

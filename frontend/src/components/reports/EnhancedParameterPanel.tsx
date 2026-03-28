@@ -80,29 +80,17 @@ export default function EnhancedParameterPanel({
     } catch { /* ignore */ }
   }, [reportId])
 
-  // Collect all ancestor values for a parameter (walk up the cascade chain)
-  const collectAncestorValues = useCallback((paramName: string, vals: Record<string, string>) => {
+  // Collect all other parameter values (so any :param in the options SQL gets substituted)
+  const collectParentValues = useCallback((paramName: string, vals: Record<string, string>) => {
     const result: Record<string, string> = {}
-    let current = paramName
-    for (let depth = 0; depth < 10; depth++) {
-      const ctrl = controls.find(c => c.parameterName === current)
-      if (!ctrl?.cascadeParent) break
-      const parentVal = vals[ctrl.cascadeParent]
-      if (parentVal) result[ctrl.cascadeParent] = parentVal
-      current = ctrl.cascadeParent
+    for (const [k, v] of Object.entries(vals)) {
+      if (k !== paramName && v) result[k] = v
     }
     return result
-  }, [controls])
+  }, [])
 
-  // Load initial options for data-driven dropdowns
-  useEffect(() => {
-    controls.forEach(c => {
-      if (c.optionsQuery && c.datasourceId) {
-        const parentValues = collectAncestorValues(c.parameterName, values)
-        loadOptions(c.parameterName, parentValues)
-      }
-    })
-  }, [controls, loadOptions])
+  // Initialize values first, then load options (so cascade parents have values)
+  const [valuesReady, setValuesReady] = useState(false)
 
   useEffect(() => {
     const init: Record<string, string> = {}
@@ -115,18 +103,35 @@ export default function EnhancedParameterPanel({
       }
     })
     setValues(init)
+    setValuesReady(true)
   }, [parameters])
 
-  // Handle cascading: when parent changes, reload child options
+  // Load initial options for data-driven dropdowns (after values are initialized)
+  useEffect(() => {
+    if (!valuesReady) return
+    controls.forEach(c => {
+      if (c.optionsQuery && c.datasourceId) {
+        const parentValues = collectParentValues(c.parameterName, values)
+        loadOptions(c.parameterName, parentValues)
+      }
+    })
+  }, [controls, loadOptions, valuesReady])
+
+  // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it
   const handleChange = (paramName: string, value: string) => {
     setValues(prev => {
       const next = { ...prev, [paramName]: value }
+      const pattern = new RegExp(`:${paramName}(?![a-zA-Z0-9_])`)
 
-      // Find dependent children and reset + reload them
-      controls.filter(c => c.cascadeParent === paramName).forEach(child => {
-        next[child.parameterName] = ''
-        const parentVals = collectAncestorValues(child.parameterName, next)
-        loadOptions(child.parameterName, parentVals)
+      controls.forEach(c => {
+        if (!c.optionsQuery || !c.datasourceId) return
+        if (c.parameterName === paramName) return
+        // Reload only if this control's SQL references the changed parameter
+        if (!pattern.test(c.optionsQuery)) return
+        // Reset value if it may become stale, then reload options
+        next[c.parameterName] = ''
+        const parentVals = collectParentValues(c.parameterName, next)
+        loadOptions(c.parameterName, parentVals)
       })
 
       return next
@@ -192,6 +197,7 @@ export default function EnhancedParameterPanel({
                   paramName={p.name}
                   reportId={reportId}
                   columnName={columnByParam[p.name]}
+                  initialOptions={dynamicOptions[p.name] || []}
                   onChange={v => handleChange(p.name, v)}
                 />
               ) : controlType === 'DROPDOWN' || p.paramType === 'SELECT' ? (
@@ -252,28 +258,39 @@ export default function EnhancedParameterPanel({
 //  Sub-components
 // ═══════════════════════════════════════════
 
-function TypeaheadControl({ value, paramName, reportId, columnName, onChange }: {
+function TypeaheadControl({ value, paramName, reportId, columnName, initialOptions, onChange }: {
   value: string
   paramName: string
   reportId: number
   columnName: string
+  initialOptions?: string[]
   onChange: (v: string) => void
 }) {
   const [query, setQuery] = useState(value)
-  const [options, setOptions] = useState<string[]>([])
+  const [options, setOptions] = useState<string[]>(initialOptions || [])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Update options when initialOptions change (e.g. after cascade reload)
+  useEffect(() => {
+    if (initialOptions) setOptions(initialOptions)
+  }, [initialOptions])
+
   const search = useCallback((q: string) => {
-    if (!q.trim()) { setOptions([]); setOpen(false); return }
+    if (!q.trim()) {
+      // Show initial options when input is cleared
+      setOptions(initialOptions || [])
+      setOpen((initialOptions || []).length > 0)
+      return
+    }
     setLoading(true)
     controlsApi.searchOptions(reportId, paramName, q, columnName)
       .then(res => { setOptions(res.options); setOpen(true) })
       .catch(() => setOptions([]))
       .finally(() => setLoading(false))
-  }, [reportId, paramName, columnName])
+  }, [reportId, paramName, columnName, initialOptions])
 
   const handleInput = (q: string) => {
     setQuery(q)
@@ -307,7 +324,7 @@ function TypeaheadControl({ value, paramName, reportId, columnName, onChange }: 
       <input
         value={query}
         onChange={e => handleInput(e.target.value)}
-        onFocus={() => { if (query.trim()) search(query) }}
+        onFocus={() => { if (query.trim()) search(query); else if (options.length > 0) setOpen(true) }}
         className="input text-sm w-full"
         placeholder="..."
         autoComplete="off"
