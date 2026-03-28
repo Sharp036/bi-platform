@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { controlsApi, ParameterControlConfig } from '@/api/controls'
 import { datasourceApi } from '@/api/datasources'
+import { reportApi } from '@/api/reports'
 import type { ReportParameter } from '@/types'
 import type { DataSource } from '@/types'
 import { Settings, Trash2 } from 'lucide-react'
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast'
 interface Props {
   reportId: number
   parameters: ReportParameter[]
+  onParameterDefaultChange?: (paramName: string, value: string) => void
 }
 
 const CONTROL_TYPES = [
@@ -21,10 +23,21 @@ const CONTROL_TYPES = [
   { value: 'MULTI_CHECKBOX', labelKey: 'interactive.control.multi_checkbox' },
 ]
 
-export default function ParameterControlConfigPanel({ reportId, parameters }: Props) {
+export default function ParameterControlConfigPanel({ reportId, parameters, onParameterDefaultChange }: Props) {
   const { t } = useTranslation()
   const [controls, setControls] = useState<ParameterControlConfig[]>([])
   const [datasources, setDatasources] = useState<DataSource[]>([])
+  // Default value picker state: { paramName, options, hasMore, columnName, loading, open, query }
+  const [picker, setPicker] = useState<{
+    paramName: string
+    options: string[]
+    hasMore: boolean
+    columnName: string
+    loading: boolean
+    open: boolean
+    query: string
+  } | null>(null)
+  const pickerDebounceRef = useRef<ReturnType<typeof setTimeout>>()
 
   const load = () => {
     controlsApi.getParameterControls(reportId).then(setControls).catch(() => {})
@@ -66,6 +79,58 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
       toast.error(t('interactive.control.failed_remove'))
     }
   }
+
+  const openPicker = async (paramName: string) => {
+    setPicker({ paramName, options: [], hasMore: false, columnName: '', loading: true, open: true, query: '' })
+    try {
+      const res = await controlsApi.loadOptions(reportId, paramName)
+      setPicker(prev => prev ? {
+        ...prev,
+        options: res.options,
+        hasMore: res.hasMore ?? false,
+        columnName: res.columnName ?? '',
+        loading: false,
+      } : null)
+    } catch {
+      setPicker(null)
+      toast.error(t('interactive.control.failed_remove'))
+    }
+  }
+
+  const pickerSearch = useCallback((q: string) => {
+    if (!picker) return
+    setPicker(prev => prev ? { ...prev, query: q } : null)
+    if (!picker.hasMore) return  // filter client-side for small lists
+    clearTimeout(pickerDebounceRef.current)
+    pickerDebounceRef.current = setTimeout(async () => {
+      if (!picker.columnName) return
+      setPicker(prev => prev ? { ...prev, loading: true } : null)
+      try {
+        const res = await controlsApi.searchOptions(reportId, picker.paramName, q, picker.columnName)
+        setPicker(prev => prev ? { ...prev, options: res.options, loading: false } : null)
+      } catch {
+        setPicker(prev => prev ? { ...prev, loading: false } : null)
+      }
+    }, 300)
+  }, [picker, reportId])
+
+  const selectDefault = async (paramName: string, value: string) => {
+    try {
+      const updated = parameters.map(p =>
+        p.name === paramName ? { ...p, defaultValue: value } : p
+      )
+      await reportApi.setParameters(reportId, updated as unknown as Array<Record<string, unknown>>)
+      onParameterDefaultChange?.(paramName, value)
+      toast.success(t('interactive.control.saved'))
+    } catch {
+      toast.error(t('interactive.control.failed_save'))
+    }
+    setPicker(null)
+  }
+
+  const pickerVisible = picker?.hasMore
+    ? picker.options
+    : (picker?.options ?? []).filter(o => !picker?.query || o.toLowerCase().includes(picker.query.toLowerCase()))
 
   return (
     <div className="space-y-3">
@@ -161,6 +226,17 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
                         ))}
                       </select>
                     </div>
+                    {ctrl?.optionsQuery && ctrl?.datasourceId && (
+                      <div className="flex items-end">
+                        <button
+                          onClick={() => openPicker(p.name)}
+                          className="btn-secondary text-xs py-1 px-2"
+                        >
+                          {t('interactive.control.pick_default')}
+                          {p.defaultValue ? `: ${p.defaultValue}` : ''}
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -168,6 +244,44 @@ export default function ParameterControlConfigPanel({ reportId, parameters }: Pr
           )
         })}
       </div>
+
+      {/* Default value picker modal */}
+      {picker && picker.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setPicker(null)}>
+          <div className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-xl p-4 w-80 max-h-[70vh] flex flex-col"
+            onClick={e => e.stopPropagation()}>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+              {t('interactive.control.pick_default')}
+            </p>
+            <input
+              autoFocus
+              value={picker.query}
+              onChange={e => pickerSearch(e.target.value)}
+              placeholder="..."
+              className="input text-sm mb-2"
+            />
+            <div className="flex-1 overflow-y-auto space-y-0.5">
+              {picker.loading ? (
+                <p className="text-xs text-slate-400 p-2">...</p>
+              ) : pickerVisible.length === 0 ? (
+                <p className="text-xs text-slate-400 p-2">{t('common.no_results')}</p>
+              ) : (
+                pickerVisible.map(opt => (
+                  <button key={opt} onClick={() => selectDefault(picker.paramName, opt)}
+                    className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-surface-50 dark:hover:bg-dark-surface-100 truncate">
+                    {opt}
+                  </button>
+                ))
+              )}
+            </div>
+            <button onClick={() => setPicker(null)}
+              className="mt-2 text-xs text-slate-400 hover:text-slate-600 self-end">
+              {t('common.cancel')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

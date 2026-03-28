@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportParameter } from '@/types'
 import { controlsApi, ParameterControlConfig } from '@/api/controls'
@@ -58,6 +58,8 @@ export default function EnhancedParameterPanel({
   })
   const [controls, setControls] = useState<ParameterControlConfig[]>([])
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, string[]>>({})
+  const [hasMoreByParam, setHasMoreByParam] = useState<Record<string, boolean>>({})
+  const [columnByParam, setColumnByParam] = useState<Record<string, string>>({})
 
   // Load control configs
   useEffect(() => {
@@ -71,6 +73,10 @@ export default function EnhancedParameterPanel({
     try {
       const result = await controlsApi.loadOptions(reportId, paramName, parentValues)
       setDynamicOptions(prev => ({ ...prev, [paramName]: result.options }))
+      setHasMoreByParam(prev => ({ ...prev, [paramName]: result.hasMore ?? false }))
+      if (result.columnName) {
+        setColumnByParam(prev => ({ ...prev, [paramName]: result.columnName! }))
+      }
     } catch { /* ignore */ }
   }, [reportId])
 
@@ -165,6 +171,14 @@ export default function EnhancedParameterPanel({
                   options={options}
                   onChange={v => handleChange(p.name, v)}
                 />
+              ) : (controlType === 'DROPDOWN' || p.paramType === 'SELECT') && hasMoreByParam[p.name] && columnByParam[p.name] ? (
+                <TypeaheadControl
+                  value={values[p.name] || ''}
+                  paramName={p.name}
+                  reportId={reportId}
+                  columnName={columnByParam[p.name]}
+                  onChange={v => handleChange(p.name, v)}
+                />
               ) : controlType === 'DROPDOWN' || p.paramType === 'SELECT' ? (
                 <select
                   value={values[p.name] || ''}
@@ -222,6 +236,95 @@ export default function EnhancedParameterPanel({
 // ═══════════════════════════════════════════
 //  Sub-components
 // ═══════════════════════════════════════════
+
+function TypeaheadControl({ value, paramName, reportId, columnName, onChange }: {
+  value: string
+  paramName: string
+  reportId: number
+  columnName: string
+  onChange: (v: string) => void
+}) {
+  const [query, setQuery] = useState(value)
+  const [options, setOptions] = useState<string[]>([])
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const search = useCallback((q: string) => {
+    if (!q.trim()) { setOptions([]); setOpen(false); return }
+    setLoading(true)
+    controlsApi.searchOptions(reportId, paramName, q, columnName)
+      .then(res => { setOptions(res.options); setOpen(true) })
+      .catch(() => setOptions([]))
+      .finally(() => setLoading(false))
+  }, [reportId, paramName, columnName])
+
+  const handleInput = (q: string) => {
+    setQuery(q)
+    onChange(q)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => search(q), 300)
+  }
+
+  const handleSelect = (opt: string) => {
+    setQuery(opt)
+    onChange(opt)
+    setOpen(false)
+  }
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Sync value from outside (e.g. reset)
+  useEffect(() => { setQuery(value) }, [value])
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <input
+        value={query}
+        onChange={e => handleInput(e.target.value)}
+        onFocus={() => { if (query.trim()) search(query) }}
+        className="input text-sm w-full"
+        placeholder="..."
+        autoComplete="off"
+      />
+      {open && (loading || options.length > 0) && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-dark-surface-50 border border-surface-200 dark:border-dark-surface-100 rounded-lg shadow-lg max-h-52 overflow-y-auto">
+          {loading ? (
+            <div className="px-3 py-2 text-xs text-slate-400">...</div>
+          ) : (
+            <>
+              <button
+                onClick={() => handleSelect('')}
+                className="w-full text-left px-3 py-1.5 text-xs text-slate-400 hover:bg-surface-50 dark:hover:bg-dark-surface-100 border-b border-surface-100 dark:border-dark-surface-100"
+              >
+                -- все --
+              </button>
+              {options.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => handleSelect(opt)}
+                  className="w-full text-left px-3 py-1.5 text-sm hover:bg-surface-50 dark:hover:bg-dark-surface-100 truncate"
+                >
+                  {opt}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function SliderControl({ value, min, max, step, onChange }: {
   value: string; min: number; max: number; step: number; onChange: (v: string) => void

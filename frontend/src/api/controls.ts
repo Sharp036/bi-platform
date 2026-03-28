@@ -87,8 +87,14 @@ export const controlsApi = {
     api.delete(`/controls/parameters/${reportId}/${parameterName}`),
 
   loadOptions: (reportId: number, parameterName: string, parentValues?: Record<string, string>) =>
-    api.get<{ parameterName: string; options: string[] }>(
+    api.get<{ parameterName: string; options: string[]; hasMore: boolean; columnName: string | null }>(
       `/controls/parameters/${reportId}/${parameterName}/options`,
       { params: parentValues }
+    ).then(r => r.data),
+
+  searchOptions: (reportId: number, parameterName: string, q: string, column: string, limit = 50) =>
+    api.get<{ parameterName: string; options: string[]; hasMore: boolean; columnName: string | null }>(
+      `/controls/parameters/${reportId}/${parameterName}/search`,
+      { params: { q, column, limit } }
     ).then(r => r.data),
 }

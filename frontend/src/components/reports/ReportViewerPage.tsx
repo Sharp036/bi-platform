@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
@@ -67,6 +67,7 @@ export default function ReportViewerPage() {
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
 
   const [containers, setContainers] = useState<ContainerItem[]>([])
+  const [activeTabByContainer, setActiveTabByContainer] = useState<Record<number, number>>({})
 
   const [liveEnabled, setLiveEnabled] = useState(false)
   const { status: liveStatus, lastUpdate: liveLastUpdate, reconnect: liveReconnect } = useLiveData({
@@ -84,6 +85,7 @@ export default function ReportViewerPage() {
     ]).then(([r, c]) => {
         setReport(r)
         setContainers(c)
+        setActiveTabByContainer(Object.fromEntries(c.map(ct => [ct.id, ct.activeTab || 0])))
         const filterPanelLayout = getFilterPanelLayout(r.layout)
         setFilterPanelPosition(filterPanelLayout.position)
         setFilterPanelCollapsed(filterPanelLayout.collapsed)
@@ -228,6 +230,46 @@ export default function ReportViewerPage() {
     await renderWithParams(nextParams)
   }, [currentParams, renderWithParams])
 
+  // ── Visible widget IDs (used to filter parameter panel) ──────────────────────
+  const visibleWidgetIds = useMemo(() => {
+    const ids = new Set<number>()
+    const inContainers = new Set(containers.flatMap(c => c.childWidgetIds.flat()))
+    for (const c of containers) {
+      if (c.containerType === 'TABS') {
+        const activeIdx = activeTabByContainer[c.id] ?? (c.activeTab || 0)
+        ;(c.childWidgetIds[activeIdx] || []).forEach(id => ids.add(id))
+      } else {
+        c.childWidgetIds.flat().forEach(id => ids.add(id))
+      }
+    }
+    // Free widgets not in any container and not hidden
+    if (report) {
+      for (const w of report.widgets) {
+        const wid = w.id ?? w.widgetId
+        if (wid !== undefined && !inContainers.has(wid) && !hiddenWidgetIds.includes(wid))
+          ids.add(wid)
+      }
+    }
+    return ids
+  }, [containers, activeTabByContainer, hiddenWidgetIds, report])
+
+  // Parameters actually used by currently visible widgets
+  const visibleParameters = useMemo(() => {
+    if (!report) return []
+    const usedNames = new Set<string>()
+    for (const w of report.widgets) {
+      const wid = w.id ?? w.widgetId
+      if (wid === undefined || !visibleWidgetIds.has(wid)) continue
+      try {
+        const mapping = JSON.parse(w.paramMapping || '{}') as Record<string, unknown>
+        Object.keys(mapping).forEach(k => usedNames.add(k))
+      } catch { /* ignore */ }
+    }
+    // Fallback: if no widget has any paramMapping, show all params
+    if (usedNames.size === 0) return report.parameters
+    return report.parameters.filter(p => usedNames.has(p.name))
+  }, [report, visibleWidgetIds])
+
   if (loading) return <LoadingSpinner />
   if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
 
@@ -318,11 +360,11 @@ export default function ReportViewerPage() {
 
               const tabGroups = tabGroupsWithIdx.map(g => g.widgets)
 
-              // Tab height = max total height of widgets in any single tab
+              // Tab height = max(y + h) across all widgets in the tallest tab
               const tabH = Math.max(...tabGroups.map(group =>
-                group.reduce((sum, w) => {
+                group.reduce((maxH, w) => {
                   const pos = parsePosition(w.position)
-                  return sum + Math.max(1, Number(pos.h) || 4)
+                  return Math.max(maxH, (Number(pos.y) || 0) + Math.max(1, Number(pos.h) || 4))
                 }, 0)
               ))
 
@@ -332,10 +374,28 @@ export default function ReportViewerPage() {
 
               return (
                 <div key={container.id} className="card p-2" style={{ minHeight: `${tabH * 70 + 56}px` }}>
-                  <TabContainer container={container} labels={tabLabels}>
+                  <TabContainer
+                    container={container}
+                    labels={tabLabels}
+                    onTabChange={(idx) => setActiveTabByContainer(prev => ({ ...prev, [container.id]: idx }))}
+                  >
                     {tabGroups.map((group, tabIdx) => (
-                      <div key={tabIdx} className="space-y-4 pt-2">
-                        {group.map(w => renderSingleWidget(w))}
+                      <div key={tabIdx} className="grid grid-cols-12 pt-2" style={{ gridAutoRows: '70px' }}>
+                        {group.map(w => {
+                          const pos = parsePosition(w.position)
+                          const x = Math.max(0, Number(pos.x) || 0)
+                          const y = Math.max(0, Number(pos.y) || 0)
+                          const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+                          const hSpan = Math.max(1, Number(pos.h) || 4)
+                          return (
+                            <div key={w.widgetId} style={{
+                              gridColumn: `${x + 1} / span ${wSpan}`,
+                              gridRow: `${y + 1} / span ${hSpan}`,
+                            }}>
+                              {renderSingleWidget(w)}
+                            </div>
+                          )
+                        })}
                       </div>
                     ))}
                   </TabContainer>
@@ -386,7 +446,7 @@ export default function ReportViewerPage() {
     )
   }
 
-  const sidePanel = report.parameters.length > 0 && (
+  const sidePanel = report.parameters.length > 0 && visibleParameters.length > 0 && (
     <div className={`${filterPanelCollapsed ? 'w-0 overflow-hidden' : 'w-80'} flex-shrink-0`}>
       <div className="sticky top-3">
         <div className="card p-2 mb-2">
@@ -408,7 +468,7 @@ export default function ReportViewerPage() {
         {!filterPanelCollapsed && (
           <EnhancedParameterPanel
             reportId={Number(id)}
-            parameters={report.parameters}
+            parameters={visibleParameters}
             onApply={handleRender}
             loading={rendering}
             compact
@@ -467,7 +527,7 @@ export default function ReportViewerPage() {
 
       <DrillDownBreadcrumb stack={navStack} onNavigate={handleBreadcrumbNavigate} />
 
-      {report.parameters.length > 0 && (filterPanelPosition === 'top' || filterPanelPosition === 'bottom') && (
+      {report.parameters.length > 0 && visibleParameters.length > 0 && (filterPanelPosition === 'top' || filterPanelPosition === 'bottom') && (
         <div className="card p-3 mb-4">
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{t('widgets.type.filter')}</span>
@@ -481,7 +541,7 @@ export default function ReportViewerPage() {
         </div>
       )}
 
-      {report.parameters.length > 0 && filterPanelPosition === 'top' && !filterPanelCollapsed && (
+      {report.parameters.length > 0 && visibleParameters.length > 0 && filterPanelPosition === 'top' && !filterPanelCollapsed && (
         <EnhancedParameterPanel
           reportId={Number(id)}
           parameters={report.parameters}
@@ -495,7 +555,7 @@ export default function ReportViewerPage() {
       {(filterPanelPosition === 'left' || filterPanelPosition === 'right') ? (
         <div className={`relative flex gap-4 ${filterPanelPosition === 'right' ? 'flex-row-reverse' : ''}`}>
           {sidePanel}
-          {filterPanelCollapsed && report.parameters.length > 0 && (
+          {filterPanelCollapsed && report.parameters.length > 0 && visibleParameters.length > 0 && (
             <button
               onClick={() => setFilterPanelCollapsed(false)}
               className={`absolute top-0 z-20 btn-secondary text-xs px-3 py-1 ${filterPanelPosition === 'right' ? 'right-0' : 'left-0'}`}
@@ -514,7 +574,7 @@ export default function ReportViewerPage() {
         </>
       )}
 
-      {report.parameters.length > 0 && filterPanelPosition === 'bottom' && !filterPanelCollapsed && (
+      {report.parameters.length > 0 && visibleParameters.length > 0 && filterPanelPosition === 'bottom' && !filterPanelCollapsed && (
         <EnhancedParameterPanel
           reportId={Number(id)}
           parameters={report.parameters}
