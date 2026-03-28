@@ -1,5 +1,5 @@
 /**
- * Shared label layout algorithm for ECharts data-point labels.
+ * Shared label layout algorithms for ECharts data-point labels.
  *
  * Provides a greedy rectangle-packing placement that:
  *  - Prevents label overlap with a 4 px gap
@@ -203,5 +203,78 @@ export function createCollisionFreeLayout(
         [anchorX, anchorY],
       ],
     }
+  }
+}
+
+/**
+ * Creates an "inline" labelLayout callback that places labels directly above
+ * their data points (bars/dots) and nudges them upward when they collide.
+ *
+ * Unlike createCollisionFreeLayout (which places labels in rows at the top of
+ * the chart with callout lines), this keeps labels anchored near their data.
+ */
+export function createInlineLabelLayout(
+  getChartWidth?: () => number,
+) {
+  const placed: (LabelPlacement & { key: string })[] = []
+  let lastTs = 0
+  const GAP = 3
+
+  return (params: {
+    rect?: { x: number; y: number; width: number; height: number }
+    labelRect?: { x: number; y: number; width: number; height: number }
+    dataIndex: number
+    seriesIndex: number
+  }) => {
+    const now = Date.now()
+    if (now - lastTs > 50) {
+      placed.length = 0
+    }
+    lastTs = now
+
+    const { rect, labelRect, dataIndex, seriesIndex } = params
+    if (!rect || !labelRect || labelRect.width < 1) return {}
+
+    const anchorX = rect.x + rect.width / 2
+    const anchorY = rect.y // top of bar/dot
+    const lw = labelRect.width
+    const lh = labelRect.height
+    const chartW = getChartWidth?.() ?? 0
+    const key = `${seriesIndex}-${dataIndex}`
+
+    // Clamp X to chart bounds
+    let cx = anchorX
+    if (chartW > 0) {
+      cx = Math.max(lw / 2, Math.min(cx, chartW - lw / 2))
+    }
+
+    // Try placing above the data point, moving upward on collision
+    const STEP = lh + GAP
+    for (let attempt = 0; attempt < 15; attempt++) {
+      const y = anchorY - lh - 6 - attempt * STEP // 6px gap above bar
+      const candidate: LabelPlacement = {
+        x1: cx - lw / 2,
+        y1: y,
+        x2: cx + lw / 2,
+        y2: y + lh,
+      }
+      const collides = placed.some(
+        p =>
+          candidate.x1 < p.x2 + GAP &&
+          candidate.x2 > p.x1 - GAP &&
+          candidate.y1 < p.y2 + GAP &&
+          candidate.y2 > p.y1 - GAP,
+      )
+      if (!collides) {
+        const entry = { ...candidate, key }
+        placed.push(entry)
+        return { x: cx, y, align: 'center' as const, verticalAlign: 'top' as const }
+      }
+    }
+
+    // Fallback: place above everything
+    const y = anchorY - lh - 6 - 15 * STEP
+    placed.push({ x1: cx - lw / 2, y1: y, x2: cx + lw / 2, y2: y + lh, key })
+    return { x: cx, y, align: 'center' as const, verticalAlign: 'top' as const }
   }
 }

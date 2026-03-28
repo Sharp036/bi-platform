@@ -22,8 +22,6 @@ export interface ParameterControlConfig {
   controlType: string    // INPUT, DROPDOWN, SLIDER, RADIO, DATE_PICKER, MULTI_CHECKBOX
   datasourceId: number | null
   optionsQuery: string | null
-  cascadeParent: string | null
-  cascadeField: string | null
   sliderMin: number | null
   sliderMax: number | null
   sliderStep: number | null
@@ -78,7 +76,6 @@ export const controlsApi = {
   saveParameterControl: (data: {
     reportId: number; parameterName: string; controlType: string;
     datasourceId?: number; optionsQuery?: string;
-    cascadeParent?: string; cascadeField?: string;
     sliderMin?: number; sliderMax?: number; sliderStep?: number;
     config?: Record<string, unknown>; sortOrder?: number
   }) => api.post<ParameterControlConfig>('/controls/parameters', data).then(r => r.data),

@@ -57,8 +57,6 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
         controlType: update.controlType ?? existing?.controlType ?? 'INPUT',
         datasourceId: update.datasourceId ?? existing?.datasourceId ?? undefined,
         optionsQuery: update.optionsQuery ?? existing?.optionsQuery ?? undefined,
-        cascadeParent: update.cascadeParent ?? existing?.cascadeParent ?? undefined,
-        cascadeField: update.cascadeField ?? existing?.cascadeField ?? undefined,
         sliderMin: update.sliderMin ?? existing?.sliderMin ?? undefined,
         sliderMax: update.sliderMax ?? existing?.sliderMax ?? undefined,
         sliderStep: update.sliderStep ?? existing?.sliderStep ?? undefined,
@@ -83,7 +81,13 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
   const openPicker = async (paramName: string) => {
     setPicker({ paramName, options: [], hasMore: false, columnName: '', loading: true, open: true, query: '' })
     try {
-      const res = await controlsApi.loadOptions(reportId, paramName)
+      // Pass default values of ALL other parameters so any :param in SQL gets substituted
+      const parentValues: Record<string, string> = {}
+      for (const p of parameters) {
+        if (p.name === paramName) continue
+        if (p.defaultValue) parentValues[p.name] = p.defaultValue
+      }
+      const res = await controlsApi.loadOptions(reportId, paramName, Object.keys(parentValues).length > 0 ? parentValues : undefined)
       setPicker(prev => prev ? {
         ...prev,
         options: res.options,
@@ -93,7 +97,7 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
       } : null)
     } catch {
       setPicker(null)
-      toast.error(t('interactive.control.failed_remove'))
+      toast.error(t('common.operation_failed'))
     }
   }
 
@@ -116,10 +120,17 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
 
   const selectDefault = async (paramName: string, value: string) => {
     try {
-      const updated = parameters.map(p =>
-        p.name === paramName ? { ...p, defaultValue: value } : p
-      )
-      await reportApi.setParameters(reportId, updated as unknown as Array<Record<string, unknown>>)
+      const payload = parameters.map((p, i) => ({
+        id: p.id,
+        name: p.name,
+        label: p.label || '',
+        paramType: p.paramType,
+        defaultValue: p.name === paramName ? value : (p.defaultValue || ''),
+        isRequired: p.isRequired,
+        sortOrder: i,
+        config: typeof p.config === 'string' ? p.config : JSON.stringify(p.config || {}),
+      }))
+      await reportApi.setParameters(reportId, payload as unknown as Array<Record<string, unknown>>)
       onParameterDefaultChange?.(paramName, value)
       toast.success(t('interactive.control.saved'))
     } catch {
@@ -215,17 +226,6 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
                         placeholder={t('interactive.control.sql_placeholder')}
                         className="input text-xs py-1 w-64" />
                     </div>
-                    <div>
-                      <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.cascade_parent')}</label>
-                      <select value={ctrl?.cascadeParent || ''}
-                        onChange={e => save(p.name, { cascadeParent: e.target.value || undefined })}
-                        className="input text-xs py-1 w-36">
-                        <option value="">{t('common.none')}</option>
-                        {parameters.filter(pp => pp.name !== p.name).map(pp => (
-                          <option key={pp.name} value={pp.name}>{pp.label || pp.name}</option>
-                        ))}
-                      </select>
-                    </div>
                     {ctrl?.optionsQuery && ctrl?.datasourceId && (
                       <div className="flex items-end">
                         <button
@@ -263,7 +263,10 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
             />
             <div className="flex-1 overflow-y-auto space-y-0.5">
               {picker.loading ? (
-                <p className="text-xs text-slate-400 p-2">...</p>
+                <div className="flex items-center gap-2 p-3 text-xs text-slate-400">
+                  <div className="w-4 h-4 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
+                  {t('common.loading')}
+                </div>
               ) : pickerVisible.length === 0 ? (
                 <p className="text-xs text-slate-400 p-2">{t('common.no_results')}</p>
               ) : (
