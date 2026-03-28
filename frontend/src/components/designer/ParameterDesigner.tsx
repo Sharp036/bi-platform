@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useDesignerStore } from '@/store/useDesignerStore'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 
 const PARAM_TYPES = ['STRING', 'NUMBER', 'DATE', 'DATE_RANGE', 'SELECT', 'MULTI_SELECT', 'BOOLEAN']
 const DATE_DEFAULTS = [
@@ -33,6 +33,14 @@ export default function ParameterDesigner() {
 
   const removeParam = (index: number) => {
     setParameters(parameters.filter((_, i) => i !== index))
+  }
+
+  const moveParam = (index: number, dir: -1 | 1) => {
+    const target = index + dir
+    if (target < 0 || target >= parameters.length) return
+    const next = [...parameters]
+    ;[next[index], next[target]] = [next[target], next[index]]
+    setParameters(next.map((p, i) => ({ ...p, sortOrder: i })))
   }
 
   return (
@@ -94,9 +102,19 @@ export default function ParameterDesigner() {
                   />
                   {t('designer.param_required')}
                 </label>
-                <button onClick={() => removeParam(i)} className="btn-ghost p-1 text-red-500">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center gap-0.5">
+                  <button onClick={() => moveParam(i, -1)} disabled={i === 0}
+                    className="btn-ghost p-1 disabled:opacity-20" title={t('common.move_up')}>
+                    <ArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => moveParam(i, 1)} disabled={i === parameters.length - 1}
+                    className="btn-ghost p-1 disabled:opacity-20" title={t('common.move_down')}>
+                    <ArrowDown className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => removeParam(i)} className="btn-ghost p-1 text-red-500">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
