@@ -683,6 +683,18 @@ export default function PropertyPanel() {
                     <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_columns_hint')}</p>
                   </Field>
 
+                  <Field label={t('designer.table_density')}>
+                    <select
+                      value={cc.tableDensity as string || 'default'}
+                      onChange={e => update({ chartConfig: { ...cc, tableDensity: e.target.value } })}
+                      className="input text-sm"
+                    >
+                      <option value="compact">{t('designer.table_density.compact')}</option>
+                      <option value="default">{t('designer.table_density.default')}</option>
+                      <option value="large">{t('designer.table_density.large')}</option>
+                    </select>
+                  </Field>
+
                   <Field label={t('designer.table_page_size')}>
                     <input
                       type="number" min={0} max={1000}
