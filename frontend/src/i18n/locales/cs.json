@@ -882,5 +882,10 @@
   "import.json_array_path": "Cesta k poli JSON",
   "import.json_array_path_hint": "Cesta oddelena teckami k vnorene poli. Pouzijte * pro iteraci vsech klicu (klic se stane sloupcem). Priklad: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Spravovat konfigurace importu dat",
-  "admin.permission_description.IMPORT_UPLOAD": "Nahravat soubory pro import dat"
+  "admin.permission_description.IMPORT_UPLOAD": "Nahravat soubory pro import dat",
+  "common.move_up": "Přesunout nahoru",
+  "common.move_down": "Přesunout dolů",
+  "designer.null_handling": "Hodnoty NULL",
+  "designer.null_handling.zero": "Zobrazit jako 0",
+  "designer.null_handling.gap": "Přerušení čáry (mezera)"
 }

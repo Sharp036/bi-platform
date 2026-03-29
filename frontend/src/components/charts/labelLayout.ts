@@ -215,6 +215,7 @@ export function createCollisionFreeLayout(
  */
 export function createInlineLabelLayout(
   getChartWidth?: () => number,
+  getGridTop?: () => number,
 ) {
   const placed: (LabelPlacement & { key: string })[] = []
   let lastTs = 0
@@ -250,8 +251,9 @@ export function createInlineLabelLayout(
 
     // Try placing above the data point, moving upward on collision
     const STEP = lh + GAP
+    const minY = getGridTop?.() ?? 0
     for (let attempt = 0; attempt < 15; attempt++) {
-      const y = anchorY - lh - 6 - attempt * STEP // 6px gap above bar
+      const y = Math.max(minY, anchorY - lh - 6 - attempt * STEP) // 6px gap above bar, clamp to grid top
       const candidate: LabelPlacement = {
         x1: cx - lw / 2,
         y1: y,
@@ -272,8 +274,8 @@ export function createInlineLabelLayout(
       }
     }
 
-    // Fallback: place above everything
-    const y = anchorY - lh - 6 - 15 * STEP
+    // Fallback: place above everything, clamped to grid top
+    const y = Math.max(minY, anchorY - lh - 6 - 15 * STEP)
     placed.push({ x1: cx - lw / 2, y1: y, x2: cx + lw / 2, y2: y + lh, key })
     return { x: cx, y, align: 'center' as const, verticalAlign: 'top' as const }
   }

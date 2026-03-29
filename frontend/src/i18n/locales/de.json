@@ -882,5 +882,10 @@
   "import.json_array_path": "JSON-Array-Pfad",
   "import.json_array_path_hint": "Durch Punkte getrennter Pfad zum verschachtelten Array. Verwende * um alle Schlussel zu iterieren (Schlussel wird zur Spalte). Beispiel: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Datenimport-Konfigurationen verwalten",
-  "admin.permission_description.IMPORT_UPLOAD": "Dateien fuer den Datenimport hochladen"
+  "admin.permission_description.IMPORT_UPLOAD": "Dateien fuer den Datenimport hochladen",
+  "common.move_up": "Nach oben",
+  "common.move_down": "Nach unten",
+  "designer.null_handling": "NULL-Werte",
+  "designer.null_handling.zero": "Als 0 anzeigen",
+  "designer.null_handling.gap": "Linie unterbrechen (Lücke)"
 }

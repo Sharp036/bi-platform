@@ -882,5 +882,10 @@
   "import.json_array_path": "JSON-arraypad",
   "import.json_array_path_hint": "Punt-gescheiden pad naar geneste array. Gebruik * om alle sleutels te doorlopen (sleutel wordt een kolom). Voorbeeld: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Importconfiguraties beheren",
-  "admin.permission_description.IMPORT_UPLOAD": "Bestanden uploaden voor gegevensimport"
+  "admin.permission_description.IMPORT_UPLOAD": "Bestanden uploaden voor gegevensimport",
+  "common.move_up": "Omhoog verplaatsen",
+  "common.move_down": "Omlaag verplaatsen",
+  "designer.null_handling": "NULL-waarden",
+  "designer.null_handling.zero": "Weergeven als 0",
+  "designer.null_handling.gap": "Lijn onderbreken (opening)"
 }

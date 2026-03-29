@@ -882,5 +882,10 @@
   "import.json_array_path": "Chemin du tableau JSON",
   "import.json_array_path_hint": "Chemin separe par des points vers le tableau imbrique. Utilisez * pour iterer toutes les cles (la cle devient une colonne). Exemple : clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Gerer les configurations d'importation de donnees",
-  "admin.permission_description.IMPORT_UPLOAD": "Telecharger des fichiers pour l'importation de donnees"
+  "admin.permission_description.IMPORT_UPLOAD": "Telecharger des fichiers pour l'importation de donnees",
+  "common.move_up": "Déplacer vers le haut",
+  "common.move_down": "Déplacer vers le bas",
+  "designer.null_handling": "Valeurs NULL",
+  "designer.null_handling.zero": "Afficher comme 0",
+  "designer.null_handling.gap": "Interrompre la ligne (espace)"
 }

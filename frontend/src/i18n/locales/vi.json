@@ -882,5 +882,10 @@
   "import.json_array_path": "Đường dẫn mảng JSON",
   "import.json_array_path_hint": "Đường dẫn đến mảng lồng nhau, phân tách bằng dấu chấm. Dùng * để duyệt qua tất cả các key (key trở thành cột). Ví dụ: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Quản lý cấu hình nhập dữ liệu",
-  "admin.permission_description.IMPORT_UPLOAD": "Tải tệp lên để nhập dữ liệu"
+  "admin.permission_description.IMPORT_UPLOAD": "Tải tệp lên để nhập dữ liệu",
+  "common.move_up": "Di chuyển lên",
+  "common.move_down": "Di chuyển xuống",
+  "designer.null_handling": "Giá trị NULL",
+  "designer.null_handling.zero": "Hiển thị là 0",
+  "designer.null_handling.gap": "Ngắt đường (khoảng trống)"
 }

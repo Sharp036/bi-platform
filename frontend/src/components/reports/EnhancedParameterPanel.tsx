@@ -71,15 +71,13 @@ export default function EnhancedParameterPanel({
   // Load dynamic options
   const loadOptions = useCallback(async (paramName: string, parentValues: Record<string, string> = {}) => {
     try {
-      console.log('[loadOptions]', paramName, 'parentValues:', JSON.stringify(parentValues))
       const result = await controlsApi.loadOptions(reportId, paramName, parentValues)
-      console.log('[loadOptions]', paramName, '->', result.options.length, 'opts, hasMore:', result.hasMore)
       setDynamicOptions(prev => ({ ...prev, [paramName]: result.options }))
       setHasMoreByParam(prev => ({ ...prev, [paramName]: result.hasMore ?? false }))
       if (result.columnName) {
         setColumnByParam(prev => ({ ...prev, [paramName]: result.columnName! }))
       }
-    } catch (err) { console.error('[loadOptions]', paramName, 'ERROR:', err) }
+    } catch { /* ignore */ }
   }, [reportId])
 
   // Collect all other non-empty parameter values (so any :param in options SQL gets substituted)

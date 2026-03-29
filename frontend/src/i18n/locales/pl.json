@@ -882,5 +882,10 @@
   "import.json_array_path": "Sciezka tablicy JSON",
   "import.json_array_path_hint": "Sciezka oddzielona kropkami do zagniezdzonej tablicy. Uzyj * aby iterowac po wszystkich kluczach (klucz staje sie kolumna). Przyklad: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Zarzadzaj konfiguracjami importu danych",
-  "admin.permission_description.IMPORT_UPLOAD": "Przesylaj pliki do importu danych"
+  "admin.permission_description.IMPORT_UPLOAD": "Przesylaj pliki do importu danych",
+  "common.move_up": "Przesuń w górę",
+  "common.move_down": "Przesuń w dół",
+  "designer.null_handling": "Wartości NULL",
+  "designer.null_handling.zero": "Pokaż jako 0",
+  "designer.null_handling.gap": "Przerwij linię (przerwa)"
 }

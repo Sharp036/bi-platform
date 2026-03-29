@@ -327,6 +327,7 @@ export default function MultiLayerChart({
     const dataLabelBoxed = !!config.dataLabelBoxed
     const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
     const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
+    const nullHandling = (config.nullHandling as string) || 'zero'
     const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency, yAxisDecimals)
     const regressionLabel = t('charts.regression_short', 'Linear')
@@ -344,8 +345,12 @@ export default function MultiLayerChart({
         : cols.filter(c => c !== categoryCol)
       seriesCols.forEach((col, seriesIndex) => {
         const seriesColor = palette[seriesIndex % palette.length]
-        const colValues = rows.map(r => Number(r[col] ?? 0))
-        const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
+        const colValues = rows.map(r => {
+          const v = r[col]
+          if (v == null || v === '') return nullHandling === 'gap' ? null : 0
+          return Number(v) || 0
+        })
+        const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0))
         if (chartType === 'pie') {
           series.push({
             name: col, type: 'pie', radius: ['40%', '70%'],
@@ -354,8 +359,10 @@ export default function MultiLayerChart({
         } else {
           series.push({
             name: col, type: chartType,
+            connectNulls: false,
             data: rows.map((r, dataIndex) => {
-              const rawValue = r[col] ?? 0
+              const v = r[col]
+              const rawValue = (v == null || v === '') ? (nullHandling === 'gap' ? '-' : 0) : (Number(v) || 0)
               if (!showDataLabels || isLabelVisible(dataIndex)) return rawValue
               return {
                 value: rawValue,
@@ -372,7 +379,7 @@ export default function MultiLayerChart({
                 show: true, position: 'top', distance: isInlineLabels ? 6 : 8,
                 rotate: dataLabelRotation || undefined,
                 fontSize: 10,
-                formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
+                formatter: buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0), dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
                 ...(dataLabelBoxed ? {
                   borderColor: seriesColor,
                   borderWidth: 1,
@@ -510,7 +517,8 @@ export default function MultiLayerChart({
       dataLabelCount
     )
     const fixedLabelTopPad = showDataLabels && !isPie ? 120 : 0
-    const labelTopPad = isInlineLabels ? 0
+    const inlineLabelTopPad = showDataLabels && !isPie ? 24 : 0
+    const labelTopPad = isInlineLabels ? inlineLabelTopPad
       : dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
     const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
     // containLabel: true already accounts for x-axis label height, so gridBottom
@@ -556,7 +564,7 @@ export default function MultiLayerChart({
       series,
       ...(showDataLabels && !isPie ? {
         labelLayout: isInlineLabels
-          ? createInlineLabelLayout(getChartWidth)
+          ? createInlineLabelLayout(getChartWidth, () => labelTopPad || 8)
           : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread),
       } : {}),
       ...(emphasisConfig || {}),

@@ -882,5 +882,10 @@
   "import.json_array_path": "Jalur array JSON",
   "import.json_array_path_hint": "Jalur ke array bersarang yang dipisahkan titik. Gunakan * untuk mengiterasi semua key (key menjadi kolom). Contoh: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Kelola konfigurasi impor data",
-  "admin.permission_description.IMPORT_UPLOAD": "Unggah file untuk impor data"
+  "admin.permission_description.IMPORT_UPLOAD": "Unggah file untuk impor data",
+  "common.move_up": "Pindahkan ke atas",
+  "common.move_down": "Pindahkan ke bawah",
+  "designer.null_handling": "Nilai NULL",
+  "designer.null_handling.zero": "Tampilkan sebagai 0",
+  "designer.null_handling.gap": "Putus garis (celah)"
 }
