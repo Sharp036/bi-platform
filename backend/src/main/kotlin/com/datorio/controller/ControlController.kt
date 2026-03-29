@@ -76,10 +76,10 @@ class ControlController(
     fun loadOptions(
         @PathVariable reportId: Long,
         @PathVariable parameterName: String,
-        @RequestParam parentValues: Map<String, String>?
+        @RequestParam allParams: Map<String, String>
     ): ResponseEntity<ParameterOptionsResponse> =
         ResponseEntity.ok(
-            controlService.loadParameterOptions(reportId, parameterName, parentValues ?: emptyMap())
+            controlService.loadParameterOptions(reportId, parameterName, allParams)
         )
 
     @GetMapping("/parameters/{reportId}/{parameterName}/search")
