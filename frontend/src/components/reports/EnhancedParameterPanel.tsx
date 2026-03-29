@@ -89,8 +89,8 @@ export default function EnhancedParameterPanel({
     return result
   }, [])
 
-  // Initialize values, then load options with those values as parent context
-  const initializedRef = useRef(false)
+  // Track which params already have options loaded
+  const loadedParamsRef = useRef(new Set<string>())
 
   useEffect(() => {
     const init: Record<string, string> = {}
@@ -103,11 +103,11 @@ export default function EnhancedParameterPanel({
       }
     })
     setValues(init)
-    // Use init directly (not stale `values` from closure) to load options
-    if (controls.length > 0 && !initializedRef.current) {
-      initializedRef.current = true
+    // Load options for controls that haven't been loaded yet
+    if (controls.length > 0) {
       controls.forEach(c => {
-        if (c.optionsQuery && c.datasourceId) {
+        if (c.optionsQuery && c.datasourceId && !loadedParamsRef.current.has(c.parameterName)) {
+          loadedParamsRef.current.add(c.parameterName)
           const parentValues = collectParentValues(c.parameterName, init)
           loadOptions(c.parameterName, parentValues)
         }
