@@ -139,7 +139,7 @@ class ControlService(
 
         var query = control.optionsQuery!!
 
-        // Substitute all parent values (direct parent + ancestors up the cascade chain)
+        // Substitute all parent values
         for ((paramName, paramVal) in parentValues) {
             query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
         }

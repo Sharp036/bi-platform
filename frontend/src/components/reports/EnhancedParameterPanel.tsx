@@ -71,13 +71,15 @@ export default function EnhancedParameterPanel({
   // Load dynamic options
   const loadOptions = useCallback(async (paramName: string, parentValues: Record<string, string> = {}) => {
     try {
+      console.log('[loadOptions]', paramName, 'parentValues:', JSON.stringify(parentValues))
       const result = await controlsApi.loadOptions(reportId, paramName, parentValues)
+      console.log('[loadOptions]', paramName, '->', result.options.length, 'opts, hasMore:', result.hasMore)
       setDynamicOptions(prev => ({ ...prev, [paramName]: result.options }))
       setHasMoreByParam(prev => ({ ...prev, [paramName]: result.hasMore ?? false }))
       if (result.columnName) {
         setColumnByParam(prev => ({ ...prev, [paramName]: result.columnName! }))
       }
-    } catch { /* ignore */ }
+    } catch (err) { console.error('[loadOptions]', paramName, 'ERROR:', err) }
   }, [reportId])
 
   // Collect all other parameter values (so any :param in the options SQL gets substituted)
@@ -106,17 +108,24 @@ export default function EnhancedParameterPanel({
   // Load dropdown options whenever controls are ready or visible parameters change
   useEffect(() => {
     if (controls.length === 0) return
-    // Build current values to pass as parent context
-    const vals: Record<string, string> = {}
+    // Build values from ALL report params (not just visible) so :param references resolve
+    const allVals: Record<string, string> = {}
+    // First, fill from all report-level parameters (including those on other tabs)
+    if (currentParameters) {
+      for (const [k, v] of Object.entries(currentParameters)) {
+        if (v !== undefined && v !== null && v !== '') allVals[k] = String(v)
+      }
+    }
+    // Then overlay visible parameter defaults
     parameters.forEach(p => {
-      const current = currentParameters?.[p.name]
-      if (current !== undefined) vals[p.name] = String(current)
-      else if (p.defaultValue) vals[p.name] = resolveDynamicDefault(p)
+      if (!(p.name in allVals) && p.defaultValue) {
+        allVals[p.name] = resolveDynamicDefault(p)
+      }
     })
     const visibleNames = new Set(parameters.map(p => p.name))
     controls.forEach(c => {
       if (c.optionsQuery && c.datasourceId && visibleNames.has(c.parameterName)) {
-        loadOptions(c.parameterName, collectParentValues(c.parameterName, vals))
+        loadOptions(c.parameterName, collectParentValues(c.parameterName, allVals))
       }
     })
   }, [controls, parameters, loadOptions, collectParentValues])
