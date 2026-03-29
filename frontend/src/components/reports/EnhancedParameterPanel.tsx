@@ -89,9 +89,7 @@ export default function EnhancedParameterPanel({
     return result
   }, [])
 
-  // Track which params already have options loaded
-  const loadedParamsRef = useRef(new Set<string>())
-
+  // Build values from parameters + currentParameters, then load all dropdown options
   useEffect(() => {
     const init: Record<string, string> = {}
     parameters.forEach(p => {
@@ -103,17 +101,25 @@ export default function EnhancedParameterPanel({
       }
     })
     setValues(init)
-    // Load options for controls that haven't been loaded yet
-    if (controls.length > 0) {
-      controls.forEach(c => {
-        if (c.optionsQuery && c.datasourceId && !loadedParamsRef.current.has(c.parameterName)) {
-          loadedParamsRef.current.add(c.parameterName)
-          const parentValues = collectParentValues(c.parameterName, init)
-          loadOptions(c.parameterName, parentValues)
-        }
-      })
-    }
-  }, [parameters, controls])
+  }, [parameters])
+
+  // Load dropdown options whenever controls are ready or visible parameters change
+  useEffect(() => {
+    if (controls.length === 0) return
+    // Build current values to pass as parent context
+    const vals: Record<string, string> = {}
+    parameters.forEach(p => {
+      const current = currentParameters?.[p.name]
+      if (current !== undefined) vals[p.name] = String(current)
+      else if (p.defaultValue) vals[p.name] = resolveDynamicDefault(p)
+    })
+    const visibleNames = new Set(parameters.map(p => p.name))
+    controls.forEach(c => {
+      if (c.optionsQuery && c.datasourceId && visibleNames.has(c.parameterName)) {
+        loadOptions(c.parameterName, collectParentValues(c.parameterName, vals))
+      }
+    })
+  }, [controls, parameters, loadOptions, collectParentValues])
 
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it
   const handleChange = (paramName: string, value: string) => {
