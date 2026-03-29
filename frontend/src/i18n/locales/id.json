@@ -532,6 +532,7 @@
   "sharing.type.reports": "Laporan",
   "sharing.type.datasources": "Sumber Data",
   "sharing.type.dashboards": "Dasbor",
+  "sharing.type.import_sources": "Sumber impor",
   "sharing.empty": "Belum ada yang dibagikan",
   "sharing.empty_desc": "Objek yang dibagikan dengan Anda akan muncul di sini",
   "sharing.shared_by": "dibagikan oleh {{name}}",

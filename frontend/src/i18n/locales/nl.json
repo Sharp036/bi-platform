@@ -532,6 +532,7 @@
   "sharing.type.reports": "Rapporten",
   "sharing.type.datasources": "Gegevensbronnen",
   "sharing.type.dashboards": "Dashboards",
+  "sharing.type.import_sources": "Importbronnen",
   "sharing.empty": "Nog niets gedeeld",
   "sharing.empty_desc": "Objecten die met u gedeeld worden verschijnen hier",
   "sharing.shared_by": "gedeeld door {{name}}",

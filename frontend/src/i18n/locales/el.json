@@ -532,6 +532,7 @@
   "sharing.type.reports": "Αναφορές",
   "sharing.type.datasources": "Πηγές δεδομένων",
   "sharing.type.dashboards": "Πίνακες ελέγχου",
+  "sharing.type.import_sources": "Πηγές εισαγωγής",
   "sharing.empty": "Τίποτα δεν έχει κοινοποιηθεί ακόμα",
   "sharing.empty_desc": "Τα αντικείμενα που κοινοποιούνται σε εσάς θα εμφανιστούν εδώ",
   "sharing.shared_by": "κοινοποιήθηκε από {{name}}",

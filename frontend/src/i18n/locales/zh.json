@@ -532,6 +532,7 @@
   "sharing.type.reports": "报表",
   "sharing.type.datasources": "数据源",
   "sharing.type.dashboards": "仪表板",
+  "sharing.type.import_sources": "导入源",
   "sharing.empty": "暂无共享内容",
   "sharing.empty_desc": "与您共享的对象将在此显示",
   "sharing.shared_by": "由 {{name}} 共享",

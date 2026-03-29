@@ -537,6 +537,7 @@
   "sharing.type.reports": "Reports",
   "sharing.type.datasources": "Data Sources",
   "sharing.type.dashboards": "Dashboards",
+  "sharing.type.import_sources": "Import Sources",
   "sharing.empty": "Nothing shared yet",
   "sharing.empty_desc": "Objects shared with you will appear here",
   "sharing.shared_by": "shared by {{name}}",

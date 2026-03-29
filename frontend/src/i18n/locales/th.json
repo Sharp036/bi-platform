@@ -532,6 +532,7 @@
   "sharing.type.reports": "รายงาน",
   "sharing.type.datasources": "แหล่งข้อมูล",
   "sharing.type.dashboards": "แดชบอร์ด",
+  "sharing.type.import_sources": "แหล่งนำเข้า",
   "sharing.empty": "ยังไม่มีรายการที่แชร์",
   "sharing.empty_desc": "วัตถุที่แชร์กับคุณจะแสดงที่นี่",
   "sharing.shared_by": "แชร์โดย {{name}}",

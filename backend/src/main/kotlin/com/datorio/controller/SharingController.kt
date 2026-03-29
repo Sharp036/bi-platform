@@ -7,6 +7,7 @@ import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -18,6 +19,7 @@ class SharingController(
 
     /** List all shares for an object */
     @GetMapping("/{objectType}/{objectId}")
+    @PreAuthorize("hasAuthority('REPORT_SHARE')")
     fun getShares(
         @PathVariable objectType: String,
         @PathVariable objectId: Long
@@ -29,6 +31,7 @@ class SharingController(
 
     /** Grant access to an object */
     @PostMapping("/grant")
+    @PreAuthorize("hasAuthority('REPORT_SHARE')")
     fun grant(
         @Valid @RequestBody request: ShareRequest,
         @AuthenticationPrincipal user: UserDetails
@@ -40,6 +43,7 @@ class SharingController(
 
     /** Bulk grant (share with multiple users/roles at once) */
     @PostMapping("/bulk-grant")
+    @PreAuthorize("hasAuthority('REPORT_SHARE')")
     fun bulkGrant(
         @Valid @RequestBody request: BulkShareRequest,
         @AuthenticationPrincipal user: UserDetails
@@ -51,6 +55,7 @@ class SharingController(
 
     /** Revoke access */
     @PostMapping("/revoke")
+    @PreAuthorize("hasAuthority('REPORT_SHARE')")
     fun revoke(
         @Valid @RequestBody request: RevokeShareRequest,
         @AuthenticationPrincipal user: UserDetails

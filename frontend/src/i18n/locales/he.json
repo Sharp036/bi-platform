@@ -532,6 +532,7 @@
   "sharing.type.reports": "דוחות",
   "sharing.type.datasources": "מקורות נתונים",
   "sharing.type.dashboards": "לוחות מחוונים",
+  "sharing.type.import_sources": "מקורות ייבוא",
   "sharing.empty": "עדיין לא שותף דבר",
   "sharing.empty_desc": "אובייקטים ששותפו איתך יופיעו כאן",
   "sharing.shared_by": "שותף על ידי {{name}}",
