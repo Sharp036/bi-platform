@@ -532,6 +532,7 @@
   "sharing.type.reports": "レポート",
   "sharing.type.datasources": "データソース",
   "sharing.type.dashboards": "ダッシュボード",
+  "sharing.type.import_sources": "インポートソース",
   "sharing.empty": "共有アイテムはまだありません",
   "sharing.empty_desc": "あなたと共有されたオブジェクトがここに表示されます",
   "sharing.shared_by": "{{name}} が共有",
@@ -882,5 +883,10 @@
   "import.json_array_path": "JSON 配列パス",
   "import.json_array_path_hint": "ネストされた配列へのドット区切りパス。* を使用してすべてのキーを反復します（キーが列になります）。例：clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "データインポート設定を管理",
-  "admin.permission_description.IMPORT_UPLOAD": "データインポート用ファイルをアップロード"
+  "admin.permission_description.IMPORT_UPLOAD": "データインポート用ファイルをアップロード",
+  "common.move_up": "上に移動",
+  "common.move_down": "下に移動",
+  "designer.null_handling": "NULL値",
+  "designer.null_handling.zero": "0として表示",
+  "designer.null_handling.gap": "線を中断（ギャップ）"
 }

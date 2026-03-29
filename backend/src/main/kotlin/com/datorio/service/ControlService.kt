@@ -139,9 +139,27 @@ class ControlService(
 
         var query = control.optionsQuery!!
 
-        // Substitute all parent values (direct parent + ancestors up the cascade chain)
+        // Substitute provided parent values, skip blank ones
         for ((paramName, paramVal) in parentValues) {
-            query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
+            if (paramVal.isNotBlank()) {
+                query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
+            }
+        }
+        // Remove any remaining unsubstituted :param references by dropping their AND-clause.
+        // Matches patterns like: AND column = :param  /  AND column != :param  /  AND func(:param)
+        // Stops at next AND, ORDER, GROUP, LIMIT, HAVING or end of string.
+        val unsubstituted = Regex(":[a-zA-Z_]\\w*")
+        while (unsubstituted.containsMatchIn(query)) {
+            query = query.replace(
+                Regex("""(?i)\s+AND\s+[^,)]*?:[a-zA-Z_]\w*[^,)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
+                ""
+            )
+            // Safety: if the regex didn't remove anything, break to avoid infinite loop
+            if (unsubstituted.containsMatchIn(query)) {
+                // Fallback: replace remaining :params with empty string to avoid SQL error
+                query = query.replace(unsubstituted, "''")
+                break
+            }
         }
 
         val threshold = 1000
@@ -173,7 +191,8 @@ class ControlService(
         parameterName: String,
         searchQuery: String,
         columnName: String,
-        limit: Int = 50
+        limit: Int = 50,
+        parentValues: Map<String, String> = emptyMap()
     ): ParameterOptionsResponse {
         val control = paramControlRepo.findByReportIdAndParameterName(reportId, parameterName)
             ?: return ParameterOptionsResponse(parameterName, emptyList())
@@ -185,12 +204,30 @@ class ControlService(
         val ds = dataSourceRepository.findById(control.datasourceId!!)
             .orElseThrow { NoSuchElementException("DataSource not found: ${control.datasourceId}") }
 
+        // Substitute parent values in the base query before wrapping
+        var baseQuery = control.optionsQuery!!
+        for ((pName, pVal) in parentValues) {
+            if (pVal.isNotBlank()) {
+                baseQuery = baseQuery.replace(":$pName", "'${pVal.replace("'", "''")}'")
+            }
+        }
+        // Remove AND-clauses with unsubstituted :params
+        val unsubstituted = Regex(":[a-zA-Z_]\\w*")
+        while (unsubstituted.containsMatchIn(baseQuery)) {
+            val before = baseQuery
+            baseQuery = baseQuery.replace(
+                Regex("""(?i)\s+AND\s+[^,)]*?:[a-zA-Z_]\w*[^,)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
+                ""
+            )
+            if (baseQuery == before) { baseQuery = baseQuery.replace(unsubstituted, "''"); break }
+        }
+
         // Sanitize inputs to prevent injection (column name must be a simple identifier)
         val safeCol = columnName.replace(Regex("[^A-Za-z0-9_]"), "")
         val safeSearch = searchQuery.replace("'", "''")
 
         val wrappedQuery = """
-            SELECT $safeCol FROM (${control.optionsQuery}) AS _opts
+            SELECT $safeCol FROM ($baseQuery) AS _opts
             WHERE positionCaseInsensitive(toString($safeCol), '$safeSearch') > 0
             LIMIT $limit
         """.trimIndent()

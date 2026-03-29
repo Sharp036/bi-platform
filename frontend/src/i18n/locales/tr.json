@@ -532,6 +532,7 @@
   "sharing.type.reports": "Raporlar",
   "sharing.type.datasources": "Veri Kaynakları",
   "sharing.type.dashboards": "Panolar",
+  "sharing.type.import_sources": "İçe aktarma kaynakları",
   "sharing.empty": "Henüz paylaşılan bir şey yok",
   "sharing.empty_desc": "Sizinle paylaşılan nesneler burada görünecek",
   "sharing.shared_by": "{{name}} tarafından paylaşıldı",
@@ -882,5 +883,10 @@
   "import.json_array_path": "JSON dizi yolu",
   "import.json_array_path_hint": "İç içe diziye nokta ayrılmış yol. Tüm anahtarları yinelemek için * kullanın (anahtar sütun olur). Örnek: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Veri aktarma yapılandirmalarini yonet",
-  "admin.permission_description.IMPORT_UPLOAD": "Veri aktarma icin dosya yukle"
+  "admin.permission_description.IMPORT_UPLOAD": "Veri aktarma icin dosya yukle",
+  "common.move_up": "Yukarı taşı",
+  "common.move_down": "Aşağı taşı",
+  "designer.null_handling": "NULL değerler",
+  "designer.null_handling.zero": "0 olarak göster",
+  "designer.null_handling.gap": "Çizgiyi kes (boşluk)"
 }

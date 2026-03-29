@@ -76,21 +76,24 @@ class ControlController(
     fun loadOptions(
         @PathVariable reportId: Long,
         @PathVariable parameterName: String,
-        @RequestParam parentValues: Map<String, String>?
+        @RequestParam allParams: Map<String, String>
     ): ResponseEntity<ParameterOptionsResponse> =
         ResponseEntity.ok(
-            controlService.loadParameterOptions(reportId, parameterName, parentValues ?: emptyMap())
+            controlService.loadParameterOptions(reportId, parameterName, allParams)
         )
 
     @GetMapping("/parameters/{reportId}/{parameterName}/search")
     fun searchOptions(
         @PathVariable reportId: Long,
         @PathVariable parameterName: String,
-        @RequestParam q: String,
-        @RequestParam column: String,
-        @RequestParam(defaultValue = "50") limit: Int
-    ): ResponseEntity<ParameterOptionsResponse> =
-        ResponseEntity.ok(
-            controlService.searchParameterOptions(reportId, parameterName, q, column, limit)
+        @RequestParam allParams: Map<String, String>
+    ): ResponseEntity<ParameterOptionsResponse> {
+        val q = allParams["q"] ?: ""
+        val column = allParams["column"] ?: ""
+        val limit = allParams["limit"]?.toIntOrNull() ?: 50
+        val parentValues = allParams.filterKeys { it !in setOf("q", "column", "limit") }
+        return ResponseEntity.ok(
+            controlService.searchParameterOptions(reportId, parameterName, q, column, limit, parentValues)
         )
+    }
 }

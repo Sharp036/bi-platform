@@ -13,6 +13,7 @@ class ObjectPermissionService(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
     private val reportRepo: ReportRepository,
+    private val importSourceRepo: ImportSourceRepository,
     private val auditService: AuditService
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -148,8 +149,8 @@ class ObjectPermissionService(
                 best
             }
 
-        return merged.map { perm ->
-            val name = resolveObjectName(perm.objectType, perm.objectId)
+        return merged.mapNotNull { perm ->
+            val name = resolveObjectName(perm.objectType, perm.objectId) ?: return@mapNotNull null
             val ownerName = resolveObjectOwner(perm.objectType, perm.objectId)
             SharedObjectItem(
                 objectType = perm.objectType,
@@ -211,10 +212,11 @@ class ObjectPermissionService(
         }
     }
 
-    private fun resolveObjectName(objectType: String, objectId: Long): String {
+    private fun resolveObjectName(objectType: String, objectId: Long): String? {
         return when (objectType) {
-            "REPORT" -> reportRepo.findById(objectId).map { it.name }.orElse("Deleted Report #$objectId")
-            else -> "$objectType #$objectId"
+            "REPORT" -> reportRepo.findById(objectId).map { it.name }.orElse(null)
+            "IMPORT_SOURCE" -> importSourceRepo.findById(objectId).map { it.name }.orElse(null)
+            else -> null
         }
     }
 

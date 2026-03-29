@@ -532,6 +532,7 @@
   "sharing.type.reports": "रिपोर्ट",
   "sharing.type.datasources": "डेटा स्रोत",
   "sharing.type.dashboards": "डैशबोर्ड",
+  "sharing.type.import_sources": "आयात स्रोत",
   "sharing.empty": "अभी तक कुछ भी साझा नहीं",
   "sharing.empty_desc": "आपके साथ साझा की गई वस्तुएं यहां दिखाई देंगी",
   "sharing.shared_by": "{{name}} द्वारा साझा",
@@ -882,5 +883,10 @@
   "import.json_array_path": "JSON सरणी पथ",
   "import.json_array_path_hint": "नेस्टेड array तक डॉट-विभाजित पथ। सभी key पर iterate करने के लिए * उपयोग करें (key एक कॉलम बन जाती है)। उदाहरण: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "डेटा आयात कॉन्फ़िगरेशन प्रबंधित करें",
-  "admin.permission_description.IMPORT_UPLOAD": "डेटा आयात के लिए फ़ाइलें अपलोड करें"
+  "admin.permission_description.IMPORT_UPLOAD": "डेटा आयात के लिए फ़ाइलें अपलोड करें",
+  "common.move_up": "ऊपर ले जाएं",
+  "common.move_down": "नीचे ले जाएं",
+  "designer.null_handling": "NULL मान",
+  "designer.null_handling.zero": "0 के रूप में दिखाएं",
+  "designer.null_handling.gap": "रेखा तोड़ें (गैप)"
 }

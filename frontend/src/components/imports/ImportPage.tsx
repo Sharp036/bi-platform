@@ -1063,9 +1063,11 @@ export default function ImportPage() {
                   <button onClick={() => handleCopy(src)} className="btn-ghost p-2" title={t('import.copy_source')}>
                     <Copy className="w-4 h-4" />
                   </button>
-                  <button onClick={() => setSharingSource(src)} className="btn-ghost p-2" title={t('common.share')}>
-                    <Share2 className="w-4 h-4" />
-                  </button>
+                  {permissions.includes('REPORT_SHARE') && (
+                    <button onClick={() => setSharingSource(src)} className="btn-ghost p-2" title={t('common.share')}>
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                  )}
                   <button onClick={() => { setEditingSource(src); setPendingForm(null); setShowForm(true) }} className="btn-ghost p-2">
                     <Pencil className="w-4 h-4" />
                   </button>

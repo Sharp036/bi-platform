@@ -65,6 +65,7 @@ export default function ReportViewerPage() {
 
   const [filterPanelPosition, setFilterPanelPosition] = useState<FilterPanelPosition>('top')
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
+  const [filterPanelWidth, setFilterPanelWidth] = useState(320) // w-80 = 320px
 
   const [containers, setContainers] = useState<ContainerItem[]>([])
   const [activeTabByContainer, setActiveTabByContainer] = useState<Record<number, number>>({})
@@ -479,35 +480,59 @@ export default function ReportViewerPage() {
   }
 
   const sidePanel = report.parameters.length > 0 && visibleParameters.length > 0 && (
-    <div className={`${filterPanelCollapsed ? 'w-0 overflow-hidden' : 'w-80'} flex-shrink-0`}>
-      <div className="sticky top-3">
-        <div className="card p-2 mb-2">
-          <div className="flex items-center justify-between gap-2">
-            {!filterPanelCollapsed && (
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                {t('widgets.type.filter')}
-              </span>
-            )}
-            <button
-              onClick={() => setFilterPanelCollapsed(v => !v)}
-              className="btn-ghost text-xs px-2 py-1 w-full"
-              title={t('reports.hide_filters')}
-            >
-              {t('reports.hide_filters')}
-            </button>
+    <div className="flex flex-shrink-0" style={{ width: filterPanelCollapsed ? 0 : `${filterPanelWidth}px` }}>
+      <div className={`flex-1 min-w-0 ${filterPanelCollapsed ? 'overflow-hidden' : ''}`}>
+        <div className="sticky top-3">
+          <div className="card p-2 mb-2">
+            <div className="flex items-center justify-between gap-2">
+              {!filterPanelCollapsed && (
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  {t('widgets.type.filter')}
+                </span>
+              )}
+              <button
+                onClick={() => setFilterPanelCollapsed(v => !v)}
+                className="btn-ghost text-xs px-2 py-1 w-full"
+                title={t('reports.hide_filters')}
+              >
+                {t('reports.hide_filters')}
+              </button>
+            </div>
           </div>
+          {!filterPanelCollapsed && (
+            <EnhancedParameterPanel
+              reportId={Number(id)}
+              parameters={visibleParameters}
+              onApply={handleRender}
+              loading={rendering}
+              compact
+              currentParameters={currentParams}
+            />
+          )}
         </div>
-        {!filterPanelCollapsed && (
-          <EnhancedParameterPanel
-            reportId={Number(id)}
-            parameters={visibleParameters}
-            onApply={handleRender}
-            loading={rendering}
-            compact
-            currentParameters={currentParams}
-          />
-        )}
       </div>
+      {/* Drag handle for resizing filter panel */}
+      {!filterPanelCollapsed && (
+        <div
+          className="w-1 cursor-col-resize hover:bg-brand-300 dark:hover:bg-brand-700 active:bg-brand-400 transition-colors flex-shrink-0"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            const startX = e.clientX
+            const startW = filterPanelWidth
+            const isRight = filterPanelPosition === 'right'
+            const onMove = (me: MouseEvent) => {
+              const delta = me.clientX - startX
+              setFilterPanelWidth(Math.max(200, Math.min(600, startW + (isRight ? -delta : delta))))
+            }
+            const onUp = () => {
+              document.removeEventListener('mousemove', onMove)
+              document.removeEventListener('mouseup', onUp)
+            }
+            document.addEventListener('mousemove', onMove)
+            document.addEventListener('mouseup', onUp)
+          }}
+        />
+      )}
     </div>
   )
 

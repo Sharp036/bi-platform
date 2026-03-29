@@ -532,6 +532,7 @@
   "sharing.type.reports": "Rapporter",
   "sharing.type.datasources": "Datakilder",
   "sharing.type.dashboards": "Dashboards",
+  "sharing.type.import_sources": "Importkilder",
   "sharing.empty": "Intet delt endnu",
   "sharing.empty_desc": "Objekter delt med dig vises her",
   "sharing.shared_by": "delt af {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "JSON-arraystien",
   "import.json_array_path_hint": "Punkt-separeret sti til nestedt array. Brug * til at iterere alle nogler (nogel bliver en kolonne). Eksempel: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Administrer konfigurationer for dataimport",
-  "admin.permission_description.IMPORT_UPLOAD": "Upload filer til dataimport"
+  "admin.permission_description.IMPORT_UPLOAD": "Upload filer til dataimport",
+  "common.move_up": "Flyt op",
+  "common.move_down": "Flyt ned",
+  "designer.null_handling": "NULL-værdier",
+  "designer.null_handling.zero": "Vis som 0",
+  "designer.null_handling.gap": "Linjebrud (mellemrum)"
 }

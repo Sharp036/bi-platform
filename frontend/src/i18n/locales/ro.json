@@ -531,7 +531,8 @@
   "sharing.all_types": "Toate tipurile",
   "sharing.type.reports": "Rapoarte",
   "sharing.type.datasources": "Surse de date",
-  "sharing.type.dashboards": "Tablouri de bord",
+  "sharing.type.dashboards": "Panouri",
+  "sharing.type.import_sources": "Surse de import",
   "sharing.empty": "Nimic partajat încă",
   "sharing.empty_desc": "Obiectele partajate cu dvs. vor apărea aici",
   "sharing.shared_by": "partajat de {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "Calea matricei JSON",
   "import.json_array_path_hint": "Cale separata prin puncte catre matricea imbricate. Folositi * pentru a itera toate cheile (cheia devine coloana). Exemplu: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Gestioneaza configuratiile de import date",
-  "admin.permission_description.IMPORT_UPLOAD": "Incarca fisiere pentru importul datelor"
+  "admin.permission_description.IMPORT_UPLOAD": "Incarca fisiere pentru importul datelor",
+  "common.move_up": "Mută sus",
+  "common.move_down": "Mută jos",
+  "designer.null_handling": "Valori NULL",
+  "designer.null_handling.zero": "Afișează ca 0",
+  "designer.null_handling.gap": "Întrerupe linia (spațiu)"
 }

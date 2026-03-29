@@ -532,6 +532,7 @@
   "sharing.type.reports": "Rapporter",
   "sharing.type.datasources": "Datakällor",
   "sharing.type.dashboards": "Instrumentpaneler",
+  "sharing.type.import_sources": "Importkällor",
   "sharing.empty": "Inget delat ännu",
   "sharing.empty_desc": "Objekt som delas med dig visas här",
   "sharing.shared_by": "delad av {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "JSON-arraysokvaeg",
   "import.json_array_path_hint": "Punkt-separerad stig till kapslad array. Anvand * for att iterera alla nycklar (nyckel blir en kolumn). Exempel: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Hantera konfigurationer for dataimport",
-  "admin.permission_description.IMPORT_UPLOAD": "Ladda upp filer for dataimport"
+  "admin.permission_description.IMPORT_UPLOAD": "Ladda upp filer for dataimport",
+  "common.move_up": "Flytta upp",
+  "common.move_down": "Flytta ner",
+  "designer.null_handling": "NULL-värden",
+  "designer.null_handling.zero": "Visa som 0",
+  "designer.null_handling.gap": "Bryt linje (mellanrum)"
 }

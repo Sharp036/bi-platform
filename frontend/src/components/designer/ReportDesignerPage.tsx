@@ -74,6 +74,7 @@ export default function ReportDesignerPage() {
   const [rightPanel, setRightPanel] = useState<'props' | 'containers'>('props')
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false)
   const [rightPanelWidth, setRightPanelWidth] = useState(288) // 18rem = 288px (w-72)
+  const [settingsPanelWidth, setSettingsPanelWidth] = useState(380)
   const controlParams: ReportParameter[] = parameters.map(p => ({
     name: p.name,
     label: p.label,
@@ -390,9 +391,10 @@ export default function ReportDesignerPage() {
 
       {/* Main area: palette + canvas + properties */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Left: Settings panel */}
+        {/* Left: Settings panel (resizable) */}
         {!previewMode && showSettings && (
-          <div className="w-[380px] flex-shrink-0 overflow-y-auto border-r border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/40 p-3 space-y-4">
+          <div className="flex-shrink-0 flex" style={{ width: `${settingsPanelWidth}px` }}>
+          <div className="flex-1 overflow-y-auto border-r border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/40 p-3 space-y-4 min-w-0">
             <div className="card p-3">
               <div className="space-y-3">
                 <div>
@@ -453,6 +455,25 @@ export default function ReportDesignerPage() {
                 />
               </div>
             )}
+          </div>
+          {/* Drag handle on right edge */}
+          <div
+            className="w-1 cursor-col-resize hover:bg-brand-300 dark:hover:bg-brand-700 active:bg-brand-400 transition-colors flex-shrink-0"
+            onMouseDown={(e) => {
+              e.preventDefault()
+              const startX = e.clientX
+              const startW = settingsPanelWidth
+              const onMove = (me: MouseEvent) => {
+                setSettingsPanelWidth(Math.max(250, Math.min(600, startW + (me.clientX - startX))))
+              }
+              const onUp = () => {
+                document.removeEventListener('mousemove', onMove)
+                document.removeEventListener('mouseup', onUp)
+              }
+              document.addEventListener('mousemove', onMove)
+              document.addEventListener('mouseup', onUp)
+            }}
+          />
           </div>
         )}
 

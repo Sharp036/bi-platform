@@ -532,6 +532,7 @@
   "sharing.type.reports": "Report",
   "sharing.type.datasources": "Origini dati",
   "sharing.type.dashboards": "Dashboard",
+  "sharing.type.import_sources": "Fonti di importazione",
   "sharing.empty": "Niente ancora condiviso",
   "sharing.empty_desc": "Gli oggetti condivisi con te appariranno qui",
   "sharing.shared_by": "condiviso da {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "Percorso array JSON",
   "import.json_array_path_hint": "Percorso separato da punti verso l'array annidato. Usa * per iterare tutte le chiavi (la chiave diventa una colonna). Esempio: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Gestire le configurazioni di importazione dati",
-  "admin.permission_description.IMPORT_UPLOAD": "Caricare file per l'importazione dati"
+  "admin.permission_description.IMPORT_UPLOAD": "Caricare file per l'importazione dati",
+  "common.move_up": "Sposta su",
+  "common.move_down": "Sposta giù",
+  "designer.null_handling": "Valori NULL",
+  "designer.null_handling.zero": "Mostra come 0",
+  "designer.null_handling.gap": "Interrompi linea (vuoto)"
 }

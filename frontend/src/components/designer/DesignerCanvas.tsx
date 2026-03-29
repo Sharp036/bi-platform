@@ -377,7 +377,7 @@ function WidgetBlock({
   }
 
   const cc = widget.chartConfig as Record<string, unknown>
-  const chartConfigStr = widget.widgetType === 'CHART' && previewData ? JSON.stringify(cc) : undefined
+  const chartConfigStr = (widget.widgetType === 'CHART' || widget.widgetType === 'TABLE') && previewData ? JSON.stringify(cc) : undefined
 
   const tablePreviewData = widget.widgetType === 'TABLE' && previewData ? (() => {
     const visCols = cc.visibleColumns as string[] | undefined
@@ -464,7 +464,7 @@ function WidgetBlock({
             </div>
           ) : tablePreviewData ? (
             <div className="w-full h-full overflow-hidden">
-              <TableWidget data={tablePreviewData} />
+              <TableWidget data={tablePreviewData} chartConfig={chartConfigStr} />
             </div>
           ) : kpiPreview ? (
             <div className="text-center w-full">

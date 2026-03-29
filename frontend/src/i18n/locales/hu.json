@@ -532,6 +532,7 @@
   "sharing.type.reports": "Jelentések",
   "sharing.type.datasources": "Adatforrások",
   "sharing.type.dashboards": "Irányítópultok",
+  "sharing.type.import_sources": "Importforrások",
   "sharing.empty": "Még nincs megosztva semmi",
   "sharing.empty_desc": "Az Önnel megosztott objektumok itt jelennek meg",
   "sharing.shared_by": "megosztotta: {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "JSON tomb utvonala",
   "import.json_array_path_hint": "Ponttal elvalasztott ut a beagyazott tombbe. Hasznalja a * karaktert az osszes kulcs ateresetelesere (a kulcs oszloppa valik). Pelda: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Adatimport-konfiguraciok kezelese",
-  "admin.permission_description.IMPORT_UPLOAD": "Fajlok feltoltese adatimporthoz"
+  "admin.permission_description.IMPORT_UPLOAD": "Fajlok feltoltese adatimporthoz",
+  "common.move_up": "Felfelé mozgatás",
+  "common.move_down": "Lefelé mozgatás",
+  "designer.null_handling": "NULL értékek",
+  "designer.null_handling.zero": "Megjelenítés 0-ként",
+  "designer.null_handling.gap": "Vonal megszakítása (rés)"
 }

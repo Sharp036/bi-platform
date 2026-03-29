@@ -532,6 +532,7 @@
   "sharing.type.reports": "דוחות",
   "sharing.type.datasources": "מקורות נתונים",
   "sharing.type.dashboards": "לוחות מחוונים",
+  "sharing.type.import_sources": "מקורות ייבוא",
   "sharing.empty": "עדיין לא שותף דבר",
   "sharing.empty_desc": "אובייקטים ששותפו איתך יופיעו כאן",
   "sharing.shared_by": "שותף על ידי {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "נתיב מערך JSON",
   "import.json_array_path_hint": "נתיב מופרד בנקודות למערך מקונן. השתמש ב-* לעבור על כל המפתחות (המפתח הופך לעמודה). דוגמה: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "ניהול תצורות ייבוא נתונים",
-  "admin.permission_description.IMPORT_UPLOAD": "העלאת קבצים לייבוא נתונים"
+  "admin.permission_description.IMPORT_UPLOAD": "העלאת קבצים לייבוא נתונים",
+  "common.move_up": "הזז למעלה",
+  "common.move_down": "הזז למטה",
+  "designer.null_handling": "ערכי NULL",
+  "designer.null_handling.zero": "הצג כ-0",
+  "designer.null_handling.gap": "שבירת קו (רווח)"
 }

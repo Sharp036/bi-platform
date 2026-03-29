@@ -532,6 +532,7 @@
   "sharing.type.reports": "Informes",
   "sharing.type.datasources": "Fuentes de datos",
   "sharing.type.dashboards": "Paneles",
+  "sharing.type.import_sources": "Fuentes de importación",
   "sharing.empty": "Aún no se ha compartido nada",
   "sharing.empty_desc": "Los objetos compartidos con usted aparecerán aquí",
   "sharing.shared_by": "compartido por {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "Ruta del array JSON",
   "import.json_array_path_hint": "Ruta separada por puntos al array anidado. Use * para iterar todas las claves (la clave se convierte en columna). Ejemplo: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Gestionar configuraciones de importacion de datos",
-  "admin.permission_description.IMPORT_UPLOAD": "Subir archivos para la importacion de datos"
+  "admin.permission_description.IMPORT_UPLOAD": "Subir archivos para la importacion de datos",
+  "common.move_up": "Mover arriba",
+  "common.move_down": "Mover abajo",
+  "designer.null_handling": "Valores NULL",
+  "designer.null_handling.zero": "Mostrar como 0",
+  "designer.null_handling.gap": "Romper línea (espacio)"
 }

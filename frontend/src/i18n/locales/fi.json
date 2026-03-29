@@ -531,7 +531,8 @@
   "sharing.all_types": "Kaikki tyypit",
   "sharing.type.reports": "Raportit",
   "sharing.type.datasources": "Tietolähteet",
-  "sharing.type.dashboards": "Koontinäytöt",
+  "sharing.type.dashboards": "Kojelaudat",
+  "sharing.type.import_sources": "Tuontilähteet",
   "sharing.empty": "Ei jaettuja kohteita vielä",
   "sharing.empty_desc": "Kanssasi jaetut kohteet näkyvät täällä",
   "sharing.shared_by": "jakanut {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "JSON-taulukkopolku",
   "import.json_array_path_hint": "Pistemerkilla erotettu polku sisakkaiseen taulukkoon. Kayta * iteroimaan kaikkia avaimia (avaimesta tulee sarake). Esimerkki: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Hallinnoi tietojen tuontimaarityksia",
-  "admin.permission_description.IMPORT_UPLOAD": "Lataa tiedostoja tietojen tuontia varten"
+  "admin.permission_description.IMPORT_UPLOAD": "Lataa tiedostoja tietojen tuontia varten",
+  "common.move_up": "Siirrä ylös",
+  "common.move_down": "Siirrä alas",
+  "designer.null_handling": "NULL-arvot",
+  "designer.null_handling.zero": "Näytä nollana",
+  "designer.null_handling.gap": "Katkaise viiva (aukko)"
 }

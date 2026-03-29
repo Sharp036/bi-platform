@@ -80,18 +80,16 @@ export default function EnhancedParameterPanel({
     } catch { /* ignore */ }
   }, [reportId])
 
-  // Collect all other parameter values (so any :param in the options SQL gets substituted)
+  // Collect all other non-empty parameter values (so any :param in options SQL gets substituted)
   const collectParentValues = useCallback((paramName: string, vals: Record<string, string>) => {
     const result: Record<string, string> = {}
     for (const [k, v] of Object.entries(vals)) {
-      if (k !== paramName && v) result[k] = v
+      if (k !== paramName && v && v.trim()) result[k] = v
     }
     return result
   }, [])
 
-  // Initialize values first, then load options (so cascade parents have values)
-  const [valuesReady, setValuesReady] = useState(false)
-
+  // Build values from parameters + currentParameters, then load all dropdown options
   useEffect(() => {
     const init: Record<string, string> = {}
     parameters.forEach(p => {
@@ -103,19 +101,32 @@ export default function EnhancedParameterPanel({
       }
     })
     setValues(init)
-    setValuesReady(true)
   }, [parameters])
 
-  // Load initial options for data-driven dropdowns (after values are initialized)
+  // Load dropdown options whenever controls are ready or visible parameters change
   useEffect(() => {
-    if (!valuesReady) return
-    controls.forEach(c => {
-      if (c.optionsQuery && c.datasourceId) {
-        const parentValues = collectParentValues(c.parameterName, values)
-        loadOptions(c.parameterName, parentValues)
+    if (controls.length === 0) return
+    // Build values from ALL report params (not just visible) so :param references resolve
+    const allVals: Record<string, string> = {}
+    // First, fill from all report-level parameters (including those on other tabs)
+    if (currentParameters) {
+      for (const [k, v] of Object.entries(currentParameters)) {
+        if (v !== undefined && v !== null && v !== '') allVals[k] = String(v)
+      }
+    }
+    // Then overlay visible parameter defaults
+    parameters.forEach(p => {
+      if (!(p.name in allVals) && p.defaultValue) {
+        allVals[p.name] = resolveDynamicDefault(p)
       }
     })
-  }, [controls, loadOptions, valuesReady])
+    const visibleNames = new Set(parameters.map(p => p.name))
+    controls.forEach(c => {
+      if (c.optionsQuery && c.datasourceId && visibleNames.has(c.parameterName)) {
+        loadOptions(c.parameterName, collectParentValues(c.parameterName, allVals))
+      }
+    })
+  }, [controls, parameters, loadOptions, collectParentValues])
 
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it
   const handleChange = (paramName: string, value: string) => {
@@ -198,6 +209,7 @@ export default function EnhancedParameterPanel({
                   reportId={reportId}
                   columnName={columnByParam[p.name]}
                   initialOptions={dynamicOptions[p.name] || []}
+                  parentValues={collectParentValues(p.name, values)}
                   onChange={v => handleChange(p.name, v)}
                 />
               ) : controlType === 'DROPDOWN' || p.paramType === 'SELECT' ? (
@@ -258,12 +270,13 @@ export default function EnhancedParameterPanel({
 //  Sub-components
 // ═══════════════════════════════════════════
 
-function TypeaheadControl({ value, paramName, reportId, columnName, initialOptions, onChange }: {
+function TypeaheadControl({ value, paramName, reportId, columnName, initialOptions, parentValues, onChange }: {
   value: string
   paramName: string
   reportId: number
   columnName: string
   initialOptions?: string[]
+  parentValues?: Record<string, string>
   onChange: (v: string) => void
 }) {
   const [query, setQuery] = useState(value)
@@ -286,11 +299,11 @@ function TypeaheadControl({ value, paramName, reportId, columnName, initialOptio
       return
     }
     setLoading(true)
-    controlsApi.searchOptions(reportId, paramName, q, columnName)
+    controlsApi.searchOptions(reportId, paramName, q, columnName, 50, parentValues)
       .then(res => { setOptions(res.options); setOpen(true) })
       .catch(() => setOptions([]))
       .finally(() => setLoading(false))
-  }, [reportId, paramName, columnName, initialOptions])
+  }, [reportId, paramName, columnName, initialOptions, parentValues])
 
   const handleInput = (q: string) => {
     setQuery(q)

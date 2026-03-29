@@ -532,6 +532,7 @@
   "sharing.type.reports": "รายงาน",
   "sharing.type.datasources": "แหล่งข้อมูล",
   "sharing.type.dashboards": "แดชบอร์ด",
+  "sharing.type.import_sources": "แหล่งนำเข้า",
   "sharing.empty": "ยังไม่มีรายการที่แชร์",
   "sharing.empty_desc": "วัตถุที่แชร์กับคุณจะแสดงที่นี่",
   "sharing.shared_by": "แชร์โดย {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "เส้นทางอาร์เรย์ JSON",
   "import.json_array_path_hint": "เส้นทางที่คั่นด้วยจุดไปยัง array ที่ซ้อนอยู่ ใช้ * เพื่อวนซ้ำทุก key (key จะกลายเป็นคอลัมน์) ตัวอย่าง: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "จัดการการตั้งค่าการนำเข้าข้อมูล",
-  "admin.permission_description.IMPORT_UPLOAD": "อัปโหลดไฟล์สำหรับการนำเข้าข้อมูล"
+  "admin.permission_description.IMPORT_UPLOAD": "อัปโหลดไฟล์สำหรับการนำเข้าข้อมูล",
+  "common.move_up": "ย้ายขึ้น",
+  "common.move_down": "ย้ายลง",
+  "designer.null_handling": "ค่า NULL",
+  "designer.null_handling.zero": "แสดงเป็น 0",
+  "designer.null_handling.gap": "ตัดเส้น (ช่องว่าง)"
 }

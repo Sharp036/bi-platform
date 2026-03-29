@@ -531,7 +531,8 @@
   "sharing.all_types": "جميع الأنواع",
   "sharing.type.reports": "التقارير",
   "sharing.type.datasources": "مصادر البيانات",
-  "sharing.type.dashboards": "لوحات المعلومات",
+  "sharing.type.dashboards": "Dashboards",
+  "sharing.type.import_sources": "مصادر الاستيراد",
   "sharing.empty": "لا توجد مشاركات بعد",
   "sharing.empty_desc": "ستظهر هنا الكائنات المشاركة معك",
   "sharing.shared_by": "شاركه {{name}}",
@@ -882,5 +883,10 @@
   "import.json_array_path": "مسار مصفوفة JSON",
   "import.json_array_path_hint": "مسار مفصول بنقاط إلى المصفوفة المتداخلة. استخدم * للتكرار على جميع المفاتيح (يصبح المفتاح عموداً). مثال: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "إدارة تكوينات استيراد البيانات",
-  "admin.permission_description.IMPORT_UPLOAD": "رفع الملفات لاستيراد البيانات"
+  "admin.permission_description.IMPORT_UPLOAD": "رفع الملفات لاستيراد البيانات",
+  "common.move_up": "تحريك لأعلى",
+  "common.move_down": "تحريك لأسفل",
+  "designer.null_handling": "قيم NULL",
+  "designer.null_handling.zero": "عرض كـ 0",
+  "designer.null_handling.gap": "قطع الخط (فجوة)"
 }
