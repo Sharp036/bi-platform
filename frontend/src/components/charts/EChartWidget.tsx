@@ -255,6 +255,7 @@ function buildOption(
   const dataLabelBoxed = !!config.dataLabelBoxed
   const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
   const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
+  const nullHandling = (config.nullHandling as string) || 'zero'
   const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
   const legendPosition = (config.legendPosition as string) || 'auto'
   const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency, yAxisDecimals)
@@ -267,13 +268,19 @@ function buildOption(
   const categories = rows.map(r => String(r[categoryCol] ?? ''))
   const series: any[] = seriesCols.map((col, seriesIndex) => {
     const seriesColor = palette[seriesIndex % palette.length]
-    const colValues = rows.map(r => Number(r[col] ?? 0))
-    const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues)
+    const colValues = rows.map(r => {
+      const v = r[col]
+      if (v == null || v === '') return nullHandling === 'gap' ? null : 0
+      return Number(v) || 0
+    })
+    const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0))
     return {
       name: col,
       type: chartType,
+      connectNulls: false,
       data: rows.map((r, dataIndex) => {
-        const rawValue = r[col] ?? 0
+        const v = r[col]
+        const rawValue = (v == null || v === '') ? (nullHandling === 'gap' ? '-' : 0) : (Number(v) || 0)
         if (!showDataLabels || chartType === 'pie' || isLabelVisible(dataIndex)) return rawValue
         return {
           value: rawValue,
@@ -299,7 +306,7 @@ function buildOption(
           fontSize: 10,
           formatter: chartType === 'pie'
             ? undefined
-            : buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues, dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
+            : buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0), dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
           ...(dataLabelBoxed && chartType !== 'pie' ? {
             borderColor: seriesColor,
             borderWidth: 1,
@@ -352,7 +359,8 @@ function buildOption(
     dataLabelCount
   )
   const fixedLabelTopPad = showDataLabels && hasAxis ? 120 : 0
-  const labelTopPad = isInlineLabels ? 0
+  const inlineLabelTopPad = showDataLabels && hasAxis ? 24 : 0
+  const labelTopPad = isInlineLabels ? inlineLabelTopPad
     : dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
   const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
   // containLabel: true already accounts for x-axis label height, so gridBottom
@@ -392,7 +400,7 @@ function buildOption(
     series,
     ...(showDataLabels && hasAxis ? {
       labelLayout: isInlineLabels
-        ? createInlineLabelLayout(getChartWidth)
+        ? createInlineLabelLayout(getChartWidth, () => labelTopPad || 8)
         : createCollisionFreeLayout(getChartWidth, manualPositions, placementsRef, dataLabelSpread),
     } : {}),
   }

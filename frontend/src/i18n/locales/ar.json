@@ -882,5 +882,10 @@
   "import.json_array_path": "مسار مصفوفة JSON",
   "import.json_array_path_hint": "مسار مفصول بنقاط إلى المصفوفة المتداخلة. استخدم * للتكرار على جميع المفاتيح (يصبح المفتاح عموداً). مثال: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "إدارة تكوينات استيراد البيانات",
-  "admin.permission_description.IMPORT_UPLOAD": "رفع الملفات لاستيراد البيانات"
+  "admin.permission_description.IMPORT_UPLOAD": "رفع الملفات لاستيراد البيانات",
+  "common.move_up": "تحريك لأعلى",
+  "common.move_down": "تحريك لأسفل",
+  "designer.null_handling": "قيم NULL",
+  "designer.null_handling.zero": "عرض كـ 0",
+  "designer.null_handling.gap": "قطع الخط (فجوة)"
 }

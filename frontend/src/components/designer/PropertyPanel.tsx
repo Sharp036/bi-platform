@@ -432,6 +432,17 @@ export default function PropertyPanel() {
                     </select>
                   </Field>
 
+                  <Field label={t('designer.null_handling')}>
+                    <select
+                      value={cc.nullHandling as string || 'zero'}
+                      onChange={e => update({ chartConfig: { ...cc, nullHandling: e.target.value } })}
+                      className="input text-sm"
+                    >
+                      <option value="zero">{t('designer.null_handling.zero')}</option>
+                      <option value="gap">{t('designer.null_handling.gap')}</option>
+                    </select>
+                  </Field>
+
                   {availableCols.length > 0 && (
                     <>
                       <Field label={t('designer.category_field')}>

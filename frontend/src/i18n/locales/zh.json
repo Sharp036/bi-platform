@@ -882,5 +882,10 @@
   "import.json_array_path": "JSON 数组路径",
   "import.json_array_path_hint": "以点分隔的嵌套数组路径。使用 * 遍历所有键（键成为列）。示例：clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "管理数据导入配置",
-  "admin.permission_description.IMPORT_UPLOAD": "上传文件以进行数据导入"
+  "admin.permission_description.IMPORT_UPLOAD": "上传文件以进行数据导入",
+  "common.move_up": "上移",
+  "common.move_down": "下移",
+  "designer.null_handling": "NULL值",
+  "designer.null_handling.zero": "显示为0",
+  "designer.null_handling.gap": "断线（间隙）"
 }

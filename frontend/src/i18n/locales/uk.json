@@ -882,5 +882,10 @@
   "import.json_array_path": "Шлях до масиву JSON",
   "import.json_array_path_hint": "Шлях через крапку до вкладеного масиву. Використовуйте * для ітерації всіх ключів (ключ стає стовпцем). Приклад: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Керування конфігураціями імпорту даних",
-  "admin.permission_description.IMPORT_UPLOAD": "Завантаження файлів для імпорту даних"
+  "admin.permission_description.IMPORT_UPLOAD": "Завантаження файлів для імпорту даних",
+  "common.move_up": "Перемістити вгору",
+  "common.move_down": "Перемістити вниз",
+  "designer.null_handling": "Значення NULL",
+  "designer.null_handling.zero": "Показувати як 0",
+  "designer.null_handling.gap": "Розрив лінії (пропуск)"
 }
