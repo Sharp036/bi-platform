@@ -82,11 +82,11 @@ export default function EnhancedParameterPanel({
     } catch (err) { console.error('[loadOptions]', paramName, 'ERROR:', err) }
   }, [reportId])
 
-  // Collect all other parameter values (so any :param in the options SQL gets substituted)
+  // Collect all other non-empty parameter values (so any :param in options SQL gets substituted)
   const collectParentValues = useCallback((paramName: string, vals: Record<string, string>) => {
     const result: Record<string, string> = {}
     for (const [k, v] of Object.entries(vals)) {
-      if (k !== paramName && v) result[k] = v
+      if (k !== paramName && v && v.trim()) result[k] = v
     }
     return result
   }, [])
