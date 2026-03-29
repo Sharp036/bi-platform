@@ -532,6 +532,7 @@
   "sharing.type.reports": "Báo cáo",
   "sharing.type.datasources": "Nguồn dữ liệu",
   "sharing.type.dashboards": "Bảng điều khiển",
+  "sharing.type.import_sources": "Nguồn nhập",
   "sharing.empty": "Chưa có gì được chia sẻ",
   "sharing.empty_desc": "Các đối tượng được chia sẻ với bạn sẽ xuất hiện tại đây",
   "sharing.shared_by": "được chia sẻ bởi {{name}}",

@@ -532,6 +532,7 @@
   "sharing.type.reports": "Jelentések",
   "sharing.type.datasources": "Adatforrások",
   "sharing.type.dashboards": "Irányítópultok",
+  "sharing.type.import_sources": "Importforrások",
   "sharing.empty": "Még nincs megosztva semmi",
   "sharing.empty_desc": "Az Önnel megosztott objektumok itt jelennek meg",
   "sharing.shared_by": "megosztotta: {{name}}",

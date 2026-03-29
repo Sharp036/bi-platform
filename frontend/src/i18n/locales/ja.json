@@ -532,6 +532,7 @@
   "sharing.type.reports": "レポート",
   "sharing.type.datasources": "データソース",
   "sharing.type.dashboards": "ダッシュボード",
+  "sharing.type.import_sources": "インポートソース",
   "sharing.empty": "共有アイテムはまだありません",
   "sharing.empty_desc": "あなたと共有されたオブジェクトがここに表示されます",
   "sharing.shared_by": "{{name}} が共有",

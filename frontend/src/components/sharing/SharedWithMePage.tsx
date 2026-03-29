@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { sharingApi, SharedObjectItem } from '@/api/sharing'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { Share2, FileBarChart, Database, LayoutDashboard, Search } from 'lucide-react'
+import { Share2, FileBarChart, Database, LayoutDashboard, Search, Upload } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -12,12 +12,21 @@ const typeIcon: Record<string, typeof FileBarChart> = {
   REPORT: FileBarChart,
   DATASOURCE: Database,
   DASHBOARD: LayoutDashboard,
+  IMPORT_SOURCE: Upload,
 }
 
 const typePath: Record<string, string> = {
   REPORT: '/reports',
   DATASOURCE: '/datasources',
   DASHBOARD: '/',
+  IMPORT_SOURCE: '/import',
+}
+
+const typeI18nKey: Record<string, string> = {
+  REPORT: 'sharing.type.reports',
+  DATASOURCE: 'sharing.type.datasources',
+  DASHBOARD: 'sharing.type.dashboards',
+  IMPORT_SOURCE: 'sharing.type.import_sources',
 }
 
 const accessColor: Record<string, string> = {
@@ -66,6 +75,7 @@ export default function SharedWithMePage() {
           <option value="REPORT">{t('sharing.type.reports')}</option>
           <option value="DATASOURCE">{t('sharing.type.datasources')}</option>
           <option value="DASHBOARD">{t('sharing.type.dashboards')}</option>
+          <option value="IMPORT_SOURCE">{t('sharing.type.import_sources')}</option>
         </select>
       </div>
 
@@ -81,6 +91,8 @@ export default function SharedWithMePage() {
             const Icon = typeIcon[item.objectType] || FileBarChart
             const path = item.objectType === 'REPORT'
               ? `/reports/${item.objectId}`
+              : item.objectType === 'IMPORT_SOURCE'
+              ? '/import'
               : typePath[item.objectType] || '/'
 
             return (
@@ -98,7 +110,7 @@ export default function SharedWithMePage() {
                     {item.objectName}
                   </p>
                   <p className="text-xs text-slate-400">
-                    {item.objectType} {item.sharedBy && `· ${t('sharing.shared_by', { name: item.sharedBy })}`}
+                    {t(typeI18nKey[item.objectType] || item.objectType)} {item.sharedBy && `· ${t('sharing.shared_by', { name: item.sharedBy })}`}
                   </p>
                 </div>
 

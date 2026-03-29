@@ -532,6 +532,7 @@
   "sharing.type.reports": "Rapporter",
   "sharing.type.datasources": "Datakilder",
   "sharing.type.dashboards": "Dashboards",
+  "sharing.type.import_sources": "Importkilder",
   "sharing.empty": "Intet delt endnu",
   "sharing.empty_desc": "Objekter delt med dig vises her",
   "sharing.shared_by": "delt af {{name}}",

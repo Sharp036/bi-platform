@@ -547,6 +547,7 @@
   "sharing.type.reports": "Отчёты",
   "sharing.type.datasources": "Источники данных",
   "sharing.type.dashboards": "Дашборды",
+  "sharing.type.import_sources": "Источники импорта",
   "sharing.empty": "Пока ничего не предоставлено",
   "sharing.empty_desc": "Объекты, к которым вам предоставлен доступ, появятся здесь",
   "sharing.shared_by": "предоставил(а) {{name}}",

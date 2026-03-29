@@ -12,7 +12,7 @@ const navItems = [
   { to: '/scripts', icon: Braces, i18nKey: 'nav.scripts', permission: 'QUERY_CREATE' },
   { to: '/datasources', icon: Database, i18nKey: 'nav.datasources', permission: 'DATASOURCE_VIEW' },
   { to: '/import', icon: Upload, i18nKey: 'nav.import', permission: 'IMPORT_UPLOAD' },
-  { to: '/models', icon: Boxes, i18nKey: 'nav.models', permission: 'REPORT_VIEW' },
+  { to: '/models', icon: Boxes, i18nKey: 'nav.models', permission: 'REPORT_CREATE' },
   { to: '/templates', icon: LayoutTemplate, i18nKey: 'nav.templates', permission: 'REPORT_VIEW' },
   { to: '/schedules', icon: CalendarClock, i18nKey: 'nav.schedules', permission: 'REPORT_CREATE' },
   { to: '/alerts', icon: Bell, i18nKey: 'nav.alerts', permission: 'REPORT_VIEW' },

@@ -532,6 +532,7 @@
   "sharing.type.reports": "Rapporter",
   "sharing.type.datasources": "Datakällor",
   "sharing.type.dashboards": "Instrumentpaneler",
+  "sharing.type.import_sources": "Importkällor",
   "sharing.empty": "Inget delat ännu",
   "sharing.empty_desc": "Objekt som delas med dig visas här",
   "sharing.shared_by": "delad av {{name}}",

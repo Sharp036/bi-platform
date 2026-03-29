@@ -532,6 +532,7 @@
   "sharing.type.reports": "रिपोर्ट",
   "sharing.type.datasources": "डेटा स्रोत",
   "sharing.type.dashboards": "डैशबोर्ड",
+  "sharing.type.import_sources": "आयात स्रोत",
   "sharing.empty": "अभी तक कुछ भी साझा नहीं",
   "sharing.empty_desc": "आपके साथ साझा की गई वस्तुएं यहां दिखाई देंगी",
   "sharing.shared_by": "{{name}} द्वारा साझा",

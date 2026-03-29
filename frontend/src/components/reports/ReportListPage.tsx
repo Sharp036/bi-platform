@@ -33,7 +33,10 @@ export default function ReportListPage() {
     (localStorage.getItem('reports_view_mode') as 'grid' | 'table') ?? 'grid'
   )
   const permissions = useAuthStore(s => s.user?.permissions ?? [])
+  const canCreate = permissions.includes('REPORT_CREATE')
+  const canEdit = permissions.includes('REPORT_EDIT')
   const canDelete = permissions.includes('REPORT_DELETE')
+  const canShare = permissions.includes('REPORT_SHARE')
 
   const setView = (mode: 'grid' | 'table') => {
     setViewMode(mode)
@@ -67,11 +70,17 @@ export default function ReportListPage() {
   const rowActions = (r: ReportListItem) => (
     <div className="flex items-center gap-1">
       <FavoriteButton objectType="REPORT" objectId={r.id} size={14} />
-      <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs" title={t('common.edit')}><Pencil className="w-3.5 h-3.5" /></Link>
+      {canEdit && (
+        <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs" title={t('common.edit')}><Pencil className="w-3.5 h-3.5" /></Link>
+      )}
       <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
-      <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
-      <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
-      <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs" title={t('common.share')}><Share2 className="w-3.5 h-3.5" /></button>
+      {canEdit && (<>
+        <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
+        <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
+      </>)}
+      {canShare && (
+        <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs" title={t('common.share')}><Share2 className="w-3.5 h-3.5" /></button>
+      )}
       {canDelete && (
         <button
           onClick={async () => {
@@ -97,7 +106,7 @@ export default function ReportListPage() {
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('reports.title')}</h1>
-        <Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.new_report')}</Link>
+        {canCreate && <Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.new_report')}</Link>}
       </div>
 
       {/* Filters */}

@@ -532,6 +532,7 @@
   "sharing.type.reports": "Informes",
   "sharing.type.datasources": "Fuentes de datos",
   "sharing.type.dashboards": "Paneles",
+  "sharing.type.import_sources": "Fuentes de importación",
   "sharing.empty": "Aún no se ha compartido nada",
   "sharing.empty_desc": "Los objetos compartidos con usted aparecerán aquí",
   "sharing.shared_by": "compartido por {{name}}",

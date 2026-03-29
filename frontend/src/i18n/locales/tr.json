@@ -532,6 +532,7 @@
   "sharing.type.reports": "Raporlar",
   "sharing.type.datasources": "Veri Kaynakları",
   "sharing.type.dashboards": "Panolar",
+  "sharing.type.import_sources": "İçe aktarma kaynakları",
   "sharing.empty": "Henüz paylaşılan bir şey yok",
   "sharing.empty_desc": "Sizinle paylaşılan nesneler burada görünecek",
   "sharing.shared_by": "{{name}} tarafından paylaşıldı",

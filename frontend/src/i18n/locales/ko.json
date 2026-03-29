@@ -532,6 +532,7 @@
   "sharing.type.reports": "리포트",
   "sharing.type.datasources": "데이터 소스",
   "sharing.type.dashboards": "대시보드",
+  "sharing.type.import_sources": "가져오기 소스",
   "sharing.empty": "공유된 항목이 아직 없습니다",
   "sharing.empty_desc": "공유된 객체가 여기에 표시됩니다",
   "sharing.shared_by": "{{name}}이(가) 공유",
