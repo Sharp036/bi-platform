@@ -139,10 +139,12 @@ class ControlService(
 
         var query = control.optionsQuery!!
 
-        // Substitute all parent values (direct parent + ancestors up the cascade chain)
+        // Substitute all parent values
+        log.info("loadOptions [{}] parentValues={}", parameterName, parentValues)
         for ((paramName, paramVal) in parentValues) {
             query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
         }
+        log.info("loadOptions [{}] query={}", parameterName, query)
 
         val threshold = 1000
         return try {
