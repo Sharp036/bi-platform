@@ -139,9 +139,27 @@ class ControlService(
 
         var query = control.optionsQuery!!
 
-        // Substitute all parent values
+        // Substitute provided parent values, skip blank ones
         for ((paramName, paramVal) in parentValues) {
-            query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
+            if (paramVal.isNotBlank()) {
+                query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
+            }
+        }
+        // Remove any remaining unsubstituted :param references by dropping their AND-clause.
+        // Matches patterns like: AND column = :param  /  AND column != :param  /  AND func(:param)
+        // Stops at next AND, ORDER, GROUP, LIMIT, HAVING or end of string.
+        val unsubstituted = Regex(":[a-zA-Z_]\\w*")
+        while (unsubstituted.containsMatchIn(query)) {
+            query = query.replace(
+                Regex("""(?i)\s+AND\s+[^,)]*?:[a-zA-Z_]\w*[^,)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
+                ""
+            )
+            // Safety: if the regex didn't remove anything, break to avoid infinite loop
+            if (unsubstituted.containsMatchIn(query)) {
+                // Fallback: replace remaining :params with empty string to avoid SQL error
+                query = query.replace(unsubstituted, "''")
+                break
+            }
         }
 
         val threshold = 1000
