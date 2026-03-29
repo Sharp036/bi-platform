@@ -89,8 +89,8 @@ export default function EnhancedParameterPanel({
     return result
   }, [])
 
-  // Initialize values first, then load options (so cascade parents have values)
-  const [valuesReady, setValuesReady] = useState(false)
+  // Initialize values, then load options with those values as parent context
+  const initializedRef = useRef(false)
 
   useEffect(() => {
     const init: Record<string, string> = {}
@@ -103,19 +103,17 @@ export default function EnhancedParameterPanel({
       }
     })
     setValues(init)
-    setValuesReady(true)
-  }, [parameters])
-
-  // Load initial options for data-driven dropdowns (after values are initialized)
-  useEffect(() => {
-    if (!valuesReady) return
-    controls.forEach(c => {
-      if (c.optionsQuery && c.datasourceId) {
-        const parentValues = collectParentValues(c.parameterName, values)
-        loadOptions(c.parameterName, parentValues)
-      }
-    })
-  }, [controls, loadOptions, valuesReady])
+    // Use init directly (not stale `values` from closure) to load options
+    if (controls.length > 0 && !initializedRef.current) {
+      initializedRef.current = true
+      controls.forEach(c => {
+        if (c.optionsQuery && c.datasourceId) {
+          const parentValues = collectParentValues(c.parameterName, init)
+          loadOptions(c.parameterName, parentValues)
+        }
+      })
+    }
+  }, [parameters, controls])
 
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it
   const handleChange = (paramName: string, value: string) => {
