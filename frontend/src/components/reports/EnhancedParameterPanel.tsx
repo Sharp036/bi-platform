@@ -211,6 +211,7 @@ export default function EnhancedParameterPanel({
                   reportId={reportId}
                   columnName={columnByParam[p.name]}
                   initialOptions={dynamicOptions[p.name] || []}
+                  parentValues={collectParentValues(p.name, values)}
                   onChange={v => handleChange(p.name, v)}
                 />
               ) : controlType === 'DROPDOWN' || p.paramType === 'SELECT' ? (
@@ -271,12 +272,13 @@ export default function EnhancedParameterPanel({
 //  Sub-components
 // ═══════════════════════════════════════════
 
-function TypeaheadControl({ value, paramName, reportId, columnName, initialOptions, onChange }: {
+function TypeaheadControl({ value, paramName, reportId, columnName, initialOptions, parentValues, onChange }: {
   value: string
   paramName: string
   reportId: number
   columnName: string
   initialOptions?: string[]
+  parentValues?: Record<string, string>
   onChange: (v: string) => void
 }) {
   const [query, setQuery] = useState(value)
@@ -299,11 +301,11 @@ function TypeaheadControl({ value, paramName, reportId, columnName, initialOptio
       return
     }
     setLoading(true)
-    controlsApi.searchOptions(reportId, paramName, q, columnName)
+    controlsApi.searchOptions(reportId, paramName, q, columnName, 50, parentValues)
       .then(res => { setOptions(res.options); setOpen(true) })
       .catch(() => setOptions([]))
       .finally(() => setLoading(false))
-  }, [reportId, paramName, columnName, initialOptions])
+  }, [reportId, paramName, columnName, initialOptions, parentValues])
 
   const handleInput = (q: string) => {
     setQuery(q)

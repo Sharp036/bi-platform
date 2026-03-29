@@ -89,9 +89,9 @@ export const controlsApi = {
       { params: parentValues }
     ).then(r => r.data),
 
-  searchOptions: (reportId: number, parameterName: string, q: string, column: string, limit = 50) =>
+  searchOptions: (reportId: number, parameterName: string, q: string, column: string, limit = 50, parentValues?: Record<string, string>) =>
     api.get<{ parameterName: string; options: string[]; hasMore: boolean; columnName: string | null }>(
       `/controls/parameters/${reportId}/${parameterName}/search`,
-      { params: { q, column, limit } }
+      { params: { q, column, limit, ...parentValues } }
     ).then(r => r.data),
 }

@@ -191,7 +191,8 @@ class ControlService(
         parameterName: String,
         searchQuery: String,
         columnName: String,
-        limit: Int = 50
+        limit: Int = 50,
+        parentValues: Map<String, String> = emptyMap()
     ): ParameterOptionsResponse {
         val control = paramControlRepo.findByReportIdAndParameterName(reportId, parameterName)
             ?: return ParameterOptionsResponse(parameterName, emptyList())
@@ -203,12 +204,30 @@ class ControlService(
         val ds = dataSourceRepository.findById(control.datasourceId!!)
             .orElseThrow { NoSuchElementException("DataSource not found: ${control.datasourceId}") }
 
+        // Substitute parent values in the base query before wrapping
+        var baseQuery = control.optionsQuery!!
+        for ((pName, pVal) in parentValues) {
+            if (pVal.isNotBlank()) {
+                baseQuery = baseQuery.replace(":$pName", "'${pVal.replace("'", "''")}'")
+            }
+        }
+        // Remove AND-clauses with unsubstituted :params
+        val unsubstituted = Regex(":[a-zA-Z_]\\w*")
+        while (unsubstituted.containsMatchIn(baseQuery)) {
+            val before = baseQuery
+            baseQuery = baseQuery.replace(
+                Regex("""(?i)\s+AND\s+[^,)]*?:[a-zA-Z_]\w*[^,)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
+                ""
+            )
+            if (baseQuery == before) { baseQuery = baseQuery.replace(unsubstituted, "''"); break }
+        }
+
         // Sanitize inputs to prevent injection (column name must be a simple identifier)
         val safeCol = columnName.replace(Regex("[^A-Za-z0-9_]"), "")
         val safeSearch = searchQuery.replace("'", "''")
 
         val wrappedQuery = """
-            SELECT $safeCol FROM (${control.optionsQuery}) AS _opts
+            SELECT $safeCol FROM ($baseQuery) AS _opts
             WHERE positionCaseInsensitive(toString($safeCol), '$safeSearch') > 0
             LIMIT $limit
         """.trimIndent()
