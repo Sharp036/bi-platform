@@ -139,27 +139,24 @@ class ControlService(
 
         var query = control.optionsQuery!!
 
-        // Substitute provided parent values, skip blank ones
+        // Substitute provided non-blank parent values
         for ((paramName, paramVal) in parentValues) {
             if (paramVal.isNotBlank()) {
                 query = query.replace(":$paramName", "'${paramVal.replace("'", "''")}'")
             }
         }
-        // Remove any remaining unsubstituted :param references by dropping their AND-clause.
-        // Matches patterns like: AND column = :param  /  AND column != :param  /  AND func(:param)
-        // Stops at next AND, ORDER, GROUP, LIMIT, HAVING or end of string.
+        // For remaining unsubstituted :params: replace simple "AND col = :param" with "AND 1=1",
+        // then replace any leftover :param with '' (safe for parenthesized conditions)
         val unsubstituted = Regex(":[a-zA-Z_]\\w*")
-        while (unsubstituted.containsMatchIn(query)) {
-            query = query.replace(
-                Regex("""(?i)\s+AND\s+[^,)]*?:[a-zA-Z_]\w*[^,)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
-                ""
-            )
-            // Safety: if the regex didn't remove anything, break to avoid infinite loop
-            if (unsubstituted.containsMatchIn(query)) {
-                // Fallback: replace remaining :params with empty string to avoid SQL error
-                query = query.replace(unsubstituted, "''")
-                break
+        if (unsubstituted.containsMatchIn(query)) {
+            val remaining = unsubstituted.findAll(query).map { it.value.substring(1) }.toSet()
+            for (pName in remaining) {
+                query = query.replace(
+                    Regex("""(?i)\bAND\s+\w+\s*[=!<>]+\s*:${Regex.escape(pName)}\b"""),
+                    "AND 1=1"
+                )
             }
+            query = query.replace(unsubstituted, "''")
         }
 
         val threshold = 1000
@@ -211,15 +208,17 @@ class ControlService(
                 baseQuery = baseQuery.replace(":$pName", "'${pVal.replace("'", "''")}'")
             }
         }
-        // Remove AND-clauses with unsubstituted :params
+        // Handle remaining unsubstituted :params safely
         val unsubstituted = Regex(":[a-zA-Z_]\\w*")
-        while (unsubstituted.containsMatchIn(baseQuery)) {
-            val before = baseQuery
-            baseQuery = baseQuery.replace(
-                Regex("""(?i)\s+AND\s+[^,)]*?:[a-zA-Z_]\w*[^,)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
-                ""
-            )
-            if (baseQuery == before) { baseQuery = baseQuery.replace(unsubstituted, "''"); break }
+        if (unsubstituted.containsMatchIn(baseQuery)) {
+            val remaining = unsubstituted.findAll(baseQuery).map { it.value.substring(1) }.toSet()
+            for (pn in remaining) {
+                baseQuery = baseQuery.replace(
+                    Regex("""(?i)\bAND\s+\w+\s*[=!<>]+\s*:${Regex.escape(pn)}\b"""),
+                    "AND 1=1"
+                )
+            }
+            baseQuery = baseQuery.replace(unsubstituted, "''")
         }
 
         // Sanitize inputs to prevent injection (column name must be a simple identifier)
