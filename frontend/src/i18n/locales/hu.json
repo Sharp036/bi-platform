@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Mentse el a jelentést a műveletek konfigurálásához",
   "widget_menu.drill_back": "Vissza",
   "interactive.action.target_widget": "Cél widget...",
-  "widget_menu.copy_table": "Másolás"
+  "widget_menu.copy_table": "Másolás",
+  "header.documentation": "Dokumentáció",
+  "header.about": "A programról",
+  "header.about_version": "Verzió {{version}}",
+  "header.about_charts": "Diagramtípusok",
+  "header.about_languages": "Nyelvek"
 }

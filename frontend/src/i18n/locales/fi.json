@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Tallenna raportti ensin määrittääksesi toiminnot",
   "widget_menu.drill_back": "Takaisin",
   "interactive.action.target_widget": "Kohdewidget...",
-  "widget_menu.copy_table": "Kopioi"
+  "widget_menu.copy_table": "Kopioi",
+  "header.documentation": "Dokumentaatio",
+  "header.about": "Tietoja",
+  "header.about_version": "Versio {{version}}",
+  "header.about_charts": "Kaaviotyypit",
+  "header.about_languages": "Kielet"
 }

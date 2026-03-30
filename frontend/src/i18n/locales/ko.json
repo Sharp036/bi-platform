@@ -904,5 +904,10 @@
   "interactive.action.save_first": "액션을 구성하려면 먼저 보고서를 저장하세요",
   "widget_menu.drill_back": "뒤로",
   "interactive.action.target_widget": "대상 위젯...",
-  "widget_menu.copy_table": "복사"
+  "widget_menu.copy_table": "복사",
+  "header.documentation": "문서",
+  "header.about": "정보",
+  "header.about_version": "버전 {{version}}",
+  "header.about_charts": "차트 유형",
+  "header.about_languages": "언어"
 }

@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Simpan laporan terlebih dahulu untuk mengkonfigurasi tindakan",
   "widget_menu.drill_back": "Kembali",
   "interactive.action.target_widget": "Widget target...",
-  "widget_menu.copy_table": "Salin"
+  "widget_menu.copy_table": "Salin",
+  "header.documentation": "Dokumentasi",
+  "header.about": "Tentang",
+  "header.about_version": "Versi {{version}}",
+  "header.about_charts": "Jenis grafik",
+  "header.about_languages": "Bahasa"
 }

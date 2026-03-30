@@ -904,5 +904,10 @@
   "interactive.action.save_first": "บันทึกรายงานก่อนเพื่อกำหนดค่าการดำเนินการ",
   "widget_menu.drill_back": "ย้อนกลับ",
   "interactive.action.target_widget": "วิดเจ็ตเป้าหมาย...",
-  "widget_menu.copy_table": "คัดลอก"
+  "widget_menu.copy_table": "คัดลอก",
+  "header.documentation": "เอกสาร",
+  "header.about": "เกี่ยวกับโปรแกรม",
+  "header.about_version": "เวอร์ชัน {{version}}",
+  "header.about_charts": "ประเภทแผนภูมิ",
+  "header.about_languages": "ภาษา"
 }

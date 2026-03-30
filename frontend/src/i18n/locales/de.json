@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Speichern Sie den Bericht zuerst, um Aktionen zu konfigurieren",
   "widget_menu.drill_back": "Zurück",
   "interactive.action.target_widget": "Ziel-Widget...",
-  "widget_menu.copy_table": "Kopieren"
+  "widget_menu.copy_table": "Kopieren",
+  "header.documentation": "Dokumentation",
+  "header.about": "Über das Programm",
+  "header.about_version": "Version {{version}}",
+  "header.about_charts": "Diagrammtypen",
+  "header.about_languages": "Sprachen"
 }
