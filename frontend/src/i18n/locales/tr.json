@@ -893,5 +893,10 @@
   "common.link_copied": "Bağlantı kopyalandı",
   "designer.y_axis_min": "Y ekseni minimum",
   "designer.y_axis_min.zero": "0'dan başla",
-  "designer.y_axis_min.auto": "Otomatik (minimum değere yakın)"
+  "designer.y_axis_min.auto": "Otomatik (minimum değere yakın)",
+  "widget_menu.title": "Widget işlemleri",
+  "widget_menu.view_query": "Sorguyu görüntüle",
+  "widget_menu.view_as_table": "Tablo olarak görüntüle",
+  "widget_menu.copied": "Kopyalandı",
+  "widget_menu.rows": "satır"
 }

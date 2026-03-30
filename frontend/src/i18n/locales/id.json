@@ -893,5 +893,10 @@
   "common.link_copied": "Tautan disalin",
   "designer.y_axis_min": "Minimum sumbu Y",
   "designer.y_axis_min.zero": "Mulai dari 0",
-  "designer.y_axis_min.auto": "Otomatis (dekat nilai minimum)"
+  "designer.y_axis_min.auto": "Otomatis (dekat nilai minimum)",
+  "widget_menu.title": "Tindakan widget",
+  "widget_menu.view_query": "Lihat kueri",
+  "widget_menu.view_as_table": "Lihat sebagai tabel",
+  "widget_menu.copied": "Disalin",
+  "widget_menu.rows": "baris"
 }

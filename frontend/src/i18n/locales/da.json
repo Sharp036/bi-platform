@@ -893,5 +893,10 @@
   "common.link_copied": "Link kopieret",
   "designer.y_axis_min": "Y-akse minimum",
   "designer.y_axis_min.zero": "Start fra 0",
-  "designer.y_axis_min.auto": "Auto (nær minimumsværdi)"
+  "designer.y_axis_min.auto": "Auto (nær minimumsværdi)",
+  "widget_menu.title": "Widget-handlinger",
+  "widget_menu.view_query": "Vis forespørgsel",
+  "widget_menu.view_as_table": "Vis som tabel",
+  "widget_menu.copied": "Kopieret",
+  "widget_menu.rows": "rækker"
 }

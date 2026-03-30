@@ -893,5 +893,10 @@
   "common.link_copied": "Linkki kopioitu",
   "designer.y_axis_min": "Y-akselin minimi",
   "designer.y_axis_min.zero": "Aloita nollasta",
-  "designer.y_axis_min.auto": "Automaattinen (lähellä minimiä)"
+  "designer.y_axis_min.auto": "Automaattinen (lähellä minimiä)",
+  "widget_menu.title": "Widget-toiminnot",
+  "widget_menu.view_query": "Näytä kysely",
+  "widget_menu.view_as_table": "Näytä taulukkona",
+  "widget_menu.copied": "Kopioitu",
+  "widget_menu.rows": "rivia"
 }

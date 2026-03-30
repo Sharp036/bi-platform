@@ -893,5 +893,10 @@
   "common.link_copied": "Link kopiert",
   "designer.y_axis_min": "Y-Achse Minimum",
   "designer.y_axis_min.zero": "Bei 0 beginnen",
-  "designer.y_axis_min.auto": "Auto (nahe Minimalwert)"
+  "designer.y_axis_min.auto": "Auto (nahe Minimalwert)",
+  "widget_menu.title": "Widget-Aktionen",
+  "widget_menu.view_query": "Abfrage anzeigen",
+  "widget_menu.view_as_table": "Als Tabelle anzeigen",
+  "widget_menu.copied": "Kopiert",
+  "widget_menu.rows": "Zeilen"
 }

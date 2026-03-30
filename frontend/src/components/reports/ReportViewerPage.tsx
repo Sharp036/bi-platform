@@ -13,6 +13,7 @@ import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { ArrowLeft, RefreshCw, Clock, Camera, Link2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ExportMenu from './ExportMenu'
+import WidgetContextMenu from './WidgetContextMenu'
 import BookmarkBar from './BookmarkBar'
 import OverlayLayer from '@/components/interactive/OverlayLayer'
 import { useActionStore } from '@/store/useActionStore'
@@ -316,15 +317,28 @@ export default function ReportViewerPage() {
     try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
   }
 
+  const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
+
   const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
     const widgetDrillActions = drillActions[w.widgetId] || []
     const hasDrill = widgetDrillActions.length > 0
+    const originalWidget = report?.widgets.find(ow => (ow.id ?? ow.widgetId) === w.widgetId)
+    const showMenu = !NON_DATA_WIDGETS.has(w.widgetType)
     return (
       <div
         key={w.widgetId}
         className={`card p-4 overflow-hidden h-full ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
         style={{ position: 'relative' }}
       >
+        {showMenu && (
+          <div className="absolute top-2 right-2 z-10">
+            <WidgetContextMenu
+              rawSql={originalWidget?.rawSql}
+              data={w.data}
+              title={w.title}
+            />
+          </div>
+        )}
         {hasDrill && (
           <div className="text-[10px] text-brand-500 dark:text-brand-400 mb-1 flex items-center gap-1">
             <span>{'->'}</span>

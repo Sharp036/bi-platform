@@ -893,5 +893,10 @@
   "common.link_copied": "リンクをコピーしました",
   "designer.y_axis_min": "Y軸の最小値",
   "designer.y_axis_min.zero": "0から開始",
-  "designer.y_axis_min.auto": "自動（最小値付近）"
+  "designer.y_axis_min.auto": "自動（最小値付近）",
+  "widget_menu.title": "ウィジェット操作",
+  "widget_menu.view_query": "クエリを表示",
+  "widget_menu.view_as_table": "テーブルとして表示",
+  "widget_menu.copied": "コピーしました",
+  "widget_menu.rows": "行"
 }

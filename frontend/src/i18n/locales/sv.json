@@ -893,5 +893,10 @@
   "common.link_copied": "Länk kopierad",
   "designer.y_axis_min": "Y-axel minimum",
   "designer.y_axis_min.zero": "Börja från 0",
-  "designer.y_axis_min.auto": "Auto (nära minimivärde)"
+  "designer.y_axis_min.auto": "Auto (nära minimivärde)",
+  "widget_menu.title": "Widgetfunktioner",
+  "widget_menu.view_query": "Visa förfrågan",
+  "widget_menu.view_as_table": "Visa som tabell",
+  "widget_menu.copied": "Kopierad",
+  "widget_menu.rows": "rader"
 }

@@ -893,5 +893,10 @@
   "common.link_copied": "Link copiat",
   "designer.y_axis_min": "Minim axa Y",
   "designer.y_axis_min.zero": "Început de la 0",
-  "designer.y_axis_min.auto": "Auto (aproape de valoarea minimă)"
+  "designer.y_axis_min.auto": "Auto (aproape de valoarea minimă)",
+  "widget_menu.title": "Acțiuni widget",
+  "widget_menu.view_query": "Vizualizare interogare",
+  "widget_menu.view_as_table": "Vizualizare ca tabel",
+  "widget_menu.copied": "Copiat",
+  "widget_menu.rows": "rânduri"
 }

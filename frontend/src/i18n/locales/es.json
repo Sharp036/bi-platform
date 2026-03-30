@@ -893,5 +893,10 @@
   "common.link_copied": "Enlace copiado",
   "designer.y_axis_min": "Mínimo eje Y",
   "designer.y_axis_min.zero": "Empezar desde 0",
-  "designer.y_axis_min.auto": "Auto (cerca del valor mínimo)"
+  "designer.y_axis_min.auto": "Auto (cerca del valor mínimo)",
+  "widget_menu.title": "Acciones del widget",
+  "widget_menu.view_query": "Ver consulta",
+  "widget_menu.view_as_table": "Ver como tabla",
+  "widget_menu.copied": "Copiado",
+  "widget_menu.rows": "filas"
 }

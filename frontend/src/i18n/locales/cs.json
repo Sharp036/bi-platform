@@ -893,5 +893,10 @@
   "common.link_copied": "Odkaz zkopírován",
   "designer.y_axis_min": "Minimum osy Y",
   "designer.y_axis_min.zero": "Začít od 0",
-  "designer.y_axis_min.auto": "Automaticky (blízko minimu)"
+  "designer.y_axis_min.auto": "Automaticky (blízko minimu)",
+  "widget_menu.title": "Akce widgetu",
+  "widget_menu.view_query": "Zobrazit dotaz",
+  "widget_menu.view_as_table": "Zobrazit jako tabulku",
+  "widget_menu.copied": "Zkopírováno",
+  "widget_menu.rows": "řádků"
 }
