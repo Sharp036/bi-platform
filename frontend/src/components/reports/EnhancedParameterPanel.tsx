@@ -128,7 +128,8 @@ export default function EnhancedParameterPanel({
     })
   }, [controls, parameters, loadOptions, collectParentValues])
 
-  // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it
+  // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it.
+  // Keep the current value of dependent params; only clear it if the new options no longer include it.
   const handleChange = (paramName: string, value: string) => {
     setValues(prev => {
       const next = { ...prev, [paramName]: value }
@@ -137,12 +138,22 @@ export default function EnhancedParameterPanel({
       controls.forEach(c => {
         if (!c.optionsQuery || !c.datasourceId) return
         if (c.parameterName === paramName) return
-        // Reload only if this control's SQL references the changed parameter
         if (!pattern.test(c.optionsQuery)) return
-        // Reset value if it may become stale, then reload options
-        next[c.parameterName] = ''
+        const prevValue = next[c.parameterName] || ''
         const parentVals = collectParentValues(c.parameterName, next)
-        loadOptions(c.parameterName, parentVals)
+        controlsApi.loadOptions(reportId, c.parameterName, parentVals)
+          .then(result => {
+            setDynamicOptions(prev => ({ ...prev, [c.parameterName]: result.options }))
+            setHasMoreByParam(prev => ({ ...prev, [c.parameterName]: result.hasMore ?? false }))
+            if (result.columnName) {
+              setColumnByParam(prev => ({ ...prev, [c.parameterName]: result.columnName! }))
+            }
+            // Reset only if the previously selected value is no longer available
+            if (prevValue && !result.options.includes(prevValue)) {
+              setValues(v => ({ ...v, [c.parameterName]: '' }))
+            }
+          })
+          .catch(() => {})
       })
 
       return next
