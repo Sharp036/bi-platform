@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "Skjul kilde, vis detalje-widget",
   "interactive.action.save_first": "Gem rapporten først for at konfigurere handlinger",
   "widget_menu.drill_back": "Tilbage",
-  "interactive.action.target_widget": "Mål-widget..."
+  "interactive.action.target_widget": "Mål-widget...",
+  "widget_menu.copy_table": "Kopier"
 }

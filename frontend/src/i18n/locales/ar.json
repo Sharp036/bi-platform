@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "إخفاء المصدر، إظهار ودجة التفاصيل",
   "interactive.action.save_first": "احفظ التقرير أولاً لتكوين الإجراءات",
   "widget_menu.drill_back": "رجوع",
-  "interactive.action.target_widget": "الودجة المستهدفة..."
+  "interactive.action.target_widget": "الودجة المستهدفة...",
+  "widget_menu.copy_table": "نسخ"
 }

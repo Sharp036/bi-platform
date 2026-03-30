@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "Piilota lähde, näytä yksityiskohtawidget",
   "interactive.action.save_first": "Tallenna raportti ensin määrittääksesi toiminnot",
   "widget_menu.drill_back": "Takaisin",
-  "interactive.action.target_widget": "Kohdewidget..."
+  "interactive.action.target_widget": "Kohdewidget...",
+  "widget_menu.copy_table": "Kopioi"
 }

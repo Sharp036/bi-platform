@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "ซ่อนแหล่งที่มา แสดงวิดเจ็ตรายละเอียด",
   "interactive.action.save_first": "บันทึกรายงานก่อนเพื่อกำหนดค่าการดำเนินการ",
   "widget_menu.drill_back": "ย้อนกลับ",
-  "interactive.action.target_widget": "วิดเจ็ตเป้าหมาย..."
+  "interactive.action.target_widget": "วิดเจ็ตเป้าหมาย...",
+  "widget_menu.copy_table": "คัดลอก"
 }

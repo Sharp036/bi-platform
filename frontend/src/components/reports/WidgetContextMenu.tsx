@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { MoreVertical, Code, Table, X, Copy, Check } from 'lucide-react'
+import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import type { WidgetData } from '@/types'
 
 interface Props {
@@ -65,11 +67,13 @@ export default function WidgetContextMenu({ rawSql, data, title }: Props) {
         )}
       </div>
 
-      {modal === 'query' && rawSql && (
-        <QueryModal sql={rawSql} title={title} onClose={() => setModal(null)} />
+      {modal === 'query' && rawSql && createPortal(
+        <QueryModal sql={rawSql} title={title} onClose={() => setModal(null)} />,
+        document.body
       )}
-      {modal === 'table' && data && (
-        <TableModal data={data} title={title} onClose={() => setModal(null)} />
+      {modal === 'table' && data && createPortal(
+        <TableModal data={data} title={title} onClose={() => setModal(null)} />,
+        document.body
       )}
     </>
   )
@@ -127,12 +131,49 @@ function QueryModal({ sql, title, onClose }: { sql: string; title?: string; onCl
 
 function TableModal({ data, title, onClose }: { data: WidgetData; title?: string; onClose: () => void }) {
   const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
+  const filename = (title || 'data').replace(/[^a-zA-Z0-9_\-. ]/g, '_')
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
+
+  const toTsv = useCallback(() => {
+    const escape = (v: unknown) => (v == null ? '' : String(v))
+    const header = data.columns.join('\t')
+    const body = data.rows.map(row => data.columns.map(c => escape(row[c])).join('\t')).join('\n')
+    return header + '\n' + body
+  }, [data])
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(toTsv()).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [toTsv])
+
+  const handleCsv = useCallback(() => {
+    const escape = (v: unknown) => {
+      if (v == null) return ''
+      const s = String(v)
+      return s.includes(',') || s.includes('"') || s.includes('\n')
+        ? `"${s.replace(/"/g, '""')}"` : s
+    }
+    const header = data.columns.map(c => escape(c)).join(',')
+    const body = data.rows.map(row => data.columns.map(c => escape(row[c])).join(',')).join('\n')
+    const csv = '\ufeff' + header + '\n' + body
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    downloadBlob(blob, filename + '.csv')
+  }, [data, filename])
+
+  const handleExcel = useCallback(() => {
+    const ws = XLSX.utils.json_to_sheet(data.rows, { header: data.columns })
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Data')
+    XLSX.writeFile(wb, filename + '.xlsx')
+  }, [data, filename])
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
@@ -149,6 +190,18 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
               {data.rowCount} {t('widget_menu.rows')}
               {data.executionMs > 0 && ` / ${data.executionMs}ms`}
             </span>
+            <button onClick={handleCopy} className="btn-secondary text-xs px-2.5 py-1.5" title={t('widget_menu.copy_table')}>
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? t('widget_menu.copied') : t('widget_menu.copy_table')}
+            </button>
+            <button onClick={handleCsv} className="btn-secondary text-xs px-2.5 py-1.5" title="CSV">
+              <FileText className="w-3.5 h-3.5" />
+              CSV
+            </button>
+            <button onClick={handleExcel} className="btn-secondary text-xs px-2.5 py-1.5" title="Excel">
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              Excel
+            </button>
             <button onClick={onClose} className="btn-ghost p-1">
               <X className="w-4 h-4" />
             </button>
@@ -191,4 +244,13 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
       </div>
     </div>
   )
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
 }

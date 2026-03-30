@@ -902,6 +902,7 @@
   "widget_menu.view_query": "View query",
   "widget_menu.view_as_table": "View as table",
   "widget_menu.copied": "Copied",
+  "widget_menu.copy_table": "Copy",
   "widget_menu.rows": "rows",
   "widget_menu.drill_back": "Back"
 }
