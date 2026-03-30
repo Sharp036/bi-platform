@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Lưu báo cáo trước để cấu hình hành động",
   "widget_menu.drill_back": "Quay lại",
   "interactive.action.target_widget": "Widget mục tiêu...",
-  "widget_menu.copy_table": "Sao chép"
+  "widget_menu.copy_table": "Sao chép",
+  "header.documentation": "Tài liệu",
+  "header.about": "Về chương trình",
+  "header.about_version": "Phiên bản {{version}}",
+  "header.about_charts": "Loại biểu đồ",
+  "header.about_languages": "Ngôn ngữ"
 }

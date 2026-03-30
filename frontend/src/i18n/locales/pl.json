@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Najpierw zapisz raport, aby skonfigurować akcje",
   "widget_menu.drill_back": "Wróć",
   "interactive.action.target_widget": "Widget docelowy...",
-  "widget_menu.copy_table": "Kopiuj"
+  "widget_menu.copy_table": "Kopiuj",
+  "header.documentation": "Dokumentacja",
+  "header.about": "O programie",
+  "header.about_version": "Wersja {{version}}",
+  "header.about_charts": "Typy wykresów",
+  "header.about_languages": "Języki"
 }

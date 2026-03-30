@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Spara rapporten först för att konfigurera åtgärder",
   "widget_menu.drill_back": "Tillbaka",
   "interactive.action.target_widget": "Målwidget...",
-  "widget_menu.copy_table": "Kopiera"
+  "widget_menu.copy_table": "Kopiera",
+  "header.documentation": "Dokumentation",
+  "header.about": "Om programmet",
+  "header.about_version": "Version {{version}}",
+  "header.about_charts": "Diagramtyper",
+  "header.about_languages": "Språk"
 }

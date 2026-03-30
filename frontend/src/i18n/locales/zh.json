@@ -904,5 +904,10 @@
   "interactive.action.save_first": "请先保存报告以配置操作",
   "widget_menu.drill_back": "返回",
   "interactive.action.target_widget": "目标组件...",
-  "widget_menu.copy_table": "复制"
+  "widget_menu.copy_table": "复制",
+  "header.documentation": "文档",
+  "header.about": "关于",
+  "header.about_version": "版本 {{version}}",
+  "header.about_charts": "图表类型",
+  "header.about_languages": "语言"
 }

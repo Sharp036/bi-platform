@@ -904,5 +904,10 @@
   "interactive.action.save_first": "アクションを設定するにはまずレポートを保存してください",
   "widget_menu.drill_back": "戻る",
   "interactive.action.target_widget": "ターゲットウィジェット...",
-  "widget_menu.copy_table": "コピー"
+  "widget_menu.copy_table": "コピー",
+  "header.documentation": "ドキュメント",
+  "header.about": "プログラムについて",
+  "header.about_version": "バージョン {{version}}",
+  "header.about_charts": "チャートタイプ",
+  "header.about_languages": "言語"
 }

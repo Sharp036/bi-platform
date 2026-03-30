@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Спочатку збережіть звіт, щоб налаштувати дії",
   "widget_menu.drill_back": "Назад",
   "interactive.action.target_widget": "Цільовий віджет...",
-  "widget_menu.copy_table": "Копіювати"
+  "widget_menu.copy_table": "Копіювати",
+  "header.documentation": "Документація",
+  "header.about": "Про програму",
+  "header.about_version": "Версія {{version}}",
+  "header.about_charts": "Типів діаграм",
+  "header.about_languages": "Мов"
 }

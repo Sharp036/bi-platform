@@ -1,4 +1,4 @@
-import { Sun, Moon, LogOut, User, Globe } from 'lucide-react'
+import { Sun, Moon, LogOut, User, Globe, BookOpen, Info } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { useState, useRef, useEffect } from 'react'
@@ -14,6 +14,7 @@ export default function Header() {
   const { t, i18n } = useTranslation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
+  const [aboutOpen, setAboutOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const langRef = useRef<HTMLDivElement>(null)
 
@@ -93,6 +94,24 @@ export default function Header() {
               <div className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
                 {user?.roles?.join(', ') || t('common.no_roles')}
               </div>
+              <a
+                href="/dashboard-guide.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 dark:text-slate-300
+                           hover:bg-surface-100 dark:hover:bg-dark-surface-100 rounded-lg mt-1"
+              >
+                <BookOpen className="w-4 h-4" /> {t('header.documentation')}
+              </a>
+              <button
+                onClick={() => { setMenuOpen(false); setAboutOpen(true) }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 dark:text-slate-300
+                           hover:bg-surface-100 dark:hover:bg-dark-surface-100 rounded-lg"
+              >
+                <Info className="w-4 h-4" /> {t('header.about')}
+              </button>
+              <div className="border-t border-surface-200 dark:border-dark-surface-100 mt-1" />
               <button
                 onClick={() => { logout(); setMenuOpen(false) }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400
@@ -104,6 +123,39 @@ export default function Header() {
           )}
         </div>
       </div>
+
+      {aboutOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setAboutOpen(false)}>
+          <div className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">DTR</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Datorio BI Platform</h3>
+                <p className="text-xs text-slate-400">{t('header.about_version', { version: '1.0' })}</p>
+              </div>
+            </div>
+            <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <p><strong>Frontend:</strong> React, TypeScript, Vite, TailwindCSS, ECharts</p>
+              <p><strong>Backend:</strong> Spring Boot, Kotlin, PostgreSQL</p>
+              <p><strong>{t('header.about_charts')}:</strong> 17</p>
+              <p><strong>{t('header.about_languages')}:</strong> 28</p>
+            </div>
+            <div className="flex justify-between items-center mt-5">
+              <a
+                href="/dashboard-guide.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-brand-600 dark:text-brand-400 hover:underline"
+              >
+                {t('header.documentation')}
+              </a>
+              <button onClick={() => setAboutOpen(false)} className="btn-secondary text-sm">{t('common.close')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

@@ -32,7 +32,7 @@ docker/volumes/
 *.env.local
 
 # ── Claude Code ──
-.claude/settings.local.json
+.claude/
 
 # ── OS ──
 .DS_Store

@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Sla het rapport eerst op om acties te configureren",
   "widget_menu.drill_back": "Terug",
   "interactive.action.target_widget": "Doelwidget...",
-  "widget_menu.copy_table": "Kopieer"
+  "widget_menu.copy_table": "Kopieer",
+  "header.documentation": "Documentatie",
+  "header.about": "Over het programma",
+  "header.about_version": "Versie {{version}}",
+  "header.about_charts": "Grafiektypen",
+  "header.about_languages": "Talen"
 }
