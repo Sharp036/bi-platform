@@ -5,8 +5,8 @@ export const reportApi = {
   list: (params?: { status?: string; page?: number; size?: number }) =>
     api.get<PageResponse<ReportListItem>>('/reports', { params }).then(r => r.data),
 
-  get: (id: number) =>
-    api.get<Report>(`/reports/${id}`).then(r => r.data),
+  get: (idOrSlug: number | string) =>
+    api.get<Report>(`/reports/${idOrSlug}`).then(r => r.data),
 
   create: (data: Record<string, unknown>) =>
     api.post<Report>('/reports', data).then(r => r.data),

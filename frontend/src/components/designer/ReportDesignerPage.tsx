@@ -98,7 +98,7 @@ export default function ReportDesignerPage() {
     }
     nameEditedRef.current = true
     setLoading(true)
-    reportApi.get(Number(id))
+    reportApi.get(id!)
       .then(async data => {
         const parsedLayout = parseReportLayout(data.layout)
         setFilterPanelPosition(parsedLayout.filterPanel.position)
