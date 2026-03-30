@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Αντικατάσταση λεπτομερειών",
   "interactive.action.drill_replace_desc": "Απόκρυψη πηγής, εμφάνιση widget λεπτομερειών",
   "interactive.action.save_first": "Αποθηκεύστε πρώτα την αναφορά για να ρυθμίσετε ενέργειες",
-  "widget_menu.drill_back": "Πίσω"
+  "widget_menu.drill_back": "Πίσω",
+  "interactive.action.target_widget": "Widget στόχος..."
 }

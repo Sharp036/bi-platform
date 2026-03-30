@@ -334,12 +334,28 @@ export default function ReportViewerPage() {
 
   const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
 
+  const activeFilters = useActionStore(s => s.activeFilters)
+
+  const applyClientFilters = useCallback((w: RenderReportResponse['widgets'][number]): RenderReportResponse['widgets'][number] => {
+    const filters = activeFilters[w.widgetId]
+    if (!filters || filters.length === 0 || !w.data) return w
+    const filteredRows = w.data.rows.filter(row =>
+      filters.every(f => {
+        const cellVal = row[f.field]
+        if (cellVal == null || f.value == null) return false
+        return String(cellVal) === String(f.value)
+      })
+    )
+    return { ...w, data: { ...w.data, rows: filteredRows, rowCount: filteredRows.length } }
+  }, [activeFilters])
+
   const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
     const widgetDrillActions = drillActions[w.widgetId] || []
     const hasDrill = widgetDrillActions.length > 0
     const originalWidget = report?.widgets.find(ow => (ow.id ?? ow.widgetId) === w.widgetId)
     const showMenu = !NON_DATA_WIDGETS.has(w.widgetType)
     const drillEntry = getDrillEntryForTarget(w.widgetId)
+    const filtered = applyClientFilters(w)
     return (
       <div
         key={w.widgetId}
@@ -376,7 +392,7 @@ export default function ReportViewerPage() {
           </div>
         )}
         <WidgetRenderer
-          widget={w}
+          widget={filtered}
           drillActions={widgetDrillActions}
           onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
           layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}

@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "ドリル置換",
   "interactive.action.drill_replace_desc": "ソースを非表示、詳細ウィジェットを表示",
   "interactive.action.save_first": "アクションを設定するにはまずレポートを保存してください",
-  "widget_menu.drill_back": "戻る"
+  "widget_menu.drill_back": "戻る",
+  "interactive.action.target_widget": "ターゲットウィジェット..."
 }

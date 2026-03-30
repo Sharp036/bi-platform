@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Деталізація",
   "interactive.action.drill_replace_desc": "Сховати джерело, показати детальний віджет",
   "interactive.action.save_first": "Спочатку збережіть звіт, щоб налаштувати дії",
-  "widget_menu.drill_back": "Назад"
+  "widget_menu.drill_back": "Назад",
+  "interactive.action.target_widget": "Цільовий віджет..."
 }

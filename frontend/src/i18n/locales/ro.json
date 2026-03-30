@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Detaliu",
   "interactive.action.drill_replace_desc": "Ascunde sursa, afișează widget-ul de detaliu",
   "interactive.action.save_first": "Salvați raportul întâi pentru a configura acțiunile",
-  "widget_menu.drill_back": "Înapoi"
+  "widget_menu.drill_back": "Înapoi",
+  "interactive.action.target_widget": "Widget țintă..."
 }
