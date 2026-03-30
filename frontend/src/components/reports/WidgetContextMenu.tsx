@@ -132,7 +132,7 @@ function QueryModal({ sql, title, onClose }: { sql: string; title?: string; onCl
 function TableModal({ data, title, onClose }: { data: WidgetData; title?: string; onClose: () => void }) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
-  const filename = (title || 'data').replace(/[^a-zA-Z0-9_\-. ]/g, '_')
+  const filename = (title || 'data').replace(/[<>:"/\\|?*]/g, '_')
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -141,9 +141,8 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
   }, [onClose])
 
   const toTsv = useCallback(() => {
-    const escape = (v: unknown) => (v == null ? '' : String(v))
     const header = data.columns.join('\t')
-    const body = data.rows.map(row => data.columns.map(c => escape(row[c])).join('\t')).join('\n')
+    const body = data.rows.map(row => data.columns.map(c => formatCell(row[c])).join('\t')).join('\n')
     return header + '\n' + body
   }, [data])
 
@@ -155,14 +154,13 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
   }, [toTsv])
 
   const handleCsv = useCallback(() => {
-    const escape = (v: unknown) => {
-      if (v == null) return ''
-      const s = String(v)
+    const escapeCsv = (v: unknown) => {
+      const s = formatCell(v)
       return s.includes(',') || s.includes('"') || s.includes('\n')
         ? `"${s.replace(/"/g, '""')}"` : s
     }
-    const header = data.columns.map(c => escape(c)).join(',')
-    const body = data.rows.map(row => data.columns.map(c => escape(row[c])).join(',')).join('\n')
+    const header = data.columns.map(c => escapeCsv(c)).join(',')
+    const body = data.rows.map(row => data.columns.map(c => escapeCsv(row[c])).join(',')).join('\n')
     const csv = '\ufeff' + header + '\n' + body
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     downloadBlob(blob, filename + '.csv')
@@ -231,9 +229,9 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
                     <td
                       key={col}
                       className="px-3 py-1.5 text-slate-700 dark:text-slate-300 whitespace-nowrap max-w-[300px] truncate"
-                      title={row[col] != null ? String(row[col]) : ''}
+                      title={formatCell(row[col])}
                     >
-                      {row[col] != null ? String(row[col]) : ''}
+                      {formatCell(row[col])}
                     </td>
                   ))}
                 </tr>
@@ -244,6 +242,12 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
       </div>
     </div>
   )
+}
+
+function formatCell(v: unknown): string {
+  if (v == null) return ''
+  if (typeof v === 'number') return Number.isFinite(v) ? v.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 }) : String(v)
+  return String(v)
 }
 
 function downloadBlob(blob: Blob, filename: string) {

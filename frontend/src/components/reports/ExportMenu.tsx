@@ -36,7 +36,7 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
     try {
       const blob = await exportApi.download(reportId, format, parameters)
       const ext = format === 'EXCEL' ? 'xlsx' : format.toLowerCase()
-      const filename = `${reportName.replace(/[^a-zA-Z0-9_\-.]/g, '_')}.${ext}`
+      const filename = `${reportName.replace(/[<>:"/\\|?*]/g, '_')}.${ext}`
 
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
