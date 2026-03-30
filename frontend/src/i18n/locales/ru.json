@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Сначала сохраните отчёт, чтобы настроить действия",
   "widget_menu.drill_back": "Назад",
   "interactive.action.target_widget": "Целевой виджет...",
-  "widget_menu.copy_table": "Копировать"
+  "widget_menu.copy_table": "Копировать",
+  "header.documentation": "Документация",
+  "header.about": "О программе",
+  "header.about_version": "Версия {{version}}",
+  "header.about_charts": "Типов диаграмм",
+  "header.about_languages": "Языков"
 }

@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Αποθηκεύστε πρώτα την αναφορά για να ρυθμίσετε ενέργειες",
   "widget_menu.drill_back": "Πίσω",
   "interactive.action.target_widget": "Widget στόχος...",
-  "widget_menu.copy_table": "Αντιγραφή"
+  "widget_menu.copy_table": "Αντιγραφή",
+  "header.documentation": "Δοκουμεντασία",
+  "header.about": "Σχετικά",
+  "header.about_version": "Έκδοση {{version}}",
+  "header.about_charts": "Τύποι γραφημάτων",
+  "header.about_languages": "Γλώσσες"
 }

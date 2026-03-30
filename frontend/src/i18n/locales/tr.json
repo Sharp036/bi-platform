@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Eylemleri yapılandırmak için önce raporu kaydedin",
   "widget_menu.drill_back": "Geri",
   "interactive.action.target_widget": "Hedef widget...",
-  "widget_menu.copy_table": "Kopyala"
+  "widget_menu.copy_table": "Kopyala",
+  "header.documentation": "Dokümantasyon",
+  "header.about": "Hakkında",
+  "header.about_version": "Sürüm {{version}}",
+  "header.about_charts": "Grafik türleri",
+  "header.about_languages": "Diller"
 }

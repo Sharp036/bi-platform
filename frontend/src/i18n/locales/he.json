@@ -904,5 +904,10 @@
   "interactive.action.save_first": "שמור תחילה את הדוח כדי להגדיר פעולות",
   "widget_menu.drill_back": "חזרה",
   "interactive.action.target_widget": "וידג'ט יעד...",
-  "widget_menu.copy_table": "העתק"
+  "widget_menu.copy_table": "העתק",
+  "header.documentation": "תיעוד",
+  "header.about": "אודות התוכנה",
+  "header.about_version": "גרסה {{version}}",
+  "header.about_charts": "סוגי תרשימים",
+  "header.about_languages": "שפות"
 }

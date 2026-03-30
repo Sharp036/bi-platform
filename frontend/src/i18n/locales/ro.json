@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Salvați raportul întâi pentru a configura acțiunile",
   "widget_menu.drill_back": "Înapoi",
   "interactive.action.target_widget": "Widget țintă...",
-  "widget_menu.copy_table": "Copiază"
+  "widget_menu.copy_table": "Copiază",
+  "header.documentation": "Documentație",
+  "header.about": "Despre program",
+  "header.about_version": "Versiunea {{version}}",
+  "header.about_charts": "Tipuri de grafice",
+  "header.about_languages": "Limbi"
 }

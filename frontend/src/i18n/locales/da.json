@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Gem rapporten først for at konfigurere handlinger",
   "widget_menu.drill_back": "Tilbage",
   "interactive.action.target_widget": "Mål-widget...",
-  "widget_menu.copy_table": "Kopier"
+  "widget_menu.copy_table": "Kopier",
+  "header.documentation": "Dokumentation",
+  "header.about": "Om programmet",
+  "header.about_version": "Version {{version}}",
+  "header.about_charts": "Diagramtyper",
+  "header.about_languages": "Sprog"
 }

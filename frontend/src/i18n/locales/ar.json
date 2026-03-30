@@ -904,5 +904,10 @@
   "interactive.action.save_first": "احفظ التقرير أولاً لتكوين الإجراءات",
   "widget_menu.drill_back": "رجوع",
   "interactive.action.target_widget": "الودجة المستهدفة...",
-  "widget_menu.copy_table": "نسخ"
+  "widget_menu.copy_table": "نسخ",
+  "header.documentation": "الوثائق",
+  "header.about": "حول البرنامج",
+  "header.about_version": "الإصدار {{version}}",
+  "header.about_charts": "أنواع الرسوم البيانية",
+  "header.about_languages": "اللغات"
 }

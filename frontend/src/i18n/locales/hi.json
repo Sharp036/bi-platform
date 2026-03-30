@@ -904,5 +904,10 @@
   "interactive.action.save_first": "क्रियाएं कॉन्फ़िगर करने के लिए पहले रिपोर्ट सहेजें",
   "widget_menu.drill_back": "वापस",
   "interactive.action.target_widget": "लक्ष्य विजेट...",
-  "widget_menu.copy_table": "कॉपी करें"
+  "widget_menu.copy_table": "कॉपी करें",
+  "header.documentation": "दस्तावेज़",
+  "header.about": "प्रोग्राम के बारे में",
+  "header.about_version": "संस्करण {{version}}",
+  "header.about_charts": "चार्ट प्रकार",
+  "header.about_languages": "भाषाएं"
 }

@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet } from 'lucide-react'
+import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet, ArrowUp, ArrowDown } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import type { WidgetData } from '@/types'
 
@@ -132,7 +132,32 @@ function QueryModal({ sql, title, onClose }: { sql: string; title?: string; onCl
 function TableModal({ data, title, onClose }: { data: WidgetData; title?: string; onClose: () => void }) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
+  const [sortCol, setSortCol] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const filename = (title || 'data').replace(/[<>:"/\\|?*]/g, '_')
+
+  const handleSort = (col: string) => {
+    if (sortCol === col) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortCol(col)
+      setSortDir('asc')
+    }
+  }
+
+  const sortedRows = useMemo(() => {
+    if (!sortCol) return data.rows
+    return [...data.rows].sort((a, b) => {
+      const av = a[sortCol], bv = b[sortCol]
+      if (av == null && bv == null) return 0
+      if (av == null) return 1
+      if (bv == null) return -1
+      const na = Number(av), nb = Number(bv)
+      const bothNum = !isNaN(na) && !isNaN(nb)
+      const cmp = bothNum ? na - nb : String(av).localeCompare(String(bv))
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [data.rows, sortCol, sortDir])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -167,7 +192,19 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
   }, [data, filename])
 
   const handleExcel = useCallback(() => {
-    const ws = XLSX.utils.json_to_sheet(data.rows, { header: data.columns })
+    const normalized = data.rows.map(row => {
+      const out: Record<string, unknown> = {}
+      for (const col of data.columns) {
+        const v = row[col]
+        if (typeof v === 'string' && v.length > 0) {
+          const n = Number(v)
+          if (!isNaN(n) && isFinite(n)) { out[col] = n; continue }
+        }
+        out[col] = v
+      }
+      return out
+    })
+    const ws = XLSX.utils.json_to_sheet(normalized, { header: data.columns })
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Data')
     XLSX.writeFile(wb, filename + '.xlsx')
@@ -212,15 +249,22 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
                 {data.columns.map(col => (
                   <th
                     key={col}
-                    className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100 whitespace-nowrap"
+                    onClick={() => handleSort(col)}
+                    className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100 whitespace-nowrap cursor-pointer select-none hover:bg-surface-100 dark:hover:bg-dark-surface-100/80 transition-colors"
                   >
-                    {col}
+                    <span className="inline-flex items-center gap-1">
+                      {col}
+                      {sortCol === col && (sortDir === 'asc'
+                        ? <ArrowUp className="w-3 h-3" />
+                        : <ArrowDown className="w-3 h-3" />
+                      )}
+                    </span>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {data.rows.map((row, i) => (
+              {sortedRows.map((row, i) => (
                 <tr
                   key={i}
                   className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-100/50"
@@ -246,7 +290,15 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
 
 function formatCell(v: unknown): string {
   if (v == null) return ''
-  if (typeof v === 'number') return Number.isFinite(v) ? v.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 }) : String(v)
+  if (typeof v === 'number') {
+    return Number.isFinite(v) ? v.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 }) : String(v)
+  }
+  if (typeof v === 'string' && v.length > 0) {
+    const n = Number(v)
+    if (!isNaN(n) && isFinite(n) && String(n) !== v) {
+      return n.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 })
+    }
+  }
   return String(v)
 }
 

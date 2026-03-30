@@ -904,5 +904,10 @@
   "interactive.action.save_first": "Guarde el informe primero para configurar acciones",
   "widget_menu.drill_back": "Volver",
   "interactive.action.target_widget": "Widget destino...",
-  "widget_menu.copy_table": "Copiar"
+  "widget_menu.copy_table": "Copiar",
+  "header.documentation": "Documentación",
+  "header.about": "Acerca de",
+  "header.about_version": "Versión {{version}}",
+  "header.about_charts": "Tipos de gráficos",
+  "header.about_languages": "Idiomas"
 }
