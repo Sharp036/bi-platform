@@ -893,5 +893,10 @@
   "common.link_copied": "Link skopiowany",
   "designer.y_axis_min": "Minimum osi Y",
   "designer.y_axis_min.zero": "Zacznij od 0",
-  "designer.y_axis_min.auto": "Auto (blisko wartości minimalnej)"
+  "designer.y_axis_min.auto": "Auto (blisko wartości minimalnej)",
+  "widget_menu.title": "Akcje widgetu",
+  "widget_menu.view_query": "Zobacz zapytanie",
+  "widget_menu.view_as_table": "Zobacz jako tabelę",
+  "widget_menu.copied": "Skopiowano",
+  "widget_menu.rows": "wierszy"
 }

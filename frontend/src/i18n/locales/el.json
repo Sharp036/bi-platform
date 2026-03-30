@@ -893,5 +893,10 @@
   "common.link_copied": "Ο σύνδεσμος αντιγράφηκε",
   "designer.y_axis_min": "Ελάχιστο άξονα Y",
   "designer.y_axis_min.zero": "Έναρξη από 0",
-  "designer.y_axis_min.auto": "Αυτόματο (κοντά στο ελάχιστο)"
+  "designer.y_axis_min.auto": "Αυτόματο (κοντά στο ελάχιστο)",
+  "widget_menu.title": "Ενέργειες widget",
+  "widget_menu.view_query": "Προβολή ερωτήματος",
+  "widget_menu.view_as_table": "Προβολή ως πίνακας",
+  "widget_menu.copied": "Αντιγράφηκε",
+  "widget_menu.rows": "γραμμές"
 }

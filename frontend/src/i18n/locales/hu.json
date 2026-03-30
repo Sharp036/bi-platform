@@ -893,5 +893,10 @@
   "common.link_copied": "Link másolva",
   "designer.y_axis_min": "Y tengely minimum",
   "designer.y_axis_min.zero": "Kezdés 0-tól",
-  "designer.y_axis_min.auto": "Automatikus (minimum közelében)"
+  "designer.y_axis_min.auto": "Automatikus (minimum közelében)",
+  "widget_menu.title": "Widget műveletek",
+  "widget_menu.view_query": "Lekérdezés megtekintése",
+  "widget_menu.view_as_table": "Megtekintés táblázatként",
+  "widget_menu.copied": "Másolva",
+  "widget_menu.rows": "sor"
 }

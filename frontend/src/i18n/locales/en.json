@@ -893,5 +893,10 @@
   "import.json_array_path": "JSON array path",
   "import.json_array_path_hint": "Dot-separated path to nested array. Use * to iterate all keys (key becomes a column). Example: clusters.*.group_ax.*.brand.*",
   "admin.permission_description.IMPORT_MANAGE": "Manage data import configurations",
-  "admin.permission_description.IMPORT_UPLOAD": "Upload files for data import"
+  "admin.permission_description.IMPORT_UPLOAD": "Upload files for data import",
+  "widget_menu.title": "Widget actions",
+  "widget_menu.view_query": "View query",
+  "widget_menu.view_as_table": "View as table",
+  "widget_menu.copied": "Copied",
+  "widget_menu.rows": "rows"
 }

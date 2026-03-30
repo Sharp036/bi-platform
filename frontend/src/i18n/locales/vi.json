@@ -893,5 +893,10 @@
   "common.link_copied": "Đã sao chép liên kết",
   "designer.y_axis_min": "Giá trị tối thiểu trục Y",
   "designer.y_axis_min.zero": "Bắt đầu từ 0",
-  "designer.y_axis_min.auto": "Tự động (gần giá trị tối thiểu)"
+  "designer.y_axis_min.auto": "Tự động (gần giá trị tối thiểu)",
+  "widget_menu.title": "Thao tác widget",
+  "widget_menu.view_query": "Xem truy vấn",
+  "widget_menu.view_as_table": "Xem dạng bảng",
+  "widget_menu.copied": "Đã sao chép",
+  "widget_menu.rows": "dòng"
 }

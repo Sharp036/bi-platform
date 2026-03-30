@@ -893,5 +893,10 @@
   "common.link_copied": "링크가 복사되었습니다",
   "designer.y_axis_min": "Y축 최솟값",
   "designer.y_axis_min.zero": "0부터 시작",
-  "designer.y_axis_min.auto": "자동 (최솟값 근처)"
+  "designer.y_axis_min.auto": "자동 (최솟값 근처)",
+  "widget_menu.title": "위젯 작업",
+  "widget_menu.view_query": "쿼리 보기",
+  "widget_menu.view_as_table": "테이블로 보기",
+  "widget_menu.copied": "복사됨",
+  "widget_menu.rows": "행"
 }
