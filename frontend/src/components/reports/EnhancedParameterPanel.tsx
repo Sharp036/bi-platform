@@ -155,7 +155,12 @@ export default function EnhancedParameterPanel({
     const typed: Record<string, unknown> = {}
     parameters.forEach(p => {
       const v = values[p.name]
-      if (v === undefined || v === '') return
+      if (v === undefined) return
+      if (v === '') {
+        // Send empty string so backend knows user chose "All" (don't fall back to default)
+        typed[p.name] = ''
+        return
+      }
       switch (p.paramType) {
         case 'NUMBER': typed[p.name] = Number(v); break
         case 'BOOLEAN': typed[p.name] = v === 'true'; break
@@ -218,7 +223,7 @@ export default function EnhancedParameterPanel({
                   onChange={e => handleChange(p.name, e.target.value)}
                   className="input text-sm"
                 >
-                  <option value="">{t('common.all')}</option>
+                  {!p.isRequired && <option value="">{t('common.all')}</option>}
                   {options.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
