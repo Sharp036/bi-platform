@@ -246,7 +246,15 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
 
 function formatCell(v: unknown): string {
   if (v == null) return ''
-  if (typeof v === 'number') return Number.isFinite(v) ? v.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 }) : String(v)
+  if (typeof v === 'number') {
+    return Number.isFinite(v) ? v.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 }) : String(v)
+  }
+  if (typeof v === 'string' && v.length > 0) {
+    const n = Number(v)
+    if (!isNaN(n) && isFinite(n) && String(n) !== v) {
+      return n.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 })
+    }
+  }
   return String(v)
 }
 
