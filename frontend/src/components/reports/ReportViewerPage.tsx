@@ -247,6 +247,22 @@ export default function ReportViewerPage() {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
   }, [drillReplaceStack])
 
+  // ── Client-side cross-filter for drill-replace targets ─────────────────────
+  const activeFilters = useActionStore(s => s.activeFilters)
+
+  const applyClientFilters = useCallback((w: RenderReportResponse['widgets'][number]): RenderReportResponse['widgets'][number] => {
+    const filters = activeFilters[w.widgetId]
+    if (!filters || filters.length === 0 || !w.data) return w
+    const filteredRows = w.data.rows.filter(row =>
+      filters.every(f => {
+        const cellVal = row[f.field]
+        if (cellVal == null || f.value == null) return false
+        return String(cellVal) === String(f.value)
+      })
+    )
+    return { ...w, data: { ...w.data, rows: filteredRows, rowCount: filteredRows.length } }
+  }, [activeFilters])
+
   // ── Visible widget IDs (used to filter parameter panel) ──────────────────────
   const visibleWidgetIds = useMemo(() => {
     const ids = new Set<number>()
@@ -333,21 +349,6 @@ export default function ReportViewerPage() {
   }
 
   const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
-
-  const activeFilters = useActionStore(s => s.activeFilters)
-
-  const applyClientFilters = useCallback((w: RenderReportResponse['widgets'][number]): RenderReportResponse['widgets'][number] => {
-    const filters = activeFilters[w.widgetId]
-    if (!filters || filters.length === 0 || !w.data) return w
-    const filteredRows = w.data.rows.filter(row =>
-      filters.every(f => {
-        const cellVal = row[f.field]
-        if (cellVal == null || f.value == null) return false
-        return String(cellVal) === String(f.value)
-      })
-    )
-    return { ...w, data: { ...w.data, rows: filteredRows, rowCount: filteredRows.length } }
-  }, [activeFilters])
 
   const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
     const widgetDrillActions = drillActions[w.widgetId] || []
