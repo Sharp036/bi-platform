@@ -893,5 +893,16 @@
   "common.link_copied": "链接已复制",
   "designer.y_axis_min": "Y轴最小值",
   "designer.y_axis_min.zero": "从0开始",
-  "designer.y_axis_min.auto": "自动（接近最小值）"
+  "designer.y_axis_min.auto": "自动（接近最小值）",
+  "widget_menu.title": "组件操作",
+  "widget_menu.view_query": "查看查询",
+  "widget_menu.view_as_table": "以表格查看",
+  "widget_menu.copied": "已复制",
+  "widget_menu.rows": "行",
+  "interactive.action.drill_replace": "钻取替换",
+  "interactive.action.drill_replace_desc": "隐藏源，显示详细组件",
+  "interactive.action.save_first": "请先保存报告以配置操作",
+  "widget_menu.drill_back": "返回",
+  "interactive.action.target_widget": "目标组件...",
+  "widget_menu.copy_table": "复制"
 }

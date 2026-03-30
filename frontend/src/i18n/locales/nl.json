@@ -893,5 +893,16 @@
   "common.link_copied": "Link gekopieerd",
   "designer.y_axis_min": "Y-as minimum",
   "designer.y_axis_min.zero": "Beginnen bij 0",
-  "designer.y_axis_min.auto": "Auto (dichtbij minimumwaarde)"
+  "designer.y_axis_min.auto": "Auto (dichtbij minimumwaarde)",
+  "widget_menu.title": "Widgetacties",
+  "widget_menu.view_query": "Query bekijken",
+  "widget_menu.view_as_table": "Als tabel bekijken",
+  "widget_menu.copied": "Gekopieerd",
+  "widget_menu.rows": "rijen",
+  "interactive.action.drill_replace": "Detail-vervanging",
+  "interactive.action.drill_replace_desc": "Bron verbergen, detail-widget tonen",
+  "interactive.action.save_first": "Sla het rapport eerst op om acties te configureren",
+  "widget_menu.drill_back": "Terug",
+  "interactive.action.target_widget": "Doelwidget...",
+  "widget_menu.copy_table": "Kopieer"
 }

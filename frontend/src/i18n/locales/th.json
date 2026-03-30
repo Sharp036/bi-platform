@@ -893,5 +893,16 @@
   "common.link_copied": "คัดลอกลิงก์แล้ว",
   "designer.y_axis_min": "ค่าต่ำสุดแกน Y",
   "designer.y_axis_min.zero": "เริ่มจาก 0",
-  "designer.y_axis_min.auto": "อัตโนมัติ (ใกล้ค่าต่ำสุด)"
+  "designer.y_axis_min.auto": "อัตโนมัติ (ใกล้ค่าต่ำสุด)",
+  "widget_menu.title": "การดำเนินการวิดเจ็ต",
+  "widget_menu.view_query": "ดูคิวรี",
+  "widget_menu.view_as_table": "ดูเป็นตาราง",
+  "widget_menu.copied": "คัดลอกแล้ว",
+  "widget_menu.rows": "แถว",
+  "interactive.action.drill_replace": "แทนที่รายละเอียด",
+  "interactive.action.drill_replace_desc": "ซ่อนแหล่งที่มา แสดงวิดเจ็ตรายละเอียด",
+  "interactive.action.save_first": "บันทึกรายงานก่อนเพื่อกำหนดค่าการดำเนินการ",
+  "widget_menu.drill_back": "ย้อนกลับ",
+  "interactive.action.target_widget": "วิดเจ็ตเป้าหมาย...",
+  "widget_menu.copy_table": "คัดลอก"
 }

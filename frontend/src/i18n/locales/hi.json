@@ -893,5 +893,16 @@
   "common.link_copied": "लिंक कॉपी हो गया",
   "designer.y_axis_min": "Y-अक्ष न्यूनतम",
   "designer.y_axis_min.zero": "0 से शुरू",
-  "designer.y_axis_min.auto": "ऑटो (न्यूनतम मान के पास)"
+  "designer.y_axis_min.auto": "ऑटो (न्यूनतम मान के पास)",
+  "widget_menu.title": "विजेट क्रियाएं",
+  "widget_menu.view_query": "क्वेरी देखें",
+  "widget_menu.view_as_table": "तालिका के रूप में देखें",
+  "widget_menu.copied": "कॉपी किया गया",
+  "widget_menu.rows": "पंक्तियां",
+  "interactive.action.drill_replace": "ड्रिल बदलें",
+  "interactive.action.drill_replace_desc": "स्रोत छुपाएं, विस्तृत विजेट दिखाएं",
+  "interactive.action.save_first": "क्रियाएं कॉन्फ़िगर करने के लिए पहले रिपोर्ट सहेजें",
+  "widget_menu.drill_back": "वापस",
+  "interactive.action.target_widget": "लक्ष्य विजेट...",
+  "widget_menu.copy_table": "कॉपी करें"
 }

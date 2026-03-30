@@ -893,5 +893,16 @@
   "common.link_copied": "Lenke kopiert",
   "designer.y_axis_min": "Y-akse minimum",
   "designer.y_axis_min.zero": "Start fra 0",
-  "designer.y_axis_min.auto": "Auto (nær minimumsverdi)"
+  "designer.y_axis_min.auto": "Auto (nær minimumsverdi)",
+  "widget_menu.title": "Widget-handlinger",
+  "widget_menu.view_query": "Vis spørring",
+  "widget_menu.view_as_table": "Vis som tabell",
+  "widget_menu.copied": "Kopiert",
+  "widget_menu.rows": "rader",
+  "interactive.action.drill_replace": "Detaljvisning",
+  "interactive.action.drill_replace_desc": "Skjul kilde, vis detalj-widget",
+  "interactive.action.save_first": "Lagre rapporten først for å konfigurere handlinger",
+  "widget_menu.drill_back": "Tilbake",
+  "interactive.action.target_widget": "Mål-widget...",
+  "widget_menu.copy_table": "Kopier"
 }

@@ -893,5 +893,16 @@
   "common.link_copied": "Tautan disalin",
   "designer.y_axis_min": "Minimum sumbu Y",
   "designer.y_axis_min.zero": "Mulai dari 0",
-  "designer.y_axis_min.auto": "Otomatis (dekat nilai minimum)"
+  "designer.y_axis_min.auto": "Otomatis (dekat nilai minimum)",
+  "widget_menu.title": "Tindakan widget",
+  "widget_menu.view_query": "Lihat kueri",
+  "widget_menu.view_as_table": "Lihat sebagai tabel",
+  "widget_menu.copied": "Disalin",
+  "widget_menu.rows": "baris",
+  "interactive.action.drill_replace": "Detail Ganti",
+  "interactive.action.drill_replace_desc": "Sembunyikan sumber, tampilkan widget detail",
+  "interactive.action.save_first": "Simpan laporan terlebih dahulu untuk mengkonfigurasi tindakan",
+  "widget_menu.drill_back": "Kembali",
+  "interactive.action.target_widget": "Widget target...",
+  "widget_menu.copy_table": "Salin"
 }

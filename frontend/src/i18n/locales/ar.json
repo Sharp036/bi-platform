@@ -893,5 +893,16 @@
   "common.link_copied": "تم نسخ الرابط",
   "designer.y_axis_min": "الحد الأدنى للمحور Y",
   "designer.y_axis_min.zero": "البدء من 0",
-  "designer.y_axis_min.auto": "تلقائي (قرب القيمة الدنيا)"
+  "designer.y_axis_min.auto": "تلقائي (قرب القيمة الدنيا)",
+  "widget_menu.title": "اجراءات الودجت",
+  "widget_menu.view_query": "عرض الاستعلام",
+  "widget_menu.view_as_table": "عرض كجدول",
+  "widget_menu.copied": "تم النسخ",
+  "widget_menu.rows": "صفوف",
+  "interactive.action.drill_replace": "استبدال التفاصيل",
+  "interactive.action.drill_replace_desc": "إخفاء المصدر، إظهار ودجة التفاصيل",
+  "interactive.action.save_first": "احفظ التقرير أولاً لتكوين الإجراءات",
+  "widget_menu.drill_back": "رجوع",
+  "interactive.action.target_widget": "الودجة المستهدفة...",
+  "widget_menu.copy_table": "نسخ"
 }

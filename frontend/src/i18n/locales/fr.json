@@ -893,5 +893,16 @@
   "common.link_copied": "Lien copié",
   "designer.y_axis_min": "Minimum axe Y",
   "designer.y_axis_min.zero": "Commencer à 0",
-  "designer.y_axis_min.auto": "Auto (proche du minimum)"
+  "designer.y_axis_min.auto": "Auto (proche du minimum)",
+  "widget_menu.title": "Actions du widget",
+  "widget_menu.view_query": "Voir la requête",
+  "widget_menu.view_as_table": "Voir en tableau",
+  "widget_menu.copied": "Copié",
+  "widget_menu.rows": "lignes",
+  "interactive.action.drill_replace": "Détail",
+  "interactive.action.drill_replace_desc": "Masquer la source, afficher le widget détaillé",
+  "interactive.action.save_first": "Enregistrez d'abord le rapport pour configurer les actions",
+  "widget_menu.drill_back": "Retour",
+  "interactive.action.target_widget": "Widget cible...",
+  "widget_menu.copy_table": "Copier"
 }

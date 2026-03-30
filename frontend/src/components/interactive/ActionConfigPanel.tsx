@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink } from 'lucide-react'
+import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers } from 'lucide-react'
 import type { DashboardActionItem, DashboardActionRequest, WidgetListItem } from '@/types'
 import { interactiveApi } from '@/api/interactive'
 import toast from 'react-hot-toast'
@@ -11,11 +11,12 @@ interface Props {
   widgets: WidgetListItem[]
 }
 
-const actionTypeIcons = {
+const actionTypeIcons: Record<string, typeof Filter> = {
   FILTER: Filter,
   HIGHLIGHT: Pointer,
   NAVIGATE: Navigation,
   URL: ExternalLink,
+  DRILL_REPLACE: Layers,
 }
 
 const triggerTypes = ['CLICK', 'HOVER', 'SELECT']
@@ -28,6 +29,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
     { type: 'HIGHLIGHT', icon: Pointer, label: t('interactive.action.highlight'), desc: t('interactive.action.highlight_desc') },
     { type: 'NAVIGATE', icon: Navigation, label: t('interactive.action.navigate'), desc: t('interactive.action.navigate_desc') },
     { type: 'URL', icon: ExternalLink, label: t('interactive.action.open_url'), desc: t('interactive.action.open_url_desc') },
+    { type: 'DRILL_REPLACE', icon: Layers, label: t('interactive.action.drill_replace'), desc: t('interactive.action.drill_replace_desc') },
   ]
 
   const [actions, setActions] = useState<DashboardActionItem[]>([])
@@ -97,7 +99,13 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
               <div className="text-slate-400">
                 {sourceWidget?.title || `Widget #${action.sourceWidgetId}`}
                 {' → '}
-                {action.targetWidgetIds === '*' ? t('common.all') : action.targetWidgetIds}
+                {action.targetWidgetIds === '*'
+                  ? t('common.all')
+                  : (action.targetWidgetIds || '').split(',').map(id => {
+                      const tw = widgets.find(w => w.id === Number(id.trim()))
+                      return tw?.title || `#${id.trim()}`
+                    }).join(', ')
+                }
                 {' '}{t('common.on')}{' '}{action.triggerType.toLowerCase()}
               </div>
             </div>
@@ -177,14 +185,29 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
           </select>
 
           {/* Target */}
-          {(form.actionType === 'FILTER' || form.actionType === 'HIGHLIGHT') && (
+          {(form.actionType === 'FILTER' || form.actionType === 'HIGHLIGHT' || form.actionType === 'DRILL_REPLACE') && (
             <>
-              <input
-                value={form.targetWidgetIds || ''}
-                onChange={e => setForm(f => ({ ...f, targetWidgetIds: e.target.value }))}
-                placeholder={t('interactive.action.target_widgets')}
-                className="input text-xs w-full"
-              />
+              {form.actionType === 'DRILL_REPLACE' ? (
+                <select
+                  value={form.targetWidgetIds || ''}
+                  onChange={e => setForm(f => ({ ...f, targetWidgetIds: e.target.value }))}
+                  className="input text-xs w-full"
+                >
+                  <option value="">{t('interactive.action.target_widget')}</option>
+                  {widgets.filter(w => w.id !== form.sourceWidgetId).map(w => (
+                    <option key={w.id} value={String(w.id)}>
+                      {w.title || `Widget #${w.id}`} ({w.widgetType})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={form.targetWidgetIds || ''}
+                  onChange={e => setForm(f => ({ ...f, targetWidgetIds: e.target.value }))}
+                  placeholder={t('interactive.action.target_widgets')}
+                  className="input text-xs w-full"
+                />
+              )}
               <div className="grid grid-cols-2 gap-2">
                 <input
                   value={form.sourceField || ''}

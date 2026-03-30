@@ -893,5 +893,16 @@
   "common.link_copied": "Link másolva",
   "designer.y_axis_min": "Y tengely minimum",
   "designer.y_axis_min.zero": "Kezdés 0-tól",
-  "designer.y_axis_min.auto": "Automatikus (minimum közelében)"
+  "designer.y_axis_min.auto": "Automatikus (minimum közelében)",
+  "widget_menu.title": "Widget műveletek",
+  "widget_menu.view_query": "Lekérdezés megtekintése",
+  "widget_menu.view_as_table": "Megtekintés táblázatként",
+  "widget_menu.copied": "Másolva",
+  "widget_menu.rows": "sor",
+  "interactive.action.drill_replace": "Részletezés",
+  "interactive.action.drill_replace_desc": "Forrás elrejtése, részlet widget megjelenítése",
+  "interactive.action.save_first": "Mentse el a jelentést a műveletek konfigurálásához",
+  "widget_menu.drill_back": "Vissza",
+  "interactive.action.target_widget": "Cél widget...",
+  "widget_menu.copy_table": "Másolás"
 }

@@ -893,5 +893,16 @@
   "dashboard.recent_reports": "Последние отчёты",
   "dashboard.saved_queries": "Сохранённые запросы",
   "dashboard.title": "Дашборд",
-  "dashboard.view_all": "Показать все"
+  "dashboard.view_all": "Показать все",
+  "widget_menu.title": "Действия виджета",
+  "widget_menu.view_query": "Посмотреть запрос",
+  "widget_menu.view_as_table": "Посмотреть как таблицу",
+  "widget_menu.copied": "Скопировано",
+  "widget_menu.rows": "строк",
+  "interactive.action.drill_replace": "Детализация",
+  "interactive.action.drill_replace_desc": "Скрыть источник, показать детальный виджет",
+  "interactive.action.save_first": "Сначала сохраните отчёт, чтобы настроить действия",
+  "widget_menu.drill_back": "Назад",
+  "interactive.action.target_widget": "Целевой виджет...",
+  "widget_menu.copy_table": "Копировать"
 }
