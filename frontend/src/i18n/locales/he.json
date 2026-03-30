@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "הסתר מקור, הצג וידג'ט פרטים",
   "interactive.action.save_first": "שמור תחילה את הדוח כדי להגדיר פעולות",
   "widget_menu.drill_back": "חזרה",
-  "interactive.action.target_widget": "וידג'ט יעד..."
+  "interactive.action.target_widget": "וידג'ט יעד...",
+  "widget_menu.copy_table": "העתק"
 }

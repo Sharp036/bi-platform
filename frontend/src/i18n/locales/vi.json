@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "Ấn nguồn, hiển thị widget chi tiết",
   "interactive.action.save_first": "Lưu báo cáo trước để cấu hình hành động",
   "widget_menu.drill_back": "Quay lại",
-  "interactive.action.target_widget": "Widget mục tiêu..."
+  "interactive.action.target_widget": "Widget mục tiêu...",
+  "widget_menu.copy_table": "Sao chép"
 }

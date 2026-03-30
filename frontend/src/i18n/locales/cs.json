@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "Skrýt zdroj, zobrazit detail widget",
   "interactive.action.save_first": "Nejprve uložte sestavu pro konfiguraci akcí",
   "widget_menu.drill_back": "Zpět",
-  "interactive.action.target_widget": "Cílový widget..."
+  "interactive.action.target_widget": "Cílový widget...",
+  "widget_menu.copy_table": "Kopírovat"
 }

@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "隐藏源，显示详细组件",
   "interactive.action.save_first": "请先保存报告以配置操作",
   "widget_menu.drill_back": "返回",
-  "interactive.action.target_widget": "目标组件..."
+  "interactive.action.target_widget": "目标组件...",
+  "widget_menu.copy_table": "复制"
 }

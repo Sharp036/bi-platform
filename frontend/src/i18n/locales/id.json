@@ -903,5 +903,6 @@
   "interactive.action.drill_replace_desc": "Sembunyikan sumber, tampilkan widget detail",
   "interactive.action.save_first": "Simpan laporan terlebih dahulu untuk mengkonfigurasi tindakan",
   "widget_menu.drill_back": "Kembali",
-  "interactive.action.target_widget": "Widget target..."
+  "interactive.action.target_widget": "Widget target...",
+  "widget_menu.copy_table": "Salin"
 }
