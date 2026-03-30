@@ -888,5 +888,10 @@
   "common.move_down": "Přesunout dolů",
   "designer.null_handling": "Hodnoty NULL",
   "designer.null_handling.zero": "Zobrazit jako 0",
-  "designer.null_handling.gap": "Přerušení čáry (mezera)"
+  "designer.null_handling.gap": "Přerušení čáry (mezera)",
+  "common.copy_link": "Kopírovat odkaz",
+  "common.link_copied": "Odkaz zkopírován",
+  "designer.y_axis_min": "Minimum osy Y",
+  "designer.y_axis_min.zero": "Začít od 0",
+  "designer.y_axis_min.auto": "Automaticky (blízko minimu)"
 }

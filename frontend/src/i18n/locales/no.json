@@ -888,5 +888,10 @@
   "common.move_down": "Flytt ned",
   "designer.null_handling": "NULL-verdier",
   "designer.null_handling.zero": "Vis som 0",
-  "designer.null_handling.gap": "Bryt linje (mellomrom)"
+  "designer.null_handling.gap": "Bryt linje (mellomrom)",
+  "common.copy_link": "Kopier lenke",
+  "common.link_copied": "Lenke kopiert",
+  "designer.y_axis_min": "Y-akse minimum",
+  "designer.y_axis_min.zero": "Start fra 0",
+  "designer.y_axis_min.auto": "Auto (nær minimumsverdi)"
 }

@@ -30,7 +30,7 @@ export interface ColumnMeta { name: string; type: string; nullable: boolean }
 
 // ── Report ──
 export interface Report {
-  id: number; name: string; description?: string
+  id: number; slug: string; name: string; description?: string
   reportType: 'STANDARD' | 'TEMPLATE'
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   isTemplate: boolean
@@ -39,7 +39,7 @@ export interface Report {
   createdAt: string; updatedAt: string
 }
 export interface ReportListItem {
-  id: number; name: string; description?: string
+  id: number; slug: string; name: string; description?: string
   reportType: 'STANDARD' | 'TEMPLATE'
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   isTemplate: boolean

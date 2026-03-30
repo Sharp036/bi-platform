@@ -888,5 +888,10 @@
   "common.move_down": "Przesuń w dół",
   "designer.null_handling": "Wartości NULL",
   "designer.null_handling.zero": "Pokaż jako 0",
-  "designer.null_handling.gap": "Przerwij linię (przerwa)"
+  "designer.null_handling.gap": "Przerwij linię (przerwa)",
+  "common.copy_link": "Kopiuj link",
+  "common.link_copied": "Link skopiowany",
+  "designer.y_axis_min": "Minimum osi Y",
+  "designer.y_axis_min.zero": "Zacznij od 0",
+  "designer.y_axis_min.auto": "Auto (blisko wartości minimalnej)"
 }

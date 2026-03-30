@@ -888,5 +888,10 @@
   "common.move_down": "تحريك لأسفل",
   "designer.null_handling": "قيم NULL",
   "designer.null_handling.zero": "عرض كـ 0",
-  "designer.null_handling.gap": "قطع الخط (فجوة)"
+  "designer.null_handling.gap": "قطع الخط (فجوة)",
+  "common.copy_link": "نسخ الرابط",
+  "common.link_copied": "تم نسخ الرابط",
+  "designer.y_axis_min": "الحد الأدنى للمحور Y",
+  "designer.y_axis_min.zero": "البدء من 0",
+  "designer.y_axis_min.auto": "تلقائي (قرب القيمة الدنيا)"
 }

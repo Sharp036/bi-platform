@@ -888,5 +888,10 @@
   "common.move_down": "아래로 이동",
   "designer.null_handling": "NULL 값",
   "designer.null_handling.zero": "0으로 표시",
-  "designer.null_handling.gap": "선 끊기 (간격)"
+  "designer.null_handling.gap": "선 끊기 (간격)",
+  "common.copy_link": "링크 복사",
+  "common.link_copied": "링크가 복사되었습니다",
+  "designer.y_axis_min": "Y축 최솟값",
+  "designer.y_axis_min.zero": "0부터 시작",
+  "designer.y_axis_min.auto": "자동 (최솟값 근처)"
 }

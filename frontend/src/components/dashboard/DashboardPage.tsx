@@ -64,7 +64,7 @@ export default function DashboardPage() {
             {reports.length === 0 ? (
               <p className="px-4 py-6 text-sm text-slate-400 text-center">{t('reports.no_reports')}</p>
             ) : reports.map(r => (
-              <Link key={r.id} to={`/reports/${r.id}`}
+              <Link key={r.id} to={`/reports/${r.slug}`}
                 className="flex items-center justify-between px-4 py-3 hover:bg-surface-50 dark:hover:bg-dark-surface-50/50 transition-colors">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{r.name}</p>

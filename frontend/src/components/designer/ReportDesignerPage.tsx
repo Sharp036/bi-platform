@@ -235,10 +235,10 @@ export default function ReportDesignerPage() {
             })
           }
         }
-        navigate(`/reports/${created.id}/edit`, { replace: true })
+        navigate(`/reports/${created.slug}/edit`, { replace: true })
         toast.success(t('designer.report_created'))
         setDirty(false)
-        navigate(`/reports/${created.id}/edit`, { replace: true })
+        navigate(`/reports/${created.slug}/edit`, { replace: true })
       } else {
         // Update report metadata
         await reportApi.update(reportId, {

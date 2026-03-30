@@ -572,6 +572,17 @@ export default function PropertyPanel() {
                         </Field>
                       )}
 
+                      <Field label={t('designer.y_axis_min')}>
+                        <select
+                          value={cc.yAxisMin as string || 'zero'}
+                          onChange={e => update({ chartConfig: { ...cc, yAxisMin: e.target.value } })}
+                          className="input text-sm"
+                        >
+                          <option value="zero">{t('designer.y_axis_min.zero')}</option>
+                          <option value="auto">{t('designer.y_axis_min.auto')}</option>
+                        </select>
+                      </Field>
+
                       <Field label={t('designer.x_axis_rotation')}>
                         <select
                           value={String(cc.xAxisRotation || 0)}

@@ -888,5 +888,10 @@
   "common.move_down": "Di chuyển xuống",
   "designer.null_handling": "Giá trị NULL",
   "designer.null_handling.zero": "Hiển thị là 0",
-  "designer.null_handling.gap": "Ngắt đường (khoảng trống)"
+  "designer.null_handling.gap": "Ngắt đường (khoảng trống)",
+  "common.copy_link": "Sao chép liên kết",
+  "common.link_copied": "Đã sao chép liên kết",
+  "designer.y_axis_min": "Giá trị tối thiểu trục Y",
+  "designer.y_axis_min.zero": "Bắt đầu từ 0",
+  "designer.y_axis_min.auto": "Tự động (gần giá trị tối thiểu)"
 }

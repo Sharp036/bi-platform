@@ -888,5 +888,10 @@
   "common.move_down": "Mover para baixo",
   "designer.null_handling": "Valores NULL",
   "designer.null_handling.zero": "Mostrar como 0",
-  "designer.null_handling.gap": "Quebrar linha (espaço)"
+  "designer.null_handling.gap": "Quebrar linha (espaço)",
+  "common.copy_link": "Copiar link",
+  "common.link_copied": "Link copiado",
+  "designer.y_axis_min": "Mínimo eixo Y",
+  "designer.y_axis_min.zero": "Começar do 0",
+  "designer.y_axis_min.auto": "Auto (perto do valor mínimo)"
 }

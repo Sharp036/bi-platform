@@ -888,5 +888,10 @@
   "common.move_down": "Pindahkan ke bawah",
   "designer.null_handling": "Nilai NULL",
   "designer.null_handling.zero": "Tampilkan sebagai 0",
-  "designer.null_handling.gap": "Putus garis (celah)"
+  "designer.null_handling.gap": "Putus garis (celah)",
+  "common.copy_link": "Salin tautan",
+  "common.link_copied": "Tautan disalin",
+  "designer.y_axis_min": "Minimum sumbu Y",
+  "designer.y_axis_min.zero": "Mulai dari 0",
+  "designer.y_axis_min.auto": "Otomatis (dekat nilai minimum)"
 }

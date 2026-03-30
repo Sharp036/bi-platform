@@ -888,5 +888,10 @@
   "common.move_down": "Siirrä alas",
   "designer.null_handling": "NULL-arvot",
   "designer.null_handling.zero": "Näytä nollana",
-  "designer.null_handling.gap": "Katkaise viiva (aukko)"
+  "designer.null_handling.gap": "Katkaise viiva (aukko)",
+  "common.copy_link": "Kopioi linkki",
+  "common.link_copied": "Linkki kopioitu",
+  "designer.y_axis_min": "Y-akselin minimi",
+  "designer.y_axis_min.zero": "Aloita nollasta",
+  "designer.y_axis_min.auto": "Automaattinen (lähellä minimiä)"
 }

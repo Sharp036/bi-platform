@@ -888,5 +888,10 @@
   "common.move_down": "Nach unten",
   "designer.null_handling": "NULL-Werte",
   "designer.null_handling.zero": "Als 0 anzeigen",
-  "designer.null_handling.gap": "Linie unterbrechen (Lücke)"
+  "designer.null_handling.gap": "Linie unterbrechen (Lücke)",
+  "common.copy_link": "Link kopieren",
+  "common.link_copied": "Link kopiert",
+  "designer.y_axis_min": "Y-Achse Minimum",
+  "designer.y_axis_min.zero": "Bei 0 beginnen",
+  "designer.y_axis_min.auto": "Auto (nahe Minimalwert)"
 }

@@ -71,9 +71,9 @@ export default function ReportListPage() {
     <div className="flex items-center gap-1">
       <FavoriteButton objectType="REPORT" objectId={r.id} size={14} />
       {canEdit && (
-        <Link to={`/reports/${r.id}/edit`} className="btn-ghost p-1.5 text-xs" title={t('common.edit')}><Pencil className="w-3.5 h-3.5" /></Link>
+        <Link to={`/reports/${r.slug}/edit`} className="btn-ghost p-1.5 text-xs" title={t('common.edit')}><Pencil className="w-3.5 h-3.5" /></Link>
       )}
-      <Link to={`/reports/${r.id}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
+      <Link to={`/reports/${r.slug}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
       {canEdit && (<>
         <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
         <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
@@ -172,7 +172,7 @@ export default function ReportListPage() {
                 <tr key={r.id} className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-50 group">
                   <td className="px-4 py-3 text-slate-400 dark:text-slate-500 font-mono text-xs">#{r.id}</td>
                   <td className="px-4 py-3">
-                    <Link to={`/reports/${r.id}`} className="font-medium text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400">
+                    <Link to={`/reports/${r.slug}`} className="font-medium text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400">
                       {r.name}
                     </Link>
                     {r.description && <p className="text-xs text-slate-400 truncate max-w-xs">{r.description}</p>}
@@ -203,7 +203,7 @@ export default function ReportListPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-xs text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">#{r.id}</span>
-                    <Link to={`/reports/${r.id}`} className="text-base font-semibold text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
+                    <Link to={`/reports/${r.slug}`} className="text-base font-semibold text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
                       {r.name}
                     </Link>
                   </div>
