@@ -131,9 +131,10 @@ export default function ReportViewerPage() {
   }, [currentReportId, id, loadDrillActions, t])
 
   const handleRender = useCallback(async (params?: Record<string, unknown>) => {
-    const mergedParams = { ...currentParams, ...params }
-    setCurrentParams(mergedParams)
-    await renderWithParams(mergedParams)
+    // Replace params entirely (not merge) so cleared filters don't persist
+    const finalParams = params ?? currentParams
+    setCurrentParams(finalParams)
+    await renderWithParams(finalParams)
   }, [currentParams, renderWithParams])
 
   useEffect(() => {
