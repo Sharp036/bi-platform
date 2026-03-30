@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Detaljersättning",
   "interactive.action.drill_replace_desc": "Dölj källa, visa detaljwidget",
   "interactive.action.save_first": "Spara rapporten först för att konfigurera åtgärder",
-  "widget_menu.drill_back": "Tillbaka"
+  "widget_menu.drill_back": "Tillbaka",
+  "interactive.action.target_widget": "Målwidget..."
 }

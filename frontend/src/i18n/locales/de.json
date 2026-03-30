@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Detail-Ersetzung",
   "interactive.action.drill_replace_desc": "Quelle ausblenden, Detail-Widget anzeigen",
   "interactive.action.save_first": "Speichern Sie den Bericht zuerst, um Aktionen zu konfigurieren",
-  "widget_menu.drill_back": "Zurück"
+  "widget_menu.drill_back": "Zurück",
+  "interactive.action.target_widget": "Ziel-Widget..."
 }

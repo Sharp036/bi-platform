@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Részletezés",
   "interactive.action.drill_replace_desc": "Forrás elrejtése, részlet widget megjelenítése",
   "interactive.action.save_first": "Mentse el a jelentést a műveletek konfigurálásához",
-  "widget_menu.drill_back": "Vissza"
+  "widget_menu.drill_back": "Vissza",
+  "interactive.action.target_widget": "Cél widget..."
 }

@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Detalle",
   "interactive.action.drill_replace_desc": "Ocultar origen, mostrar widget de detalle",
   "interactive.action.save_first": "Guarde el informe primero para configurar acciones",
-  "widget_menu.drill_back": "Volver"
+  "widget_menu.drill_back": "Volver",
+  "interactive.action.target_widget": "Widget destino..."
 }

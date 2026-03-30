@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Détail",
   "interactive.action.drill_replace_desc": "Masquer la source, afficher le widget détaillé",
   "interactive.action.save_first": "Enregistrez d'abord le rapport pour configurer les actions",
-  "widget_menu.drill_back": "Retour"
+  "widget_menu.drill_back": "Retour",
+  "interactive.action.target_widget": "Widget cible..."
 }

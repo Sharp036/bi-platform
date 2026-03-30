@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "드릴 대체",
   "interactive.action.drill_replace_desc": "소스 숨기고 상세 위젯 표시",
   "interactive.action.save_first": "액션을 구성하려면 먼저 보고서를 저장하세요",
-  "widget_menu.drill_back": "뒤로"
+  "widget_menu.drill_back": "뒤로",
+  "interactive.action.target_widget": "대상 위젯..."
 }

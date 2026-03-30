@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "ड्रिल बदलें",
   "interactive.action.drill_replace_desc": "स्रोत छुपाएं, विस्तृत विजेट दिखाएं",
   "interactive.action.save_first": "क्रियाएं कॉन्फ़िगर करने के लिए पहले रिपोर्ट सहेजें",
-  "widget_menu.drill_back": "वापस"
+  "widget_menu.drill_back": "वापस",
+  "interactive.action.target_widget": "लक्ष्य विजेट..."
 }

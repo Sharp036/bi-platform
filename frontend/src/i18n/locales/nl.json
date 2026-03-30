@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Detail-vervanging",
   "interactive.action.drill_replace_desc": "Bron verbergen, detail-widget tonen",
   "interactive.action.save_first": "Sla het rapport eerst op om acties te configureren",
-  "widget_menu.drill_back": "Terug"
+  "widget_menu.drill_back": "Terug",
+  "interactive.action.target_widget": "Doelwidget..."
 }

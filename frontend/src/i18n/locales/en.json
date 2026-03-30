@@ -728,6 +728,7 @@
   "interactive.action.no_actions": "No actions configured",
   "interactive.action.source_widget": "Source widget...",
   "interactive.action.target_widgets": "Target widget IDs (e.g. 2,3 or * for all)",
+  "interactive.action.target_widget": "Target widget...",
   "interactive.action.source_field": "Source field",
   "interactive.action.target_field": "Target field",
   "interactive.action.target_report": "Target Report ID",

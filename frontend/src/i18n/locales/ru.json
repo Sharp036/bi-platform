@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Детализация",
   "interactive.action.drill_replace_desc": "Скрыть источник, показать детальный виджет",
   "interactive.action.save_first": "Сначала сохраните отчёт, чтобы настроить действия",
-  "widget_menu.drill_back": "Назад"
+  "widget_menu.drill_back": "Назад",
+  "interactive.action.target_widget": "Целевой виджет..."
 }

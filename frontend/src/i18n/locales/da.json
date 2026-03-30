@@ -902,5 +902,6 @@
   "interactive.action.drill_replace": "Detaljevisning",
   "interactive.action.drill_replace_desc": "Skjul kilde, vis detalje-widget",
   "interactive.action.save_first": "Gem rapporten først for at konfigurere handlinger",
-  "widget_menu.drill_back": "Tilbage"
+  "widget_menu.drill_back": "Tilbage",
+  "interactive.action.target_widget": "Mål-widget..."
 }
