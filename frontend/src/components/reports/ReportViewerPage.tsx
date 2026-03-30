@@ -10,7 +10,7 @@ import DrillDownBreadcrumb from './DrillDownBreadcrumb'
 import type { BreadcrumbEntry } from './DrillDownBreadcrumb'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
-import { ArrowLeft, RefreshCw, Clock, Camera } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Clock, Camera, Link2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ExportMenu from './ExportMenu'
 import BookmarkBar from './BookmarkBar'
@@ -79,21 +79,20 @@ export default function ReportViewerPage() {
 
   useEffect(() => {
     if (!id) return
-    const reportId = Number(id)
-    Promise.all([
-      reportApi.get(reportId),
-      vizApi.getContainers(reportId).catch(() => [] as ContainerItem[]),
-    ]).then(([r, c]) => {
+    reportApi.get(id).then(r => {
+      const numericId = r.id
+      return vizApi.getContainers(numericId).catch(() => [] as ContainerItem[]).then(c => ({ r, c, numericId }))
+    }).then(({ r, c, numericId }) => {
         setReport(r)
         setContainers(c)
         setActiveTabByContainer(Object.fromEntries(c.map(ct => [ct.id, ct.activeTab || 0])))
         const filterPanelLayout = getFilterPanelLayout(r.layout)
         setFilterPanelPosition(filterPanelLayout.position)
         setFilterPanelCollapsed(filterPanelLayout.collapsed)
-        workspaceApi.trackView('REPORT', reportId).catch(() => {})
-        setCurrentReportId(reportId)
+        workspaceApi.trackView('REPORT', numericId).catch(() => {})
+        setCurrentReportId(numericId)
         if (!initializedRef.current) {
-          setNavStack([{ reportId, reportName: r.name, parameters: {}, label: r.name }])
+          setNavStack([{ reportId: numericId, reportName: r.name, parameters: {}, label: r.name }])
           initializedRef.current = true
         }
       })
@@ -111,7 +110,7 @@ export default function ReportViewerPage() {
   }, [])
 
   const renderWithParams = useCallback(async (paramsToUse: Record<string, unknown>) => {
-    const rId = currentReportId || (id ? Number(id) : null)
+    const rId = currentReportId || (id ? report?.id || 0 : null)
     if (!rId) return
     setRendering(true)
     try {
@@ -132,9 +131,10 @@ export default function ReportViewerPage() {
   }, [currentReportId, id, loadDrillActions, t])
 
   const handleRender = useCallback(async (params?: Record<string, unknown>) => {
-    const mergedParams = { ...currentParams, ...params }
-    setCurrentParams(mergedParams)
-    await renderWithParams(mergedParams)
+    // Replace params entirely (not merge) so cleared filters don't persist
+    const finalParams = params ?? currentParams
+    setCurrentParams(finalParams)
+    await renderWithParams(finalParams)
   }, [currentParams, renderWithParams])
 
   useEffect(() => {
@@ -336,7 +336,7 @@ export default function ReportViewerPage() {
           drillActions={widgetDrillActions}
           onDrillDown={hasDrill ? (data) => handleDrillDown(w.widgetId, data) : undefined}
           layers={interactiveMeta?.chartLayers?.[w.widgetId] || []}
-          reportId={currentReportId || Number(id)}
+          reportId={currentReportId || report?.id || 0}
           onToggleWidgets={handleToggleWidgets}
           onApplyFilter={handleApplyFilter}
           onChartClick={(data) => {
@@ -365,7 +365,7 @@ export default function ReportViewerPage() {
                 ''
           return (
             <BookmarkBar
-              reportId={currentReportId || Number(id)}
+              reportId={currentReportId || report?.id || 0}
               currentParameters={currentParams}
               className={bookmarkOffsetClass}
               onApplyBookmark={(params) => {
@@ -501,7 +501,7 @@ export default function ReportViewerPage() {
           </div>
           {!filterPanelCollapsed && (
             <EnhancedParameterPanel
-              reportId={Number(id)}
+              reportId={report?.id || 0}
               parameters={visibleParameters}
               onApply={handleRender}
               loading={rendering}
@@ -545,7 +545,7 @@ export default function ReportViewerPage() {
             <h1 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">{report.name}</h1>
             {report.description && <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">{report.description}</p>}
           </div>
-          <FavoriteButton objectType="REPORT" objectId={Number(id)} size={20} />
+          <FavoriteButton objectType="REPORT" objectId={report?.id || 0} size={20} />
         </div>
         <div className="flex items-center gap-1.5">
           <div className="flex items-center gap-1">
@@ -573,12 +573,23 @@ export default function ReportViewerPage() {
             <RefreshCw className={`w-4 h-4 ${rendering ? 'animate-spin' : ''}`} /> {t('common.refresh')}
           </button>
           <button
-            onClick={() => { reportApi.createSnapshot(Number(id)); toast.success(t('reports.snapshot_created')) }}
+            onClick={() => { reportApi.createSnapshot(report?.id || 0); toast.success(t('reports.snapshot_created')) }}
             className="btn-secondary text-xs py-1"
           >
             <Camera className="w-4 h-4" /> {t('reports.snapshot')}
           </button>
-          <ExportMenu reportId={Number(id)} reportName={report.name} />
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/reports/${report.slug}`
+              navigator.clipboard.writeText(url)
+              toast.success(t('common.link_copied'))
+            }}
+            className="btn-ghost text-xs py-1"
+            title={t('common.copy_link')}
+          >
+            <Link2 className="w-4 h-4" />
+          </button>
+          <ExportMenu reportId={report?.id || 0} reportName={report.name} />
         </div>
       </div>
 
@@ -600,7 +611,7 @@ export default function ReportViewerPage() {
 
       {report.parameters.length > 0 && visibleParameters.length > 0 && filterPanelPosition === 'top' && !filterPanelCollapsed && (
         <EnhancedParameterPanel
-          reportId={Number(id)}
+          reportId={report?.id || 0}
           parameters={report.parameters}
           onApply={handleRender}
           loading={rendering}
@@ -633,7 +644,7 @@ export default function ReportViewerPage() {
 
       {report.parameters.length > 0 && visibleParameters.length > 0 && filterPanelPosition === 'bottom' && !filterPanelCollapsed && (
         <EnhancedParameterPanel
-          reportId={Number(id)}
+          reportId={report?.id || 0}
           parameters={report.parameters}
           onApply={handleRender}
           loading={rendering}

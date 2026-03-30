@@ -888,5 +888,10 @@
   "common.move_down": "Aşağı taşı",
   "designer.null_handling": "NULL değerler",
   "designer.null_handling.zero": "0 olarak göster",
-  "designer.null_handling.gap": "Çizgiyi kes (boşluk)"
+  "designer.null_handling.gap": "Çizgiyi kes (boşluk)",
+  "common.copy_link": "Bağlantıyı kopyala",
+  "common.link_copied": "Bağlantı kopyalandı",
+  "designer.y_axis_min": "Y ekseni minimum",
+  "designer.y_axis_min.zero": "0'dan başla",
+  "designer.y_axis_min.auto": "Otomatik (minimum değere yakın)"
 }

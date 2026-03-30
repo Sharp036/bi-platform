@@ -888,5 +888,10 @@
   "common.move_down": "Μετακίνηση κάτω",
   "designer.null_handling": "Τιμές NULL",
   "designer.null_handling.zero": "Εμφάνιση ως 0",
-  "designer.null_handling.gap": "Διακοπή γραμμής (κενό)"
+  "designer.null_handling.gap": "Διακοπή γραμμής (κενό)",
+  "common.copy_link": "Αντιγραφή συνδέσμου",
+  "common.link_copied": "Ο σύνδεσμος αντιγράφηκε",
+  "designer.y_axis_min": "Ελάχιστο άξονα Y",
+  "designer.y_axis_min.zero": "Έναρξη από 0",
+  "designer.y_axis_min.auto": "Αυτόματο (κοντά στο ελάχιστο)"
 }

@@ -888,5 +888,10 @@
   "common.move_down": "Omlaag verplaatsen",
   "designer.null_handling": "NULL-waarden",
   "designer.null_handling.zero": "Weergeven als 0",
-  "designer.null_handling.gap": "Lijn onderbreken (opening)"
+  "designer.null_handling.gap": "Lijn onderbreken (opening)",
+  "common.copy_link": "Link kopiëren",
+  "common.link_copied": "Link gekopieerd",
+  "designer.y_axis_min": "Y-as minimum",
+  "designer.y_axis_min.zero": "Beginnen bij 0",
+  "designer.y_axis_min.auto": "Auto (dichtbij minimumwaarde)"
 }

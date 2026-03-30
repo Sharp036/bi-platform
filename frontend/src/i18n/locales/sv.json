@@ -888,5 +888,10 @@
   "common.move_down": "Flytta ner",
   "designer.null_handling": "NULL-värden",
   "designer.null_handling.zero": "Visa som 0",
-  "designer.null_handling.gap": "Bryt linje (mellanrum)"
+  "designer.null_handling.gap": "Bryt linje (mellanrum)",
+  "common.copy_link": "Kopiera länk",
+  "common.link_copied": "Länk kopierad",
+  "designer.y_axis_min": "Y-axel minimum",
+  "designer.y_axis_min.zero": "Börja från 0",
+  "designer.y_axis_min.auto": "Auto (nära minimivärde)"
 }

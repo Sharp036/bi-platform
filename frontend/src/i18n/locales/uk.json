@@ -888,5 +888,10 @@
   "common.move_down": "Перемістити вниз",
   "designer.null_handling": "Значення NULL",
   "designer.null_handling.zero": "Показувати як 0",
-  "designer.null_handling.gap": "Розрив лінії (пропуск)"
+  "designer.null_handling.gap": "Розрив лінії (пропуск)",
+  "common.copy_link": "Копіювати посилання",
+  "common.link_copied": "Посилання скопійовано",
+  "designer.y_axis_min": "Мінімум осі Y",
+  "designer.y_axis_min.zero": "Починати з 0",
+  "designer.y_axis_min.auto": "Авто (біля мінімального значення)"
 }

@@ -35,10 +35,22 @@ class ParameterResolver(dialectType: DataSourceType) {
         val foundParams = paramPattern.findAll(sql).map { it.groupValues[1] }.toSet()
 
         for (paramName in foundParams) {
-            require(parameters.containsKey(paramName)) {
-                "Missing required parameter: '$paramName'"
-            }
             val value = parameters[paramName]
+            val isEmptyOrMissing = !parameters.containsKey(paramName) ||
+                value == null || (value is String && value.isBlank())
+
+            if (isEmptyOrMissing) {
+                // Replace :param with a marker that makes simple conditions always true:
+                //   "column = :param"  -> "column = column"  (always true)
+                //   ":param IS NULL"   -> "'' IS NULL"        (false, but inside OR it's ok)
+                //   ":param = ''"      -> "'' = ''"           (true)
+                // First try: replace "column = :param" or "column != :param" patterns
+                // with "1=1" by removing the whole simple condition
+                resolved = removeSimpleConditions(resolved, paramName)
+                // If :param still present (complex expressions), replace with empty string
+                resolved = resolved.replace(Regex(":${Regex.escape(paramName)}\\b"), "''")
+                continue
+            }
             val literal = formatParameterValue(value)
             // Replace all occurrences of :paramName (word boundary aware)
             resolved = resolved.replace(
@@ -57,6 +69,20 @@ class ParameterResolver(dialectType: DataSourceType) {
     fun extractParameterNames(sql: String): List<String> {
         val paramPattern = Regex(":([a-zA-Z_][a-zA-Z0-9_]*)")
         return paramPattern.findAll(sql).map { it.groupValues[1] }.distinct().toList()
+    }
+
+    /**
+     * Remove simple AND-conditions like "AND column = :param" or "AND column != :param"
+     * by replacing the whole condition with "AND 1=1".
+     * Does NOT touch parenthesized or complex conditions -- those are handled by
+     * substituting :param with '' (empty string) in the caller.
+     */
+    private fun removeSimpleConditions(sql: String, paramName: String): String {
+        // Match: AND <identifier> <op> :param  (simple non-parenthesized condition)
+        return sql.replace(
+            Regex("""(?i)\bAND\s+\w+\s*[=!<>]+\s*:${Regex.escape(paramName)}\b"""),
+            "AND 1=1"
+        )
     }
 
     private fun formatParameterValue(value: Any?): String {

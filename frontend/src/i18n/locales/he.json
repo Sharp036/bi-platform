@@ -888,5 +888,10 @@
   "common.move_down": "הזז למטה",
   "designer.null_handling": "ערכי NULL",
   "designer.null_handling.zero": "הצג כ-0",
-  "designer.null_handling.gap": "שבירת קו (רווח)"
+  "designer.null_handling.gap": "שבירת קו (רווח)",
+  "common.copy_link": "העתק קישור",
+  "common.link_copied": "הקישור הועתק",
+  "designer.y_axis_min": "מינימום ציר Y",
+  "designer.y_axis_min.zero": "התחל מ-0",
+  "designer.y_axis_min.auto": "אוטומטי (קרוב לערך המינימלי)"
 }

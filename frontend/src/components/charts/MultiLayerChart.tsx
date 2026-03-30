@@ -312,6 +312,7 @@ export default function MultiLayerChart({
     const series: any[] = []
 
     // Display options from chartConfig (match EChartWidget behavior)
+    const yAxisMin = (config.yAxisMin as string) || 'zero'
     const yAxisFormat = (config.yAxisFormat as string) || 'plain'
     const yAxisCurrency = (config.yAxisCurrency as string) || 'USD'
     const yAxisDecimals = config.yAxisDecimals != null ? Number(config.yAxisDecimals) : undefined
@@ -483,7 +484,7 @@ export default function MultiLayerChart({
     }
 
     // Build yAxis
-    const yAxis: any[] = [{ type: 'value' }]
+    const yAxis: any[] = [{ type: 'value', min: yAxisMin === 'auto' ? 'dataMin' : 0 }]
     if (hasRightAxis) {
       yAxis.push({
         type: 'value',

@@ -31,6 +31,7 @@ data class UpdateReportRequest(
 
 data class ReportResponse(
     val id: Long,
+    val slug: String,
     val name: String,
     val description: String?,
     val reportType: ReportType,
@@ -50,6 +51,7 @@ data class ReportResponse(
 
 data class ReportListItem(
     val id: Long,
+    val slug: String,
     val name: String,
     val description: String?,
     val reportType: ReportType,
