@@ -230,18 +230,13 @@ class ReportRenderService(
             emptyMap()
         }
 
-        if (mapping.isEmpty()) return reportParams
-
+        // Always pass all report params through (so :param in SQL always resolves)
         val result = mutableMapOf<String, Any?>()
+        result.putAll(reportParams)
+        // Apply explicit mappings on top (renames query param -> report param)
         for ((queryParam, reportParam) in mapping) {
             if (reportParams.containsKey(reportParam)) {
                 result[queryParam] = reportParams[reportParam]
-            }
-        }
-        // Also include unmapped report params
-        for ((key, value) in reportParams) {
-            if (key !in result) {
-                result[key] = value
             }
         }
         return result

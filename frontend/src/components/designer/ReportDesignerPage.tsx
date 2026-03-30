@@ -169,6 +169,38 @@ export default function ReportDesignerPage() {
 
     setSaving(true)
     try {
+      // Auto-match paramMapping before saving: extract :params from SQL,
+      // match to report parameter names and filter widget filterColumns
+      const reportParamNames = new Set(parameters.map(p => p.name))
+      widgets.forEach(w => {
+        if (w.widgetType === 'FILTER') {
+          const col = (w.chartConfig as Record<string, unknown>).filterColumn as string | undefined
+          if (col) reportParamNames.add(col)
+        }
+      })
+      const paramRe = /(^|[^:]):([a-zA-Z_][a-zA-Z0-9_]*)/g
+      const updatedMappings = new Map<string, Record<string, string>>()
+      widgets.forEach(w => {
+        const sql = w.rawSql || ''
+        if (!sql) return
+        const current = { ...w.paramMapping }
+        let changed = false
+        let m: RegExpExecArray | null
+        paramRe.lastIndex = 0
+        while ((m = paramRe.exec(sql)) !== null) {
+          const sqlParam = m[2]
+          if (!sqlParam || sqlParam in current || Object.values(current).includes(sqlParam)) continue
+          if (reportParamNames.has(sqlParam)) {
+            current[sqlParam] = sqlParam
+            changed = true
+          }
+        }
+        if (changed) {
+          updateWidget(w.id, { paramMapping: current })
+          updatedMappings.set(w.id, current)
+        }
+      })
+
       const widgetPayloads = widgets.map((w, i) => {
         const hasInlineSql = !!(w.datasourceId && w.rawSql?.trim())
         return {
@@ -180,7 +212,7 @@ export default function ReportDesignerPage() {
           chartConfig: JSON.stringify(w.chartConfig),
           position: JSON.stringify(w.position),
           style: JSON.stringify(w.style),
-          paramMapping: JSON.stringify(w.paramMapping),
+          paramMapping: JSON.stringify(updatedMappings.get(w.id) || w.paramMapping),
           sortOrder: i,
           isVisible: w.isVisible,
         }

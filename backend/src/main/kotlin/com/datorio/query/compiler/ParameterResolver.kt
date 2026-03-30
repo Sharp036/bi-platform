@@ -35,10 +35,17 @@ class ParameterResolver(dialectType: DataSourceType) {
         val foundParams = paramPattern.findAll(sql).map { it.groupValues[1] }.toSet()
 
         for (paramName in foundParams) {
-            require(parameters.containsKey(paramName)) {
-                "Missing required parameter: '$paramName'"
+            if (!parameters.containsKey(paramName)) {
+                // Parameter not provided -- remove AND-clause containing it
+                resolved = removeAndClause(resolved, paramName)
+                continue
             }
             val value = parameters[paramName]
+            // Empty/blank string means "all" -- remove the AND-clause
+            if (value == null || (value is String && value.isBlank())) {
+                resolved = removeAndClause(resolved, paramName)
+                continue
+            }
             val literal = formatParameterValue(value)
             // Replace all occurrences of :paramName (word boundary aware)
             resolved = resolved.replace(
@@ -57,6 +64,28 @@ class ParameterResolver(dialectType: DataSourceType) {
     fun extractParameterNames(sql: String): List<String> {
         val paramPattern = Regex(":([a-zA-Z_][a-zA-Z0-9_]*)")
         return paramPattern.findAll(sql).map { it.groupValues[1] }.distinct().toList()
+    }
+
+    /**
+     * Remove AND-clauses that reference a given :param.
+     * E.g. "AND brand = :brand" or "AND (:brand IS NULL OR ...)" are removed.
+     */
+    private fun removeAndClause(sql: String, paramName: String): String {
+        // Remove "AND ... :paramName ..." up to next AND/ORDER/GROUP/LIMIT/HAVING or end
+        var result = sql.replace(
+            Regex("""(?i)\s+AND\s+[^)]*?:${Regex.escape(paramName)}\b[^)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
+            ""
+        )
+        // Also handle parenthesized conditions: AND (:param IS NULL OR ...)
+        result = result.replace(
+            Regex("""(?i)\s+AND\s+\([^)]*?:${Regex.escape(paramName)}\b[^)]*?\)"""),
+            ""
+        )
+        // Fallback: if :param still present, replace with a neutral value
+        if (result.contains(":$paramName")) {
+            result = result.replace(Regex(":${Regex.escape(paramName)}\\b"), "''")
+        }
+        return result
     }
 
     private fun formatParameterValue(value: Any?): String {
