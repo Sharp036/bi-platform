@@ -888,5 +888,10 @@
   "common.move_down": "Mută jos",
   "designer.null_handling": "Valori NULL",
   "designer.null_handling.zero": "Afișează ca 0",
-  "designer.null_handling.gap": "Întrerupe linia (spațiu)"
+  "designer.null_handling.gap": "Întrerupe linia (spațiu)",
+  "common.copy_link": "Copiază link",
+  "common.link_copied": "Link copiat",
+  "designer.y_axis_min": "Minim axa Y",
+  "designer.y_axis_min.zero": "Început de la 0",
+  "designer.y_axis_min.auto": "Auto (aproape de valoarea minimă)"
 }

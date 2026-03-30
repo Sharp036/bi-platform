@@ -888,5 +888,10 @@
   "common.move_down": "ย้ายลง",
   "designer.null_handling": "ค่า NULL",
   "designer.null_handling.zero": "แสดงเป็น 0",
-  "designer.null_handling.gap": "ตัดเส้น (ช่องว่าง)"
+  "designer.null_handling.gap": "ตัดเส้น (ช่องว่าง)",
+  "common.copy_link": "คัดลอกลิงก์",
+  "common.link_copied": "คัดลอกลิงก์แล้ว",
+  "designer.y_axis_min": "ค่าต่ำสุดแกน Y",
+  "designer.y_axis_min.zero": "เริ่มจาก 0",
+  "designer.y_axis_min.auto": "อัตโนมัติ (ใกล้ค่าต่ำสุด)"
 }

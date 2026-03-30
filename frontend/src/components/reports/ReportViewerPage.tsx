@@ -10,7 +10,7 @@ import DrillDownBreadcrumb from './DrillDownBreadcrumb'
 import type { BreadcrumbEntry } from './DrillDownBreadcrumb'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
-import { ArrowLeft, RefreshCw, Clock, Camera } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Clock, Camera, Link2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ExportMenu from './ExportMenu'
 import BookmarkBar from './BookmarkBar'
@@ -577,6 +577,17 @@ export default function ReportViewerPage() {
             className="btn-secondary text-xs py-1"
           >
             <Camera className="w-4 h-4" /> {t('reports.snapshot')}
+          </button>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/reports/${report.slug}`
+              navigator.clipboard.writeText(url)
+              toast.success(t('common.link_copied'))
+            }}
+            className="btn-ghost text-xs py-1"
+            title={t('common.copy_link')}
+          >
+            <Link2 className="w-4 h-4" />
           </button>
           <ExportMenu reportId={Number(id)} reportName={report.name} />
         </div>

@@ -888,5 +888,10 @@
   "common.move_down": "Lefelé mozgatás",
   "designer.null_handling": "NULL értékek",
   "designer.null_handling.zero": "Megjelenítés 0-ként",
-  "designer.null_handling.gap": "Vonal megszakítása (rés)"
+  "designer.null_handling.gap": "Vonal megszakítása (rés)",
+  "common.copy_link": "Link másolása",
+  "common.link_copied": "Link másolva",
+  "designer.y_axis_min": "Y tengely minimum",
+  "designer.y_axis_min.zero": "Kezdés 0-tól",
+  "designer.y_axis_min.auto": "Automatikus (minimum közelében)"
 }

@@ -888,5 +888,10 @@
   "common.move_down": "नीचे ले जाएं",
   "designer.null_handling": "NULL मान",
   "designer.null_handling.zero": "0 के रूप में दिखाएं",
-  "designer.null_handling.gap": "रेखा तोड़ें (गैप)"
+  "designer.null_handling.gap": "रेखा तोड़ें (गैप)",
+  "common.copy_link": "लिंक कॉपी करें",
+  "common.link_copied": "लिंक कॉपी हो गया",
+  "designer.y_axis_min": "Y-अक्ष न्यूनतम",
+  "designer.y_axis_min.zero": "0 से शुरू",
+  "designer.y_axis_min.auto": "ऑटो (न्यूनतम मान के पास)"
 }

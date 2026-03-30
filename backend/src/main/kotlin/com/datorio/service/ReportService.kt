@@ -79,6 +79,17 @@ class ReportService(
         return toResponse(result)
     }
 
+    fun resolveReport(idOrSlug: String): Report {
+        val asLong = idOrSlug.toLongOrNull()
+        return if (asLong != null) {
+            reportRepo.findById(asLong)
+                .orElseGet { reportRepo.findBySlug(idOrSlug).orElseThrow { IllegalArgumentException("Report not found: $idOrSlug") } }
+        } else {
+            reportRepo.findBySlug(idOrSlug)
+                .orElseThrow { IllegalArgumentException("Report not found: $idOrSlug") }
+        }
+    }
+
     @Transactional(readOnly = true)
     fun getReport(id: Long): ReportResponse {
         val report = reportRepo.findById(id)
@@ -313,7 +324,7 @@ class ReportService(
     // ── Mapping helpers ──
 
     private fun toResponse(r: Report) = ReportResponse(
-        id = r.id, name = r.name, description = r.description,
+        id = r.id, slug = r.slug, name = r.name, description = r.description,
         reportType = r.reportType, layout = r.layout, settings = r.settings,
         status = r.status, isTemplate = r.isTemplate, thumbnailUrl = r.thumbnailUrl,
         folderId = r.folderId,
@@ -324,7 +335,7 @@ class ReportService(
     )
 
     private fun toListItem(r: Report) = ReportListItem(
-        id = r.id, name = r.name, description = r.description,
+        id = r.id, slug = r.slug, name = r.name, description = r.description,
         reportType = r.reportType, status = r.status,
         isTemplate = r.isTemplate, widgetCount = widgetRepo.countByReportId(r.id).toInt(),
         parameterCount = paramRepo.countByReportId(r.id).toInt(),

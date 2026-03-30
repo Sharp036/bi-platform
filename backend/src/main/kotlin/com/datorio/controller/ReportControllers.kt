@@ -35,17 +35,18 @@ class ReportController(
             .body(reportService.createReport(request, userId))
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{idOrSlug}")
     @PreAuthorize("hasAuthority('REPORT_VIEW')")
-    fun getReport(@PathVariable id: Long, auth: Authentication): ResponseEntity<ReportResponse> {
+    fun getReport(@PathVariable idOrSlug: String, auth: Authentication): ResponseEntity<ReportResponse> {
+        val report = reportService.resolveReport(idOrSlug)
         val canSeeAll = auth.authorities.any { it.authority in listOf("REPORT_EDIT", "SYSTEM_ADMIN") }
         if (!canSeeAll) {
             val userId = getUserId(auth)
-            if (!objectPermissionService.canAccess("REPORT", id, userId)) {
+            if (!objectPermissionService.canAccess("REPORT", report.id, userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
             }
         }
-        return ResponseEntity.ok(reportService.getReport(id))
+        return ResponseEntity.ok(reportService.getReport(report.id))
     }
 
     @GetMapping

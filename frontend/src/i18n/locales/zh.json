@@ -888,5 +888,10 @@
   "common.move_down": "下移",
   "designer.null_handling": "NULL值",
   "designer.null_handling.zero": "显示为0",
-  "designer.null_handling.gap": "断线（间隙）"
+  "designer.null_handling.gap": "断线（间隙）",
+  "common.copy_link": "复制链接",
+  "common.link_copied": "链接已复制",
+  "designer.y_axis_min": "Y轴最小值",
+  "designer.y_axis_min.zero": "从0开始",
+  "designer.y_axis_min.auto": "自动（接近最小值）"
 }

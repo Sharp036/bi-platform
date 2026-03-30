@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ReportRepository : JpaRepository<Report, Long> {
 
+    fun findBySlug(slug: String): java.util.Optional<Report>
+
     fun findByStatus(status: ReportStatus, pageable: Pageable): Page<Report>
 
     fun findByCreatedBy(userId: Long, pageable: Pageable): Page<Report>

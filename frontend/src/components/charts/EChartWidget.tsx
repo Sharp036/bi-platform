@@ -240,6 +240,7 @@ function buildOption(
     : cols.filter(c => c !== categoryCol)
 
   // Display options
+  const yAxisMin = (config.yAxisMin as string) || 'zero'
   const yAxisFormat = (config.yAxisFormat as string) || 'plain'
   const yAxisCurrency = (config.yAxisCurrency as string) || 'USD'
   const yAxisDecimals = config.yAxisDecimals != null ? Number(config.yAxisDecimals) : undefined
@@ -394,6 +395,7 @@ function buildOption(
       },
       yAxis: {
         type: 'value',
+        min: yAxisMin === 'auto' ? 'dataMin' : 0,
         axisLabel: valueFormatter ? { formatter: valueFormatter } : undefined,
       },
     } : {}),

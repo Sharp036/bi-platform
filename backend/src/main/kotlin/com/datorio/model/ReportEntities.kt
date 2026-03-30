@@ -21,6 +21,9 @@ class Report(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
+    @Column(nullable = false, length = 36, unique = true)
+    var slug: String = java.util.UUID.randomUUID().toString(),
+
     @Column(nullable = false, length = 300)
     var name: String,
 

@@ -888,5 +888,10 @@
   "common.move_down": "下に移動",
   "designer.null_handling": "NULL値",
   "designer.null_handling.zero": "0として表示",
-  "designer.null_handling.gap": "線を中断（ギャップ）"
+  "designer.null_handling.gap": "線を中断（ギャップ）",
+  "common.copy_link": "リンクをコピー",
+  "common.link_copied": "リンクをコピーしました",
+  "designer.y_axis_min": "Y軸の最小値",
+  "designer.y_axis_min.zero": "0から開始",
+  "designer.y_axis_min.auto": "自動（最小値付近）"
 }
