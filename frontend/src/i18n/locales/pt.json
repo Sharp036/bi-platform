@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Ver consulta",
   "widget_menu.view_as_table": "Ver como tabela",
   "widget_menu.copied": "Copiado",
-  "widget_menu.rows": "linhas"
+  "widget_menu.rows": "linhas",
+  "interactive.action.drill_replace": "Detalhe",
+  "interactive.action.drill_replace_desc": "Ocultar origem, mostrar widget de detalhe",
+  "interactive.action.save_first": "Salve o relatório primeiro para configurar ações",
+  "widget_menu.drill_back": "Voltar"
 }

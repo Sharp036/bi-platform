@@ -898,5 +898,9 @@
   "widget_menu.view_query": "쿼리 보기",
   "widget_menu.view_as_table": "테이블로 보기",
   "widget_menu.copied": "복사됨",
-  "widget_menu.rows": "행"
+  "widget_menu.rows": "행",
+  "interactive.action.drill_replace": "드릴 대체",
+  "interactive.action.drill_replace_desc": "소스 숨기고 상세 위젯 표시",
+  "interactive.action.save_first": "액션을 구성하려면 먼저 보고서를 저장하세요",
+  "widget_menu.drill_back": "뒤로"
 }

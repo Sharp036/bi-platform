@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Zobrazit dotaz",
   "widget_menu.view_as_table": "Zobrazit jako tabulku",
   "widget_menu.copied": "Zkopírováno",
-  "widget_menu.rows": "řádků"
+  "widget_menu.rows": "řádků",
+  "interactive.action.drill_replace": "Detail",
+  "interactive.action.drill_replace_desc": "Skrýt zdroj, zobrazit detail widget",
+  "interactive.action.save_first": "Nejprve uložte sestavu pro konfiguraci akcí",
+  "widget_menu.drill_back": "Zpět"
 }

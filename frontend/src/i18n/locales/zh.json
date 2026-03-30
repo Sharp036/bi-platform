@@ -898,5 +898,9 @@
   "widget_menu.view_query": "查看查询",
   "widget_menu.view_as_table": "以表格查看",
   "widget_menu.copied": "已复制",
-  "widget_menu.rows": "行"
+  "widget_menu.rows": "行",
+  "interactive.action.drill_replace": "钻取替换",
+  "interactive.action.drill_replace_desc": "隐藏源，显示详细组件",
+  "interactive.action.save_first": "请先保存报告以配置操作",
+  "widget_menu.drill_back": "返回"
 }

@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Näytä kysely",
   "widget_menu.view_as_table": "Näytä taulukkona",
   "widget_menu.copied": "Kopioitu",
-  "widget_menu.rows": "rivia"
+  "widget_menu.rows": "rivia",
+  "interactive.action.drill_replace": "Yksityiskohdat",
+  "interactive.action.drill_replace_desc": "Piilota lähde, näytä yksityiskohtawidget",
+  "interactive.action.save_first": "Tallenna raportti ensin määrittääksesi toiminnot",
+  "widget_menu.drill_back": "Takaisin"
 }

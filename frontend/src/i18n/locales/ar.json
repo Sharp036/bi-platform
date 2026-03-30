@@ -898,5 +898,9 @@
   "widget_menu.view_query": "عرض الاستعلام",
   "widget_menu.view_as_table": "عرض كجدول",
   "widget_menu.copied": "تم النسخ",
-  "widget_menu.rows": "صفوف"
+  "widget_menu.rows": "صفوف",
+  "interactive.action.drill_replace": "استبدال التفاصيل",
+  "interactive.action.drill_replace_desc": "إخفاء المصدر، إظهار ودجة التفاصيل",
+  "interactive.action.save_first": "احفظ التقرير أولاً لتكوين الإجراءات",
+  "widget_menu.drill_back": "رجوع"
 }

@@ -16,7 +16,7 @@ import ExportMenu from './ExportMenu'
 import WidgetContextMenu from './WidgetContextMenu'
 import BookmarkBar from './BookmarkBar'
 import OverlayLayer from '@/components/interactive/OverlayLayer'
-import { useActionStore } from '@/store/useActionStore'
+import { useActionStore, type DrillReplaceEntry } from '@/store/useActionStore'
 import { interactiveApi } from '@/api/interactive'
 import type { InteractiveMeta } from '@/types'
 import { workspaceApi } from '@/api/workspace'
@@ -232,6 +232,21 @@ export default function ReportViewerPage() {
     await renderWithParams(nextParams)
   }, [currentParams, renderWithParams])
 
+  // ── Drill-replace visibility ─────────────────────────────────────────────────
+  const drillReplaceStack = useActionStore(s => s.drillReplaceStack)
+  const drillHiddenSources = useMemo(() => new Set(drillReplaceStack.map(e => e.sourceWidgetId)), [drillReplaceStack])
+  const drillVisibleTargets = useMemo(() => new Set(drillReplaceStack.flatMap(e => e.targetWidgetIds)), [drillReplaceStack])
+
+  const isWidgetHidden = useCallback((widgetId: number) => {
+    if (drillHiddenSources.has(widgetId)) return true
+    if (drillVisibleTargets.has(widgetId)) return false
+    return hiddenWidgetIds.includes(widgetId)
+  }, [hiddenWidgetIds, drillHiddenSources, drillVisibleTargets])
+
+  const getDrillEntryForTarget = useCallback((widgetId: number): DrillReplaceEntry | undefined => {
+    return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
+  }, [drillReplaceStack])
+
   // ── Visible widget IDs (used to filter parameter panel) ──────────────────────
   const visibleWidgetIds = useMemo(() => {
     const ids = new Set<number>()
@@ -248,12 +263,12 @@ export default function ReportViewerPage() {
     if (report) {
       for (const w of report.widgets) {
         const wid = w.id ?? w.widgetId
-        if (wid !== undefined && !inContainers.has(wid) && !hiddenWidgetIds.includes(wid))
+        if (wid !== undefined && !inContainers.has(wid) && !isWidgetHidden(wid))
           ids.add(wid)
       }
     }
     return ids
-  }, [containers, activeTabByContainer, hiddenWidgetIds, report])
+  }, [containers, activeTabByContainer, isWidgetHidden, report])
 
   // Collect report-param names referenced by visible non-filter widgets
   const usedParamNames = useMemo(() => {
@@ -324,6 +339,7 @@ export default function ReportViewerPage() {
     const hasDrill = widgetDrillActions.length > 0
     const originalWidget = report?.widgets.find(ow => (ow.id ?? ow.widgetId) === w.widgetId)
     const showMenu = !NON_DATA_WIDGETS.has(w.widgetType)
+    const drillEntry = getDrillEntryForTarget(w.widgetId)
     return (
       <div
         key={w.widgetId}
@@ -337,6 +353,20 @@ export default function ReportViewerPage() {
               data={w.data}
               title={w.title}
             />
+          </div>
+        )}
+        {drillEntry && (
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => useActionStore.getState().undoDrillReplace(drillEntry.sourceWidgetId)}
+              className="flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              {t('widget_menu.drill_back')}
+            </button>
+            {drillEntry.label && (
+              <span className="text-xs text-slate-400">{drillEntry.label}</span>
+            )}
           </div>
         )}
         {hasDrill && (
@@ -400,7 +430,7 @@ export default function ReportViewerPage() {
               const tabGroupsWithIdx = container.childWidgetIds
                 .map((group, origIdx) => ({
                   origIdx,
-                  widgets: group.map(wid => widgetById[wid]).filter(Boolean).filter(w => !hiddenWidgetIds.includes(w.widgetId)),
+                  widgets: group.map(wid => widgetById[wid]).filter(Boolean).filter(w => !isWidgetHidden(w.widgetId)),
                 }))
                 .filter(g => g.widgets.length > 0)
               if (tabGroupsWithIdx.length === 0) return null
@@ -452,11 +482,11 @@ export default function ReportViewerPage() {
 
             {/* Flat grid for widgets not in any container */}
             {renderResult.widgets.filter(w =>
-              !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId)
+              !isWidgetHidden(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId)
             ).length > 0 && (
               <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
                 {renderResult.widgets
-                  .filter(w => !hiddenWidgetIds.includes(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId))
+                  .filter(w => !isWidgetHidden(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId))
                   .map((w) => {
                     const pos = parsePosition(w.position)
                     const x = Math.max(0, Number(pos.x) || 0)

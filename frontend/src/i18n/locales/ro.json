@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Vizualizare interogare",
   "widget_menu.view_as_table": "Vizualizare ca tabel",
   "widget_menu.copied": "Copiat",
-  "widget_menu.rows": "rânduri"
+  "widget_menu.rows": "rânduri",
+  "interactive.action.drill_replace": "Detaliu",
+  "interactive.action.drill_replace_desc": "Ascunde sursa, afișează widget-ul de detaliu",
+  "interactive.action.save_first": "Salvați raportul întâi pentru a configura acțiunile",
+  "widget_menu.drill_back": "Înapoi"
 }

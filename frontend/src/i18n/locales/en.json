@@ -733,6 +733,9 @@
   "interactive.action.target_report": "Target Report ID",
   "interactive.action.url_template_placeholder": "https://example.com/detail?id={customer_id}",
   "interactive.action.action_name": "Action name",
+  "interactive.action.drill_replace": "Drill Replace",
+  "interactive.action.drill_replace_desc": "Hide source, show detail widget",
+  "interactive.action.save_first": "Save the report first to configure actions",
   "interactive.filter.failed_load": "Failed to load filter config",
   "interactive.filter.config_title": "Global Filter Configuration",
   "interactive.filter.field_placeholder": "Filter field...",
@@ -898,5 +901,6 @@
   "widget_menu.view_query": "View query",
   "widget_menu.view_as_table": "View as table",
   "widget_menu.copied": "Copied",
-  "widget_menu.rows": "rows"
+  "widget_menu.rows": "rows",
+  "widget_menu.drill_back": "Back"
 }

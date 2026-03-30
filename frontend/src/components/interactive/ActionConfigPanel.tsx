@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink } from 'lucide-react'
+import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers } from 'lucide-react'
 import type { DashboardActionItem, DashboardActionRequest, WidgetListItem } from '@/types'
 import { interactiveApi } from '@/api/interactive'
 import toast from 'react-hot-toast'
@@ -11,11 +11,12 @@ interface Props {
   widgets: WidgetListItem[]
 }
 
-const actionTypeIcons = {
+const actionTypeIcons: Record<string, typeof Filter> = {
   FILTER: Filter,
   HIGHLIGHT: Pointer,
   NAVIGATE: Navigation,
   URL: ExternalLink,
+  DRILL_REPLACE: Layers,
 }
 
 const triggerTypes = ['CLICK', 'HOVER', 'SELECT']
@@ -28,6 +29,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
     { type: 'HIGHLIGHT', icon: Pointer, label: t('interactive.action.highlight'), desc: t('interactive.action.highlight_desc') },
     { type: 'NAVIGATE', icon: Navigation, label: t('interactive.action.navigate'), desc: t('interactive.action.navigate_desc') },
     { type: 'URL', icon: ExternalLink, label: t('interactive.action.open_url'), desc: t('interactive.action.open_url_desc') },
+    { type: 'DRILL_REPLACE', icon: Layers, label: t('interactive.action.drill_replace'), desc: t('interactive.action.drill_replace_desc') },
   ]
 
   const [actions, setActions] = useState<DashboardActionItem[]>([])
@@ -177,7 +179,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
           </select>
 
           {/* Target */}
-          {(form.actionType === 'FILTER' || form.actionType === 'HIGHLIGHT') && (
+          {(form.actionType === 'FILTER' || form.actionType === 'HIGHLIGHT' || form.actionType === 'DRILL_REPLACE') && (
             <>
               <input
                 value={form.targetWidgetIds || ''}

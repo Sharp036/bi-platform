@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Vis forespørgsel",
   "widget_menu.view_as_table": "Vis som tabel",
   "widget_menu.copied": "Kopieret",
-  "widget_menu.rows": "rækker"
+  "widget_menu.rows": "rækker",
+  "interactive.action.drill_replace": "Detaljevisning",
+  "interactive.action.drill_replace_desc": "Skjul kilde, vis detalje-widget",
+  "interactive.action.save_first": "Gem rapporten først for at konfigurere handlinger",
+  "widget_menu.drill_back": "Tilbage"
 }
