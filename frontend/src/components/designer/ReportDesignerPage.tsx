@@ -11,11 +11,12 @@ import PropertyPanel from './PropertyPanel'
 import ParameterDesigner from './ParameterDesigner'
 import ParameterControlConfigPanel from '@/components/interactive/ParameterControlConfigPanel'
 import ContainerDesigner, { DesignerContainer, genContainerId } from './ContainerDesigner'
+import ActionConfigPanel from '@/components/interactive/ActionConfigPanel'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Save, Undo2, Redo2, Eye, EyeOff, ArrowLeft,
   Upload, Download, Settings2, Layers, SlidersHorizontal, ExternalLink,
-  PanelRightClose, PanelRightOpen,
+  PanelRightClose, PanelRightOpen, Zap,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
@@ -71,7 +72,7 @@ export default function ReportDesignerPage() {
   const [filterPanelPosition, setFilterPanelPosition] = useState<FilterPanelPosition>('top')
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
   const [containers, setContainers] = useState<DesignerContainer[]>([])
-  const [rightPanel, setRightPanel] = useState<'props' | 'containers'>('props')
+  const [rightPanel, setRightPanel] = useState<'props' | 'containers' | 'actions'>('props')
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false)
   const [rightPanelWidth, setRightPanelWidth] = useState(288) // 18rem = 288px (w-72)
   const [settingsPanelWidth, setSettingsPanelWidth] = useState(380)
@@ -395,7 +396,7 @@ export default function ReportDesignerPage() {
           </button>
           {reportId && (
             <button
-              onClick={() => window.open(`/reports/${reportId}`, '_blank')}
+              onClick={() => window.open(`/reports/${id}`, '_blank')}
               className="btn-ghost p-2"
               title={t('designer.open_in_viewer')}
             >
@@ -594,11 +595,30 @@ export default function ReportDesignerPage() {
                         </span>
                       )}
                     </button>
+                    <button
+                      onClick={() => setRightPanel('actions')}
+                      className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
+                        rightPanel === 'actions'
+                          ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500'
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                      title={t('interactive.action.title')}
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      {t('interactive.action.title')}
+                    </button>
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     {rightPanel === 'props'
                       ? <PropertyPanel />
-                      : <ContainerDesigner containers={containers} onChange={setContainers} />
+                      : rightPanel === 'containers'
+                      ? <ContainerDesigner containers={containers} onChange={setContainers} />
+                      : reportId
+                      ? <div className="p-3"><ActionConfigPanel
+                          reportId={reportId}
+                          widgets={widgets.filter(w => w.serverId).map(w => ({ id: w.serverId!, title: w.title, widgetType: w.widgetType }))}
+                        /></div>
+                      : <p className="p-3 text-xs text-slate-400">{t('interactive.action.save_first')}</p>
                     }
                   </div>
                 </div>

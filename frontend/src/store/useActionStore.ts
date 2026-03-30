@@ -5,16 +5,24 @@ import type { DashboardActionItem } from '@/types'
  * Active filters applied by cross-filter actions.
  * key = targetWidgetId, value = map of field→value filters
  */
-interface ActionFilter {
+export interface ActionFilter {
   sourceWidgetId: number
   field: string
   value: unknown
+}
+
+export interface DrillReplaceEntry {
+  sourceWidgetId: number
+  targetWidgetIds: number[]
+  filters: ActionFilter[]
+  label: string
 }
 
 interface ActionState {
   actions: DashboardActionItem[]
   activeFilters: Record<number, ActionFilter[]>  // targetWidgetId → filters
   highlightedValues: Record<number, { field: string; value: unknown }>  // widgetId → highlight
+  drillReplaceStack: DrillReplaceEntry[]
 
   setActions: (actions: DashboardActionItem[]) => void
 
@@ -27,6 +35,9 @@ interface ActionState {
   // Get active filters for a specific widget
   getFiltersForWidget: (widgetId: number) => ActionFilter[]
 
+  // Undo a drill replace (back button)
+  undoDrillReplace: (sourceWidgetId: number) => void
+
   // Reset all
   reset: () => void
 }
@@ -35,6 +46,7 @@ export const useActionStore = create<ActionState>((set, get) => ({
   actions: [],
   activeFilters: {},
   highlightedValues: {},
+  drillReplaceStack: [],
 
   setActions: (actions) => set({ actions }),
 
@@ -52,6 +64,7 @@ export const useActionStore = create<ActionState>((set, get) => ({
 
     const newFilters = { ...activeFilters }
     const newHighlights = { ...highlightedValues }
+    let newDrillStack: DrillReplaceEntry[] | null = null
 
     for (const action of matching) {
       const targetIds = resolveTargetWidgets(action)
@@ -106,10 +119,39 @@ export const useActionStore = create<ActionState>((set, get) => ({
           }
           break
         }
+
+        case 'DRILL_REPLACE': {
+          const drillFilters: ActionFilter[] = []
+          if (sourceValue !== undefined && sourceValue !== null) {
+            for (const targetId of targetIds) {
+              const filterField = action.targetField || action.sourceField || ''
+              const filter: ActionFilter = { sourceWidgetId, field: filterField, value: sourceValue }
+              drillFilters.push(filter)
+              const existing = newFilters[targetId] || []
+              const filtered = existing.filter(f =>
+                !(f.sourceWidgetId === sourceWidgetId && f.field === filterField)
+              )
+              filtered.push(filter)
+              newFilters[targetId] = filtered
+            }
+          }
+          const entry: DrillReplaceEntry = {
+            sourceWidgetId,
+            targetWidgetIds: targetIds,
+            filters: drillFilters,
+            label: sourceValue != null ? String(sourceValue) : '',
+          }
+          newDrillStack = [...get().drillReplaceStack, entry]
+          break
+        }
       }
     }
 
-    set({ activeFilters: newFilters, highlightedValues: newHighlights })
+    set({
+      activeFilters: newFilters,
+      highlightedValues: newHighlights,
+      ...(newDrillStack ? { drillReplaceStack: newDrillStack } : {}),
+    })
   },
 
   clearFiltersFromSource: (sourceWidgetId) => {
@@ -136,7 +178,23 @@ export const useActionStore = create<ActionState>((set, get) => ({
     return get().activeFilters[widgetId] || []
   },
 
-  reset: () => set({ activeFilters: {}, highlightedValues: {}, actions: [] }),
+  undoDrillReplace: (sourceWidgetId: number) => {
+    const { drillReplaceStack, activeFilters } = get()
+    const idx = drillReplaceStack.findIndex(e => e.sourceWidgetId === sourceWidgetId)
+    if (idx === -1) return
+    const entry = drillReplaceStack[idx]
+    // Remove filters that were applied by this drill
+    const newFilters = { ...activeFilters }
+    for (const targetId of entry.targetWidgetIds) {
+      const existing = newFilters[targetId] || []
+      newFilters[targetId] = existing.filter(f => f.sourceWidgetId !== sourceWidgetId)
+      if (newFilters[targetId].length === 0) delete newFilters[targetId]
+    }
+    const newStack = drillReplaceStack.filter((_, i) => i !== idx)
+    set({ drillReplaceStack: newStack, activeFilters: newFilters })
+  },
+
+  reset: () => set({ activeFilters: {}, highlightedValues: {}, drillReplaceStack: [], actions: [] }),
 }))
 
 function resolveTargetWidgets(action: DashboardActionItem): number[] {

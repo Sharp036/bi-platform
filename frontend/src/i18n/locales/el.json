@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Προβολή ερωτήματος",
   "widget_menu.view_as_table": "Προβολή ως πίνακας",
   "widget_menu.copied": "Αντιγράφηκε",
-  "widget_menu.rows": "γραμμές"
+  "widget_menu.rows": "γραμμές",
+  "interactive.action.drill_replace": "Αντικατάσταση λεπτομερειών",
+  "interactive.action.drill_replace_desc": "Απόκρυψη πηγής, εμφάνιση widget λεπτομερειών",
+  "interactive.action.save_first": "Αποθηκεύστε πρώτα την αναφορά για να ρυθμίσετε ενέργειες",
+  "widget_menu.drill_back": "Πίσω"
 }

@@ -898,5 +898,9 @@
   "widget_menu.view_query": "ดูคิวรี",
   "widget_menu.view_as_table": "ดูเป็นตาราง",
   "widget_menu.copied": "คัดลอกแล้ว",
-  "widget_menu.rows": "แถว"
+  "widget_menu.rows": "แถว",
+  "interactive.action.drill_replace": "แทนที่รายละเอียด",
+  "interactive.action.drill_replace_desc": "ซ่อนแหล่งที่มา แสดงวิดเจ็ตรายละเอียด",
+  "interactive.action.save_first": "บันทึกรายงานก่อนเพื่อกำหนดค่าการดำเนินการ",
+  "widget_menu.drill_back": "ย้อนกลับ"
 }

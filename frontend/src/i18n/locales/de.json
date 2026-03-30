@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Abfrage anzeigen",
   "widget_menu.view_as_table": "Als Tabelle anzeigen",
   "widget_menu.copied": "Kopiert",
-  "widget_menu.rows": "Zeilen"
+  "widget_menu.rows": "Zeilen",
+  "interactive.action.drill_replace": "Detail-Ersetzung",
+  "interactive.action.drill_replace_desc": "Quelle ausblenden, Detail-Widget anzeigen",
+  "interactive.action.save_first": "Speichern Sie den Bericht zuerst, um Aktionen zu konfigurieren",
+  "widget_menu.drill_back": "Zurück"
 }

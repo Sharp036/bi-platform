@@ -898,5 +898,9 @@
   "widget_menu.view_query": "הצג שאילתה",
   "widget_menu.view_as_table": "הצג כטבלה",
   "widget_menu.copied": "הועתק",
-  "widget_menu.rows": "שורות"
+  "widget_menu.rows": "שורות",
+  "interactive.action.drill_replace": "החלפת פרטים",
+  "interactive.action.drill_replace_desc": "הסתר מקור, הצג וידג'ט פרטים",
+  "interactive.action.save_first": "שמור תחילה את הדוח כדי להגדיר פעולות",
+  "widget_menu.drill_back": "חזרה"
 }

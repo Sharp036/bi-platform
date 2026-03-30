@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Zobacz zapytanie",
   "widget_menu.view_as_table": "Zobacz jako tabelę",
   "widget_menu.copied": "Skopiowano",
-  "widget_menu.rows": "wierszy"
+  "widget_menu.rows": "wierszy",
+  "interactive.action.drill_replace": "Szczegóły",
+  "interactive.action.drill_replace_desc": "Ukryj źródło, pokaż widget szczegółów",
+  "interactive.action.save_first": "Najpierw zapisz raport, aby skonfigurować akcje",
+  "widget_menu.drill_back": "Wróć"
 }

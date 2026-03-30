@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Lekérdezés megtekintése",
   "widget_menu.view_as_table": "Megtekintés táblázatként",
   "widget_menu.copied": "Másolva",
-  "widget_menu.rows": "sor"
+  "widget_menu.rows": "sor",
+  "interactive.action.drill_replace": "Részletezés",
+  "interactive.action.drill_replace_desc": "Forrás elrejtése, részlet widget megjelenítése",
+  "interactive.action.save_first": "Mentse el a jelentést a műveletek konfigurálásához",
+  "widget_menu.drill_back": "Vissza"
 }

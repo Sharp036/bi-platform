@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Sorguyu görüntüle",
   "widget_menu.view_as_table": "Tablo olarak görüntüle",
   "widget_menu.copied": "Kopyalandı",
-  "widget_menu.rows": "satır"
+  "widget_menu.rows": "satır",
+  "interactive.action.drill_replace": "Detay Değiştir",
+  "interactive.action.drill_replace_desc": "Kaynağı gizle, detay widgetı göster",
+  "interactive.action.save_first": "Eylemleri yapılandırmak için önce raporu kaydedin",
+  "widget_menu.drill_back": "Geri"
 }

@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Посмотреть запрос",
   "widget_menu.view_as_table": "Посмотреть как таблицу",
   "widget_menu.copied": "Скопировано",
-  "widget_menu.rows": "строк"
+  "widget_menu.rows": "строк",
+  "interactive.action.drill_replace": "Детализация",
+  "interactive.action.drill_replace_desc": "Скрыть источник, показать детальный виджет",
+  "interactive.action.save_first": "Сначала сохраните отчёт, чтобы настроить действия",
+  "widget_menu.drill_back": "Назад"
 }

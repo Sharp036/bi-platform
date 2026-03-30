@@ -898,5 +898,9 @@
   "widget_menu.view_query": "Переглянути запит",
   "widget_menu.view_as_table": "Переглянути як таблицю",
   "widget_menu.copied": "Скопійовано",
-  "widget_menu.rows": "рядків"
+  "widget_menu.rows": "рядків",
+  "interactive.action.drill_replace": "Деталізація",
+  "interactive.action.drill_replace_desc": "Сховати джерело, показати детальний віджет",
+  "interactive.action.save_first": "Спочатку збережіть звіт, щоб налаштувати дії",
+  "widget_menu.drill_back": "Назад"
 }
