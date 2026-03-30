@@ -196,7 +196,6 @@ export default function ReportDesignerPage() {
           }
         }
         if (changed) {
-          updateWidget(w.id, { paramMapping: current })
           updatedMappings.set(w.id, current)
         }
       })
