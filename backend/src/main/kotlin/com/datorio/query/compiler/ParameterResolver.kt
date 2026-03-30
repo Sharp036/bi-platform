@@ -35,15 +35,20 @@ class ParameterResolver(dialectType: DataSourceType) {
         val foundParams = paramPattern.findAll(sql).map { it.groupValues[1] }.toSet()
 
         for (paramName in foundParams) {
-            if (!parameters.containsKey(paramName)) {
-                // Parameter not provided -- remove AND-clause containing it
-                resolved = removeAndClause(resolved, paramName)
-                continue
-            }
             val value = parameters[paramName]
-            // Empty/blank string means "all" -- remove the AND-clause
-            if (value == null || (value is String && value.isBlank())) {
-                resolved = removeAndClause(resolved, paramName)
+            val isEmptyOrMissing = !parameters.containsKey(paramName) ||
+                value == null || (value is String && value.isBlank())
+
+            if (isEmptyOrMissing) {
+                // Replace :param with a marker that makes simple conditions always true:
+                //   "column = :param"  -> "column = column"  (always true)
+                //   ":param IS NULL"   -> "'' IS NULL"        (false, but inside OR it's ok)
+                //   ":param = ''"      -> "'' = ''"           (true)
+                // First try: replace "column = :param" or "column != :param" patterns
+                // with "1=1" by removing the whole simple condition
+                resolved = removeSimpleConditions(resolved, paramName)
+                // If :param still present (complex expressions), replace with empty string
+                resolved = resolved.replace(Regex(":${Regex.escape(paramName)}\\b"), "''")
                 continue
             }
             val literal = formatParameterValue(value)
@@ -67,25 +72,17 @@ class ParameterResolver(dialectType: DataSourceType) {
     }
 
     /**
-     * Remove AND-clauses that reference a given :param.
-     * E.g. "AND brand = :brand" or "AND (:brand IS NULL OR ...)" are removed.
+     * Remove simple AND-conditions like "AND column = :param" or "AND column != :param"
+     * by replacing the whole condition with "AND 1=1".
+     * Does NOT touch parenthesized or complex conditions -- those are handled by
+     * substituting :param with '' (empty string) in the caller.
      */
-    private fun removeAndClause(sql: String, paramName: String): String {
-        // Remove "AND ... :paramName ..." up to next AND/ORDER/GROUP/LIMIT/HAVING or end
-        var result = sql.replace(
-            Regex("""(?i)\s+AND\s+[^)]*?:${Regex.escape(paramName)}\b[^)]*?(?=\s+AND\s|\s+ORDER\s|\s+GROUP\s|\s+LIMIT\s|\s+HAVING\s|$)"""),
-            ""
+    private fun removeSimpleConditions(sql: String, paramName: String): String {
+        // Match: AND <identifier> <op> :param  (simple non-parenthesized condition)
+        return sql.replace(
+            Regex("""(?i)\bAND\s+\w+\s*[=!<>]+\s*:${Regex.escape(paramName)}\b"""),
+            "AND 1=1"
         )
-        // Also handle parenthesized conditions: AND (:param IS NULL OR ...)
-        result = result.replace(
-            Regex("""(?i)\s+AND\s+\([^)]*?:${Regex.escape(paramName)}\b[^)]*?\)"""),
-            ""
-        )
-        // Fallback: if :param still present, replace with a neutral value
-        if (result.contains(":$paramName")) {
-            result = result.replace(Regex(":${Regex.escape(paramName)}\\b"), "''")
-        }
-        return result
     }
 
     private fun formatParameterValue(value: Any?): String {
