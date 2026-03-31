@@ -89,6 +89,9 @@ export default function EnhancedParameterPanel({
     return result
   }, [])
 
+  // Stable key derived from parameter names — avoids resetting values on every render
+  const paramKey = parameters.map(p => p.name).join(',')
+
   // Build values from parameters + currentParameters, then load all dropdown options
   useEffect(() => {
     const init: Record<string, string> = {}
@@ -101,7 +104,7 @@ export default function EnhancedParameterPanel({
       }
     })
     setValues(init)
-  }, [parameters])
+  }, [paramKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load dropdown options whenever controls are ready or visible parameters change
   useEffect(() => {
@@ -126,7 +129,7 @@ export default function EnhancedParameterPanel({
         loadOptions(c.parameterName, collectParentValues(c.parameterName, allVals))
       }
     })
-  }, [controls, parameters, loadOptions, collectParentValues])
+  }, [controls, paramKey, loadOptions, collectParentValues]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it.
   // Keep the current value of dependent params; only clear it if the new options no longer include it.
