@@ -616,7 +616,7 @@ export default function ReportDesignerPage() {
                       : reportId
                       ? <div className="p-3"><ActionConfigPanel
                           reportId={reportId}
-                          widgets={widgets.filter(w => w.serverId).map(w => ({ id: w.serverId!, title: w.title, widgetType: w.widgetType }))}
+                          widgets={widgets.filter(w => w.serverId).map(w => ({ id: w.serverId!, title: w.title, widgetType: w.widgetType, datasourceId: w.datasourceId ?? undefined, rawSql: w.rawSql || undefined, queryId: w.queryId ?? undefined }))}
                         /></div>
                       : <p className="p-3 text-xs text-slate-400">{t('interactive.action.save_first')}</p>
                     }

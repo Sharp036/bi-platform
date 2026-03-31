@@ -111,39 +111,17 @@ function ContainerBlock({
       .map(id => widgets.find(w => w.id === id))
       .filter((w): w is DesignerWidget => !!w)
 
-  // Group widgets by their y-position so they render as rows (no absolute-top overlap)
-  const groupIntoRows = (group: DesignerWidget[]): DesignerWidget[][] => {
-    const byY = new Map<number, DesignerWidget[]>()
-    for (const w of group) {
-      const row = byY.get(w.position.y) ?? []
-      row.push(w)
-      byY.set(w.position.y, row)
-    }
-    return [...byY.entries()]
-      .sort(([a], [b]) => a - b)
-      .map(([, row]) => row.sort((a, b) => a.position.x - b.position.x))
-  }
-
   const sharedProps = { parameters, selectedId, onSelect, previewMode, insideContainer: true }
 
-  // Render a list of widgets grouped into y-rows, with spacers for y-gaps
-  const renderRows = (group: DesignerWidget[]) => {
-    const rows = groupIntoRows(group)
-    let prevEndY = 0
-    return rows.map((row, ri) => {
-      const rowY = row[0].position.y
-      const rowH = Math.max(...row.map(w => w.position.h)) * ROW_HEIGHT
-      const gap = Math.max(0, rowY - prevEndY) * ROW_HEIGHT
-      prevEndY = rowY + Math.max(...row.map(w => w.position.h))
-      return (
-        <div key={ri}>
-          {gap > 0 && <div style={{ height: `${gap}px` }} />}
-          <div className="relative" style={{ height: `${rowH}px` }}>
-            {row.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} rowRelative />)}
-          </div>
-        </div>
-      )
-    })
+  // Render widgets with absolute positioning (same as free widget grid)
+  const renderAbsolute = (group: DesignerWidget[]) => {
+    if (group.length === 0) return null
+    const maxY = Math.max(...group.map(w => w.position.y + w.position.h))
+    return (
+      <div className="relative" style={{ minHeight: `${maxY * ROW_HEIGHT}px` }}>
+        {group.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} />)}
+      </div>
+    )
   }
 
   return (
@@ -185,7 +163,7 @@ function ContainerBlock({
                 {t('designer.tabs.add_widget')}
               </div>
             )
-            return <div>{renderRows(group)}</div>
+            return <div>{renderAbsolute(group)}</div>
           })()}
         </>
       ) : (
@@ -213,7 +191,7 @@ function ContainerBlock({
                       <div className="flex items-center justify-center h-16 text-xs text-slate-400">
                         {t('designer.tabs.add_widget')}
                       </div>
-                    ) : renderRows(group)}
+                    ) : renderAbsolute(group)}
                   </div>
                 )}
               </div>
