@@ -9,9 +9,10 @@ interface Props {
   rawSql?: string
   data?: WidgetData
   title?: string
+  parameters?: Record<string, unknown>
 }
 
-export default function WidgetContextMenu({ rawSql, data, title }: Props) {
+export default function WidgetContextMenu({ rawSql, data, title, parameters }: Props) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [modal, setModal] = useState<'query' | 'table' | null>(null)
@@ -26,6 +27,19 @@ export default function WidgetContextMenu({ rawSql, data, title }: Props) {
     if (open) document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+
+  const resolvedSql = useMemo(() => {
+    if (!rawSql) return ''
+    if (!parameters || Object.keys(parameters).length === 0) return rawSql
+    let sql = rawSql
+    for (const [key, val] of Object.entries(parameters)) {
+      if (val == null || val === '') continue
+      const pattern = new RegExp(`:${key}(?![a-zA-Z0-9_])`, 'g')
+      const replacement = typeof val === 'number' ? String(val) : `'${String(val).replace(/'/g, "''")}'`
+      sql = sql.replace(pattern, replacement)
+    }
+    return sql
+  }, [rawSql, parameters])
 
   const hasQuery = !!rawSql
   const hasData = data && data.columns.length > 0
@@ -68,7 +82,7 @@ export default function WidgetContextMenu({ rawSql, data, title }: Props) {
       </div>
 
       {modal === 'query' && rawSql && createPortal(
-        <QueryModal sql={rawSql} title={title} onClose={() => setModal(null)} />,
+        <QueryModal sql={resolvedSql} title={title} onClose={() => setModal(null)} />,
         document.body
       )}
       {modal === 'table' && data && createPortal(

@@ -369,6 +369,7 @@ export default function ReportViewerPage() {
               rawSql={originalWidget?.rawSql}
               data={w.data}
               title={w.title}
+              parameters={currentParams}
             />
           </div>
         )}
