@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet, ArrowUp, ArrowDown } from 'lucide-react'
+import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import type { WidgetData } from '@/types'
 
@@ -268,10 +268,10 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
                   >
                     <span className="inline-flex items-center gap-1">
                       {col}
-                      {sortCol === col && (sortDir === 'asc'
-                        ? <ArrowUp className="w-3 h-3" />
-                        : <ArrowDown className="w-3 h-3" />
-                      )}
+                      {sortCol === col
+                        ? (sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)
+                        : <ArrowUpDown className="w-3 h-3 opacity-30" />
+                      }
                     </span>
                   </th>
                 ))}

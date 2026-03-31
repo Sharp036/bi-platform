@@ -61,6 +61,9 @@ export default function EnhancedParameterPanel({
   const [hasMoreByParam, setHasMoreByParam] = useState<Record<string, boolean>>({})
   const [columnByParam, setColumnByParam] = useState<Record<string, string>>({})
 
+  // Remember last non-empty user-selected value per parameter for smart cascade restore
+  const lastKnownRef = useRef<Record<string, string>>({})
+
   // Load control configs
   useEffect(() => {
     controlsApi.getParameterControls(reportId)
@@ -134,6 +137,9 @@ export default function EnhancedParameterPanel({
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it.
   // Keep the current value of dependent params; only clear it if the new options no longer include it.
   const handleChange = (paramName: string, value: string) => {
+    // Track last non-empty selection
+    if (value) lastKnownRef.current[paramName] = value
+
     setValues(prev => {
       const next = { ...prev, [paramName]: value }
       const pattern = new RegExp(`:${paramName}(?![a-zA-Z0-9_])`)
@@ -156,9 +162,11 @@ export default function EnhancedParameterPanel({
             if (prevValue && result.options.includes(prevValue)) {
               // Current value still valid -- keep it
             } else if (result.options.length > 0) {
-              // Pick best fallback: default value > first option (for required) > empty
+              // Priority: last user selection > default value > first option (required) > empty
+              const lastKnown = lastKnownRef.current[c.parameterName] || ''
               const defaultVal = param?.defaultValue ? resolveDynamicDefault(param) : ''
-              const fallback = result.options.includes(defaultVal) ? defaultVal
+              const fallback = result.options.includes(lastKnown) ? lastKnown
+                : result.options.includes(defaultVal) ? defaultVal
                 : param?.isRequired ? (result.options[0] || '') : ''
               setValues(v => ({ ...v, [c.parameterName]: fallback }))
             } else {
