@@ -488,17 +488,21 @@ export default function ReportViewerPage() {
                     onTabChange={(idx) => setActiveTabByContainer(prev => ({ ...prev, [container.id]: idx }))}
                   >
                     {tabGroups.map((group, tabIdx) => (
-                      <div key={tabIdx} className="grid grid-cols-12 pt-2" style={{ gridAutoRows: '70px' }}>
+                      <div key={tabIdx} className="grid grid-cols-12 gap-4 pt-2" style={{ gridAutoRows: '70px' }}>
                         {group.map(w => {
                           const pos = parsePosition(w.position)
                           const x = Math.max(0, Number(pos.x) || 0)
                           const y = Math.max(0, Number(pos.y) || 0)
                           const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
                           const hSpan = Math.max(1, Number(pos.h) || 4)
+                          const styleCfg = parseStyle(w.style)
+                          const zIndex = Number(styleCfg.zIndex ?? 0)
                           return (
                             <div key={w.widgetId} style={{
                               gridColumn: `${x + 1} / span ${wSpan}`,
                               gridRow: `${y + 1} / span ${hSpan}`,
+                              zIndex,
+                              position: 'relative',
                             }}>
                               {renderSingleWidget(w)}
                             </div>
