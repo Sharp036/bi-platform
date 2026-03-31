@@ -152,14 +152,18 @@ export default function EnhancedParameterPanel({
             if (result.columnName) {
               setColumnByParam(prev => ({ ...prev, [c.parameterName]: result.columnName! }))
             }
-            // Reset only if the previously selected value is no longer available
-            if (prevValue && !result.options.includes(prevValue)) {
-              // For required fields: use default value if it exists in new options, else first option
+            // Decide new value for dependent parameter
+            if (prevValue && result.options.includes(prevValue)) {
+              // Current value still valid -- keep it
+            } else if (result.options.length > 0) {
+              // Pick best fallback: default value > first option (for required) > empty
               const defaultVal = param?.defaultValue ? resolveDynamicDefault(param) : ''
-              const fallback = param?.isRequired
-                ? (result.options.includes(defaultVal) ? defaultVal : result.options[0] || '')
-                : ''
+              const fallback = result.options.includes(defaultVal) ? defaultVal
+                : param?.isRequired ? (result.options[0] || '') : ''
               setValues(v => ({ ...v, [c.parameterName]: fallback }))
+            } else {
+              // No options available -- clear
+              setValues(v => ({ ...v, [c.parameterName]: '' }))
             }
           })
           .catch(() => {})
