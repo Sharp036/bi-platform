@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers, Pencil } from 'lucide-react'
 import type { DashboardActionItem, DashboardActionRequest, WidgetListItem } from '@/types'
 import { interactiveApi } from '@/api/interactive'
+import { queryApi } from '@/api/queries'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
@@ -38,6 +39,36 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
   const [form, setForm] = useState<Partial<DashboardActionRequest>>({
     reportId, actionType: 'FILTER', triggerType: 'CLICK',
   })
+  const [sourceCols, setSourceCols] = useState<string[]>([])
+  const [targetCols, setTargetCols] = useState<string[]>([])
+
+  const loadWidgetColumns = useCallback(async (w: WidgetListItem): Promise<string[]> => {
+    try {
+      let res
+      if (w.datasourceId && w.rawSql?.trim()) {
+        res = await queryApi.executeAdHoc({ datasourceId: w.datasourceId, sql: w.rawSql, limit: 1 })
+      } else if (w.queryId) {
+        res = await queryApi.execute(w.queryId, {}, 1)
+      }
+      if (res?.columns) {
+        return res.columns.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
+      }
+    } catch { /* ignore */ }
+    return []
+  }, [])
+
+  useEffect(() => {
+    if (!form.sourceWidgetId) { setSourceCols([]); return }
+    const w = widgets.find(ww => ww.id === form.sourceWidgetId)
+    if (w) loadWidgetColumns(w).then(setSourceCols)
+  }, [form.sourceWidgetId, widgets, loadWidgetColumns])
+
+  useEffect(() => {
+    if (!form.targetWidgetIds) { setTargetCols([]); return }
+    const targetId = Number(form.targetWidgetIds.split(',')[0]?.trim())
+    const w = widgets.find(ww => ww.id === targetId)
+    if (w) loadWidgetColumns(w).then(setTargetCols)
+  }, [form.targetWidgetIds, widgets, loadWidgetColumns])
 
   useEffect(() => {
     interactiveApi.getActionsForReport(reportId).then(setActions).catch(() => {})
@@ -242,18 +273,40 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
                 />
               )}
               <div className="grid grid-cols-2 gap-2">
-                <input
-                  value={form.sourceField || ''}
-                  onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
-                  placeholder={t('interactive.action.source_field')}
-                  className="input text-xs"
-                />
-                <input
-                  value={form.targetField || ''}
-                  onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
-                  placeholder={t('interactive.action.target_field')}
-                  className="input text-xs"
-                />
+                {sourceCols.length > 0 ? (
+                  <select
+                    value={form.sourceField || ''}
+                    onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
+                    className="input text-xs"
+                  >
+                    <option value="">{t('interactive.action.source_field')}</option>
+                    {sourceCols.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    value={form.sourceField || ''}
+                    onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
+                    placeholder={t('interactive.action.source_field')}
+                    className="input text-xs"
+                  />
+                )}
+                {targetCols.length > 0 ? (
+                  <select
+                    value={form.targetField || ''}
+                    onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
+                    className="input text-xs"
+                  >
+                    <option value="">{t('interactive.action.target_field')}</option>
+                    {targetCols.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    value={form.targetField || ''}
+                    onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
+                    placeholder={t('interactive.action.target_field')}
+                    className="input text-xs"
+                  />
+                )}
               </div>
             </>
           )}

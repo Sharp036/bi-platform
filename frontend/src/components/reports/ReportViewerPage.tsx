@@ -234,14 +234,27 @@ export default function ReportViewerPage() {
 
   // ── Drill-replace visibility ─────────────────────────────────────────────────
   const drillReplaceStack = useActionStore(s => s.drillReplaceStack)
+  const allActions = useActionStore(s => s.actions)
   const drillHiddenSources = useMemo(() => new Set(drillReplaceStack.map(e => e.sourceWidgetId)), [drillReplaceStack])
   const drillVisibleTargets = useMemo(() => new Set(drillReplaceStack.flatMap(e => e.targetWidgetIds)), [drillReplaceStack])
+
+  // Target widgets of DRILL_REPLACE actions are hidden by default until activated
+  const drillReplaceTargets = useMemo(() => {
+    const ids = new Set<number>()
+    for (const a of allActions) {
+      if (a.actionType === 'DRILL_REPLACE' && a.isActive && a.targetWidgetIds) {
+        a.targetWidgetIds.split(',').forEach(id => { const n = Number(id.trim()); if (n) ids.add(n) })
+      }
+    }
+    return ids
+  }, [allActions])
 
   const isWidgetHidden = useCallback((widgetId: number) => {
     if (drillHiddenSources.has(widgetId)) return true
     if (drillVisibleTargets.has(widgetId)) return false
+    if (drillReplaceTargets.has(widgetId)) return true
     return hiddenWidgetIds.includes(widgetId)
-  }, [hiddenWidgetIds, drillHiddenSources, drillVisibleTargets])
+  }, [hiddenWidgetIds, drillHiddenSources, drillVisibleTargets, drillReplaceTargets])
 
   const getDrillEntryForTarget = useCallback((widgetId: number): DrillReplaceEntry | undefined => {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
