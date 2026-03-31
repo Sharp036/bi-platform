@@ -909,5 +909,7 @@
   "header.about": "О программе",
   "header.about_version": "Версия {{version}}",
   "header.about_charts": "Типов диаграмм",
-  "header.about_languages": "Языков"
+  "header.about_languages": "Языков",
+  "interactive.action.updated": "Действие обновлено",
+  "interactive.action.failed_update": "Не удалось обновить действие"
 }

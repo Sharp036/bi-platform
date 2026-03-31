@@ -909,5 +909,7 @@
   "header.about": "A programról",
   "header.about_version": "Verzió {{version}}",
   "header.about_charts": "Diagramtípusok",
-  "header.about_languages": "Nyelvek"
+  "header.about_languages": "Nyelvek",
+  "interactive.action.updated": "Művelet frissítve",
+  "interactive.action.failed_update": "A művelet frissítése sikertelen"
 }

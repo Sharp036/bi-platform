@@ -909,5 +909,7 @@
   "header.about": "关于",
   "header.about_version": "版本 {{version}}",
   "header.about_charts": "图表类型",
-  "header.about_languages": "语言"
+  "header.about_languages": "语言",
+  "interactive.action.updated": "操作已更新",
+  "interactive.action.failed_update": "更新操作失败"
 }

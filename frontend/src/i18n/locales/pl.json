@@ -909,5 +909,7 @@
   "header.about": "O programie",
   "header.about_version": "Wersja {{version}}",
   "header.about_charts": "Typy wykresów",
-  "header.about_languages": "Języki"
+  "header.about_languages": "Języki",
+  "interactive.action.updated": "Akcja zaktualizowana",
+  "interactive.action.failed_update": "Nie udało się zaktualizować akcji"
 }

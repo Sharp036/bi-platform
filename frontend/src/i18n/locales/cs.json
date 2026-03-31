@@ -909,5 +909,7 @@
   "header.about": "O programu",
   "header.about_version": "Verze {{version}}",
   "header.about_charts": "Typy grafů",
-  "header.about_languages": "Jazyky"
+  "header.about_languages": "Jazyky",
+  "interactive.action.updated": "Akce aktualizována",
+  "interactive.action.failed_update": "Aktualizace akce se nezdařila"
 }

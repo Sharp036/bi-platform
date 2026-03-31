@@ -909,5 +909,7 @@
   "header.about": "حول البرنامج",
   "header.about_version": "الإصدار {{version}}",
   "header.about_charts": "أنواع الرسوم البيانية",
-  "header.about_languages": "اللغات"
+  "header.about_languages": "اللغات",
+  "interactive.action.updated": "تم تحديث الإجراء",
+  "interactive.action.failed_update": "فشل تحديث الإجراء"
 }
