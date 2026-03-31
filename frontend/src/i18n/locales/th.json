@@ -909,5 +909,7 @@
   "header.about": "เกี่ยวกับโปรแกรม",
   "header.about_version": "เวอร์ชัน {{version}}",
   "header.about_charts": "ประเภทแผนภูมิ",
-  "header.about_languages": "ภาษา"
+  "header.about_languages": "ภาษา",
+  "interactive.action.updated": "อัปเดตการดำเนินการแล้ว",
+  "interactive.action.failed_update": "ไม่สามารถอัปเดต"
 }

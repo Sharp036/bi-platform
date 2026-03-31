@@ -909,5 +909,7 @@
   "header.about": "Om programmet",
   "header.about_version": "Version {{version}}",
   "header.about_charts": "Diagramtyper",
-  "header.about_languages": "Sprog"
+  "header.about_languages": "Sprog",
+  "interactive.action.updated": "Handling opdateret",
+  "interactive.action.failed_update": "Opdatering af handling mislykkedes"
 }

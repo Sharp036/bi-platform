@@ -909,5 +909,7 @@
   "header.about": "प्रोग्राम के बारे में",
   "header.about_version": "संस्करण {{version}}",
   "header.about_charts": "चार्ट प्रकार",
-  "header.about_languages": "भाषाएं"
+  "header.about_languages": "भाषाएं",
+  "interactive.action.updated": "क्रिया अपडेट हुई",
+  "interactive.action.failed_update": "क्रिया अपडेट विफल"
 }

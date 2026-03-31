@@ -909,5 +909,7 @@
   "header.about": "プログラムについて",
   "header.about_version": "バージョン {{version}}",
   "header.about_charts": "チャートタイプ",
-  "header.about_languages": "言語"
+  "header.about_languages": "言語",
+  "interactive.action.updated": "アクションを更新しました",
+  "interactive.action.failed_update": "アクションの更新に失敗"
 }

@@ -909,5 +909,7 @@
   "header.about": "Про програму",
   "header.about_version": "Версія {{version}}",
   "header.about_charts": "Типів діаграм",
-  "header.about_languages": "Мов"
+  "header.about_languages": "Мов",
+  "interactive.action.updated": "Дію оновлено",
+  "interactive.action.failed_update": "Не вдалося оновити дію"
 }

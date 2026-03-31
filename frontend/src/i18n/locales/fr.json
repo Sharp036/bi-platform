@@ -909,5 +909,7 @@
   "header.about": "À propos",
   "header.about_version": "Version {{version}}",
   "header.about_charts": "Types de graphiques",
-  "header.about_languages": "Langues"
+  "header.about_languages": "Langues",
+  "interactive.action.updated": "Action mise à jour",
+  "interactive.action.failed_update": "Échec de la mise à jour"
 }

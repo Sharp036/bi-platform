@@ -909,5 +909,7 @@
   "header.about": "Σχετικά",
   "header.about_version": "Έκδοση {{version}}",
   "header.about_charts": "Τύποι γραφημάτων",
-  "header.about_languages": "Γλώσσες"
+  "header.about_languages": "Γλώσσες",
+  "interactive.action.updated": "Ενέργεια ενημερώθηκε",
+  "interactive.action.failed_update": "Αποτυχία ενημέρωσης"
 }

@@ -909,5 +909,7 @@
   "header.about": "Hakkında",
   "header.about_version": "Sürüm {{version}}",
   "header.about_charts": "Grafik türleri",
-  "header.about_languages": "Diller"
+  "header.about_languages": "Diller",
+  "interactive.action.updated": "Eylem güncellendi",
+  "interactive.action.failed_update": "Eylem güncellenemedi"
 }

@@ -909,5 +909,7 @@
   "header.about": "Despre program",
   "header.about_version": "Versiunea {{version}}",
   "header.about_charts": "Tipuri de grafice",
-  "header.about_languages": "Limbi"
+  "header.about_languages": "Limbi",
+  "interactive.action.updated": "Acțiune actualizată",
+  "interactive.action.failed_update": "Actualizarea acțiunii a eșuat"
 }

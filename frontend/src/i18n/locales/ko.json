@@ -909,5 +909,7 @@
   "header.about": "정보",
   "header.about_version": "버전 {{version}}",
   "header.about_charts": "차트 유형",
-  "header.about_languages": "언어"
+  "header.about_languages": "언어",
+  "interactive.action.updated": "액션 업데이트됨",
+  "interactive.action.failed_update": "액션 업데이트 실패"
 }

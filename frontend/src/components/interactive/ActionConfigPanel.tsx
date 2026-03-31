@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers } from 'lucide-react'
+import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers, Pencil } from 'lucide-react'
 import type { DashboardActionItem, DashboardActionRequest, WidgetListItem } from '@/types'
 import { interactiveApi } from '@/api/interactive'
 import toast from 'react-hot-toast'
@@ -34,6 +34,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
 
   const [actions, setActions] = useState<DashboardActionItem[]>([])
   const [showAdd, setShowAdd] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState<Partial<DashboardActionRequest>>({
     reportId, actionType: 'FILTER', triggerType: 'CLICK',
   })
@@ -42,27 +43,52 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
     interactiveApi.getActionsForReport(reportId).then(setActions).catch(() => {})
   }, [reportId])
 
+  const buildRequest = (): DashboardActionRequest => ({
+    reportId,
+    name: form.name || '',
+    actionType: form.actionType || 'FILTER',
+    triggerType: form.triggerType || 'CLICK',
+    sourceWidgetId: form.sourceWidgetId || undefined,
+    targetWidgetIds: form.targetWidgetIds || undefined,
+    sourceField: form.sourceField || undefined,
+    targetField: form.targetField || undefined,
+    targetReportId: form.targetReportId || undefined,
+    urlTemplate: form.urlTemplate || undefined,
+    config: {},
+  })
+
   const handleSave = async () => {
     if (!form.name?.trim()) { toast.error(t('interactive.action.name_required')); return }
     try {
-      const req: DashboardActionRequest = {
-        reportId,
-        name: form.name || '',
-        actionType: form.actionType || 'FILTER',
-        triggerType: form.triggerType || 'CLICK',
-        sourceWidgetId: form.sourceWidgetId || undefined,
-        targetWidgetIds: form.targetWidgetIds || undefined,
-        sourceField: form.sourceField || undefined,
-        targetField: form.targetField || undefined,
-        targetReportId: form.targetReportId || undefined,
-        urlTemplate: form.urlTemplate || undefined,
-        config: {},
+      if (editingId) {
+        const updated = await interactiveApi.updateAction(editingId, buildRequest())
+        setActions(prev => prev.map(a => a.id === editingId ? updated : a))
+        setEditingId(null)
+        toast.success(t('interactive.action.updated'))
+      } else {
+        const created = await interactiveApi.createAction(buildRequest())
+        setActions(prev => [...prev, created])
+        toast.success(t('interactive.action.created'))
       }
-      const created = await interactiveApi.createAction(req)
-      setActions(prev => [...prev, created])
       setShowAdd(false)
-      toast.success(t('interactive.action.created'))
-    } catch { toast.error(t('interactive.action.failed_create')) }
+    } catch { toast.error(editingId ? t('interactive.action.failed_update') : t('interactive.action.failed_create')) }
+  }
+
+  const handleEdit = (action: DashboardActionItem) => {
+    setForm({
+      reportId,
+      name: action.name,
+      actionType: action.actionType,
+      triggerType: action.triggerType,
+      sourceWidgetId: action.sourceWidgetId,
+      targetWidgetIds: action.targetWidgetIds || undefined,
+      sourceField: action.sourceField || undefined,
+      targetField: action.targetField || undefined,
+      targetReportId: action.targetReportId || undefined,
+      urlTemplate: action.urlTemplate || undefined,
+    })
+    setEditingId(action.id)
+    setShowAdd(true)
   }
 
   const handleDelete = async (id: number) => {
@@ -80,7 +106,11 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
           <Zap className="w-4 h-4 text-amber-500" />
           {t('interactive.action.title')}
         </h3>
-        <button onClick={() => setShowAdd(!showAdd)} className="btn-ghost p-1">
+        <button onClick={() => {
+          setShowAdd(!showAdd)
+          setEditingId(null)
+          setForm({ reportId, actionType: 'FILTER', triggerType: 'CLICK' })
+        }} className="btn-ghost p-1">
           <Plus className="w-4 h-4" />
         </button>
       </div>
@@ -115,6 +145,9 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
             )}>
               {action.actionType}
             </span>
+            <button onClick={() => handleEdit(action)} className="text-slate-400 hover:text-brand-600">
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
             <button onClick={() => handleDelete(action.id)} className="text-red-400 hover:text-red-600">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -245,8 +278,8 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
           )}
 
           <div className="flex justify-end gap-2">
-            <button onClick={() => setShowAdd(false)} className="btn-secondary text-xs">{t('common.cancel')}</button>
-            <button onClick={handleSave} className="btn-primary text-xs">{t('common.create')}</button>
+            <button onClick={() => { setShowAdd(false); setEditingId(null) }} className="btn-secondary text-xs">{t('common.cancel')}</button>
+            <button onClick={handleSave} className="btn-primary text-xs">{editingId ? t('common.save') : t('common.create')}</button>
           </div>
         </div>
       )}
