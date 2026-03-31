@@ -140,6 +140,7 @@ export default function EnhancedParameterPanel({
         if (c.parameterName === paramName) return
         if (!pattern.test(c.optionsQuery)) return
         const prevValue = next[c.parameterName] || ''
+        const param = parameters.find(p => p.name === c.parameterName)
         const parentVals = collectParentValues(c.parameterName, next)
         controlsApi.loadOptions(reportId, c.parameterName, parentVals)
           .then(result => {
@@ -150,7 +151,12 @@ export default function EnhancedParameterPanel({
             }
             // Reset only if the previously selected value is no longer available
             if (prevValue && !result.options.includes(prevValue)) {
-              setValues(v => ({ ...v, [c.parameterName]: '' }))
+              // For required fields: use default value if it exists in new options, else first option
+              const defaultVal = param?.defaultValue ? resolveDynamicDefault(param) : ''
+              const fallback = param?.isRequired
+                ? (result.options.includes(defaultVal) ? defaultVal : result.options[0] || '')
+                : ''
+              setValues(v => ({ ...v, [c.parameterName]: fallback }))
             }
           })
           .catch(() => {})
