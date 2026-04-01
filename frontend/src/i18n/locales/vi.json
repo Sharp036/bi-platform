@@ -909,5 +909,14 @@
   "header.about": "Về chương trình",
   "header.about_version": "Phiên bản {{version}}",
   "header.about_charts": "Loại biểu đồ",
-  "header.about_languages": "Ngôn ngữ"
+  "header.about_languages": "Ngôn ngữ",
+  "interactive.action.updated": "Hành động đã cập nhật",
+  "interactive.action.failed_update": "Cập nhật hành động thất bại",
+  "common.total": "Tổng",
+  "designer.show_totals": "Dòng tổng",
+  "designer.show_totals_hint": "Hiển thị dòng tổng ở cuối bảng",
+  "widget_menu.execute": "Chạy",
+  "widget_menu.executing": "Đang chạy...",
+  "widget_menu.execute_failed": "Thực thi truy vấn thất bại",
+  "widget_menu.execute_hint": "Ctrl+Enter để chạy"
 }

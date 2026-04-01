@@ -909,5 +909,14 @@
   "header.about": "À propos",
   "header.about_version": "Version {{version}}",
   "header.about_charts": "Types de graphiques",
-  "header.about_languages": "Langues"
+  "header.about_languages": "Langues",
+  "interactive.action.updated": "Action mise à jour",
+  "interactive.action.failed_update": "Échec de la mise à jour",
+  "common.total": "Total",
+  "designer.show_totals": "Ligne de totaux",
+  "designer.show_totals_hint": "Afficher la ligne de totaux en bas du tableau",
+  "widget_menu.execute": "Exécuter",
+  "widget_menu.executing": "Exécution...",
+  "widget_menu.execute_failed": "Échec de l'exécution",
+  "widget_menu.execute_hint": "Ctrl+Entrée pour exécuter"
 }

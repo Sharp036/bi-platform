@@ -234,14 +234,27 @@ export default function ReportViewerPage() {
 
   // ── Drill-replace visibility ─────────────────────────────────────────────────
   const drillReplaceStack = useActionStore(s => s.drillReplaceStack)
+  const allActions = useActionStore(s => s.actions)
   const drillHiddenSources = useMemo(() => new Set(drillReplaceStack.map(e => e.sourceWidgetId)), [drillReplaceStack])
   const drillVisibleTargets = useMemo(() => new Set(drillReplaceStack.flatMap(e => e.targetWidgetIds)), [drillReplaceStack])
+
+  // Target widgets of DRILL_REPLACE actions are hidden by default until activated
+  const drillReplaceTargets = useMemo(() => {
+    const ids = new Set<number>()
+    for (const a of allActions) {
+      if (a.actionType === 'DRILL_REPLACE' && a.isActive && a.targetWidgetIds) {
+        a.targetWidgetIds.split(',').forEach(id => { const n = Number(id.trim()); if (n) ids.add(n) })
+      }
+    }
+    return ids
+  }, [allActions])
 
   const isWidgetHidden = useCallback((widgetId: number) => {
     if (drillHiddenSources.has(widgetId)) return true
     if (drillVisibleTargets.has(widgetId)) return false
+    if (drillReplaceTargets.has(widgetId)) return true
     return hiddenWidgetIds.includes(widgetId)
-  }, [hiddenWidgetIds, drillHiddenSources, drillVisibleTargets])
+  }, [hiddenWidgetIds, drillHiddenSources, drillVisibleTargets, drillReplaceTargets])
 
   const getDrillEntryForTarget = useCallback((widgetId: number): DrillReplaceEntry | undefined => {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
@@ -252,16 +265,25 @@ export default function ReportViewerPage() {
 
   const applyClientFilters = useCallback((w: RenderReportResponse['widgets'][number]): RenderReportResponse['widgets'][number] => {
     const filters = activeFilters[w.widgetId]
-    if (!filters || filters.length === 0 || !w.data) return w
-    const filteredRows = w.data.rows.filter(row =>
-      filters.every(f => {
-        const cellVal = row[f.field]
-        if (cellVal == null || f.value == null) return false
-        return String(cellVal) === String(f.value)
-      })
-    )
-    return { ...w, data: { ...w.data, rows: filteredRows, rowCount: filteredRows.length } }
-  }, [activeFilters])
+    const drillEntry = drillReplaceStack.find(e => e.targetWidgetIds.includes(w.widgetId))
+    if ((!filters || filters.length === 0) && !drillEntry?.seriesName) return w
+    if (!w.data) return w
+    let rows = w.data.rows
+    if (filters && filters.length > 0) {
+      rows = rows.filter(row =>
+        filters.every(f => {
+          const cellVal = row[f.field]
+          if (cellVal == null || f.value == null) return false
+          return String(cellVal) === String(f.value)
+        })
+      )
+    }
+    // If a specific series was clicked, filter by that metric column > 0
+    if (drillEntry?.seriesName && drillEntry.seriesName in (w.data.rows[0] || {})) {
+      rows = rows.filter(row => Number(row[drillEntry.seriesName!]) > 0)
+    }
+    return { ...w, data: { ...w.data, rows, rowCount: rows.length } }
+  }, [activeFilters, drillReplaceStack])
 
   // ── Visible widget IDs (used to filter parameter panel) ──────────────────────
   const visibleWidgetIds = useMemo(() => {
@@ -367,22 +389,26 @@ export default function ReportViewerPage() {
           <div className="absolute top-2 right-2 z-10">
             <WidgetContextMenu
               rawSql={originalWidget?.rawSql}
+              datasourceId={originalWidget?.datasourceId}
               data={w.data}
               title={w.title}
+              parameters={currentParams}
             />
           </div>
         )}
         {drillEntry && (
-          <div className="flex items-center gap-2 mb-2">
+          <div className="absolute top-2 left-2 z-10 flex items-center gap-2">
             <button
               onClick={() => useActionStore.getState().undoDrillReplace(drillEntry.sourceWidgetId)}
-              className="flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+              className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               {t('widget_menu.drill_back')}
             </button>
-            {drillEntry.label && (
-              <span className="text-xs text-slate-400">{drillEntry.label}</span>
+            {(drillEntry.label || drillEntry.seriesName) && (
+              <span className="text-xs text-slate-400">
+                {drillEntry.label}{drillEntry.seriesName ? ` / ${drillEntry.seriesName}` : ''}
+              </span>
             )}
           </div>
         )}
@@ -474,17 +500,21 @@ export default function ReportViewerPage() {
                     onTabChange={(idx) => setActiveTabByContainer(prev => ({ ...prev, [container.id]: idx }))}
                   >
                     {tabGroups.map((group, tabIdx) => (
-                      <div key={tabIdx} className="grid grid-cols-12 pt-2" style={{ gridAutoRows: '70px' }}>
+                      <div key={tabIdx} className="grid grid-cols-12 gap-4 pt-2" style={{ gridAutoRows: '70px' }}>
                         {group.map(w => {
                           const pos = parsePosition(w.position)
                           const x = Math.max(0, Number(pos.x) || 0)
                           const y = Math.max(0, Number(pos.y) || 0)
                           const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
                           const hSpan = Math.max(1, Number(pos.h) || 4)
+                          const styleCfg = parseStyle(w.style)
+                          const zIndex = Number(styleCfg.zIndex ?? 0)
                           return (
                             <div key={w.widgetId} style={{
                               gridColumn: `${x + 1} / span ${wSpan}`,
                               gridRow: `${y + 1} / span ${hSpan}`,
+                              zIndex,
+                              position: 'relative',
                             }}>
                               {renderSingleWidget(w)}
                             </div>

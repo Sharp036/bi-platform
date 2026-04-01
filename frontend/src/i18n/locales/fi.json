@@ -909,5 +909,14 @@
   "header.about": "Tietoja",
   "header.about_version": "Versio {{version}}",
   "header.about_charts": "Kaaviotyypit",
-  "header.about_languages": "Kielet"
+  "header.about_languages": "Kielet",
+  "interactive.action.updated": "Toiminto päivitetty",
+  "interactive.action.failed_update": "Toiminnon päivitys epäonnistui",
+  "common.total": "Yhteensä",
+  "designer.show_totals": "Yhteensrivi",
+  "designer.show_totals_hint": "Näytä yhteensrivi taulukon alaosassa",
+  "widget_menu.execute": "Suorita",
+  "widget_menu.executing": "Suoritetaan...",
+  "widget_menu.execute_failed": "Kyselyn suoritus epäonnistui",
+  "widget_menu.execute_hint": "Ctrl+Enter suorittaaksesi"
 }

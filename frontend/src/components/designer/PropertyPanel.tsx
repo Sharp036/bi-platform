@@ -791,6 +791,18 @@ export default function PropertyPanel() {
                     />
                     <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_page_size_hint')}</p>
                   </Field>
+
+                  <Field label={t('designer.show_totals')}>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!cc.showTotals}
+                        onChange={e => update({ chartConfig: { ...cc, showTotals: e.target.checked } })}
+                        className="rounded"
+                      />
+                      <span className="text-sm text-slate-600 dark:text-slate-400">{t('designer.show_totals_hint')}</span>
+                    </label>
+                  </Field>
                 </>
               )
             })()}

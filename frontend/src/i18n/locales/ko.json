@@ -909,5 +909,14 @@
   "header.about": "정보",
   "header.about_version": "버전 {{version}}",
   "header.about_charts": "차트 유형",
-  "header.about_languages": "언어"
+  "header.about_languages": "언어",
+  "interactive.action.updated": "액션 업데이트됨",
+  "interactive.action.failed_update": "액션 업데이트 실패",
+  "common.total": "합계",
+  "designer.show_totals": "합계 행",
+  "designer.show_totals_hint": "테이블 하단에 합계 행 표시",
+  "widget_menu.execute": "실행",
+  "widget_menu.executing": "실행 중...",
+  "widget_menu.execute_failed": "쿼리 실행 실패",
+  "widget_menu.execute_hint": "Ctrl+Enter로 실행"
 }

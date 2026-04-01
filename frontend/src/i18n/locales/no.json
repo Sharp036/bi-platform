@@ -909,5 +909,14 @@
   "header.about": "Om programmet",
   "header.about_version": "Versjon {{version}}",
   "header.about_charts": "Diagramtyper",
-  "header.about_languages": "Språk"
+  "header.about_languages": "Språk",
+  "interactive.action.updated": "Handling oppdatert",
+  "interactive.action.failed_update": "Oppdatering av handling mislyktes",
+  "common.total": "Totalt",
+  "designer.show_totals": "Totalrad",
+  "designer.show_totals_hint": "Vis totalrad nederst i tabellen",
+  "widget_menu.execute": "Kjør",
+  "widget_menu.executing": "Kjører...",
+  "widget_menu.execute_failed": "Spørringskjøring mislyktes",
+  "widget_menu.execute_hint": "Ctrl+Enter for å kjøre"
 }

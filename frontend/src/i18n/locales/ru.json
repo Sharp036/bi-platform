@@ -909,5 +909,14 @@
   "header.about": "О программе",
   "header.about_version": "Версия {{version}}",
   "header.about_charts": "Типов диаграмм",
-  "header.about_languages": "Языков"
+  "header.about_languages": "Языков",
+  "interactive.action.updated": "Действие обновлено",
+  "interactive.action.failed_update": "Не удалось обновить действие",
+  "common.total": "Итого",
+  "designer.show_totals": "Строка итогов",
+  "designer.show_totals_hint": "Показывать строку итогов внизу таблицы",
+  "widget_menu.execute": "Выполнить",
+  "widget_menu.executing": "Выполняется...",
+  "widget_menu.execute_failed": "Ошибка выполнения запроса",
+  "widget_menu.execute_hint": "Ctrl+Enter для выполнения"
 }

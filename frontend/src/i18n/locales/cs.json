@@ -909,5 +909,14 @@
   "header.about": "O programu",
   "header.about_version": "Verze {{version}}",
   "header.about_charts": "Typy grafů",
-  "header.about_languages": "Jazyky"
+  "header.about_languages": "Jazyky",
+  "interactive.action.updated": "Akce aktualizována",
+  "interactive.action.failed_update": "Aktualizace akce se nezdařila",
+  "common.total": "Celkem",
+  "designer.show_totals": "Řádek súčtů",
+  "designer.show_totals_hint": "Zobrazit řádek súčtů ve spodní části tabulky",
+  "widget_menu.execute": "Spustit",
+  "widget_menu.executing": "Probíhá...",
+  "widget_menu.execute_failed": "Spuštění dotazu se nezdařilo",
+  "widget_menu.execute_hint": "Ctrl+Enter pro spuštění"
 }

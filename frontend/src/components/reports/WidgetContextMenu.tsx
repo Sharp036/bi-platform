@@ -1,17 +1,20 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet, ArrowUp, ArrowDown } from 'lucide-react'
+import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet, ArrowUp, ArrowDown, ArrowUpDown, Play } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import type { WidgetData } from '@/types'
+import { queryApi } from '@/api/queries'
 
 interface Props {
   rawSql?: string
+  datasourceId?: number
   data?: WidgetData
   title?: string
+  parameters?: Record<string, unknown>
 }
 
-export default function WidgetContextMenu({ rawSql, data, title }: Props) {
+export default function WidgetContextMenu({ rawSql, datasourceId, data, title, parameters }: Props) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [modal, setModal] = useState<'query' | 'table' | null>(null)
@@ -26,6 +29,19 @@ export default function WidgetContextMenu({ rawSql, data, title }: Props) {
     if (open) document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+
+  const resolvedSql = useMemo(() => {
+    if (!rawSql) return ''
+    if (!parameters || Object.keys(parameters).length === 0) return rawSql
+    let sql = rawSql
+    for (const [key, val] of Object.entries(parameters)) {
+      if (val == null || val === '') continue
+      const pattern = new RegExp(`:${key}(?![a-zA-Z0-9_])`, 'g')
+      const replacement = typeof val === 'number' ? String(val) : `'${String(val).replace(/'/g, "''")}'`
+      sql = sql.replace(pattern, replacement)
+    }
+    return sql
+  }, [rawSql, parameters])
 
   const hasQuery = !!rawSql
   const hasData = data && data.columns.length > 0
@@ -68,7 +84,7 @@ export default function WidgetContextMenu({ rawSql, data, title }: Props) {
       </div>
 
       {modal === 'query' && rawSql && createPortal(
-        <QueryModal sql={rawSql} title={title} onClose={() => setModal(null)} />,
+        <QueryModal sql={resolvedSql} datasourceId={datasourceId} title={title} onClose={() => setModal(null)} />,
         document.body
       )}
       {modal === 'table' && data && createPortal(
@@ -79,27 +95,50 @@ export default function WidgetContextMenu({ rawSql, data, title }: Props) {
   )
 }
 
-function QueryModal({ sql, title, onClose }: { sql: string; title?: string; onClose: () => void }) {
+function QueryModal({ sql, datasourceId, title, onClose }: { sql: string; datasourceId?: number; title?: string; onClose: () => void }) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
+  const [editableSql, setEditableSql] = useState(sql)
+  const [executing, setExecuting] = useState(false)
+  const [result, setResult] = useState<{ columns: string[]; rows: Record<string, unknown>[]; rowCount: number; executionMs: number } | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(sql).then(() => {
+    navigator.clipboard.writeText(editableSql).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
-  }, [sql])
+  }, [editableSql])
+
+  const handleExecute = useCallback(async () => {
+    if (!datasourceId || !editableSql.trim()) return
+    setExecuting(true)
+    setError(null)
+    try {
+      const res = await queryApi.executeAdHoc({ datasourceId, sql: editableSql, limit: 1000 })
+      const cols = (res.columns || []).map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
+      setResult({ columns: cols, rows: res.rows || [], rowCount: res.rowCount || res.rows?.length || 0, executionMs: res.executionTimeMs || 0 })
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      setError(msg || t('widget_menu.execute_failed'))
+    } finally {
+      setExecuting(false)
+    }
+  }, [datasourceId, editableSql, t])
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleExecute()
+    }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [onClose, handleExecute])
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col m-4"
+        className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col m-4"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200 dark:border-dark-surface-100">
@@ -107,22 +146,66 @@ function QueryModal({ sql, title, onClose }: { sql: string; title?: string; onCl
             {t('widget_menu.view_query')}{title ? ` - ${title}` : ''}
           </h3>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopy}
-              className="btn-secondary text-xs px-2.5 py-1.5"
-            >
+            <button onClick={handleCopy} className="btn-secondary text-xs px-2.5 py-1.5">
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? t('widget_menu.copied') : t('common.copy')}
             </button>
+            {datasourceId && (
+              <button onClick={handleExecute} disabled={executing} className="btn-primary text-xs px-2.5 py-1.5">
+                <Play className="w-3.5 h-3.5" />
+                {executing ? t('widget_menu.executing') : t('widget_menu.execute')}
+              </button>
+            )}
             <button onClick={onClose} className="btn-ghost p-1">
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
-        <div className="overflow-auto flex-1 p-5">
-          <pre className="text-sm font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
-            {sql}
-          </pre>
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <textarea
+            value={editableSql}
+            onChange={e => setEditableSql(e.target.value)}
+            className="w-full text-sm font-mono text-slate-700 dark:text-slate-300 bg-surface-50 dark:bg-dark-surface-100 p-4 resize-none border-b border-surface-200 dark:border-dark-surface-100 focus:outline-none"
+            style={{ minHeight: '120px', maxHeight: '40vh' }}
+            spellCheck={false}
+          />
+          {error && (
+            <div className="px-4 py-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
+              {error}
+            </div>
+          )}
+          {result && (
+            <div className="overflow-auto flex-1">
+              <div className="px-4 py-1 text-xs text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
+                {result.rowCount} {t('widget_menu.rows')} / {result.executionMs}ms
+              </div>
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-surface-50 dark:bg-dark-surface-100">
+                  <tr>
+                    {result.columns.map(col => (
+                      <th key={col} className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100 whitespace-nowrap">{col}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.rows.slice(0, 200).map((row, i) => (
+                    <tr key={i} className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-100/50">
+                      {result.columns.map(col => (
+                        <td key={col} className="px-3 py-1.5 text-slate-700 dark:text-slate-300 whitespace-nowrap max-w-[300px] truncate" title={formatCell(row[col])}>
+                          {formatCell(row[col])}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {!result && !error && (
+            <div className="flex-1 flex items-center justify-center text-sm text-slate-400 p-4">
+              {datasourceId ? t('widget_menu.execute_hint') : ''}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -254,10 +337,10 @@ function TableModal({ data, title, onClose }: { data: WidgetData; title?: string
                   >
                     <span className="inline-flex items-center gap-1">
                       {col}
-                      {sortCol === col && (sortDir === 'asc'
-                        ? <ArrowUp className="w-3 h-3" />
-                        : <ArrowDown className="w-3 h-3" />
-                      )}
+                      {sortCol === col
+                        ? (sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)
+                        : <ArrowUpDown className="w-3 h-3 opacity-30" />
+                      }
                     </span>
                   </th>
                 ))}

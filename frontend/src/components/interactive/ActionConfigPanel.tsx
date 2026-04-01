@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers } from 'lucide-react'
+import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers, Pencil } from 'lucide-react'
 import type { DashboardActionItem, DashboardActionRequest, WidgetListItem } from '@/types'
 import { interactiveApi } from '@/api/interactive'
+import { queryApi } from '@/api/queries'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
@@ -34,35 +35,91 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
 
   const [actions, setActions] = useState<DashboardActionItem[]>([])
   const [showAdd, setShowAdd] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState<Partial<DashboardActionRequest>>({
     reportId, actionType: 'FILTER', triggerType: 'CLICK',
   })
+  const [sourceCols, setSourceCols] = useState<string[]>([])
+  const [targetCols, setTargetCols] = useState<string[]>([])
+
+  const loadWidgetColumns = useCallback(async (w: WidgetListItem): Promise<string[]> => {
+    try {
+      let res
+      if (w.datasourceId && w.rawSql?.trim()) {
+        res = await queryApi.executeAdHoc({ datasourceId: w.datasourceId, sql: w.rawSql, limit: 1 })
+      } else if (w.queryId) {
+        res = await queryApi.execute(w.queryId, {}, 1)
+      }
+      if (res?.columns) {
+        return res.columns.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
+      }
+    } catch { /* ignore */ }
+    return []
+  }, [])
+
+  useEffect(() => {
+    if (!form.sourceWidgetId) { setSourceCols([]); return }
+    const w = widgets.find(ww => ww.id === form.sourceWidgetId)
+    if (w) loadWidgetColumns(w).then(setSourceCols)
+  }, [form.sourceWidgetId, widgets, loadWidgetColumns])
+
+  useEffect(() => {
+    if (!form.targetWidgetIds) { setTargetCols([]); return }
+    const targetId = Number(form.targetWidgetIds.split(',')[0]?.trim())
+    const w = widgets.find(ww => ww.id === targetId)
+    if (w) loadWidgetColumns(w).then(setTargetCols)
+  }, [form.targetWidgetIds, widgets, loadWidgetColumns])
 
   useEffect(() => {
     interactiveApi.getActionsForReport(reportId).then(setActions).catch(() => {})
   }, [reportId])
 
+  const buildRequest = (): DashboardActionRequest => ({
+    reportId,
+    name: form.name || '',
+    actionType: form.actionType || 'FILTER',
+    triggerType: form.triggerType || 'CLICK',
+    sourceWidgetId: form.sourceWidgetId || undefined,
+    targetWidgetIds: form.targetWidgetIds || undefined,
+    sourceField: form.sourceField || undefined,
+    targetField: form.targetField || undefined,
+    targetReportId: form.targetReportId || undefined,
+    urlTemplate: form.urlTemplate || undefined,
+    config: {},
+  })
+
   const handleSave = async () => {
     if (!form.name?.trim()) { toast.error(t('interactive.action.name_required')); return }
     try {
-      const req: DashboardActionRequest = {
-        reportId,
-        name: form.name || '',
-        actionType: form.actionType || 'FILTER',
-        triggerType: form.triggerType || 'CLICK',
-        sourceWidgetId: form.sourceWidgetId || undefined,
-        targetWidgetIds: form.targetWidgetIds || undefined,
-        sourceField: form.sourceField || undefined,
-        targetField: form.targetField || undefined,
-        targetReportId: form.targetReportId || undefined,
-        urlTemplate: form.urlTemplate || undefined,
-        config: {},
+      if (editingId) {
+        const updated = await interactiveApi.updateAction(editingId, buildRequest())
+        setActions(prev => prev.map(a => a.id === editingId ? updated : a))
+        setEditingId(null)
+        toast.success(t('interactive.action.updated'))
+      } else {
+        const created = await interactiveApi.createAction(buildRequest())
+        setActions(prev => [...prev, created])
+        toast.success(t('interactive.action.created'))
       }
-      const created = await interactiveApi.createAction(req)
-      setActions(prev => [...prev, created])
       setShowAdd(false)
-      toast.success(t('interactive.action.created'))
-    } catch { toast.error(t('interactive.action.failed_create')) }
+    } catch { toast.error(editingId ? t('interactive.action.failed_update') : t('interactive.action.failed_create')) }
+  }
+
+  const handleEdit = (action: DashboardActionItem) => {
+    setForm({
+      reportId,
+      name: action.name,
+      actionType: action.actionType,
+      triggerType: action.triggerType,
+      sourceWidgetId: action.sourceWidgetId,
+      targetWidgetIds: action.targetWidgetIds || undefined,
+      sourceField: action.sourceField || undefined,
+      targetField: action.targetField || undefined,
+      targetReportId: action.targetReportId || undefined,
+      urlTemplate: action.urlTemplate || undefined,
+    })
+    setEditingId(action.id)
+    setShowAdd(true)
   }
 
   const handleDelete = async (id: number) => {
@@ -80,7 +137,11 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
           <Zap className="w-4 h-4 text-amber-500" />
           {t('interactive.action.title')}
         </h3>
-        <button onClick={() => setShowAdd(!showAdd)} className="btn-ghost p-1">
+        <button onClick={() => {
+          setShowAdd(!showAdd)
+          setEditingId(null)
+          setForm({ reportId, actionType: 'FILTER', triggerType: 'CLICK' })
+        }} className="btn-ghost p-1">
           <Plus className="w-4 h-4" />
         </button>
       </div>
@@ -115,6 +176,9 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
             )}>
               {action.actionType}
             </span>
+            <button onClick={() => handleEdit(action)} className="text-slate-400 hover:text-brand-600">
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
             <button onClick={() => handleDelete(action.id)} className="text-red-400 hover:text-red-600">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -209,18 +273,40 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
                 />
               )}
               <div className="grid grid-cols-2 gap-2">
-                <input
-                  value={form.sourceField || ''}
-                  onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
-                  placeholder={t('interactive.action.source_field')}
-                  className="input text-xs"
-                />
-                <input
-                  value={form.targetField || ''}
-                  onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
-                  placeholder={t('interactive.action.target_field')}
-                  className="input text-xs"
-                />
+                {sourceCols.length > 0 ? (
+                  <select
+                    value={form.sourceField || ''}
+                    onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
+                    className="input text-xs"
+                  >
+                    <option value="">{t('interactive.action.source_field')}</option>
+                    {sourceCols.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    value={form.sourceField || ''}
+                    onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
+                    placeholder={t('interactive.action.source_field')}
+                    className="input text-xs"
+                  />
+                )}
+                {targetCols.length > 0 ? (
+                  <select
+                    value={form.targetField || ''}
+                    onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
+                    className="input text-xs"
+                  >
+                    <option value="">{t('interactive.action.target_field')}</option>
+                    {targetCols.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    value={form.targetField || ''}
+                    onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
+                    placeholder={t('interactive.action.target_field')}
+                    className="input text-xs"
+                  />
+                )}
               </div>
             </>
           )}
@@ -245,8 +331,8 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
           )}
 
           <div className="flex justify-end gap-2">
-            <button onClick={() => setShowAdd(false)} className="btn-secondary text-xs">{t('common.cancel')}</button>
-            <button onClick={handleSave} className="btn-primary text-xs">{t('common.create')}</button>
+            <button onClick={() => { setShowAdd(false); setEditingId(null) }} className="btn-secondary text-xs">{t('common.cancel')}</button>
+            <button onClick={handleSave} className="btn-primary text-xs">{editingId ? t('common.save') : t('common.create')}</button>
           </div>
         </div>
       )}

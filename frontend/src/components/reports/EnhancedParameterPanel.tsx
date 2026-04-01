@@ -61,6 +61,9 @@ export default function EnhancedParameterPanel({
   const [hasMoreByParam, setHasMoreByParam] = useState<Record<string, boolean>>({})
   const [columnByParam, setColumnByParam] = useState<Record<string, string>>({})
 
+  // Remember last non-empty user-selected value per parameter for smart cascade restore
+  const lastKnownRef = useRef<Record<string, string>>({})
+
   // Load control configs
   useEffect(() => {
     controlsApi.getParameterControls(reportId)
@@ -89,6 +92,9 @@ export default function EnhancedParameterPanel({
     return result
   }, [])
 
+  // Stable key derived from parameter names — avoids resetting values on every render
+  const paramKey = parameters.map(p => p.name).join(',')
+
   // Build values from parameters + currentParameters, then load all dropdown options
   useEffect(() => {
     const init: Record<string, string> = {}
@@ -101,7 +107,7 @@ export default function EnhancedParameterPanel({
       }
     })
     setValues(init)
-  }, [parameters])
+  }, [paramKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load dropdown options whenever controls are ready or visible parameters change
   useEffect(() => {
@@ -126,11 +132,14 @@ export default function EnhancedParameterPanel({
         loadOptions(c.parameterName, collectParentValues(c.parameterName, allVals))
       }
     })
-  }, [controls, parameters, loadOptions, collectParentValues])
+  }, [controls, paramKey, loadOptions, collectParentValues]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it.
   // Keep the current value of dependent params; only clear it if the new options no longer include it.
   const handleChange = (paramName: string, value: string) => {
+    // Track last non-empty selection
+    if (value) lastKnownRef.current[paramName] = value
+
     setValues(prev => {
       const next = { ...prev, [paramName]: value }
       const pattern = new RegExp(`:${paramName}(?![a-zA-Z0-9_])`)
@@ -140,6 +149,7 @@ export default function EnhancedParameterPanel({
         if (c.parameterName === paramName) return
         if (!pattern.test(c.optionsQuery)) return
         const prevValue = next[c.parameterName] || ''
+        const param = parameters.find(p => p.name === c.parameterName)
         const parentVals = collectParentValues(c.parameterName, next)
         controlsApi.loadOptions(reportId, c.parameterName, parentVals)
           .then(result => {
@@ -148,8 +158,19 @@ export default function EnhancedParameterPanel({
             if (result.columnName) {
               setColumnByParam(prev => ({ ...prev, [c.parameterName]: result.columnName! }))
             }
-            // Reset only if the previously selected value is no longer available
-            if (prevValue && !result.options.includes(prevValue)) {
+            // Decide new value for dependent parameter
+            if (prevValue && result.options.includes(prevValue)) {
+              // Current value still valid -- keep it
+            } else if (result.options.length > 0) {
+              // Priority: last user selection > default value > first option (required) > empty
+              const lastKnown = lastKnownRef.current[c.parameterName] || ''
+              const defaultVal = param?.defaultValue ? resolveDynamicDefault(param) : ''
+              const fallback = result.options.includes(lastKnown) ? lastKnown
+                : result.options.includes(defaultVal) ? defaultVal
+                : param?.isRequired ? (result.options[0] || '') : ''
+              setValues(v => ({ ...v, [c.parameterName]: fallback }))
+            } else {
+              // No options available -- clear
               setValues(v => ({ ...v, [c.parameterName]: '' }))
             }
           })

@@ -909,5 +909,14 @@
   "header.about": "Tentang",
   "header.about_version": "Versi {{version}}",
   "header.about_charts": "Jenis grafik",
-  "header.about_languages": "Bahasa"
+  "header.about_languages": "Bahasa",
+  "interactive.action.updated": "Tindakan diperbarui",
+  "interactive.action.failed_update": "Gagal memperbarui tindakan",
+  "common.total": "Total",
+  "designer.show_totals": "Baris total",
+  "designer.show_totals_hint": "Tampilkan baris total di bawah tabel",
+  "widget_menu.execute": "Jalankan",
+  "widget_menu.executing": "Menjalankan...",
+  "widget_menu.execute_failed": "Eksekusi kueri gagal",
+  "widget_menu.execute_hint": "Ctrl+Enter untuk menjalankan"
 }

@@ -909,5 +909,14 @@
   "header.about": "Over het programma",
   "header.about_version": "Versie {{version}}",
   "header.about_charts": "Grafiektypen",
-  "header.about_languages": "Talen"
+  "header.about_languages": "Talen",
+  "interactive.action.updated": "Actie bijgewerkt",
+  "interactive.action.failed_update": "Actie bijwerken mislukt",
+  "common.total": "Totaal",
+  "designer.show_totals": "Totaalrij",
+  "designer.show_totals_hint": "Totaalrij onderaan de tabel tonen",
+  "widget_menu.execute": "Uitvoeren",
+  "widget_menu.executing": "Bezig...",
+  "widget_menu.execute_failed": "Query uitvoering mislukt",
+  "widget_menu.execute_hint": "Ctrl+Enter om uit te voeren"
 }

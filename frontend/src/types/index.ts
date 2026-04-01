@@ -450,4 +450,5 @@ export interface InteractiveMeta {
 
 export interface WidgetListItem {
   id: number; title?: string; widgetType: string
+  datasourceId?: number; rawSql?: string; queryId?: number
 }
