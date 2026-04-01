@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "Eylem güncellenemedi",
   "common.total": "Toplam",
   "designer.show_totals": "Toplam satırı",
-  "designer.show_totals_hint": "Tablonun altında toplam satırı göster",
   "widget_menu.execute": "Çalıştır",
   "widget_menu.executing": "Çalıştırılıyor...",
   "widget_menu.execute_failed": "Sorgu çalıştırma başarısız",
   "widget_menu.execute_hint": "Ctrl+Enter ile çalıştır",
   "designer.open_sql_editor": "SQL düzenleyiciyi aç",
   "designer.sql_editor": "SQL Düzenleyici",
-  "designer.layers": "Katmanlar"
+  "designer.layers": "Katmanlar",
+  "designer.totals_off": "Kapalı",
+  "designer.totals_per_column": "Sütun başına (boş = varsayılan):"
 }

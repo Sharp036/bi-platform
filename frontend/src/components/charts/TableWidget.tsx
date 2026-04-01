@@ -193,21 +193,40 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
               </tr>
             ))}
           </tbody>
-          {!!config.showTotals && (
-            <tfoot className="sticky bottom-0 bg-surface-100 dark:bg-dark-surface-100 border-t-2 border-surface-300 dark:border-dark-surface-100">
-              <tr>
-                {visibleCols.map((col, ci) => {
-                  const values = allRows.map(r => Number(r[col])).filter(n => !isNaN(n))
-                  const isNumeric = values.length > 0 && values.length >= allRows.length * 0.5
-                  return (
-                    <td key={col} className={`${cellPad} whitespace-nowrap font-semibold text-slate-800 dark:text-slate-200`}>
-                      {ci === 0 && !isNumeric ? t('common.total') : isNumeric ? values.reduce((a, b) => a + b, 0).toLocaleString() : ''}
-                    </td>
-                  )
-                })}
-              </tr>
-            </tfoot>
-          )}
+          {!!config.showTotals && (() => {
+            const defaultAgg = (config.totalsAggregation as string) || 'SUM'
+            const perCol = (config.totalsPerColumn as Record<string, string>) || {}
+            return (
+              <tfoot className="sticky bottom-0 bg-surface-100 dark:bg-dark-surface-100 border-t-2 border-surface-300 dark:border-dark-surface-100">
+                <tr>
+                  {visibleCols.map((col, ci) => {
+                    const agg = perCol[col] || defaultAgg
+                    if (agg === 'NONE') return <td key={col} className={`${cellPad}`} />
+                    const values = allRows.map(r => Number(r[col])).filter(n => !isNaN(n))
+                    const isNumeric = values.length > 0 && values.length >= allRows.length * 0.5
+                    let result = ''
+                    if (isNumeric && values.length > 0) {
+                      switch (agg) {
+                        case 'SUM': result = values.reduce((a, b) => a + b, 0).toLocaleString(); break
+                        case 'COUNT': result = String(allRows.length); break
+                        case 'DISTINCT_COUNT': result = String(new Set(allRows.map(r => r[col])).size); break
+                        case 'AVG': result = (values.reduce((a, b) => a + b, 0) / values.length).toLocaleString(undefined, { maximumFractionDigits: 2 }); break
+                        case 'MIN': result = Math.min(...values).toLocaleString(); break
+                        case 'MAX': result = Math.max(...values).toLocaleString(); break
+                      }
+                    } else if (ci === 0) {
+                      result = t('common.total')
+                    }
+                    return (
+                      <td key={col} className={`${cellPad} whitespace-nowrap font-semibold text-slate-800 dark:text-slate-200`}>
+                        {result}
+                      </td>
+                    )
+                  })}
+                </tr>
+              </tfoot>
+            )
+          })()}
         </table>
         {allRows.length === 0 && (
           <div className="py-8 text-center text-sm text-slate-400">{t('common.no_data')}</div>

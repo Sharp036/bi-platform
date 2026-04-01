@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "Aktion konnte nicht aktualisiert werden",
   "common.total": "Gesamt",
   "designer.show_totals": "Summenzeile",
-  "designer.show_totals_hint": "Summenzeile am Ende der Tabelle anzeigen",
   "widget_menu.execute": "Ausführen",
   "widget_menu.executing": "Wird ausgeführt...",
   "widget_menu.execute_failed": "Abfrageausführung fehlgeschlagen",
   "widget_menu.execute_hint": "Ctrl+Enter zum Ausführen",
   "designer.open_sql_editor": "SQL-Editor öffnen",
   "designer.sql_editor": "SQL-Editor",
-  "designer.layers": "Ebenen"
+  "designer.layers": "Ebenen",
+  "designer.totals_off": "Aus",
+  "designer.totals_per_column": "Pro Spalte (leer = Standard):"
 }

@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "Falha ao atualizar a ação",
   "common.total": "Total",
   "designer.show_totals": "Linha de totais",
-  "designer.show_totals_hint": "Mostrar linha de totais no final da tabela",
   "widget_menu.execute": "Executar",
   "widget_menu.executing": "Executando...",
   "widget_menu.execute_failed": "Falha na execução",
   "widget_menu.execute_hint": "Ctrl+Enter para executar",
   "designer.open_sql_editor": "Abrir editor SQL",
   "designer.sql_editor": "Editor SQL",
-  "designer.layers": "Camadas"
+  "designer.layers": "Camadas",
+  "designer.totals_off": "Desligado",
+  "designer.totals_per_column": "Por coluna (vazio = padrão):"
 }

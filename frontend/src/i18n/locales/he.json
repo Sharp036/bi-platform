@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "עדכון הפעולה נכשל",
   "common.total": "סה\"כ",
   "designer.show_totals": "שורת סיכום",
-  "designer.show_totals_hint": "הצג שורת סיכום בתחתית הטבלה",
   "widget_menu.execute": "הרץ",
   "widget_menu.executing": "מריץ...",
   "widget_menu.execute_failed": "הרצת שאילתה נכשלה",
   "widget_menu.execute_hint": "Ctrl+Enter להרצה",
   "designer.open_sql_editor": "פתח עורך SQL",
   "designer.sql_editor": "עורך SQL",
-  "designer.layers": "שכבות"
+  "designer.layers": "שכבות",
+  "designer.totals_off": "כבוי",
+  "designer.totals_per_column": "לפי עמודה (ריק = ברירת מחדל):"
 }

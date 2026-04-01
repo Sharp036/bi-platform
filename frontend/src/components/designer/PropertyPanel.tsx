@@ -756,28 +756,54 @@ export default function PropertyPanel() {
                         <Square className="w-3 h-3" /> {t('designer.deselect_all')}
                       </button>
                     </div>
-                    <div className="space-y-0.5 max-h-44 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                      {(isAllVisible ? availableCols : [...visibleCols, ...availableCols.filter(c => !visibleCols.includes(c))]).map(col => (
-                        <div key={col} className="flex items-center gap-1 group">
-                          <input
-                            type="checkbox"
-                            checked={isAllVisible || effectiveCols.includes(col)}
-                            onChange={() => handleToggleCol(col)}
-                            className="rounded border-slate-300"
-                          />
-                          <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate">{col}</span>
-                          {!isAllVisible && effectiveCols.includes(col) && (
-                            <span className="opacity-0 group-hover:opacity-100 flex gap-0.5">
-                              <button onClick={() => moveCol(col, -1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
-                                <ArrowUp className="w-3 h-3 text-slate-400" />
-                              </button>
-                              <button onClick={() => moveCol(col, 1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
-                                <ArrowDown className="w-3 h-3 text-slate-400" />
-                              </button>
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                    <div className="space-y-0.5 max-h-60 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+                      {(isAllVisible ? availableCols : [...visibleCols, ...availableCols.filter(c => !visibleCols.includes(c))]).map(col => {
+                        const perCol = (cc.totalsPerColumn as Record<string, string>) || {}
+                        const isVisible = isAllVisible || effectiveCols.includes(col)
+                        return (
+                          <div key={col} className="flex items-center gap-1 group">
+                            <input
+                              type="checkbox"
+                              checked={isVisible}
+                              onChange={() => handleToggleCol(col)}
+                              className="rounded border-slate-300 flex-shrink-0"
+                            />
+                            <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate" title={col}>{col}</span>
+                            {!!cc.totalsAggregation && (
+                              <select
+                                value={perCol[col] || ''}
+                                onChange={e => {
+                                  const next = { ...perCol }
+                                  if (e.target.value) next[col] = e.target.value
+                                  else delete next[col]
+                                  update({ chartConfig: { ...cc, totalsPerColumn: next } })
+                                }}
+                                className="text-[10px] border border-surface-200 dark:border-dark-surface-100 rounded px-0.5 py-0 bg-white dark:bg-dark-surface-200 text-slate-500 dark:text-slate-400 w-16 flex-shrink-0"
+                                title={t('designer.show_totals')}
+                              >
+                                <option value="">{(cc.totalsAggregation as string).slice(0, 3)}</option>
+                                <option value="SUM">SUM</option>
+                                <option value="COUNT">CNT</option>
+                                <option value="DISTINCT_COUNT">DST</option>
+                                <option value="AVG">AVG</option>
+                                <option value="MIN">MIN</option>
+                                <option value="MAX">MAX</option>
+                                <option value="NONE">--</option>
+                              </select>
+                            )}
+                            {!isAllVisible && isVisible && (
+                              <span className="opacity-0 group-hover:opacity-100 flex gap-0.5 flex-shrink-0">
+                                <button onClick={() => moveCol(col, -1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                                  <ArrowUp className="w-3 h-3 text-slate-400" />
+                                </button>
+                                <button onClick={() => moveCol(col, 1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                                  <ArrowDown className="w-3 h-3 text-slate-400" />
+                                </button>
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                     <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_columns_hint')}</p>
                   </Field>
@@ -806,15 +832,22 @@ export default function PropertyPanel() {
                   </Field>
 
                   <Field label={t('designer.show_totals')}>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!!cc.showTotals}
-                        onChange={e => update({ chartConfig: { ...cc, showTotals: e.target.checked } })}
-                        className="rounded"
-                      />
-                      <span className="text-sm text-slate-600 dark:text-slate-400">{t('designer.show_totals_hint')}</span>
-                    </label>
+                    <select
+                      value={cc.totalsAggregation as string || ''}
+                      onChange={e => update({ chartConfig: { ...cc, totalsAggregation: e.target.value || undefined, showTotals: !!e.target.value } })}
+                      className="input text-sm"
+                    >
+                      <option value="">{t('designer.totals_off')}</option>
+                      <option value="SUM">SUM</option>
+                      <option value="COUNT">COUNT</option>
+                      <option value="DISTINCT_COUNT">DISTINCT COUNT</option>
+                      <option value="AVG">AVG</option>
+                      <option value="MIN">MIN</option>
+                      <option value="MAX">MAX</option>
+                    </select>
+                    {!!cc.totalsAggregation && (
+                      <p className="text-[10px] text-slate-400 mt-1">{t('designer.totals_per_column')}</p>
+                    )}
                   </Field>
                 </>
               )
