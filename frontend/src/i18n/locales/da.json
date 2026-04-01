@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "Opdatering af handling mislykkedes",
   "common.total": "I alt",
   "designer.show_totals": "Totalrække",
-  "designer.show_totals_hint": "Vis totalrække i bunden af tabellen",
   "widget_menu.execute": "Kør",
   "widget_menu.executing": "Kører...",
   "widget_menu.execute_failed": "Forespørgsel mislykkedes",
   "widget_menu.execute_hint": "Ctrl+Enter for at køre",
   "designer.open_sql_editor": "Åbn SQL-editor",
   "designer.sql_editor": "SQL-editor",
-  "designer.layers": "Lag"
+  "designer.layers": "Lag",
+  "designer.totals_off": "Fra",
+  "designer.totals_per_column": "Per kolonne (tom = standard):"
 }

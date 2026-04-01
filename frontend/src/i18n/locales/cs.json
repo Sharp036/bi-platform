@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "Aktualizace akce se nezdařila",
   "common.total": "Celkem",
   "designer.show_totals": "Řádek súčtů",
-  "designer.show_totals_hint": "Zobrazit řádek súčtů ve spodní části tabulky",
   "widget_menu.execute": "Spustit",
   "widget_menu.executing": "Probíhá...",
   "widget_menu.execute_failed": "Spuštění dotazu se nezdařilo",
   "widget_menu.execute_hint": "Ctrl+Enter pro spuštění",
   "designer.open_sql_editor": "Otevřít SQL editor",
   "designer.sql_editor": "SQL editor",
-  "designer.layers": "Vrstvy"
+  "designer.layers": "Vrstvy",
+  "designer.totals_off": "Vyp.",
+  "designer.totals_per_column": "Na sloupec (prázdné = výchozí):"
 }

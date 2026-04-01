@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "Oppdatering av handling mislyktes",
   "common.total": "Totalt",
   "designer.show_totals": "Totalrad",
-  "designer.show_totals_hint": "Vis totalrad nederst i tabellen",
   "widget_menu.execute": "Kjør",
   "widget_menu.executing": "Kjører...",
   "widget_menu.execute_failed": "Spørringskjøring mislyktes",
   "widget_menu.execute_hint": "Ctrl+Enter for å kjøre",
   "designer.open_sql_editor": "Åpne SQL-editor",
   "designer.sql_editor": "SQL-editor",
-  "designer.layers": "Lag"
+  "designer.layers": "Lag",
+  "designer.totals_off": "Av",
+  "designer.totals_per_column": "Per kolonne (tom = standard):"
 }

@@ -914,12 +914,13 @@
   "interactive.action.failed_update": "ไม่สามารถอัปเดต",
   "common.total": "รวม",
   "designer.show_totals": "แถวรวม",
-  "designer.show_totals_hint": "แสดงแถวรวมที่ด้านล่างของตาราง",
   "widget_menu.execute": "รัน",
   "widget_menu.executing": "กำลังรัน...",
   "widget_menu.execute_failed": "การรันคิวรีล้มเหลว",
   "widget_menu.execute_hint": "Ctrl+Enter เพื่อรัน",
   "designer.open_sql_editor": "เปิดตัวแก้ไข SQL",
   "designer.sql_editor": "ตัวแก้ไข SQL",
-  "designer.layers": "เลเยอร์"
+  "designer.layers": "เลเยอร์",
+  "designer.totals_off": "ปิด",
+  "designer.totals_per_column": "ตามคอลัมน์ (ว่าง = ค่าเริ่มต้น):"
 }
