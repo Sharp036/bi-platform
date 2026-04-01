@@ -918,5 +918,7 @@
   "widget_menu.execute": "הרץ",
   "widget_menu.executing": "מריץ...",
   "widget_menu.execute_failed": "הרצת שאילתה נכשלה",
-  "widget_menu.execute_hint": "Ctrl+Enter להרצה"
+  "widget_menu.execute_hint": "Ctrl+Enter להרצה",
+  "designer.open_sql_editor": "פתח עורך SQL",
+  "designer.sql_editor": "עורך SQL"
 }

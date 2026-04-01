@@ -918,5 +918,7 @@
   "widget_menu.execute": "تنفيذ",
   "widget_menu.executing": "جاري التنفيذ...",
   "widget_menu.execute_failed": "فشل تنفيذ الاستعلام",
-  "widget_menu.execute_hint": "Ctrl+Enter للتنفيذ"
+  "widget_menu.execute_hint": "Ctrl+Enter للتنفيذ",
+  "designer.open_sql_editor": "فتح محرر SQL",
+  "designer.sql_editor": "محرر SQL"
 }

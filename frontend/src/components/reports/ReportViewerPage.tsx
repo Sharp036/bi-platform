@@ -382,7 +382,7 @@ export default function ReportViewerPage() {
     return (
       <div
         key={w.widgetId}
-        className={`card p-4 overflow-hidden h-full ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''}`}
+        className={`card p-4 overflow-hidden h-full ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''} ${drillEntry ? 'pt-10' : ''}`}
         style={{ position: 'relative' }}
       >
         {showMenu && (

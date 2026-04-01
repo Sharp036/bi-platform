@@ -918,5 +918,7 @@
   "widget_menu.execute": "รัน",
   "widget_menu.executing": "กำลังรัน...",
   "widget_menu.execute_failed": "การรันคิวรีล้มเหลว",
-  "widget_menu.execute_hint": "Ctrl+Enter เพื่อรัน"
+  "widget_menu.execute_hint": "Ctrl+Enter เพื่อรัน",
+  "designer.open_sql_editor": "เปิดตัวแก้ไข SQL",
+  "designer.sql_editor": "ตัวแก้ไข SQL"
 }

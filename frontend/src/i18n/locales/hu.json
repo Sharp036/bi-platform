@@ -918,5 +918,7 @@
   "widget_menu.execute": "Futtatás",
   "widget_menu.executing": "Futás...",
   "widget_menu.execute_failed": "Lekérdezés végrehajtása sikertelen",
-  "widget_menu.execute_hint": "Ctrl+Enter a futtatáshoz"
+  "widget_menu.execute_hint": "Ctrl+Enter a futtatáshoz",
+  "designer.open_sql_editor": "SQL szerkesztő megnyitása",
+  "designer.sql_editor": "SQL szerkesztő"
 }

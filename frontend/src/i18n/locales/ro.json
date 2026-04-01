@@ -918,5 +918,7 @@
   "widget_menu.execute": "Execută",
   "widget_menu.executing": "Se execută...",
   "widget_menu.execute_failed": "Executarea interogării a eșuat",
-  "widget_menu.execute_hint": "Ctrl+Enter pentru executare"
+  "widget_menu.execute_hint": "Ctrl+Enter pentru executare",
+  "designer.open_sql_editor": "Deschide editorul SQL",
+  "designer.sql_editor": "Editor SQL"
 }
