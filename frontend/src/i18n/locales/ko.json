@@ -918,5 +918,7 @@
   "widget_menu.execute": "실행",
   "widget_menu.executing": "실행 중...",
   "widget_menu.execute_failed": "쿼리 실행 실패",
-  "widget_menu.execute_hint": "Ctrl+Enter로 실행"
+  "widget_menu.execute_hint": "Ctrl+Enter로 실행",
+  "designer.open_sql_editor": "SQL 편집기 열기",
+  "designer.sql_editor": "SQL 편집기"
 }

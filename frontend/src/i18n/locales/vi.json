@@ -918,5 +918,7 @@
   "widget_menu.execute": "Chạy",
   "widget_menu.executing": "Đang chạy...",
   "widget_menu.execute_failed": "Thực thi truy vấn thất bại",
-  "widget_menu.execute_hint": "Ctrl+Enter để chạy"
+  "widget_menu.execute_hint": "Ctrl+Enter để chạy",
+  "designer.open_sql_editor": "Mở trình soạn SQL",
+  "designer.sql_editor": "Trình soạn SQL"
 }

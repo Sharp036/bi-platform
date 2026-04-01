@@ -918,5 +918,7 @@
   "widget_menu.execute": "Ausführen",
   "widget_menu.executing": "Wird ausgeführt...",
   "widget_menu.execute_failed": "Abfrageausführung fehlgeschlagen",
-  "widget_menu.execute_hint": "Ctrl+Enter zum Ausführen"
+  "widget_menu.execute_hint": "Ctrl+Enter zum Ausführen",
+  "designer.open_sql_editor": "SQL-Editor öffnen",
+  "designer.sql_editor": "SQL-Editor"
 }

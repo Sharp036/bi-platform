@@ -6,7 +6,8 @@ import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
-import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X } from 'lucide-react'
+import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import toast from 'react-hot-toast'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
@@ -41,6 +42,7 @@ export default function PropertyPanel() {
   const [datasources, setDatasources] = useState<DataSource[]>([])
   const [availableCols, setAvailableCols] = useState<string[]>([])
   const [loadingCols, setLoadingCols] = useState(false)
+  const [sqlEditorOpen, setSqlEditorOpen] = useState(false)
 
   const widget = widgets.find(w => w.id === selected)
 
@@ -212,6 +214,7 @@ export default function PropertyPanel() {
   const update = (updates: Partial<DesignerWidget>) => updateWidget(widget.id, updates)
 
   return (
+    <>
     <div className="p-3 space-y-4 overflow-y-auto">
       {/* Actions */}
       <div className="flex items-center gap-1">
@@ -342,12 +345,21 @@ export default function PropertyPanel() {
                   <option key={ds.id} value={ds.id}>{ds.name} ({ds.type})</option>
                 ))}
               </select>
-              <textarea
-                value={widget.rawSql}
-                onChange={e => update({ rawSql: e.target.value, queryId: null })}
-                placeholder={t('designer.sql_placeholder')}
-                className="input text-xs font-mono h-20 resize-none"
-              />
+              <div className="relative">
+                <textarea
+                  value={widget.rawSql}
+                  onChange={e => update({ rawSql: e.target.value, queryId: null })}
+                  placeholder={t('designer.sql_placeholder')}
+                  className="input text-xs font-mono h-20 resize-none pr-8"
+                />
+                <button
+                  onClick={() => setSqlEditorOpen(true)}
+                  className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600"
+                  title={t('designer.open_sql_editor')}
+                >
+                  <MoreVertical className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </Field>
 
             {/* Load Columns — shared for all data-bound types */}
@@ -944,6 +956,18 @@ export default function PropertyPanel() {
         </Field>
       )}
     </div>
+
+    {sqlEditorOpen && widget && createPortal(
+      <SqlEditorModal
+        sql={widget.rawSql}
+        datasourceId={widget.datasourceId}
+        parameters={parameters}
+        onSave={(newSql) => { update({ rawSql: newSql, queryId: null }); setSqlEditorOpen(false) }}
+        onClose={() => setSqlEditorOpen(false)}
+      />,
+      document.body
+    )}
+    </>
   )
 }
 
@@ -1037,6 +1061,103 @@ function ParamMappingEditor({
         <Plus className="w-3 h-3" /> {t('designer.param_mapping_add')}
       </button>
     </Field>
+    </div>
+  )
+}
+
+function SqlEditorModal({ sql, datasourceId, parameters, onSave, onClose }: {
+  sql: string
+  datasourceId: number | null
+  parameters: Array<{ name: string; paramType: string; defaultValue: string }>
+  onSave: (sql: string) => void
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  const [editSql, setEditSql] = useState(sql)
+  const [executing, setExecuting] = useState(false)
+  const [result, setResult] = useState<{ columns: string[]; rows: Record<string, unknown>[]; rowCount: number; executionMs: number } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleExecute = useCallback(async () => {
+    if (!datasourceId || !editSql.trim()) return
+    setExecuting(true)
+    setError(null)
+    try {
+      const paramValues = buildDesignerParameterValues(parameters)
+      const merged = mergeSqlParameterKeys(editSql, paramValues)
+      const res = await queryApi.executeAdHoc({ datasourceId, sql: editSql, parameters: merged, limit: 100 })
+      const cols = (res.columns || []).map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
+      setResult({ columns: cols, rows: res.rows || [], rowCount: res.rowCount || res.rows?.length || 0, executionMs: res.executionTimeMs || 0 })
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      setError(msg || t('widget_menu.execute_failed'))
+    } finally {
+      setExecuting(false)
+    }
+  }, [datasourceId, editSql, parameters, t])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleExecute()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose, handleExecute])
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col m-4" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-surface-200 dark:border-dark-surface-100">
+          <h3 className="text-base font-semibold text-slate-800 dark:text-white">{t('designer.sql_editor')}</h3>
+          <div className="flex items-center gap-2">
+            {datasourceId && (
+              <button onClick={handleExecute} disabled={executing} className="btn-secondary text-xs px-2.5 py-1.5">
+                <Play className="w-3.5 h-3.5" />
+                {executing ? t('widget_menu.executing') : t('widget_menu.execute')}
+              </button>
+            )}
+            <button onClick={() => onSave(editSql)} className="btn-primary text-xs px-3 py-1.5">{t('common.save')}</button>
+            <button onClick={onClose} className="btn-ghost p-1"><X className="w-4 h-4" /></button>
+          </div>
+        </div>
+        <textarea
+          value={editSql}
+          onChange={e => setEditSql(e.target.value)}
+          className="w-full text-sm font-mono text-slate-700 dark:text-slate-300 bg-surface-50 dark:bg-dark-surface-100 p-4 border-b border-surface-200 dark:border-dark-surface-100 focus:outline-none resize-y"
+          style={{ minHeight: '200px' }}
+          spellCheck={false}
+          autoFocus
+        />
+        {error && (
+          <div className="px-4 py-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">{error}</div>
+        )}
+        {result && (
+          <div className="overflow-auto flex-1">
+            <div className="px-4 py-1 text-xs text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
+              {result.rowCount} {t('widget_menu.rows')} / {result.executionMs}ms
+            </div>
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-surface-50 dark:bg-dark-surface-100">
+                <tr>
+                  {result.columns.map(col => (
+                    <th key={col} className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100 whitespace-nowrap">{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {result.rows.map((row, i) => (
+                  <tr key={i} className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-100/50">
+                    {result.columns.map(col => (
+                      <td key={col} className="px-3 py-1.5 text-slate-700 dark:text-slate-300 whitespace-nowrap max-w-[300px] truncate">{row[col] != null ? String(row[col]) : ''}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

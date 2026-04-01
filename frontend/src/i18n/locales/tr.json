@@ -918,5 +918,7 @@
   "widget_menu.execute": "Çalıştır",
   "widget_menu.executing": "Çalıştırılıyor...",
   "widget_menu.execute_failed": "Sorgu çalıştırma başarısız",
-  "widget_menu.execute_hint": "Ctrl+Enter ile çalıştır"
+  "widget_menu.execute_hint": "Ctrl+Enter ile çalıştır",
+  "designer.open_sql_editor": "SQL düzenleyiciyi aç",
+  "designer.sql_editor": "SQL Düzenleyici"
 }
