@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "打开SQL编辑器",
   "designer.sql_editor": "SQL编辑器",
   "designer.layers": "图层",
-  "designer.totals_off": "关闭",
-  "designer.totals_per_column": "按列设置(空=默认):"
+  "designer.totals_per_column": "在可见列中配置聚合类型",
+  "designer.show_totals_hint": "在表格底部显示合计行"
 }

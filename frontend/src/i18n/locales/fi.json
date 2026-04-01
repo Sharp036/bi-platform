@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Avaa SQL-editori",
   "designer.sql_editor": "SQL-editori",
   "designer.layers": "Tasot",
-  "designer.totals_off": "Pois",
-  "designer.totals_per_column": "Sarakkeittain (tyhjä = oletus):"
+  "designer.totals_per_column": "Aggregointityyppi näkyvässä sarakkeissa",
+  "designer.show_totals_hint": "Näytä yhteensrivi taulukon alaosassa"
 }

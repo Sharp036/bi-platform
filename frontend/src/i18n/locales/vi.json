@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Mở trình soạn SQL",
   "designer.sql_editor": "Trình soạn SQL",
   "designer.layers": "Lớp",
-  "designer.totals_off": "Tắt",
-  "designer.totals_per_column": "Theo cột (trống = mặc định):"
+  "designer.totals_per_column": "Loại tổng hợp trong cột hiển thị",
+  "designer.show_totals_hint": "Hiển thị dòng tổng ở cuối bảng"
 }

@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Apri editor SQL",
   "designer.sql_editor": "Editor SQL",
   "designer.layers": "Livelli",
-  "designer.totals_off": "Disattivato",
-  "designer.totals_per_column": "Per colonna (vuoto = predefinito):"
+  "designer.totals_per_column": "Tipo aggregazione configurabile nelle colonne visibili",
+  "designer.show_totals_hint": "Mostra riga totali in fondo alla tabella"
 }

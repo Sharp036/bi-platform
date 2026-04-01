@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "פתח עורך SQL",
   "designer.sql_editor": "עורך SQL",
   "designer.layers": "שכבות",
-  "designer.totals_off": "כבוי",
-  "designer.totals_per_column": "לפי עמודה (ריק = ברירת מחדל):"
+  "designer.totals_per_column": "סוג אגרגציה בעמודות גלויות",
+  "designer.show_totals_hint": "הצג שורת סיכום בתחתית הטבלה"
 }

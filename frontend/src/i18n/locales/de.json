@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "SQL-Editor öffnen",
   "designer.sql_editor": "SQL-Editor",
   "designer.layers": "Ebenen",
-  "designer.totals_off": "Aus",
-  "designer.totals_per_column": "Pro Spalte (leer = Standard):"
+  "designer.totals_per_column": "Aggregationstyp in sichtbaren Spalten konfigurieren",
+  "designer.show_totals_hint": "Summenzeile am Ende der Tabelle anzeigen"
 }

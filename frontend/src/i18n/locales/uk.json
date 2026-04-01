@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Відкрити SQL-редактор",
   "designer.sql_editor": "SQL-редактор",
   "designer.layers": "Шари",
-  "designer.totals_off": "Вимк.",
-  "designer.totals_per_column": "По стовпцям (порожньо = за замовч.):"
+  "designer.totals_per_column": "Тип агрегації в видимих стовпцях",
+  "designer.show_totals_hint": "Показувати рядок підсумків внизу таблиці"
 }

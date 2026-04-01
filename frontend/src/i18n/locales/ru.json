@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Открыть SQL-редактор",
   "designer.sql_editor": "SQL-редактор",
   "designer.layers": "Слои",
-  "designer.totals_off": "Выкл",
-  "designer.totals_per_column": "Переопределить по столбцам (пусто = по умолчанию):"
+  "designer.totals_per_column": "Тип агрегации настраивается в видимых столбцах",
+  "designer.show_totals_hint": "Показывать строку итогов внизу таблицы"
 }

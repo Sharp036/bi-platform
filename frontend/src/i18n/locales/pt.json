@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Abrir editor SQL",
   "designer.sql_editor": "Editor SQL",
   "designer.layers": "Camadas",
-  "designer.totals_off": "Desligado",
-  "designer.totals_per_column": "Por coluna (vazio = padrão):"
+  "designer.totals_per_column": "Tipo configurável nas colunas visíveis",
+  "designer.show_totals_hint": "Mostrar linha de totais no final"
 }

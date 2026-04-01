@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Ouvrir l'éditeur SQL",
   "designer.sql_editor": "Éditeur SQL",
   "designer.layers": "Calques",
-  "designer.totals_off": "Désactivé",
-  "designer.totals_per_column": "Par colonne (vide = par défaut) :"
+  "designer.totals_per_column": "Type configurable dans les colonnes visibles",
+  "designer.show_totals_hint": "Afficher la ligne de totaux en bas"
 }

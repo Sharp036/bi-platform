@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "SQL düzenleyiciyi aç",
   "designer.sql_editor": "SQL Düzenleyici",
   "designer.layers": "Katmanlar",
-  "designer.totals_off": "Kapalı",
-  "designer.totals_per_column": "Sütun başına (boş = varsayılan):"
+  "designer.totals_per_column": "Toplama türü görünür sütunlarda ayarlanır",
+  "designer.show_totals_hint": "Tablonun altında toplam satırı göster"
 }

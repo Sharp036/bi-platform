@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Otwórz edytor SQL",
   "designer.sql_editor": "Edytor SQL",
   "designer.layers": "Warstwy",
-  "designer.totals_off": "Wył.",
-  "designer.totals_per_column": "Na kolumnę (puste = domyślnie):"
+  "designer.totals_per_column": "Typ agregacji w widocznych kolumnach",
+  "designer.show_totals_hint": "Pokaż wiersz sum na dole tabeli"
 }

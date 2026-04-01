@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "فتح محرر SQL",
   "designer.sql_editor": "محرر SQL",
   "designer.layers": "الطبقات",
-  "designer.totals_off": "إيقاف",
-  "designer.totals_per_column": "لكل عمود (فارغ = افتراضي):"
+  "designer.totals_per_column": "نوع التجميع في الأعمدة المرئية",
+  "designer.show_totals_hint": "عرض صف الإجمالي أسفل الجدول"
 }
