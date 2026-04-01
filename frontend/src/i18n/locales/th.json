@@ -911,5 +911,12 @@
   "header.about_charts": "ประเภทแผนภูมิ",
   "header.about_languages": "ภาษา",
   "interactive.action.updated": "อัปเดตการดำเนินการแล้ว",
-  "interactive.action.failed_update": "ไม่สามารถอัปเดต"
+  "interactive.action.failed_update": "ไม่สามารถอัปเดต",
+  "common.total": "รวม",
+  "designer.show_totals": "แถวรวม",
+  "designer.show_totals_hint": "แสดงแถวรวมที่ด้านล่างของตาราง",
+  "widget_menu.execute": "รัน",
+  "widget_menu.executing": "กำลังรัน...",
+  "widget_menu.execute_failed": "การรันคิวรีล้มเหลว",
+  "widget_menu.execute_hint": "Ctrl+Enter เพื่อรัน"
 }

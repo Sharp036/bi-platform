@@ -911,5 +911,12 @@
   "header.about_charts": "チャートタイプ",
   "header.about_languages": "言語",
   "interactive.action.updated": "アクションを更新しました",
-  "interactive.action.failed_update": "アクションの更新に失敗"
+  "interactive.action.failed_update": "アクションの更新に失敗",
+  "common.total": "合計",
+  "designer.show_totals": "合計行",
+  "designer.show_totals_hint": "テーブルの下部に合計行を表示",
+  "widget_menu.execute": "実行",
+  "widget_menu.executing": "実行中...",
+  "widget_menu.execute_failed": "クエリ実行失敗",
+  "widget_menu.execute_hint": "Ctrl+Enterで実行"
 }

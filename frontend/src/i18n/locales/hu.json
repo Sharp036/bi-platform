@@ -911,5 +911,12 @@
   "header.about_charts": "Diagramtípusok",
   "header.about_languages": "Nyelvek",
   "interactive.action.updated": "Művelet frissítve",
-  "interactive.action.failed_update": "A művelet frissítése sikertelen"
+  "interactive.action.failed_update": "A művelet frissítése sikertelen",
+  "common.total": "Összesen",
+  "designer.show_totals": "Összeg sor",
+  "designer.show_totals_hint": "Összeg sor megjelenítése a táblázat alján",
+  "widget_menu.execute": "Futtatás",
+  "widget_menu.executing": "Futás...",
+  "widget_menu.execute_failed": "Lekérdezés végrehajtása sikertelen",
+  "widget_menu.execute_hint": "Ctrl+Enter a futtatáshoz"
 }

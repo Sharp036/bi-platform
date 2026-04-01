@@ -16,6 +16,7 @@ export interface DrillReplaceEntry {
   targetWidgetIds: number[]
   filters: ActionFilter[]
   label: string
+  seriesName?: string
 }
 
 interface ActionState {
@@ -122,6 +123,7 @@ export const useActionStore = create<ActionState>((set, get) => ({
 
         case 'DRILL_REPLACE': {
           const drillFilters: ActionFilter[] = []
+          const clickedSeries = data.seriesName != null ? String(data.seriesName) : undefined
           if (sourceValue !== undefined && sourceValue !== null) {
             for (const targetId of targetIds) {
               const filterField = action.targetField || action.sourceField || ''
@@ -140,6 +142,7 @@ export const useActionStore = create<ActionState>((set, get) => ({
             targetWidgetIds: targetIds,
             filters: drillFilters,
             label: sourceValue != null ? String(sourceValue) : '',
+            seriesName: clickedSeries,
           }
           newDrillStack = [...get().drillReplaceStack, entry]
           break

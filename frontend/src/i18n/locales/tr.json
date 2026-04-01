@@ -911,5 +911,12 @@
   "header.about_charts": "Grafik türleri",
   "header.about_languages": "Diller",
   "interactive.action.updated": "Eylem güncellendi",
-  "interactive.action.failed_update": "Eylem güncellenemedi"
+  "interactive.action.failed_update": "Eylem güncellenemedi",
+  "common.total": "Toplam",
+  "designer.show_totals": "Toplam satırı",
+  "designer.show_totals_hint": "Tablonun altında toplam satırı göster",
+  "widget_menu.execute": "Çalıştır",
+  "widget_menu.executing": "Çalıştırılıyor...",
+  "widget_menu.execute_failed": "Sorgu çalıştırma başarısız",
+  "widget_menu.execute_hint": "Ctrl+Enter ile çalıştır"
 }

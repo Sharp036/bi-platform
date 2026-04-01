@@ -911,5 +911,12 @@
   "header.about_charts": "Typy wykresów",
   "header.about_languages": "Języki",
   "interactive.action.updated": "Akcja zaktualizowana",
-  "interactive.action.failed_update": "Nie udało się zaktualizować akcji"
+  "interactive.action.failed_update": "Nie udało się zaktualizować akcji",
+  "common.total": "Razem",
+  "designer.show_totals": "Wiersz sum",
+  "designer.show_totals_hint": "Pokaż wiersz sum na dole tabeli",
+  "widget_menu.execute": "Wykonaj",
+  "widget_menu.executing": "Wykonywanie...",
+  "widget_menu.execute_failed": "Błąd wykonania zapytania",
+  "widget_menu.execute_hint": "Ctrl+Enter aby wykonać"
 }

@@ -193,6 +193,21 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
               </tr>
             ))}
           </tbody>
+          {!!config.showTotals && (
+            <tfoot className="sticky bottom-0 bg-surface-100 dark:bg-dark-surface-100 border-t-2 border-surface-300 dark:border-dark-surface-100">
+              <tr>
+                {visibleCols.map((col, ci) => {
+                  const values = allRows.map(r => Number(r[col])).filter(n => !isNaN(n))
+                  const isNumeric = values.length > 0 && values.length >= allRows.length * 0.5
+                  return (
+                    <td key={col} className={`${cellPad} whitespace-nowrap font-semibold text-slate-800 dark:text-slate-200`}>
+                      {ci === 0 && !isNumeric ? t('common.total') : isNumeric ? values.reduce((a, b) => a + b, 0).toLocaleString() : ''}
+                    </td>
+                  )
+                })}
+              </tr>
+            </tfoot>
+          )}
         </table>
         {allRows.length === 0 && (
           <div className="py-8 text-center text-sm text-slate-400">{t('common.no_data')}</div>
