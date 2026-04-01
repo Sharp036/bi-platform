@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Sorgu çalıştırma başarısız",
   "widget_menu.execute_hint": "Ctrl+Enter ile çalıştır",
   "designer.open_sql_editor": "SQL düzenleyiciyi aç",
-  "designer.sql_editor": "SQL Düzenleyici"
+  "designer.sql_editor": "SQL Düzenleyici",
+  "designer.layers": "Katmanlar"
 }

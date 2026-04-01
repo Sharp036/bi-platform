@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Frågekörning misslyckades",
   "widget_menu.execute_hint": "Ctrl+Enter för att köra",
   "designer.open_sql_editor": "Öppna SQL-redigerare",
-  "designer.sql_editor": "SQL-redigerare"
+  "designer.sql_editor": "SQL-redigerare",
+  "designer.layers": "Lager"
 }

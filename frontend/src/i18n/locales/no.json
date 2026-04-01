@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Spørringskjøring mislyktes",
   "widget_menu.execute_hint": "Ctrl+Enter for å kjøre",
   "designer.open_sql_editor": "Åpne SQL-editor",
-  "designer.sql_editor": "SQL-editor"
+  "designer.sql_editor": "SQL-editor",
+  "designer.layers": "Lag"
 }

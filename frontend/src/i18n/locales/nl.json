@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Query uitvoering mislukt",
   "widget_menu.execute_hint": "Ctrl+Enter om uit te voeren",
   "designer.open_sql_editor": "SQL-editor openen",
-  "designer.sql_editor": "SQL-editor"
+  "designer.sql_editor": "SQL-editor",
+  "designer.layers": "Lagen"
 }

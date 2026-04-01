@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Αποτυχία εκτέλεσης",
   "widget_menu.execute_hint": "Ctrl+Enter για εκτέλεση",
   "designer.open_sql_editor": "Άνοιγμα επεξεργαστή SQL",
-  "designer.sql_editor": "Επεξεργαστής SQL"
+  "designer.sql_editor": "Επεξεργαστής SQL",
+  "designer.layers": "Επίπεδα"
 }

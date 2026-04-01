@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Помилка виконання запиту",
   "widget_menu.execute_hint": "Ctrl+Enter для виконання",
   "designer.open_sql_editor": "Відкрити SQL-редактор",
-  "designer.sql_editor": "SQL-редактор"
+  "designer.sql_editor": "SQL-редактор",
+  "designer.layers": "Шари"
 }

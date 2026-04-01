@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "クエリ実行失敗",
   "widget_menu.execute_hint": "Ctrl+Enterで実行",
   "designer.open_sql_editor": "SQLエディタを開く",
-  "designer.sql_editor": "SQLエディタ"
+  "designer.sql_editor": "SQLエディタ",
+  "designer.layers": "レイヤー"
 }

@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Falha na execução",
   "widget_menu.execute_hint": "Ctrl+Enter para executar",
   "designer.open_sql_editor": "Abrir editor SQL",
-  "designer.sql_editor": "Editor SQL"
+  "designer.sql_editor": "Editor SQL",
+  "designer.layers": "Camadas"
 }

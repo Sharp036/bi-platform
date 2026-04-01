@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Ошибка выполнения запроса",
   "widget_menu.execute_hint": "Ctrl+Enter для выполнения",
   "designer.open_sql_editor": "Открыть SQL-редактор",
-  "designer.sql_editor": "SQL-редактор"
+  "designer.sql_editor": "SQL-редактор",
+  "designer.layers": "Слои"
 }

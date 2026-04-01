@@ -742,6 +742,7 @@
   "interactive.action.target_report": "Target Report ID",
   "interactive.action.url_template_placeholder": "https://example.com/detail?id={customer_id}",
   "interactive.action.action_name": "Action name",
+  "designer.layers": "Layers",
   "designer.open_sql_editor": "Open SQL editor",
   "designer.sql_editor": "SQL Editor",
   "designer.show_totals": "Totals row",

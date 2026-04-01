@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Thực thi truy vấn thất bại",
   "widget_menu.execute_hint": "Ctrl+Enter để chạy",
   "designer.open_sql_editor": "Mở trình soạn SQL",
-  "designer.sql_editor": "Trình soạn SQL"
+  "designer.sql_editor": "Trình soạn SQL",
+  "designer.layers": "Lớp"
 }

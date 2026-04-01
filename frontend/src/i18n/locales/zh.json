@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "查询执行失败",
   "widget_menu.execute_hint": "Ctrl+Enter 运行查询",
   "designer.open_sql_editor": "打开SQL编辑器",
-  "designer.sql_editor": "SQL编辑器"
+  "designer.sql_editor": "SQL编辑器",
+  "designer.layers": "图层"
 }

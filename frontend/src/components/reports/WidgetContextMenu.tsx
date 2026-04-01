@@ -5,6 +5,7 @@ import { MoreVertical, Code, Table, X, Copy, Check, FileText, FileSpreadsheet, A
 import * as XLSX from 'xlsx'
 import type { WidgetData } from '@/types'
 import { queryApi } from '@/api/queries'
+import SqlCodeEditor from '@/components/common/SqlCodeEditor'
 
 interface Props {
   rawSql?: string
@@ -129,19 +130,19 @@ function QueryModal({ sql, datasourceId, title, onClose }: { sql: string; dataso
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleExecute()
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [onClose, handleExecute])
+  }, [onClose])
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col m-4"
+        className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl flex flex-col m-4"
+        style={{ width: 'calc(100vw - 120px)', height: 'calc(100vh - 120px)' }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200 dark:border-dark-surface-100">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
           <h3 className="text-base font-semibold text-slate-800 dark:text-white">
             {t('widget_menu.view_query')}{title ? ` - ${title}` : ''}
           </h3>
@@ -162,13 +163,13 @@ function QueryModal({ sql, datasourceId, title, onClose }: { sql: string; dataso
           </div>
         </div>
         <div className="flex flex-col flex-1 overflow-hidden">
-          <textarea
-            value={editableSql}
-            onChange={e => setEditableSql(e.target.value)}
-            className="w-full text-sm font-mono text-slate-700 dark:text-slate-300 bg-surface-50 dark:bg-dark-surface-100 p-4 resize-none border-b border-surface-200 dark:border-dark-surface-100 focus:outline-none"
-            style={{ minHeight: '120px', maxHeight: '40vh' }}
-            spellCheck={false}
-          />
+          <div className="border-b border-surface-200 dark:border-dark-surface-100" style={{ minHeight: '150px', height: '40%' }}>
+            <SqlCodeEditor
+              value={editableSql}
+              onChange={setEditableSql}
+              onExecute={handleExecute}
+            />
+          </div>
           {error && (
             <div className="px-4 py-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
               {error}
