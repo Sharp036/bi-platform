@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Αποτυχία ενημέρωσης",
   "common.total": "Σύνολο",
   "designer.show_totals": "Γραμμή συνόλων",
-  "designer.show_totals_hint": "Εμφάνιση γραμμής συνόλων στο κάτω μέρος του πίνακα",
   "widget_menu.execute": "Εκτέλεση",
   "widget_menu.executing": "Εκτελείται...",
   "widget_menu.execute_failed": "Αποτυχία εκτέλεσης",
-  "widget_menu.execute_hint": "Ctrl+Enter για εκτέλεση"
+  "widget_menu.execute_hint": "Ctrl+Enter για εκτέλεση",
+  "designer.open_sql_editor": "Άνοιγμα επεξεργαστή SQL",
+  "designer.sql_editor": "Επεξεργαστής SQL",
+  "designer.layers": "Επίπεδα",
+  "designer.totals_per_column": "Τύπος συνάθροισης στις ορατές στήλες",
+  "designer.show_totals_hint": "Εμφάνιση γραμμής συνόλων στο κάτω μέρος"
 }

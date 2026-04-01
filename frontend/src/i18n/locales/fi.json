@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Toiminnon päivitys epäonnistui",
   "common.total": "Yhteensä",
   "designer.show_totals": "Yhteensrivi",
-  "designer.show_totals_hint": "Näytä yhteensrivi taulukon alaosassa",
   "widget_menu.execute": "Suorita",
   "widget_menu.executing": "Suoritetaan...",
   "widget_menu.execute_failed": "Kyselyn suoritus epäonnistui",
-  "widget_menu.execute_hint": "Ctrl+Enter suorittaaksesi"
+  "widget_menu.execute_hint": "Ctrl+Enter suorittaaksesi",
+  "designer.open_sql_editor": "Avaa SQL-editori",
+  "designer.sql_editor": "SQL-editori",
+  "designer.layers": "Tasot",
+  "designer.totals_per_column": "Aggregointityyppi näkyvässä sarakkeissa",
+  "designer.show_totals_hint": "Näytä yhteensrivi taulukon alaosassa"
 }

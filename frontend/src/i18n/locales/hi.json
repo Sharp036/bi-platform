@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "क्रिया अपडेट विफल",
   "common.total": "कुल",
   "designer.show_totals": "कुल पंक्ति",
-  "designer.show_totals_hint": "तालिका के नीचे कुल पंक्ति दिखाएं",
   "widget_menu.execute": "चलाएं",
   "widget_menu.executing": "चल रहा है...",
   "widget_menu.execute_failed": "क्वेरी विफल",
-  "widget_menu.execute_hint": "Ctrl+Enter चलाने के लिए"
+  "widget_menu.execute_hint": "Ctrl+Enter चलाने के लिए",
+  "designer.open_sql_editor": "SQL संपादक खोलें",
+  "designer.sql_editor": "SQL संपादक",
+  "designer.layers": "परतें",
+  "designer.totals_per_column": "दृश्य स्तंभों में एग्रीगेशन प्रकार कॉन्फ़िगर करें",
+  "designer.show_totals_hint": "तालिका के नीचे कुल पंक्ति दिखाएं"
 }

@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Не вдалося оновити дію",
   "common.total": "Всього",
   "designer.show_totals": "Рядок підсумків",
-  "designer.show_totals_hint": "Показувати рядок підсумків внизу таблиці",
   "widget_menu.execute": "Виконати",
   "widget_menu.executing": "Виконується...",
   "widget_menu.execute_failed": "Помилка виконання запиту",
-  "widget_menu.execute_hint": "Ctrl+Enter для виконання"
+  "widget_menu.execute_hint": "Ctrl+Enter для виконання",
+  "designer.open_sql_editor": "Відкрити SQL-редактор",
+  "designer.sql_editor": "SQL-редактор",
+  "designer.layers": "Шари",
+  "designer.totals_per_column": "Тип агрегації в видимих стовпцях",
+  "designer.show_totals_hint": "Показувати рядок підсумків внизу таблиці"
 }

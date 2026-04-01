@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Aggiornamento azione fallito",
   "common.total": "Totale",
   "designer.show_totals": "Riga totali",
-  "designer.show_totals_hint": "Mostra riga totali in fondo alla tabella",
   "widget_menu.execute": "Esegui",
   "widget_menu.executing": "Esecuzione...",
   "widget_menu.execute_failed": "Esecuzione query fallita",
-  "widget_menu.execute_hint": "Ctrl+Invio per eseguire"
+  "widget_menu.execute_hint": "Ctrl+Invio per eseguire",
+  "designer.open_sql_editor": "Apri editor SQL",
+  "designer.sql_editor": "Editor SQL",
+  "designer.layers": "Livelli",
+  "designer.totals_per_column": "Tipo aggregazione configurabile nelle colonne visibili",
+  "designer.show_totals_hint": "Mostra riga totali in fondo alla tabella"
 }

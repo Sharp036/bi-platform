@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Gagal memperbarui tindakan",
   "common.total": "Total",
   "designer.show_totals": "Baris total",
-  "designer.show_totals_hint": "Tampilkan baris total di bawah tabel",
   "widget_menu.execute": "Jalankan",
   "widget_menu.executing": "Menjalankan...",
   "widget_menu.execute_failed": "Eksekusi kueri gagal",
-  "widget_menu.execute_hint": "Ctrl+Enter untuk menjalankan"
+  "widget_menu.execute_hint": "Ctrl+Enter untuk menjalankan",
+  "designer.open_sql_editor": "Buka editor SQL",
+  "designer.sql_editor": "Editor SQL",
+  "designer.layers": "Lapisan",
+  "designer.totals_per_column": "Jenis agregasi di kolom yang terlihat",
+  "designer.show_totals_hint": "Tampilkan baris total di bawah tabel"
 }

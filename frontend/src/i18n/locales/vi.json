@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Cập nhật hành động thất bại",
   "common.total": "Tổng",
   "designer.show_totals": "Dòng tổng",
-  "designer.show_totals_hint": "Hiển thị dòng tổng ở cuối bảng",
   "widget_menu.execute": "Chạy",
   "widget_menu.executing": "Đang chạy...",
   "widget_menu.execute_failed": "Thực thi truy vấn thất bại",
-  "widget_menu.execute_hint": "Ctrl+Enter để chạy"
+  "widget_menu.execute_hint": "Ctrl+Enter để chạy",
+  "designer.open_sql_editor": "Mở trình soạn SQL",
+  "designer.sql_editor": "Trình soạn SQL",
+  "designer.layers": "Lớp",
+  "designer.totals_per_column": "Loại tổng hợp trong cột hiển thị",
+  "designer.show_totals_hint": "Hiển thị dòng tổng ở cuối bảng"
 }

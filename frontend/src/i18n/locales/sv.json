@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Kunde inte uppdatera åtgärd",
   "common.total": "Totalt",
   "designer.show_totals": "Summarad",
-  "designer.show_totals_hint": "Visa summarad längst ner i tabellen",
   "widget_menu.execute": "Kör",
   "widget_menu.executing": "Kör...",
   "widget_menu.execute_failed": "Frågekörning misslyckades",
-  "widget_menu.execute_hint": "Ctrl+Enter för att köra"
+  "widget_menu.execute_hint": "Ctrl+Enter för att köra",
+  "designer.open_sql_editor": "Öppna SQL-redigerare",
+  "designer.sql_editor": "SQL-redigerare",
+  "designer.layers": "Lager",
+  "designer.totals_per_column": "Aggregeringstyp i synliga kolumner",
+  "designer.show_totals_hint": "Visa summarad längst ner i tabellen"
 }

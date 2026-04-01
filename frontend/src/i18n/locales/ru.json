@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "Не удалось обновить действие",
   "common.total": "Итого",
   "designer.show_totals": "Строка итогов",
-  "designer.show_totals_hint": "Показывать строку итогов внизу таблицы",
   "widget_menu.execute": "Выполнить",
   "widget_menu.executing": "Выполняется...",
   "widget_menu.execute_failed": "Ошибка выполнения запроса",
-  "widget_menu.execute_hint": "Ctrl+Enter для выполнения"
+  "widget_menu.execute_hint": "Ctrl+Enter для выполнения",
+  "designer.open_sql_editor": "Открыть SQL-редактор",
+  "designer.sql_editor": "SQL-редактор",
+  "designer.layers": "Слои",
+  "designer.totals_per_column": "Тип агрегации настраивается в видимых столбцах",
+  "designer.show_totals_hint": "Показывать строку итогов внизу таблицы"
 }

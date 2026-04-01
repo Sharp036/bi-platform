@@ -284,11 +284,11 @@ class SqlCompilerTest {
         }
 
         @Test
-        fun `throws on missing parameter`() {
-            val sql = "SELECT * FROM sales WHERE region = :region"
-            assertThrows(IllegalArgumentException::class.java) {
-                resolver.resolve(sql, emptyMap())
-            }
+        fun `removes condition for missing parameter`() {
+            val sql = "SELECT * FROM sales WHERE 1=1 AND region = :region"
+            val resolved = resolver.resolve(sql, emptyMap())
+            assertFalse(resolved.contains(":region"))
+            assertTrue(resolved.contains("1=1"))
         }
 
         @Test
@@ -301,10 +301,11 @@ class SqlCompilerTest {
         }
 
         @Test
-        fun `handles null parameters`() {
-            val sql = "SELECT * FROM t WHERE a = :val"
+        fun `handles null parameters by removing condition`() {
+            val sql = "SELECT * FROM t WHERE 1=1 AND a = :val"
             val resolved = resolver.resolve(sql, mapOf("val" to null))
-            assertTrue(resolved.contains("NULL"))
+            assertFalse(resolved.contains(":val"))
+            assertTrue(resolved.contains("1=1"))
         }
 
         @Test

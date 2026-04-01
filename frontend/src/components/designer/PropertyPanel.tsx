@@ -6,7 +6,9 @@ import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
-import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X } from 'lucide-react'
+import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import SqlCodeEditor from '@/components/common/SqlCodeEditor'
 import toast from 'react-hot-toast'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
@@ -41,6 +43,7 @@ export default function PropertyPanel() {
   const [datasources, setDatasources] = useState<DataSource[]>([])
   const [availableCols, setAvailableCols] = useState<string[]>([])
   const [loadingCols, setLoadingCols] = useState(false)
+  const [sqlEditorOpen, setSqlEditorOpen] = useState(false)
 
   const widget = widgets.find(w => w.id === selected)
 
@@ -212,6 +215,7 @@ export default function PropertyPanel() {
   const update = (updates: Partial<DesignerWidget>) => updateWidget(widget.id, updates)
 
   return (
+    <>
     <div className="p-3 space-y-4 overflow-y-auto">
       {/* Actions */}
       <div className="flex items-center gap-1">
@@ -342,12 +346,21 @@ export default function PropertyPanel() {
                   <option key={ds.id} value={ds.id}>{ds.name} ({ds.type})</option>
                 ))}
               </select>
-              <textarea
-                value={widget.rawSql}
-                onChange={e => update({ rawSql: e.target.value, queryId: null })}
-                placeholder={t('designer.sql_placeholder')}
-                className="input text-xs font-mono h-20 resize-none"
-              />
+              <div className="relative">
+                <textarea
+                  value={widget.rawSql}
+                  onChange={e => update({ rawSql: e.target.value, queryId: null })}
+                  placeholder={t('designer.sql_placeholder')}
+                  className="input text-xs font-mono h-20 resize-none pr-8"
+                />
+                <button
+                  onClick={() => setSqlEditorOpen(true)}
+                  className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600"
+                  title={t('designer.open_sql_editor')}
+                >
+                  <MoreVertical className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </Field>
 
             {/* Load Columns — shared for all data-bound types */}
@@ -743,28 +756,54 @@ export default function PropertyPanel() {
                         <Square className="w-3 h-3" /> {t('designer.deselect_all')}
                       </button>
                     </div>
-                    <div className="space-y-0.5 max-h-44 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                      {(isAllVisible ? availableCols : [...visibleCols, ...availableCols.filter(c => !visibleCols.includes(c))]).map(col => (
-                        <div key={col} className="flex items-center gap-1 group">
-                          <input
-                            type="checkbox"
-                            checked={isAllVisible || effectiveCols.includes(col)}
-                            onChange={() => handleToggleCol(col)}
-                            className="rounded border-slate-300"
-                          />
-                          <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate">{col}</span>
-                          {!isAllVisible && effectiveCols.includes(col) && (
-                            <span className="opacity-0 group-hover:opacity-100 flex gap-0.5">
-                              <button onClick={() => moveCol(col, -1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
-                                <ArrowUp className="w-3 h-3 text-slate-400" />
-                              </button>
-                              <button onClick={() => moveCol(col, 1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
-                                <ArrowDown className="w-3 h-3 text-slate-400" />
-                              </button>
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                    <div className="space-y-0.5 max-h-60 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+                      {(isAllVisible ? availableCols : [...visibleCols, ...availableCols.filter(c => !visibleCols.includes(c))]).map(col => {
+                        const perCol = (cc.totalsPerColumn as Record<string, string>) || {}
+                        const isVisible = isAllVisible || effectiveCols.includes(col)
+                        return (
+                          <div key={col} className="flex items-center gap-1 group">
+                            <input
+                              type="checkbox"
+                              checked={isVisible}
+                              onChange={() => handleToggleCol(col)}
+                              className="rounded border-slate-300 flex-shrink-0"
+                            />
+                            <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate" title={col}>{col}</span>
+                            {!!cc.showTotals && (
+                              <select
+                                value={perCol[col] || ''}
+                                onChange={e => {
+                                  const next = { ...perCol }
+                                  if (e.target.value) next[col] = e.target.value
+                                  else delete next[col]
+                                  update({ chartConfig: { ...cc, totalsPerColumn: next } })
+                                }}
+                                className="text-[10px] border border-surface-200 dark:border-dark-surface-100 rounded px-0.5 py-0 bg-white dark:bg-dark-surface-200 text-slate-500 dark:text-slate-400 w-16 flex-shrink-0"
+                                title={t('designer.show_totals')}
+                              >
+                                <option value="">SUM</option>
+                                <option value="SUM">SUM</option>
+                                <option value="COUNT">CNT</option>
+                                <option value="DISTINCT_COUNT">DST</option>
+                                <option value="AVG">AVG</option>
+                                <option value="MIN">MIN</option>
+                                <option value="MAX">MAX</option>
+                                <option value="NONE">--</option>
+                              </select>
+                            )}
+                            {!isAllVisible && isVisible && (
+                              <span className="opacity-0 group-hover:opacity-100 flex gap-0.5 flex-shrink-0">
+                                <button onClick={() => moveCol(col, -1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                                  <ArrowUp className="w-3 h-3 text-slate-400" />
+                                </button>
+                                <button onClick={() => moveCol(col, 1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                                  <ArrowDown className="w-3 h-3 text-slate-400" />
+                                </button>
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                     <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_columns_hint')}</p>
                   </Field>
@@ -797,7 +836,7 @@ export default function PropertyPanel() {
                       <input
                         type="checkbox"
                         checked={!!cc.showTotals}
-                        onChange={e => update({ chartConfig: { ...cc, showTotals: e.target.checked } })}
+                        onChange={e => update({ chartConfig: { ...cc, showTotals: e.target.checked, totalsAggregation: e.target.checked ? (cc.totalsAggregation || 'SUM') : undefined } })}
                         className="rounded"
                       />
                       <span className="text-sm text-slate-600 dark:text-slate-400">{t('designer.show_totals_hint')}</span>
@@ -944,6 +983,18 @@ export default function PropertyPanel() {
         </Field>
       )}
     </div>
+
+    {sqlEditorOpen && widget && createPortal(
+      <SqlEditorModal
+        sql={widget.rawSql}
+        datasourceId={widget.datasourceId}
+        parameters={parameters}
+        onSave={(newSql) => { update({ rawSql: newSql, queryId: null }); setSqlEditorOpen(false) }}
+        onClose={() => setSqlEditorOpen(false)}
+      />,
+      document.body
+    )}
+    </>
   )
 }
 
@@ -1037,6 +1088,101 @@ function ParamMappingEditor({
         <Plus className="w-3 h-3" /> {t('designer.param_mapping_add')}
       </button>
     </Field>
+    </div>
+  )
+}
+
+function SqlEditorModal({ sql, datasourceId, parameters, onSave, onClose }: {
+  sql: string
+  datasourceId: number | null
+  parameters: Array<{ name: string; paramType: string; defaultValue: string }>
+  onSave: (sql: string) => void
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  const [editSql, setEditSql] = useState(sql)
+  const [executing, setExecuting] = useState(false)
+  const [result, setResult] = useState<{ columns: string[]; rows: Record<string, unknown>[]; rowCount: number; executionMs: number } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleExecute = useCallback(async () => {
+    if (!datasourceId || !editSql.trim()) return
+    setExecuting(true)
+    setError(null)
+    try {
+      const paramValues = buildDesignerParameterValues(parameters)
+      const merged = mergeSqlParameterKeys(editSql, paramValues)
+      const res = await queryApi.executeAdHoc({ datasourceId, sql: editSql, parameters: merged, limit: 100 })
+      const cols = (res.columns || []).map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
+      setResult({ columns: cols, rows: res.rows || [], rowCount: res.rowCount || res.rows?.length || 0, executionMs: res.executionTimeMs || 0 })
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      setError(msg || t('widget_menu.execute_failed'))
+    } finally {
+      setExecuting(false)
+    }
+  }, [datasourceId, editSql, parameters, t])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl flex flex-col m-4" style={{ width: 'calc(100vw - 80px)', height: 'calc(100vh - 80px)' }} onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
+          <h3 className="text-base font-semibold text-slate-800 dark:text-white">{t('designer.sql_editor')}</h3>
+          <div className="flex items-center gap-2">
+            {datasourceId && (
+              <button onClick={handleExecute} disabled={executing} className="btn-secondary text-xs px-2.5 py-1.5">
+                <Play className="w-3.5 h-3.5" />
+                {executing ? t('widget_menu.executing') : t('widget_menu.execute')}
+              </button>
+            )}
+            <button onClick={() => onSave(editSql)} className="btn-primary text-xs px-3 py-1.5">{t('common.save')}</button>
+            <button onClick={onClose} className="btn-secondary text-xs px-3 py-1.5">{t('common.cancel')}</button>
+          </div>
+        </div>
+        <div className="flex-1 min-h-0 border-b border-surface-200 dark:border-dark-surface-100" style={{ minHeight: '250px' }}>
+          <SqlCodeEditor
+            value={editSql}
+            onChange={setEditSql}
+            onExecute={handleExecute}
+          />
+        </div>
+        {error && (
+          <div className="px-4 py-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">{error}</div>
+        )}
+        {result && (
+          <div className="overflow-auto flex-1">
+            <div className="px-4 py-1 text-xs text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
+              {result.rowCount} {t('widget_menu.rows')} / {result.executionMs}ms
+            </div>
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-surface-50 dark:bg-dark-surface-100">
+                <tr>
+                  {result.columns.map(col => (
+                    <th key={col} className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100 whitespace-nowrap">{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {result.rows.map((row, i) => (
+                  <tr key={i} className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-100/50">
+                    {result.columns.map(col => (
+                      <td key={col} className="px-3 py-1.5 text-slate-700 dark:text-slate-300 whitespace-nowrap max-w-[300px] truncate">{row[col] != null ? String(row[col]) : ''}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -914,9 +914,13 @@
   "interactive.action.failed_update": "更新操作失败",
   "common.total": "合计",
   "designer.show_totals": "合计行",
-  "designer.show_totals_hint": "在表格底部显示合计行",
   "widget_menu.execute": "运行",
   "widget_menu.executing": "运行中...",
   "widget_menu.execute_failed": "查询执行失败",
-  "widget_menu.execute_hint": "Ctrl+Enter 运行查询"
+  "widget_menu.execute_hint": "Ctrl+Enter 运行查询",
+  "designer.open_sql_editor": "打开SQL编辑器",
+  "designer.sql_editor": "SQL编辑器",
+  "designer.layers": "图层",
+  "designer.totals_per_column": "在可见列中配置聚合类型",
+  "designer.show_totals_hint": "在表格底部显示合计行"
 }
