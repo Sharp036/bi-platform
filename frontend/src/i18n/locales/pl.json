@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Błąd wykonania zapytania",
   "widget_menu.execute_hint": "Ctrl+Enter aby wykonać",
   "designer.open_sql_editor": "Otwórz edytor SQL",
-  "designer.sql_editor": "Edytor SQL"
+  "designer.sql_editor": "Edytor SQL",
+  "designer.layers": "Warstwy"
 }

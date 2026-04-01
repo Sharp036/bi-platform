@@ -2,7 +2,7 @@ import { useDesignerStore } from '@/store/useDesignerStore'
 import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { DesignerContainer } from './ContainerDesigner'
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play, ChevronDown, ChevronRight } from 'lucide-react'
+import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play, ChevronDown, ChevronRight, Eye, Layers } from 'lucide-react'
 import { queryApi } from '@/api/queries'
 import { buildDesignerParameterValues } from '@/utils/designerParameters'
 import EChartWidget from '@/components/charts/EChartWidget'
@@ -30,6 +30,17 @@ export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps)
   const selectWidget = useDesignerStore(s => s.selectWidget)
   const previewMode = useDesignerStore(s => s.previewMode)
   const parameters = useDesignerStore(s => s.parameters)
+  const [hiddenLayerIds, setHiddenLayerIds] = useState<Set<string>>(new Set())
+  const [showLayers, setShowLayers] = useState(false)
+
+  const toggleLayerVisibility = useCallback((id: string) => {
+    setHiddenLayerIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
 
   // Widgets that live inside a container
   const widgetIdsInContainers = new Set(containers.flatMap(c => c.tabGroups.flat()))
@@ -49,12 +60,12 @@ export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps)
 
   return (
     <div
-      className="bg-white dark:bg-dark-surface-50 rounded-xl border-2 border-dashed border-surface-200 dark:border-dark-surface-100 overflow-hidden"
+      className="relative bg-white dark:bg-dark-surface-50 rounded-xl border-2 border-dashed border-surface-200 dark:border-dark-surface-100 overflow-hidden"
       onClick={(e) => { if (e.target === e.currentTarget) selectWidget(null) }}
     >
       {/* ── Containers ── */}
       {containers.map(c => (
-        <ContainerBlock key={c.clientId} container={c} widgets={widgets} {...sharedProps} />
+        <ContainerBlock key={c.clientId} container={c} widgets={widgets} {...sharedProps} hiddenLayerIds={hiddenLayerIds} />
       ))}
 
       {/* ── Free widget grid ── */}
@@ -71,7 +82,7 @@ export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps)
             backgroundSize: `${100 / COLS}% ${ROW_HEIGHT}px`,
             backgroundImage: 'linear-gradient(to right, rgb(148 163 184 / 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgb(148 163 184 / 0.15) 1px, transparent 1px)',
           }} />
-          {freeWidgets.map(widget => (
+          {freeWidgets.filter(w => !hiddenLayerIds.has(w.id)).map(widget => (
             <WidgetBlock key={widget.id} widget={widget} {...sharedProps} />
           ))}
         </div>
@@ -86,6 +97,60 @@ export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps)
           </div>
         </div>
       )}
+      {/* ── Layer panel toggle ── */}
+      {!previewMode && widgets.length > 1 && (
+        <div className="absolute bottom-3 right-3 z-20">
+          {showLayers ? (
+            <div className="bg-white dark:bg-dark-surface-50 rounded-lg shadow-xl border border-surface-200 dark:border-dark-surface-100 w-64 max-h-64 flex flex-col">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-surface-200 dark:border-dark-surface-100">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5" /> {t('designer.layers')}
+                </span>
+                <button onClick={() => setShowLayers(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="overflow-y-auto flex-1 p-1">
+                {widgets.map(w => {
+                  const Icon = ICON_MAP[w.widgetType] || BarChart3
+                  const isHidden = hiddenLayerIds.has(w.id)
+                  const isSelected = w.id === selectedId
+                  return (
+                    <div
+                      key={w.id}
+                      className={clsx(
+                        'flex items-center gap-2 px-2 py-1.5 rounded text-xs cursor-pointer',
+                        isSelected ? 'bg-brand-50 dark:bg-brand-900/30' : 'hover:bg-surface-50 dark:hover:bg-dark-surface-100'
+                      )}
+                      onClick={() => selectWidget(w.id)}
+                    >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleLayerVisibility(w.id) }}
+                        className={clsx('flex-shrink-0', isHidden ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400')}
+                      >
+                        {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                      <Icon className={clsx('w-3.5 h-3.5 flex-shrink-0', isHidden ? 'text-slate-300' : 'text-brand-500')} />
+                      <span className={clsx('flex-1 truncate', isHidden ? 'text-slate-400 line-through' : isSelected ? 'text-brand-700 dark:text-brand-400 font-medium' : 'text-slate-700 dark:text-slate-300')}>
+                        {w.title || `Widget #${w.id.slice(0, 6)}`}
+                      </span>
+                      <span className="text-[10px] text-slate-400 flex-shrink-0">z{String((w.style as Record<string, unknown>)?.zIndex ?? 0)}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowLayers(true)}
+              className="p-2 bg-white dark:bg-dark-surface-50 rounded-lg shadow-lg border border-surface-200 dark:border-dark-surface-100 text-slate-500 hover:text-brand-600 transition-colors"
+              title={t('designer.layers')}
+            >
+              <Layers className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -93,7 +158,7 @@ export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps)
 // ── Container block (tabs or accordion) ──────────────────────────────────────
 
 function ContainerBlock({
-  container, widgets, parameters, selectedId, onSelect, previewMode,
+  container, widgets, parameters, selectedId, onSelect, previewMode, hiddenLayerIds,
 }: {
   container: DesignerContainer
   widgets: DesignerWidget[]
@@ -101,6 +166,7 @@ function ContainerBlock({
   selectedId: string | null
   onSelect: (id: string | null) => void
   previewMode: boolean
+  hiddenLayerIds: Set<string>
 }) {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState(0)
@@ -115,11 +181,12 @@ function ContainerBlock({
 
   // Render widgets with absolute positioning (same as free widget grid)
   const renderAbsolute = (group: DesignerWidget[]) => {
+    const visible = group.filter(w => !hiddenLayerIds.has(w.id))
     if (group.length === 0) return null
     const maxY = Math.max(...group.map(w => w.position.y + w.position.h))
     return (
       <div className="relative" style={{ minHeight: `${maxY * ROW_HEIGHT}px` }}>
-        {group.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} />)}
+        {visible.map(w => <WidgetBlock key={w.id} widget={w} {...sharedProps} />)}
       </div>
     )
   }

@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Esecuzione query fallita",
   "widget_menu.execute_hint": "Ctrl+Invio per eseguire",
   "designer.open_sql_editor": "Apri editor SQL",
-  "designer.sql_editor": "Editor SQL"
+  "designer.sql_editor": "Editor SQL",
+  "designer.layers": "Livelli"
 }

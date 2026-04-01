@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Error al ejecutar la consulta",
   "widget_menu.execute_hint": "Ctrl+Enter para ejecutar",
   "designer.open_sql_editor": "Abrir editor SQL",
-  "designer.sql_editor": "Editor SQL"
+  "designer.sql_editor": "Editor SQL",
+  "designer.layers": "Capas"
 }

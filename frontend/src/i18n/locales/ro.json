@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Executarea interogării a eșuat",
   "widget_menu.execute_hint": "Ctrl+Enter pentru executare",
   "designer.open_sql_editor": "Deschide editorul SQL",
-  "designer.sql_editor": "Editor SQL"
+  "designer.sql_editor": "Editor SQL",
+  "designer.layers": "Straturi"
 }

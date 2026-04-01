@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Spuštění dotazu se nezdařilo",
   "widget_menu.execute_hint": "Ctrl+Enter pro spuštění",
   "designer.open_sql_editor": "Otevřít SQL editor",
-  "designer.sql_editor": "SQL editor"
+  "designer.sql_editor": "SQL editor",
+  "designer.layers": "Vrstvy"
 }

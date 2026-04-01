@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "क्वेरी विफल",
   "widget_menu.execute_hint": "Ctrl+Enter चलाने के लिए",
   "designer.open_sql_editor": "SQL संपादक खोलें",
-  "designer.sql_editor": "SQL संपादक"
+  "designer.sql_editor": "SQL संपादक",
+  "designer.layers": "परतें"
 }

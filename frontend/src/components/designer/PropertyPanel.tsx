@@ -8,6 +8,7 @@ import { datasourceApi } from '@/api/datasources'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
 import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play } from 'lucide-react'
 import { createPortal } from 'react-dom'
+import SqlCodeEditor from '@/components/common/SqlCodeEditor'
 import toast from 'react-hot-toast'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
@@ -1099,16 +1100,15 @@ function SqlEditorModal({ sql, datasourceId, parameters, onSave, onClose }: {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleExecute()
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [onClose, handleExecute])
+  }, [onClose])
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col m-4" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-3 border-b border-surface-200 dark:border-dark-surface-100">
+      <div className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl flex flex-col m-4" style={{ width: 'calc(100vw - 80px)', height: 'calc(100vh - 80px)' }} onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
           <h3 className="text-base font-semibold text-slate-800 dark:text-white">{t('designer.sql_editor')}</h3>
           <div className="flex items-center gap-2">
             {datasourceId && (
@@ -1118,17 +1118,16 @@ function SqlEditorModal({ sql, datasourceId, parameters, onSave, onClose }: {
               </button>
             )}
             <button onClick={() => onSave(editSql)} className="btn-primary text-xs px-3 py-1.5">{t('common.save')}</button>
-            <button onClick={onClose} className="btn-ghost p-1"><X className="w-4 h-4" /></button>
+            <button onClick={onClose} className="btn-secondary text-xs px-3 py-1.5">{t('common.cancel')}</button>
           </div>
         </div>
-        <textarea
-          value={editSql}
-          onChange={e => setEditSql(e.target.value)}
-          className="w-full text-sm font-mono text-slate-700 dark:text-slate-300 bg-surface-50 dark:bg-dark-surface-100 p-4 border-b border-surface-200 dark:border-dark-surface-100 focus:outline-none resize-y"
-          style={{ minHeight: '200px' }}
-          spellCheck={false}
-          autoFocus
-        />
+        <div className="flex-1 min-h-0 border-b border-surface-200 dark:border-dark-surface-100" style={{ minHeight: '250px' }}>
+          <SqlCodeEditor
+            value={editSql}
+            onChange={setEditSql}
+            onExecute={handleExecute}
+          />
+        </div>
         {error && (
           <div className="px-4 py-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">{error}</div>
         )}

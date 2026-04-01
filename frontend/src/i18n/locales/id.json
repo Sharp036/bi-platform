@@ -920,5 +920,6 @@
   "widget_menu.execute_failed": "Eksekusi kueri gagal",
   "widget_menu.execute_hint": "Ctrl+Enter untuk menjalankan",
   "designer.open_sql_editor": "Buka editor SQL",
-  "designer.sql_editor": "Editor SQL"
+  "designer.sql_editor": "Editor SQL",
+  "designer.layers": "Lapisan"
 }
