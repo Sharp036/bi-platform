@@ -911,5 +911,12 @@
   "header.about_charts": "Tipos de gráficos",
   "header.about_languages": "Idiomas",
   "interactive.action.updated": "Acción actualizada",
-  "interactive.action.failed_update": "Error al actualizar la acción"
+  "interactive.action.failed_update": "Error al actualizar la acción",
+  "common.total": "Total",
+  "designer.show_totals": "Fila de totales",
+  "designer.show_totals_hint": "Mostrar fila de totales al final de la tabla",
+  "widget_menu.execute": "Ejecutar",
+  "widget_menu.executing": "Ejecutando...",
+  "widget_menu.execute_failed": "Error al ejecutar la consulta",
+  "widget_menu.execute_hint": "Ctrl+Enter para ejecutar"
 }

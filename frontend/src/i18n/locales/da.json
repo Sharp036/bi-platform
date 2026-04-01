@@ -911,5 +911,12 @@
   "header.about_charts": "Diagramtyper",
   "header.about_languages": "Sprog",
   "interactive.action.updated": "Handling opdateret",
-  "interactive.action.failed_update": "Opdatering af handling mislykkedes"
+  "interactive.action.failed_update": "Opdatering af handling mislykkedes",
+  "common.total": "I alt",
+  "designer.show_totals": "Totalrække",
+  "designer.show_totals_hint": "Vis totalrække i bunden af tabellen",
+  "widget_menu.execute": "Kør",
+  "widget_menu.executing": "Kører...",
+  "widget_menu.execute_failed": "Forespørgsel mislykkedes",
+  "widget_menu.execute_hint": "Ctrl+Enter for at køre"
 }
