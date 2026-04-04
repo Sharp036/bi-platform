@@ -5,8 +5,11 @@ import { datasourceApi } from '@/api/datasources'
 import { reportApi } from '@/api/reports'
 import type { ReportParameter } from '@/types'
 import type { DataSource } from '@/types'
-import { Settings, Trash2 } from 'lucide-react'
+import { Settings, Trash2, MoreVertical } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { createPortal } from 'react-dom'
+import SqlCodeEditor from '@/components/common/SqlCodeEditor'
+import { queryApi } from '@/api/queries'
 
 interface Props {
   reportId: number
@@ -38,6 +41,7 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
     query: string
   } | null>(null)
   const pickerDebounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const [sqlEditor, setSqlEditor] = useState<{ paramName: string; sql: string; datasourceId: number } | null>(null)
 
   const load = () => {
     controlsApi.getParameterControls(reportId).then(setControls).catch(() => {})
@@ -144,6 +148,7 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
     : (picker?.options ?? []).filter(o => !picker?.query || o.toLowerCase().includes(picker.query.toLowerCase()))
 
   return (
+    <>
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
         <Settings className="w-4 h-4 text-brand-500" /> {t('interactive.parameter_controls')}
@@ -221,10 +226,21 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
                     </div>
                     <div>
                       <label className="text-xs text-slate-500 block mb-0.5">{t('interactive.control.options_sql')}</label>
-                      <input value={ctrl?.optionsQuery || ''}
-                        onChange={e => save(p.name, { optionsQuery: e.target.value })}
-                        placeholder={t('interactive.control.sql_placeholder')}
-                        className="input text-xs py-1 w-64" />
+                      <div className="flex gap-1">
+                        <input value={ctrl?.optionsQuery || ''}
+                          onChange={e => save(p.name, { optionsQuery: e.target.value })}
+                          placeholder={t('interactive.control.sql_placeholder')}
+                          className="input text-xs py-1 flex-1" />
+                        {ctrl?.datasourceId && (
+                          <button
+                            onClick={() => setSqlEditor({ paramName: p.name, sql: ctrl?.optionsQuery || '', datasourceId: ctrl.datasourceId! })}
+                            className="p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600 flex-shrink-0"
+                            title={t('designer.open_sql_editor')}
+                          >
+                            <MoreVertical className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {ctrl?.optionsQuery && ctrl?.datasourceId && (
                       <div className="flex items-end">
@@ -285,6 +301,99 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
           </div>
         </div>
       )}
+    </div>
+
+    {sqlEditor && createPortal(
+      <OptionsSqlEditorModal
+        sql={sqlEditor.sql}
+        datasourceId={sqlEditor.datasourceId}
+        onSave={(newSql) => { save(sqlEditor.paramName, { optionsQuery: newSql }); setSqlEditor(null) }}
+        onClose={() => setSqlEditor(null)}
+      />,
+      document.body
+    )}
+    </>
+  )
+}
+
+function OptionsSqlEditorModal({ sql, datasourceId, onSave, onClose }: {
+  sql: string; datasourceId: number; onSave: (sql: string) => void; onClose: () => void
+}) {
+  const { t } = useTranslation()
+  const [editSql, setEditSql] = useState(sql)
+  const [executing, setExecuting] = useState(false)
+  const [result, setResult] = useState<{ columns: string[]; rows: Record<string, unknown>[]; rowCount: number; executionMs: number } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleExecute = useCallback(async () => {
+    if (!editSql.trim()) return
+    setExecuting(true)
+    setError(null)
+    try {
+      const res = await queryApi.executeAdHoc({ datasourceId, sql: editSql, limit: 100 })
+      const cols = (res.columns || []).map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
+      setResult({ columns: cols, rows: res.rows || [], rowCount: res.rowCount || res.rows?.length || 0, executionMs: res.executionTimeMs || 0 })
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      setError(msg || t('widget_menu.execute_failed'))
+    } finally {
+      setExecuting(false)
+    }
+  }, [datasourceId, editSql, t])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white dark:bg-dark-surface-50 rounded-xl shadow-2xl flex flex-col m-4"
+        style={{ width: 'calc(100vw - 80px)', height: 'calc(100vh - 80px)' }}
+        onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-surface-200 dark:border-dark-surface-100 flex-shrink-0">
+          <h3 className="text-base font-semibold text-slate-800 dark:text-white">{t('interactive.control.options_sql')}</h3>
+          <div className="flex items-center gap-2">
+            <button onClick={handleExecute} disabled={executing} className="btn-secondary text-xs px-2.5 py-1.5">
+              {executing ? t('widget_menu.executing') : t('widget_menu.execute')}
+            </button>
+            <button onClick={() => onSave(editSql)} className="btn-primary text-xs px-3 py-1.5">{t('common.save')}</button>
+            <button onClick={onClose} className="btn-secondary text-xs px-3 py-1.5">{t('common.cancel')}</button>
+          </div>
+        </div>
+        <div className="flex-1 min-h-0 border-b border-surface-200 dark:border-dark-surface-100" style={{ minHeight: '200px' }}>
+          <SqlCodeEditor value={editSql} onChange={setEditSql} onExecute={handleExecute} />
+        </div>
+        {error && (
+          <div className="px-4 py-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">{error}</div>
+        )}
+        {result && (
+          <div className="overflow-auto flex-1">
+            <div className="px-4 py-1 text-xs text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
+              {result.rowCount} {t('widget_menu.rows')} / {result.executionMs}ms
+            </div>
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-surface-50 dark:bg-dark-surface-100">
+                <tr>
+                  {result.columns.map(col => (
+                    <th key={col} className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100 whitespace-nowrap">{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {result.rows.map((row, i) => (
+                  <tr key={i} className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-100/50">
+                    {result.columns.map(col => (
+                      <td key={col} className="px-3 py-1.5 text-slate-700 dark:text-slate-300 whitespace-nowrap">{row[col] != null ? String(row[col]) : ''}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
