@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "เปิดตัวแก้ไข SQL",
   "designer.sql_editor": "ตัวแก้ไข SQL",
   "designer.layers": "เลเยอร์",
-  "designer.totals_off": "ปิด",
-  "designer.totals_per_column": "ตามคอลัมน์ (ว่าง = ค่าเริ่มต้น):"
+  "designer.totals_per_column": "ประเภทการรวมในคอลัมน์ที่มองเห็น",
+  "designer.show_totals_hint": "แสดงแถวรวมที่ด้านล่างของตาราง"
 }

@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "SQL szerkesztő megnyitása",
   "designer.sql_editor": "SQL szerkesztő",
   "designer.layers": "Rétegek",
-  "designer.totals_off": "Ki",
-  "designer.totals_per_column": "Oszloponként (üres = alapértelmezett):"
+  "designer.totals_per_column": "Aggregáció típusa a látható oszlopokban",
+  "designer.show_totals_hint": "Összeg sor megjelenítése a táblázat alján"
 }

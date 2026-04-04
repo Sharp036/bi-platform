@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Otevřít SQL editor",
   "designer.sql_editor": "SQL editor",
   "designer.layers": "Vrstvy",
-  "designer.totals_off": "Vyp.",
-  "designer.totals_per_column": "Na sloupec (prázdné = výchozí):"
+  "designer.totals_per_column": "Typ agregace v viditelných sloupcích",
+  "designer.show_totals_hint": "Zobrazit řádek súčtů ve spodní části tabulky"
 }

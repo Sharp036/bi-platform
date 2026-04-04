@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "SQLエディタを開く",
   "designer.sql_editor": "SQLエディタ",
   "designer.layers": "レイヤー",
-  "designer.totals_off": "オフ",
-  "designer.totals_per_column": "列ごと(空=デフォルト):"
+  "designer.totals_per_column": "表示列で集計タイプを設定",
+  "designer.show_totals_hint": "テーブルの下部に合計行を表示"
 }

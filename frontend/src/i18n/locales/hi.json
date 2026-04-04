@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "SQL संपादक खोलें",
   "designer.sql_editor": "SQL संपादक",
   "designer.layers": "परतें",
-  "designer.totals_off": "बंद",
-  "designer.totals_per_column": "स्तंभ के अनुसार (खाली = डिफॉल्ट):"
+  "designer.totals_per_column": "दृश्य स्तंभों में एग्रीगेशन प्रकार कॉन्फ़िगर करें",
+  "designer.show_totals_hint": "तालिका के नीचे कुल पंक्ति दिखाएं"
 }

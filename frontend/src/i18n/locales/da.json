@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Åbn SQL-editor",
   "designer.sql_editor": "SQL-editor",
   "designer.layers": "Lag",
-  "designer.totals_off": "Fra",
-  "designer.totals_per_column": "Per kolonne (tom = standard):"
+  "designer.totals_per_column": "Aggregeringstype i synlige kolonner",
+  "designer.show_totals_hint": "Vis totalrække i bunden af tabellen"
 }

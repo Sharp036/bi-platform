@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Abrir editor SQL",
   "designer.sql_editor": "Editor SQL",
   "designer.layers": "Capas",
-  "designer.totals_off": "Desactivado",
-  "designer.totals_per_column": "Por columna (vacío = predeterminado):"
+  "designer.totals_per_column": "Tipo configurable en columnas visibles",
+  "designer.show_totals_hint": "Mostrar fila de totales al final"
 }

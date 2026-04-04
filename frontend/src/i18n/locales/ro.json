@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "Deschide editorul SQL",
   "designer.sql_editor": "Editor SQL",
   "designer.layers": "Straturi",
-  "designer.totals_off": "Oprit",
-  "designer.totals_per_column": "Pe coloană (gol = implicit):"
+  "designer.totals_per_column": "Tipul agregației în coloanele vizibile",
+  "designer.show_totals_hint": "Afișează rândul total în partea de jos a tabelului"
 }

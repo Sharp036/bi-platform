@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "SQL 편집기 열기",
   "designer.sql_editor": "SQL 편집기",
   "designer.layers": "레이어",
-  "designer.totals_off": "꺼짐",
-  "designer.totals_per_column": "열별(비움=기본값):"
+  "designer.totals_per_column": "보이는 열에서 집계 유형 설정",
+  "designer.show_totals_hint": "테이블 하단에 합계 행 표시"
 }

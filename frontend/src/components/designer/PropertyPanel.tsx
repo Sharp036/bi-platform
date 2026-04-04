@@ -769,7 +769,7 @@ export default function PropertyPanel() {
                               className="rounded border-slate-300 flex-shrink-0"
                             />
                             <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate" title={col}>{col}</span>
-                            {!!cc.totalsAggregation && (
+                            {!!cc.showTotals && (
                               <select
                                 value={perCol[col] || ''}
                                 onChange={e => {
@@ -781,7 +781,7 @@ export default function PropertyPanel() {
                                 className="text-[10px] border border-surface-200 dark:border-dark-surface-100 rounded px-0.5 py-0 bg-white dark:bg-dark-surface-200 text-slate-500 dark:text-slate-400 w-16 flex-shrink-0"
                                 title={t('designer.show_totals')}
                               >
-                                <option value="">{(cc.totalsAggregation as string).slice(0, 3)}</option>
+                                <option value="">SUM</option>
                                 <option value="SUM">SUM</option>
                                 <option value="COUNT">CNT</option>
                                 <option value="DISTINCT_COUNT">DST</option>
@@ -832,22 +832,15 @@ export default function PropertyPanel() {
                   </Field>
 
                   <Field label={t('designer.show_totals')}>
-                    <select
-                      value={cc.totalsAggregation as string || ''}
-                      onChange={e => update({ chartConfig: { ...cc, totalsAggregation: e.target.value || undefined, showTotals: !!e.target.value } })}
-                      className="input text-sm"
-                    >
-                      <option value="">{t('designer.totals_off')}</option>
-                      <option value="SUM">SUM</option>
-                      <option value="COUNT">COUNT</option>
-                      <option value="DISTINCT_COUNT">DISTINCT COUNT</option>
-                      <option value="AVG">AVG</option>
-                      <option value="MIN">MIN</option>
-                      <option value="MAX">MAX</option>
-                    </select>
-                    {!!cc.totalsAggregation && (
-                      <p className="text-[10px] text-slate-400 mt-1">{t('designer.totals_per_column')}</p>
-                    )}
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!cc.showTotals}
+                        onChange={e => update({ chartConfig: { ...cc, showTotals: e.target.checked, totalsAggregation: e.target.checked ? (cc.totalsAggregation || 'SUM') : undefined } })}
+                        className="rounded"
+                      />
+                      <span className="text-sm text-slate-600 dark:text-slate-400">{t('designer.show_totals_hint')}</span>
+                    </label>
                   </Field>
                 </>
               )

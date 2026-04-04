@@ -921,6 +921,6 @@
   "designer.open_sql_editor": "SQL-editor openen",
   "designer.sql_editor": "SQL-editor",
   "designer.layers": "Lagen",
-  "designer.totals_off": "Uit",
-  "designer.totals_per_column": "Per kolom (leeg = standaard):"
+  "designer.totals_per_column": "Aggregatietype in zichtbare kolommen instellen",
+  "designer.show_totals_hint": "Totaalrij onderaan de tabel tonen"
 }
