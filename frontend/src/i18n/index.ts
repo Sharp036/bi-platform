@@ -112,6 +112,10 @@ i18n
 i18n.on('languageChanged', (lng) => {
   const lang = SUPPORTED_LANGUAGES.find(l => l.code === lng)
   document.documentElement.dir = lang?.dir === 'rtl' ? 'rtl' : 'ltr'
+  document.documentElement.lang = lng
 })
+
+// Set initial lang attribute
+document.documentElement.lang = initialLang
 
 export default i18n
