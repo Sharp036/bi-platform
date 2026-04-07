@@ -125,17 +125,27 @@ export const useActionStore = create<ActionState>((set, get) => ({
         }
 
         case 'DRILL_REPLACE': {
+          const drillFilters: ActionFilter[] = []
           const clickedSeries = data.seriesName != null ? String(data.seriesName) : undefined
-          const paramName = action.targetField || action.sourceField || ''
-          const paramValue = sourceValue != null ? String(sourceValue) : ''
+          if (sourceValue !== undefined && sourceValue !== null) {
+            for (const targetId of targetIds) {
+              const filterField = action.targetField || action.sourceField || ''
+              const filter: ActionFilter = { sourceWidgetId, field: filterField, value: sourceValue }
+              drillFilters.push(filter)
+              const existing = newFilters[targetId] || []
+              const filtered = existing.filter(f =>
+                !(f.sourceWidgetId === sourceWidgetId && f.field === filterField)
+              )
+              filtered.push(filter)
+              newFilters[targetId] = filtered
+            }
+          }
           const entry: DrillReplaceEntry = {
             sourceWidgetId,
             targetWidgetIds: targetIds,
-            filters: [],
-            label: paramValue,
+            filters: drillFilters,
+            label: sourceValue != null ? String(sourceValue) : '',
             seriesName: clickedSeries,
-            paramName: paramName || undefined,
-            paramValue: paramValue || undefined,
           }
           newDrillStack = [...get().drillReplaceStack, entry]
           break
