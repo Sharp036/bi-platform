@@ -260,37 +260,7 @@ export default function ReportViewerPage() {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
   }, [drillReplaceStack])
 
-  // ── Server-side re-render when drill-replace sets a parameter ────────────────
-  const prevDrillStackRef = useRef<DrillReplaceEntry[]>([])
-  const currentParamsRef = useRef(currentParams)
-  currentParamsRef.current = currentParams
-
-  useEffect(() => {
-    const prev = prevDrillStackRef.current
-    const curr = drillReplaceStack
-    const params = currentParamsRef.current
-    if (curr.length > prev.length) {
-      // New drill entry added -- set param and re-render
-      const entry = curr[curr.length - 1]
-      if (entry.paramName && entry.paramValue) {
-        entry.prevParamValue = params[entry.paramName] != null ? String(params[entry.paramName]) : ''
-        const nextParams = { ...params, [entry.paramName]: entry.paramValue }
-        setCurrentParams(nextParams)
-        renderWithParams(nextParams)
-      }
-    } else if (curr.length < prev.length) {
-      // Entry removed (back button) -- restore previous param value
-      const removed = prev.find(e => !curr.includes(e))
-      if (removed?.paramName) {
-        const nextParams = { ...params, [removed.paramName]: removed.prevParamValue || '' }
-        setCurrentParams(nextParams)
-        renderWithParams(nextParams)
-      }
-    }
-    prevDrillStackRef.current = curr
-  }, [drillReplaceStack]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Client-side cross-filter for non-drill actions ─────────────────────────
+  // ── Client-side cross-filter for drill-replace and other actions ─────────────
   const activeFilters = useActionStore(s => s.activeFilters)
 
   const applyClientFilters = useCallback((w: RenderReportResponse['widgets'][number]): RenderReportResponse['widgets'][number] => {
