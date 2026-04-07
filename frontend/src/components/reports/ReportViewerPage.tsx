@@ -260,30 +260,48 @@ export default function ReportViewerPage() {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
   }, [drillReplaceStack])
 
-  // ── Client-side cross-filter for drill-replace targets ─────────────────────
+  // ── Server-side re-render when drill-replace sets a parameter ────────────────
+  const prevDrillStackRef = useRef<DrillReplaceEntry[]>([])
+
+  useEffect(() => {
+    const prev = prevDrillStackRef.current
+    const curr = drillReplaceStack
+    if (curr.length > prev.length) {
+      // New drill entry added -- set param and re-render
+      const entry = curr[curr.length - 1]
+      if (entry.paramName && entry.paramValue) {
+        entry.prevParamValue = currentParams[entry.paramName] != null ? String(currentParams[entry.paramName]) : ''
+        const nextParams = { ...currentParams, [entry.paramName]: entry.paramValue }
+        setCurrentParams(nextParams)
+        renderWithParams(nextParams)
+      }
+    } else if (curr.length < prev.length) {
+      // Entry removed (back button) -- restore previous param value
+      const removed = prev.find(e => !curr.includes(e))
+      if (removed?.paramName) {
+        const nextParams = { ...currentParams, [removed.paramName]: removed.prevParamValue || '' }
+        setCurrentParams(nextParams)
+        renderWithParams(nextParams)
+      }
+    }
+    prevDrillStackRef.current = curr
+  }, [drillReplaceStack]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Client-side cross-filter for non-drill actions ─────────────────────────
   const activeFilters = useActionStore(s => s.activeFilters)
 
   const applyClientFilters = useCallback((w: RenderReportResponse['widgets'][number]): RenderReportResponse['widgets'][number] => {
     const filters = activeFilters[w.widgetId]
-    const drillEntry = drillReplaceStack.find(e => e.targetWidgetIds.includes(w.widgetId))
-    if ((!filters || filters.length === 0) && !drillEntry?.seriesName) return w
-    if (!w.data) return w
-    let rows = w.data.rows
-    if (filters && filters.length > 0) {
-      rows = rows.filter(row =>
-        filters.every(f => {
-          const cellVal = row[f.field]
-          if (cellVal == null || f.value == null) return false
-          return String(cellVal) === String(f.value)
-        })
-      )
-    }
-    // If a specific series was clicked, filter by that metric column > 0
-    if (drillEntry?.seriesName && drillEntry.seriesName in (w.data.rows[0] || {})) {
-      rows = rows.filter(row => Number(row[drillEntry.seriesName!]) > 0)
-    }
-    return { ...w, data: { ...w.data, rows, rowCount: rows.length } }
-  }, [activeFilters, drillReplaceStack])
+    if (!filters || filters.length === 0 || !w.data) return w
+    const filteredRows = w.data.rows.filter(row =>
+      filters.every(f => {
+        const cellVal = row[f.field]
+        if (cellVal == null || f.value == null) return false
+        return String(cellVal) === String(f.value)
+      })
+    )
+    return { ...w, data: { ...w.data, rows: filteredRows, rowCount: filteredRows.length } }
+  }, [activeFilters])
 
   // ── Visible widget IDs (used to filter parameter panel) ──────────────────────
   const visibleWidgetIds = useMemo(() => {
