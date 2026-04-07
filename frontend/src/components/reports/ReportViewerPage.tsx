@@ -262,16 +262,19 @@ export default function ReportViewerPage() {
 
   // ── Server-side re-render when drill-replace sets a parameter ────────────────
   const prevDrillStackRef = useRef<DrillReplaceEntry[]>([])
+  const currentParamsRef = useRef(currentParams)
+  currentParamsRef.current = currentParams
 
   useEffect(() => {
     const prev = prevDrillStackRef.current
     const curr = drillReplaceStack
+    const params = currentParamsRef.current
     if (curr.length > prev.length) {
       // New drill entry added -- set param and re-render
       const entry = curr[curr.length - 1]
       if (entry.paramName && entry.paramValue) {
-        entry.prevParamValue = currentParams[entry.paramName] != null ? String(currentParams[entry.paramName]) : ''
-        const nextParams = { ...currentParams, [entry.paramName]: entry.paramValue }
+        entry.prevParamValue = params[entry.paramName] != null ? String(params[entry.paramName]) : ''
+        const nextParams = { ...params, [entry.paramName]: entry.paramValue }
         setCurrentParams(nextParams)
         renderWithParams(nextParams)
       }
@@ -279,7 +282,7 @@ export default function ReportViewerPage() {
       // Entry removed (back button) -- restore previous param value
       const removed = prev.find(e => !curr.includes(e))
       if (removed?.paramName) {
-        const nextParams = { ...currentParams, [removed.paramName]: removed.prevParamValue || '' }
+        const nextParams = { ...params, [removed.paramName]: removed.prevParamValue || '' }
         setCurrentParams(nextParams)
         renderWithParams(nextParams)
       }
