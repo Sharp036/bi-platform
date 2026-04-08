@@ -554,7 +554,7 @@ export default function PropertyPanel() {
                         </select>
                       </Field>
 
-                      {['thousands', 'millions', 'billions', 'currency', 'percent'].includes((cc.yAxisFormat as string) || 'plain') && (
+                      {['plain', 'thousands', 'millions', 'billions', 'currency', 'percent'].includes((cc.yAxisFormat as string) || 'plain') && (
                         <Field label={t('designer.y_axis_decimals')}>
                           <input
                             type="number" min={0} max={6}
