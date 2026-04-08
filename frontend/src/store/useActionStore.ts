@@ -17,6 +17,9 @@ export interface DrillReplaceEntry {
   filters: ActionFilter[]
   label: string
   seriesName?: string
+  paramName?: string
+  paramValue?: string
+  prevParamValue?: string
 }
 
 interface ActionState {

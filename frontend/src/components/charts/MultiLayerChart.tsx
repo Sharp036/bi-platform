@@ -26,6 +26,9 @@ function buildValueFormatter(format: string, currency: string, decimals?: number
     case 'billions': return (v: number) => (v / 1_000_000_000).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + 'B'
     case 'currency': return (v: number) => v.toLocaleString(undefined, { style: 'currency', currency, minimumFractionDigits: d, maximumFractionDigits: d })
     case 'percent': return (v: number) => (v * 100).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + '%'
+    case 'plain': return decimals != null
+      ? (v: number) => v.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d })
+      : undefined
     default: return undefined
   }
 }
