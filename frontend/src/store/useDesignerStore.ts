@@ -4,7 +4,7 @@ import i18n from 'i18next'
 export interface DesignerWidget {
   id: string                // temp client ID (negative or uuid)
   serverId?: number         // server ID after save
-  widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE'
+  widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE' | 'BUTTON' | 'WEBPAGE' | 'SPACER' | 'DIVIDER'
   title: string
   queryId: number | null
   datasourceId: number | null

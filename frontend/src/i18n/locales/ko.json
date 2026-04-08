@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL 편집기",
   "designer.layers": "레이어",
   "designer.totals_per_column": "보이는 열에서 집계 유형 설정",
-  "designer.show_totals_hint": "테이블 하단에 합계 행 표시"
+  "designer.show_totals_hint": "테이블 하단에 합계 행 표시",
+  "widgets.type.button": "버튼",
+  "widgets.type.webpage": "웹 페이지",
+  "widgets.type.spacer": "간격",
+  "widgets.type.divider": "구분선",
+  "widgets.desc.button": "가시성 전환, 탐색",
+  "widgets.desc.webpage": "임베디드 웹 페이지",
+  "widgets.desc.spacer": "위젯 사이 공백",
+  "widgets.desc.divider": "수평/수직 선"
 }

@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL szerkesztő",
   "designer.layers": "Rétegek",
   "designer.totals_per_column": "Aggregáció típusa a látható oszlopokban",
-  "designer.show_totals_hint": "Összeg sor megjelenítése a táblázat alján"
+  "designer.show_totals_hint": "Összeg sor megjelenítése a táblázat alján",
+  "widgets.type.button": "Gomb",
+  "widgets.type.webpage": "Weboldal",
+  "widgets.type.spacer": "Térköz",
+  "widgets.type.divider": "Elválasztó",
+  "widgets.desc.button": "Láthatóság váltása",
+  "widgets.desc.webpage": "Beágyazott weboldal",
+  "widgets.desc.spacer": "Üres tér",
+  "widgets.desc.divider": "Vízszintes/függőleges vonal"
 }

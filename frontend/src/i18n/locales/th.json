@@ -922,5 +922,13 @@
   "designer.sql_editor": "ตัวแก้ไข SQL",
   "designer.layers": "เลเยอร์",
   "designer.totals_per_column": "ประเภทการรวมในคอลัมน์ที่มองเห็น",
-  "designer.show_totals_hint": "แสดงแถวรวมที่ด้านล่างของตาราง"
+  "designer.show_totals_hint": "แสดงแถวรวมที่ด้านล่างของตาราง",
+  "widgets.type.button": "ปุ่ม",
+  "widgets.type.webpage": "หน้าเว็บ",
+  "widgets.type.spacer": "ช่องว่าง",
+  "widgets.type.divider": "ตัวคั่น",
+  "widgets.desc.button": "สลับการมองเห็น",
+  "widgets.desc.webpage": "หน้าเว็บฝัง",
+  "widgets.desc.spacer": "พื้นที่ว่าง",
+  "widgets.desc.divider": "เส้นแนวนอน/ตั้ง"
 }

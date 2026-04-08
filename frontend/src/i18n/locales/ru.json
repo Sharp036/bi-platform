@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-редактор",
   "designer.layers": "Слои",
   "designer.totals_per_column": "Тип агрегации настраивается в видимых столбцах",
-  "designer.show_totals_hint": "Показывать строку итогов внизу таблицы"
+  "designer.show_totals_hint": "Показывать строку итогов внизу таблицы",
+  "widgets.type.button": "Кнопка",
+  "widgets.type.webpage": "Веб-страница",
+  "widgets.type.spacer": "Отступ",
+  "widgets.type.divider": "Разделитель",
+  "widgets.desc.button": "Переключение видимости, навигация",
+  "widgets.desc.webpage": "Встроенная веб-страница (iframe)",
+  "widgets.desc.spacer": "Пустое пространство между виджетами",
+  "widgets.desc.divider": "Горизонтальная / вертикальная линия"
 }

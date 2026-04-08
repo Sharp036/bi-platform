@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL संपादक",
   "designer.layers": "परतें",
   "designer.totals_per_column": "दृश्य स्तंभों में एग्रीगेशन प्रकार कॉन्फ़िगर करें",
-  "designer.show_totals_hint": "तालिका के नीचे कुल पंक्ति दिखाएं"
+  "designer.show_totals_hint": "तालिका के नीचे कुल पंक्ति दिखाएं",
+  "widgets.type.button": "बटन",
+  "widgets.type.webpage": "वेब पेज",
+  "widgets.type.spacer": "स्पेसर",
+  "widgets.type.divider": "विभाजक",
+  "widgets.desc.button": "दृश्यता टॉगल, नेविगेशन",
+  "widgets.desc.webpage": "एम्बेडेड वेब पेज",
+  "widgets.desc.spacer": "विजेट्स के बीच खाली जगह",
+  "widgets.desc.divider": "क्षैतिज/लंबवत रेखा"
 }
