@@ -922,5 +922,13 @@
   "designer.sql_editor": "Éditeur SQL",
   "designer.layers": "Calques",
   "designer.totals_per_column": "Type configurable dans les colonnes visibles",
-  "designer.show_totals_hint": "Afficher la ligne de totaux en bas"
+  "designer.show_totals_hint": "Afficher la ligne de totaux en bas",
+  "widgets.type.button": "Bouton",
+  "widgets.type.webpage": "Page web",
+  "widgets.type.spacer": "Espacement",
+  "widgets.type.divider": "Séparateur",
+  "widgets.desc.button": "Basculer la visibilité, naviguer",
+  "widgets.desc.webpage": "Page web intégrée (iframe)",
+  "widgets.desc.spacer": "Espace vide entre les widgets",
+  "widgets.desc.divider": "Ligne horizontale / verticale"
 }

@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQLエディタ",
   "designer.layers": "レイヤー",
   "designer.totals_per_column": "表示列で集計タイプを設定",
-  "designer.show_totals_hint": "テーブルの下部に合計行を表示"
+  "designer.show_totals_hint": "テーブルの下部に合計行を表示",
+  "widgets.type.button": "ボタン",
+  "widgets.type.webpage": "ウェブページ",
+  "widgets.type.spacer": "スペーサー",
+  "widgets.type.divider": "区切り線",
+  "widgets.desc.button": "表示切替、ナビゲーション",
+  "widgets.desc.webpage": "埋め込みWebページ",
+  "widgets.desc.spacer": "ウィジェット間の空白",
+  "widgets.desc.divider": "水平/垂直線"
 }

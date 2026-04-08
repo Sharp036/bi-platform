@@ -922,5 +922,13 @@
   "designer.sql_editor": "Edytor SQL",
   "designer.layers": "Warstwy",
   "designer.totals_per_column": "Typ agregacji w widocznych kolumnach",
-  "designer.show_totals_hint": "Pokaż wiersz sum na dole tabeli"
+  "designer.show_totals_hint": "Pokaż wiersz sum na dole tabeli",
+  "widgets.type.button": "Przycisk",
+  "widgets.type.webpage": "Strona www",
+  "widgets.type.spacer": "Odstęp",
+  "widgets.type.divider": "Separator",
+  "widgets.desc.button": "Przełączanie widoczności",
+  "widgets.desc.webpage": "Osadzona strona (iframe)",
+  "widgets.desc.spacer": "Pusta przestrzeń",
+  "widgets.desc.divider": "Linia pozioma/pionowa"
 }

@@ -922,5 +922,13 @@
   "designer.sql_editor": "Editor SQL",
   "designer.layers": "Livelli",
   "designer.totals_per_column": "Tipo aggregazione configurabile nelle colonne visibili",
-  "designer.show_totals_hint": "Mostra riga totali in fondo alla tabella"
+  "designer.show_totals_hint": "Mostra riga totali in fondo alla tabella",
+  "widgets.type.button": "Pulsante",
+  "widgets.type.webpage": "Pagina web",
+  "widgets.type.spacer": "Spaziatore",
+  "widgets.type.divider": "Divisore",
+  "widgets.desc.button": "Attiva/disattiva, naviga",
+  "widgets.desc.webpage": "Pagina web incorporata",
+  "widgets.desc.spacer": "Spazio tra i widget",
+  "widgets.desc.divider": "Linea orizzontale/verticale"
 }

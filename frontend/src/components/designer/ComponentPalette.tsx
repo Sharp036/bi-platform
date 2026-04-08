@@ -1,4 +1,4 @@
-import { BarChart3, Table, Hash, Type, Filter, ImageIcon } from 'lucide-react'
+import { BarChart3, Table, Hash, Type, Filter, ImageIcon, MousePointerClick, Globe, Minus, SeparatorHorizontal } from 'lucide-react'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import { useTranslation } from 'react-i18next'
 import type { DesignerWidget } from '@/store/useDesignerStore'
@@ -15,6 +15,10 @@ const COMPONENTS: Array<{
   { type: 'TEXT', i18nKey: 'widgets.type.text', icon: Type, descKey: 'widgets.desc.text' },
   { type: 'FILTER', i18nKey: 'widgets.type.filter', icon: Filter, descKey: 'widgets.desc.filter' },
   { type: 'IMAGE', i18nKey: 'widgets.type.image', icon: ImageIcon, descKey: 'widgets.desc.image' },
+  { type: 'BUTTON', i18nKey: 'widgets.type.button', icon: MousePointerClick, descKey: 'widgets.desc.button' },
+  { type: 'WEBPAGE', i18nKey: 'widgets.type.webpage', icon: Globe, descKey: 'widgets.desc.webpage' },
+  { type: 'SPACER', i18nKey: 'widgets.type.spacer', icon: SeparatorHorizontal, descKey: 'widgets.desc.spacer' },
+  { type: 'DIVIDER', i18nKey: 'widgets.type.divider', icon: Minus, descKey: 'widgets.desc.divider' },
 ]
 
 export default function ComponentPalette() {

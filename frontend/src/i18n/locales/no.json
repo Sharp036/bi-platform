@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-editor",
   "designer.layers": "Lag",
   "designer.totals_per_column": "Aggregeringstype i synlige kolonner",
-  "designer.show_totals_hint": "Vis totalrad nederst i tabellen"
+  "designer.show_totals_hint": "Vis totalrad nederst i tabellen",
+  "widgets.type.button": "Knapp",
+  "widgets.type.webpage": "Nettside",
+  "widgets.type.spacer": "Mellomrom",
+  "widgets.type.divider": "Skillelinje",
+  "widgets.desc.button": "Veksle synlighet",
+  "widgets.desc.webpage": "Innebygd nettside",
+  "widgets.desc.spacer": "Tomt rom",
+  "widgets.desc.divider": "Horisontal/vertikal linje"
 }

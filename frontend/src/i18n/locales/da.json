@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-editor",
   "designer.layers": "Lag",
   "designer.totals_per_column": "Aggregeringstype i synlige kolonner",
-  "designer.show_totals_hint": "Vis totalrække i bunden af tabellen"
+  "designer.show_totals_hint": "Vis totalrække i bunden af tabellen",
+  "widgets.type.button": "Knap",
+  "widgets.type.webpage": "Webside",
+  "widgets.type.spacer": "Mellemrum",
+  "widgets.type.divider": "Adskiller",
+  "widgets.desc.button": "Skift synlighed",
+  "widgets.desc.webpage": "Indlejret webside",
+  "widgets.desc.spacer": "Tomt rum",
+  "widgets.desc.divider": "Vandret/lodret linje"
 }

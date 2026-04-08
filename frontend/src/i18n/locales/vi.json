@@ -922,5 +922,13 @@
   "designer.sql_editor": "Trình soạn SQL",
   "designer.layers": "Lớp",
   "designer.totals_per_column": "Loại tổng hợp trong cột hiển thị",
-  "designer.show_totals_hint": "Hiển thị dòng tổng ở cuối bảng"
+  "designer.show_totals_hint": "Hiển thị dòng tổng ở cuối bảng",
+  "widgets.type.button": "Nút",
+  "widgets.type.webpage": "Trang web",
+  "widgets.type.spacer": "Khoảng cách",
+  "widgets.type.divider": "Dường phân cách",
+  "widgets.desc.button": "Chuyển đổi hiển thị",
+  "widgets.desc.webpage": "Trang web nhúng",
+  "widgets.desc.spacer": "Khoảng trống",
+  "widgets.desc.divider": "Dường ngang/dọc"
 }

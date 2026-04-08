@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-editori",
   "designer.layers": "Tasot",
   "designer.totals_per_column": "Aggregointityyppi näkyvässä sarakkeissa",
-  "designer.show_totals_hint": "Näytä yhteensrivi taulukon alaosassa"
+  "designer.show_totals_hint": "Näytä yhteensrivi taulukon alaosassa",
+  "widgets.type.button": "Painike",
+  "widgets.type.webpage": "Verkkosivu",
+  "widgets.type.spacer": "Väli",
+  "widgets.type.divider": "Erotin",
+  "widgets.desc.button": "Näkyvyyden vaihto",
+  "widgets.desc.webpage": "Upotettu verkkosivu",
+  "widgets.desc.spacer": "Tyhjä tila",
+  "widgets.desc.divider": "Vaaka-/pystyviiva"
 }

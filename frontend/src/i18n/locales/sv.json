@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-redigerare",
   "designer.layers": "Lager",
   "designer.totals_per_column": "Aggregeringstyp i synliga kolumner",
-  "designer.show_totals_hint": "Visa summarad längst ner i tabellen"
+  "designer.show_totals_hint": "Visa summarad längst ner i tabellen",
+  "widgets.type.button": "Knapp",
+  "widgets.type.webpage": "Webbsida",
+  "widgets.type.spacer": "Mellanrum",
+  "widgets.type.divider": "Avgränsare",
+  "widgets.desc.button": "Växla synlighet",
+  "widgets.desc.webpage": "Inbäddad webbsida",
+  "widgets.desc.spacer": "Tomt utrymme",
+  "widgets.desc.divider": "Horisontell/vertikal linje"
 }

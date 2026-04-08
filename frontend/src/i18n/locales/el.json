@@ -922,5 +922,13 @@
   "designer.sql_editor": "Επεξεργαστής SQL",
   "designer.layers": "Επίπεδα",
   "designer.totals_per_column": "Τύπος συνάθροισης στις ορατές στήλες",
-  "designer.show_totals_hint": "Εμφάνιση γραμμής συνόλων στο κάτω μέρος"
+  "designer.show_totals_hint": "Εμφάνιση γραμμής συνόλων στο κάτω μέρος",
+  "widgets.type.button": "Κουμπί",
+  "widgets.type.webpage": "Ιστοσελίδα",
+  "widgets.type.spacer": "Κενό",
+  "widgets.type.divider": "Διαχωριστικό",
+  "widgets.desc.button": "Εναλλαγή ορατότητας",
+  "widgets.desc.webpage": "Ενσωματωμένη σελίδα",
+  "widgets.desc.spacer": "Κενός χώρος",
+  "widgets.desc.divider": "Οριζόντια/κατακόρυφη γραμμή"
 }

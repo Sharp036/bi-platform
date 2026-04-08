@@ -922,5 +922,13 @@
   "designer.sql_editor": "Editor SQL",
   "designer.layers": "Lapisan",
   "designer.totals_per_column": "Jenis agregasi di kolom yang terlihat",
-  "designer.show_totals_hint": "Tampilkan baris total di bawah tabel"
+  "designer.show_totals_hint": "Tampilkan baris total di bawah tabel",
+  "widgets.type.button": "Tombol",
+  "widgets.type.webpage": "Halaman web",
+  "widgets.type.spacer": "Spasi",
+  "widgets.type.divider": "Pemisah",
+  "widgets.desc.button": "Alihkan visibilitas",
+  "widgets.desc.webpage": "Halaman web tertanam",
+  "widgets.desc.spacer": "Ruang kosong",
+  "widgets.desc.divider": "Garis horizontal/vertikal"
 }
