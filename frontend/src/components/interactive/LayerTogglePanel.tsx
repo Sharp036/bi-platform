@@ -45,10 +45,13 @@ export default function LayerTogglePanel({ layers, onToggle, compact = false }: 
             : <EyeOff className="w-3.5 h-3.5" />}
 
           {/* Layer name */}
-          <span className={clsx(
-            'truncate max-w-[100px]',
-            !layer.isVisible && 'line-through'
-          )}>
+          <span
+            className={clsx(
+              'truncate max-w-[100px]',
+              !layer.isVisible && 'line-through'
+            )}
+            title={layer.label || layer.name}
+          >
             {layer.label || layer.name}
           </span>
 

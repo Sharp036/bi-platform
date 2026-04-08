@@ -131,7 +131,10 @@ export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps)
                         {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                       <Icon className={clsx('w-3.5 h-3.5 flex-shrink-0', isHidden ? 'text-slate-300' : 'text-brand-500')} />
-                      <span className={clsx('flex-1 truncate', isHidden ? 'text-slate-400 line-through' : isSelected ? 'text-brand-700 dark:text-brand-400 font-medium' : 'text-slate-700 dark:text-slate-300')}>
+                      <span
+                        className={clsx('flex-1 truncate', isHidden ? 'text-slate-400 line-through' : isSelected ? 'text-brand-700 dark:text-brand-400 font-medium' : 'text-slate-700 dark:text-slate-300')}
+                        title={w.title || `Widget #${w.id.slice(0, 6)}`}
+                      >
                         {w.title || `Widget #${w.id.slice(0, 6)}`}
                       </span>
                       <span className="text-[10px] text-slate-400 flex-shrink-0">z{String((w.style as Record<string, unknown>)?.zIndex ?? 0)}</span>
