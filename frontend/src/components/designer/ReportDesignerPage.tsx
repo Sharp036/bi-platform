@@ -316,11 +316,19 @@ export default function ReportDesignerPage() {
           }),
         }))
 
+        // Debug: log container mapping
+        console.log('[Save] clientIdToServerId:', Object.fromEntries(clientIdToServerId))
+        console.log('[Save] containers tabGroups:', containers.map(c => c.tabGroups))
+
         const existingContainers = await vizApi.getContainers(reportId)
         for (const ec of existingContainers) {
           await vizApi.deleteContainer(ec.id)
         }
         for (const c of containers) {
+          const resolved = c.tabGroups.map(g =>
+            g.map(cid => clientIdToServerId.get(cid) ?? -1).filter(id => id !== -1)
+          )
+          console.log('[Save] container', c.name, 'tabGroups resolved:', resolved)
           await vizApi.createContainer({
             reportId,
             containerType: c.containerType,
