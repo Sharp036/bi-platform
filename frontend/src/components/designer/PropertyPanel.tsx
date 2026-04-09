@@ -234,23 +234,14 @@ export default function PropertyPanel() {
         >
           <Trash2 className="w-4 h-4" />
         </button>
-        <select
-          value={widget.widgetType}
-          onChange={e => update({ widgetType: e.target.value as DesignerWidget['widgetType'] })}
-          className="ml-auto input text-xs py-0.5 h-auto"
-          title={t('designer.widget_type')}
-        >
-          {([
-            ['CHART', t('widgets.type.chart')],
-            ['TABLE', t('widgets.type.table')],
-            ['KPI',   t('widgets.type.kpi')],
-            ['TEXT',  t('widgets.type.text')],
-            ['FILTER',t('widgets.type.filter')],
-            ['IMAGE', t('widgets.type.image')],
-          ] as const).map(([wt, label]) => (
-            <option key={wt} value={wt}>{label}</option>
-          ))}
-        </select>
+        <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 px-2 py-0.5 bg-surface-100 dark:bg-dark-surface-100 rounded">
+          {({
+            CHART: t('widgets.type.chart'), TABLE: t('widgets.type.table'), KPI: t('widgets.type.kpi'),
+            TEXT: t('widgets.type.text'), FILTER: t('widgets.type.filter'), IMAGE: t('widgets.type.image'),
+            BUTTON: t('widgets.type.button'), WEBPAGE: t('widgets.type.webpage'),
+            SPACER: t('widgets.type.spacer'), DIVIDER: t('widgets.type.divider'),
+          } as Record<string, string>)[widget.widgetType] || widget.widgetType}
+        </span>
       </div>
 
       {/* Title */}
@@ -305,7 +296,7 @@ export default function PropertyPanel() {
       </Field>
 
       {/* Data Binding */}
-      {widget.widgetType !== 'TEXT' && widget.widgetType !== 'IMAGE' && (() => {
+      {!['TEXT', 'IMAGE', 'BUTTON', 'SPACER', 'DIVIDER', 'WEBPAGE'].includes(widget.widgetType) && (() => {
         const cc = widget.chartConfig as Record<string, unknown>
         const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
