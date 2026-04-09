@@ -307,6 +307,15 @@ export default function ReportDesignerPage() {
             await reportApi.deleteWidget(ew.id)
           }
         }
+
+        // Update serverId in store for newly created widgets (without marking dirty)
+        useDesignerStore.setState(state => ({
+          widgets: state.widgets.map(w => {
+            const sid = clientIdToServerId.get(w.id)
+            return sid && !w.serverId ? { ...w, serverId: sid } : w
+          }),
+        }))
+
         const existingContainers = await vizApi.getContainers(reportId)
         for (const ec of existingContainers) {
           await vizApi.deleteContainer(ec.id)
