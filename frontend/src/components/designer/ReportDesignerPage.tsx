@@ -159,7 +159,9 @@ export default function ReportDesignerPage() {
     return () => window.removeEventListener('keydown', handler)
   }, [undo, redo]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const savingRef = useRef(false)
   const handleSave = useCallback(async () => {
+    if (savingRef.current) return
     if (!reportName.trim()) { toast.error(t('designer.report_name_required')); return }
     const normalizedParamNames = parameters.map(p => (p.name || '').trim()).filter(Boolean)
     const hasDuplicateParamNames = new Set(normalizedParamNames).size !== normalizedParamNames.length
@@ -168,6 +170,7 @@ export default function ReportDesignerPage() {
       return
     }
 
+    savingRef.current = true
     setSaving(true)
     try {
       // Auto-match paramMapping before saving: extract :params from SQL,
@@ -349,6 +352,7 @@ export default function ReportDesignerPage() {
       toast.error(msg || t('designer.failed_save'))
     } finally {
       setSaving(false)
+      savingRef.current = false
     }
   }, [
     reportName,
