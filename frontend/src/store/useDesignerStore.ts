@@ -95,7 +95,17 @@ const pushHistory = (state: DesignerState): Partial<DesignerState> => {
 
 const findNextY = (widgets: DesignerWidget[]): number => {
   if (widgets.length === 0) return 0
-  return Math.max(...widgets.map(w => w.position.y + w.position.h))
+  // Group by Y position; overlapping widgets share Y, so only count the tallest at each Y
+  const maxHByY = new Map<number, number>()
+  for (const w of widgets) {
+    const existing = maxHByY.get(w.position.y) || 0
+    maxHByY.set(w.position.y, Math.max(existing, w.position.h))
+  }
+  let maxEnd = 0
+  for (const [y, h] of maxHByY) {
+    maxEnd = Math.max(maxEnd, y + h)
+  }
+  return maxEnd
 }
 
 export const useDesignerStore = create<DesignerState>((set, get) => ({
