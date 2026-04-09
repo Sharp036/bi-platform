@@ -930,5 +930,22 @@
   "widgets.desc.button": "Переключение видимости, навигация",
   "widgets.desc.webpage": "Встроенная веб-страница (iframe)",
   "widgets.desc.spacer": "Пустое пространство между виджетами",
-  "widgets.desc.divider": "Горизонтальная / вертикальная линия"
+  "widgets.desc.divider": "Горизонтальная / вертикальная линия",
+  "designer.button_type": "Тип кнопки",
+  "designer.button_show_hide": "Переключить видимость",
+  "designer.button_navigate": "Перейти к отчету",
+  "designer.button_filter": "Применить фильтр",
+  "designer.button_url": "Открыть URL",
+  "designer.button_export": "Экспорт",
+  "designer.button_label": "Текст кнопки",
+  "designer.button_size": "Размер",
+  "designer.button_small": "Маленький",
+  "designer.button_medium": "Средний",
+  "designer.button_large": "Большой",
+  "designer.button_color": "Цвет",
+  "designer.button_toggle_ids": "Виджет для переключения",
+  "designer.button_select_widget": "Выберите виджет...",
+  "designer.button_toggle_hint": "Клик будет показывать/скрывать этот виджет",
+  "designer.button_target_report": "ID целевого отчета",
+  "designer.button_filter_value": "Значение фильтра"
 }

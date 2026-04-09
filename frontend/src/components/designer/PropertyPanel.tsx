@@ -982,6 +982,79 @@ export default function PropertyPanel() {
           />
         </Field>
       )}
+
+      {/* Button */}
+      {widget.widgetType === 'BUTTON' && (() => {
+        const bc = (widget.chartConfig || {}) as Record<string, unknown>
+        const updateBtn = (updates: Record<string, unknown>) => update({ chartConfig: { ...bc, ...updates } })
+        return (
+          <>
+            <Field label={t('designer.button_type')}>
+              <select value={bc.buttonType as string || 'SHOW_HIDE'} onChange={e => updateBtn({ buttonType: e.target.value })} className="input text-sm">
+                <option value="SHOW_HIDE">{t('designer.button_show_hide')}</option>
+                <option value="NAVIGATE">{t('designer.button_navigate')}</option>
+                <option value="FILTER">{t('designer.button_filter')}</option>
+                <option value="URL">{t('designer.button_url')}</option>
+                <option value="EXPORT">{t('designer.button_export')}</option>
+              </select>
+            </Field>
+            <Field label={t('designer.button_label')}>
+              <input value={bc.label as string || ''} onChange={e => updateBtn({ label: e.target.value })} className="input text-sm" placeholder={t('designer.button_label')} />
+            </Field>
+            <Field label={t('designer.button_size')}>
+              <select value={bc.size as string || 'medium'} onChange={e => updateBtn({ size: e.target.value })} className="input text-sm">
+                <option value="small">{t('designer.button_small')}</option>
+                <option value="medium">{t('designer.button_medium')}</option>
+                <option value="large">{t('designer.button_large')}</option>
+              </select>
+            </Field>
+            <Field label={t('designer.button_color')}>
+              <select value={bc.color as string || 'brand'} onChange={e => updateBtn({ color: e.target.value })} className="input text-sm">
+                <option value="brand">Brand</option>
+                <option value="green">Green</option>
+                <option value="red">Red</option>
+                <option value="orange">Orange</option>
+                <option value="slate">Slate</option>
+              </select>
+            </Field>
+            {bc.buttonType === 'SHOW_HIDE' && (
+              <Field label={t('designer.button_toggle_ids')}>
+                <select
+                  value={(bc.toggleWidgetIds as number[] || [])[0] || ''}
+                  onChange={e => updateBtn({ toggleWidgetIds: e.target.value ? [Number(e.target.value)] : [] })}
+                  className="input text-sm"
+                >
+                  <option value="">{t('designer.button_select_widget')}</option>
+                  {widgets.filter(w => w.id !== widget.id && w.serverId).map(w => (
+                    <option key={w.serverId} value={w.serverId}>{w.title || `Widget #${w.serverId}`}</option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-slate-400 mt-1">{t('designer.button_toggle_hint')}</p>
+              </Field>
+            )}
+            {bc.buttonType === 'NAVIGATE' && (
+              <Field label={t('designer.button_target_report')}>
+                <input type="number" value={bc.targetReportId as number || ''} onChange={e => updateBtn({ targetReportId: Number(e.target.value) || undefined })} className="input text-sm" placeholder="Report ID" />
+              </Field>
+            )}
+            {bc.buttonType === 'URL' && (
+              <Field label="URL">
+                <input value={bc.url as string || ''} onChange={e => updateBtn({ url: e.target.value })} className="input text-sm" placeholder="https://..." />
+              </Field>
+            )}
+            {bc.buttonType === 'FILTER' && (
+              <>
+                <Field label={t('interactive.action.source_field')}>
+                  <input value={bc.filterField as string || ''} onChange={e => updateBtn({ filterField: e.target.value })} className="input text-sm" />
+                </Field>
+                <Field label={t('designer.button_filter_value')}>
+                  <input value={bc.filterValue as string || ''} onChange={e => updateBtn({ filterValue: e.target.value })} className="input text-sm" />
+                </Field>
+              </>
+            )}
+          </>
+        )
+      })()}
     </div>
 
     {sqlEditorOpen && widget && createPortal(
