@@ -922,5 +922,13 @@
   "designer.sql_editor": "Editor SQL",
   "designer.layers": "Straturi",
   "designer.totals_per_column": "Tipul agregației în coloanele vizibile",
-  "designer.show_totals_hint": "Afișează rândul total în partea de jos a tabelului"
+  "designer.show_totals_hint": "Afișează rândul total în partea de jos a tabelului",
+  "widgets.type.button": "Buton",
+  "widgets.type.webpage": "Pagină web",
+  "widgets.type.spacer": "Spațiu",
+  "widgets.type.divider": "Separator",
+  "widgets.desc.button": "Comutare vizibilitate",
+  "widgets.desc.webpage": "Pagină web încorporată",
+  "widgets.desc.spacer": "Spațiu gol",
+  "widgets.desc.divider": "Linie orizontală/verticală"
 }

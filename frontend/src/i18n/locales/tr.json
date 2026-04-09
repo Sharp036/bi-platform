@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL Düzenleyici",
   "designer.layers": "Katmanlar",
   "designer.totals_per_column": "Toplama türü görünür sütunlarda ayarlanır",
-  "designer.show_totals_hint": "Tablonun altında toplam satırı göster"
+  "designer.show_totals_hint": "Tablonun altında toplam satırı göster",
+  "widgets.type.button": "Düğme",
+  "widgets.type.webpage": "Web sayfası",
+  "widgets.type.spacer": "Boşluk",
+  "widgets.type.divider": "Ayırıcı",
+  "widgets.desc.button": "Görünürlüğü değiştir",
+  "widgets.desc.webpage": "Gömülü web sayfası",
+  "widgets.desc.spacer": "Widget'lar arası boşluk",
+  "widgets.desc.divider": "Yatay/dikey çizgi"
 }

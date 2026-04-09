@@ -922,5 +922,13 @@
   "designer.sql_editor": "עורך SQL",
   "designer.layers": "שכבות",
   "designer.totals_per_column": "סוג אגרגציה בעמודות גלויות",
-  "designer.show_totals_hint": "הצג שורת סיכום בתחתית הטבלה"
+  "designer.show_totals_hint": "הצג שורת סיכום בתחתית הטבלה",
+  "widgets.type.button": "כפתור",
+  "widgets.type.webpage": "דף אינטרנט",
+  "widgets.type.spacer": "רווח",
+  "widgets.type.divider": "מפריד",
+  "widgets.desc.button": "החלפת נראות",
+  "widgets.desc.webpage": "דף מוטמע",
+  "widgets.desc.spacer": "רווח ריק",
+  "widgets.desc.divider": "קו אופקי/אנכי"
 }

@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-редактор",
   "designer.layers": "Шари",
   "designer.totals_per_column": "Тип агрегації в видимих стовпцях",
-  "designer.show_totals_hint": "Показувати рядок підсумків внизу таблиці"
+  "designer.show_totals_hint": "Показувати рядок підсумків внизу таблиці",
+  "widgets.type.button": "Кнопка",
+  "widgets.type.webpage": "Веб-сторінка",
+  "widgets.type.spacer": "Відступ",
+  "widgets.type.divider": "Розділювач",
+  "widgets.desc.button": "Перемикання видимості",
+  "widgets.desc.webpage": "Вбудована сторінка",
+  "widgets.desc.spacer": "Порожній простір",
+  "widgets.desc.divider": "Горизонтальна/вертикальна лінія"
 }

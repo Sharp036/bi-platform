@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-editor",
   "designer.layers": "Lagen",
   "designer.totals_per_column": "Aggregatietype in zichtbare kolommen instellen",
-  "designer.show_totals_hint": "Totaalrij onderaan de tabel tonen"
+  "designer.show_totals_hint": "Totaalrij onderaan de tabel tonen",
+  "widgets.type.button": "Knop",
+  "widgets.type.webpage": "Webpagina",
+  "widgets.type.spacer": "Tussenruimte",
+  "widgets.type.divider": "Scheidingslijn",
+  "widgets.desc.button": "Zichtbaarheid schakelen, navigeren",
+  "widgets.desc.webpage": "Ingesloten webpagina",
+  "widgets.desc.spacer": "Lege ruimte tussen widgets",
+  "widgets.desc.divider": "Horizontale/verticale lijn"
 }

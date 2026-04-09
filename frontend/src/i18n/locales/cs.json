@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL editor",
   "designer.layers": "Vrstvy",
   "designer.totals_per_column": "Typ agregace v viditelných sloupcích",
-  "designer.show_totals_hint": "Zobrazit řádek súčtů ve spodní části tabulky"
+  "designer.show_totals_hint": "Zobrazit řádek súčtů ve spodní části tabulky",
+  "widgets.type.button": "Tlačítko",
+  "widgets.type.webpage": "Webová stránka",
+  "widgets.type.spacer": "Mezera",
+  "widgets.type.divider": "Oddělovač",
+  "widgets.desc.button": "Přepnutí viditelnosti",
+  "widgets.desc.webpage": "Vložená stránka",
+  "widgets.desc.spacer": "Prázdné místo",
+  "widgets.desc.divider": "Vodorovná/svislá čára"
 }

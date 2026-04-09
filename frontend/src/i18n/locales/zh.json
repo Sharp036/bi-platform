@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL编辑器",
   "designer.layers": "图层",
   "designer.totals_per_column": "在可见列中配置聚合类型",
-  "designer.show_totals_hint": "在表格底部显示合计行"
+  "designer.show_totals_hint": "在表格底部显示合计行",
+  "widgets.type.button": "按钮",
+  "widgets.type.webpage": "网页",
+  "widgets.type.spacer": "间距",
+  "widgets.type.divider": "分割线",
+  "widgets.desc.button": "切换可见性、导航",
+  "widgets.desc.webpage": "嵌入网页 (iframe)",
+  "widgets.desc.spacer": "组件之间的空白",
+  "widgets.desc.divider": "水平/垂直线"
 }

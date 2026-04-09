@@ -922,5 +922,13 @@
   "designer.sql_editor": "SQL-Editor",
   "designer.layers": "Ebenen",
   "designer.totals_per_column": "Aggregationstyp in sichtbaren Spalten konfigurieren",
-  "designer.show_totals_hint": "Summenzeile am Ende der Tabelle anzeigen"
+  "designer.show_totals_hint": "Summenzeile am Ende der Tabelle anzeigen",
+  "widgets.type.button": "Schaltfläche",
+  "widgets.type.webpage": "Webseite",
+  "widgets.type.spacer": "Abstand",
+  "widgets.type.divider": "Trennlinie",
+  "widgets.desc.button": "Sichtbarkeit umschalten, Navigation",
+  "widgets.desc.webpage": "Eingebettete Webseite (iframe)",
+  "widgets.desc.spacer": "Leerraum zwischen Widgets",
+  "widgets.desc.divider": "Horizontale / vertikale Linie"
 }

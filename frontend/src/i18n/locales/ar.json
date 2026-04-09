@@ -922,5 +922,13 @@
   "designer.sql_editor": "محرر SQL",
   "designer.layers": "الطبقات",
   "designer.totals_per_column": "نوع التجميع في الأعمدة المرئية",
-  "designer.show_totals_hint": "عرض صف الإجمالي أسفل الجدول"
+  "designer.show_totals_hint": "عرض صف الإجمالي أسفل الجدول",
+  "widgets.type.button": "زر",
+  "widgets.type.webpage": "صفحة ويب",
+  "widgets.type.spacer": "مسافة",
+  "widgets.type.divider": "فاصل",
+  "widgets.desc.button": "تبديل الرؤية، التنقل",
+  "widgets.desc.webpage": "صفحة مضمنة",
+  "widgets.desc.spacer": "مسافة فارغة",
+  "widgets.desc.divider": "خط أفقي/عمودي"
 }
