@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ButtonConfig } from '@/api/controls'
@@ -34,8 +35,10 @@ export default function ButtonWidget({
 }: ButtonWidgetProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [toggled, setToggled] = useState(false)
 
   const handleClick = () => {
+    if (config.buttonType === 'SHOW_HIDE') setToggled(v => !v)
     switch (config.buttonType) {
       case 'NAVIGATE':
         if (config.targetReportId) {
@@ -96,7 +99,7 @@ export default function ButtonWidget({
         }}
       >
         <Icon className="w-4 h-4" />
-        {config.label || t('interactive.button.default_label')}
+        {toggled && config.labelActive ? config.labelActive : (config.label || t('interactive.button.default_label'))}
       </button>
     </div>
   )

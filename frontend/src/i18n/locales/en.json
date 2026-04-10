@@ -767,6 +767,7 @@
   "designer.button_select_widget": "Select widget...",
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
+  "designer.button_label_active": "Label when toggled on",
   "designer.button_filter_value": "Filter value",
   "designer.open_sql_editor": "Open SQL editor",
   "designer.sql_editor": "SQL Editor",
