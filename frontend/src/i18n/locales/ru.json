@@ -947,5 +947,6 @@
   "designer.button_select_widget": "Выберите виджет...",
   "designer.button_toggle_hint": "Клик будет показывать/скрывать этот виджет",
   "designer.button_target_report": "ID целевого отчета",
-  "designer.button_filter_value": "Значение фильтра"
+  "designer.button_filter_value": "Значение фильтра",
+  "designer.button_label_active": "Текст при включении"
 }

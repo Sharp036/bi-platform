@@ -992,6 +992,11 @@ export default function PropertyPanel() {
             <Field label={t('designer.button_label')}>
               <input value={bc.label as string || ''} onChange={e => updateBtn({ label: e.target.value })} className="input text-sm" placeholder={t('designer.button_label')} />
             </Field>
+            {bc.buttonType === 'SHOW_HIDE' && (
+              <Field label={t('designer.button_label_active')}>
+                <input value={bc.labelActive as string || ''} onChange={e => updateBtn({ labelActive: e.target.value })} className="input text-sm" placeholder={t('designer.button_label_active')} />
+              </Field>
+            )}
             <Field label={t('designer.button_size')}>
               <select value={bc.size as string || 'medium'} onChange={e => updateBtn({ size: e.target.value })} className="input text-sm">
                 <option value="small">{t('designer.button_small')}</option>

@@ -545,6 +545,26 @@ function WidgetBlock({
               alt={widget.title}
               className="max-h-full max-w-full object-contain"
             />
+          ) : widget.widgetType === 'BUTTON' ? (
+            <button className={clsx(
+              'rounded-lg font-medium transition-colors',
+              cc.size === 'small' ? 'px-3 py-1.5 text-xs' : cc.size === 'large' ? 'px-6 py-3 text-base' : 'px-4 py-2 text-sm',
+              cc.color === 'green' ? 'bg-emerald-500 text-white' :
+              cc.color === 'red' ? 'bg-red-500 text-white' :
+              cc.color === 'orange' ? 'bg-amber-500 text-white' :
+              cc.color === 'slate' ? 'bg-slate-500 text-white' :
+              'bg-brand-500 text-white',
+            )}>
+              {(cc.label as string) || widget.title || 'Button'}
+            </button>
+          ) : widget.widgetType === 'SPACER' ? (
+            <div className="w-full h-full border border-dashed border-slate-200 dark:border-slate-700 rounded flex items-center justify-center">
+              <span className="text-[10px] text-slate-300">Spacer</span>
+            </div>
+          ) : widget.widgetType === 'DIVIDER' ? (
+            <div className="w-full flex items-center px-2">
+              <div className="w-full border-t border-slate-300 dark:border-slate-600" />
+            </div>
           ) : previewError ? (
             <p className="text-[10px] text-red-400">{previewError}</p>
           ) : (

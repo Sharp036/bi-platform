@@ -33,6 +33,7 @@ export interface ParameterControlConfig {
 export interface ButtonConfig {
   buttonType: string     // NAVIGATE, SHOW_HIDE, FILTER, EXPORT, URL
   label: string
+  labelActive?: string   // Label when toggled on (SHOW_HIDE)
   icon?: string
   color?: string
   size?: string          // small, medium, large
