@@ -291,15 +291,18 @@ export default function ReportDesignerPage() {
         const existingServerIdSet = new Set(existingWidgets.map(w => w.id))
 
         const clientIdToServerId = new Map<string, number>()
+        const usedServerIds = new Set<number>()
         for (let i = 0; i < widgets.length; i++) {
           const w = widgets[i]
           const wp = widgetPayloads[i]
-          if (w.serverId && existingServerIdSet.has(w.serverId)) {
+          if (w.serverId && existingServerIdSet.has(w.serverId) && !usedServerIds.has(w.serverId)) {
             await reportApi.updateWidget(w.serverId, wp)
             clientIdToServerId.set(w.id, w.serverId)
+            usedServerIds.add(w.serverId)
           } else {
             const created = await reportApi.addWidget(reportId, wp) as { id: number }
             clientIdToServerId.set(w.id, created.id)
+            usedServerIds.add(created.id)
           }
         }
 
