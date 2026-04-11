@@ -992,7 +992,7 @@ export default function PropertyPanel() {
             <Field label={t('designer.button_label')}>
               <input value={bc.label as string || ''} onChange={e => updateBtn({ label: e.target.value })} className="input text-sm" placeholder={t('designer.button_label')} />
             </Field>
-            {bc.buttonType === 'SHOW_HIDE' && (
+            {(bc.buttonType === 'SHOW_HIDE' || !bc.buttonType) && (
               <Field label={t('designer.button_label_active')}>
                 <input value={bc.labelActive as string || ''} onChange={e => updateBtn({ labelActive: e.target.value })} className="input text-sm" placeholder={t('designer.button_label_active')} />
               </Field>
@@ -1013,7 +1013,7 @@ export default function PropertyPanel() {
                 <option value="slate">Slate</option>
               </select>
             </Field>
-            {bc.buttonType === 'SHOW_HIDE' && (
+            {(bc.buttonType === 'SHOW_HIDE' || !bc.buttonType) && (
               <Field label={t('designer.button_toggle_ids')}>
                 <select
                   value={(bc.toggleWidgetIds as number[] || [])[0] || ''}

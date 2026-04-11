@@ -75,12 +75,16 @@ let nextId = 1
 const genId = () => `w_${nextId++}`
 
 const WIDGET_DEFAULTS: Record<string, Partial<DesignerWidget>> = {
-  CHART: { position: { x: 0, y: 0, w: 6, h: 4 }, chartConfig: { type: 'bar' } },
-  TABLE: { position: { x: 0, y: 0, w: 12, h: 4 }, chartConfig: {} },
-  KPI:   { position: { x: 0, y: 0, w: 3, h: 2 }, chartConfig: { format: 'number' } },
-  TEXT:  { position: { x: 0, y: 0, w: 6, h: 2 }, chartConfig: {} },
-  FILTER: { position: { x: 0, y: 0, w: 3, h: 1 }, chartConfig: {} },
-  IMAGE: { position: { x: 0, y: 0, w: 4, h: 3 }, chartConfig: {} },
+  CHART:   { position: { x: 0, y: 0, w: 6, h: 4 }, chartConfig: { type: 'bar' } },
+  TABLE:   { position: { x: 0, y: 0, w: 12, h: 4 }, chartConfig: {} },
+  KPI:     { position: { x: 0, y: 0, w: 3, h: 2 }, chartConfig: { format: 'number' } },
+  TEXT:    { position: { x: 0, y: 0, w: 6, h: 2 }, chartConfig: {} },
+  FILTER:  { position: { x: 0, y: 0, w: 3, h: 1 }, chartConfig: {} },
+  IMAGE:   { position: { x: 0, y: 0, w: 4, h: 3 }, chartConfig: {} },
+  BUTTON:  { position: { x: 0, y: 0, w: 2, h: 1 }, chartConfig: { buttonType: 'SHOW_HIDE', label: '', size: 'small' } },
+  WEBPAGE: { position: { x: 0, y: 0, w: 12, h: 6 }, chartConfig: {} },
+  SPACER:  { position: { x: 0, y: 0, w: 12, h: 1 }, chartConfig: {} },
+  DIVIDER: { position: { x: 0, y: 0, w: 12, h: 1 }, chartConfig: {} },
 }
 
 const pushHistory = (state: DesignerState): Partial<DesignerState> => {
