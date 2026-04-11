@@ -978,10 +978,13 @@ export default function PropertyPanel() {
       {widget.widgetType === 'BUTTON' && (() => {
         const bc = (widget.chartConfig || {}) as Record<string, unknown>
         const updateBtn = (updates: Record<string, unknown>) => update({ chartConfig: { ...bc, ...updates } })
+        // Ensure buttonType is always saved
+        if (!bc.buttonType) updateBtn({ buttonType: 'SHOW_HIDE' })
+        const effectiveType = (bc.buttonType as string) || 'SHOW_HIDE'
         return (
           <>
             <Field label={t('designer.button_type')}>
-              <select value={bc.buttonType as string || 'SHOW_HIDE'} onChange={e => updateBtn({ buttonType: e.target.value })} className="input text-sm">
+              <select value={effectiveType} onChange={e => updateBtn({ buttonType: e.target.value })} className="input text-sm">
                 <option value="SHOW_HIDE">{t('designer.button_show_hide')}</option>
                 <option value="NAVIGATE">{t('designer.button_navigate')}</option>
                 <option value="FILTER">{t('designer.button_filter')}</option>

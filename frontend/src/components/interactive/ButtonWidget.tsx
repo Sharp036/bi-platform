@@ -38,8 +38,9 @@ export default function ButtonWidget({
   const [toggled, setToggled] = useState(false)
 
   const handleClick = () => {
-    if (config.buttonType === 'SHOW_HIDE') setToggled(v => !v)
-    switch (config.buttonType) {
+    const btnType = config.buttonType || 'SHOW_HIDE'
+    if (btnType === 'SHOW_HIDE') setToggled(v => !v)
+    switch (btnType) {
       case 'NAVIGATE':
         if (config.targetReportId) {
           const params = config.targetParams
