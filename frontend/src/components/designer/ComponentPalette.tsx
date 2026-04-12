@@ -21,7 +21,7 @@ const COMPONENTS: Array<{
   { type: 'DIVIDER', i18nKey: 'widgets.type.divider', icon: Minus, descKey: 'widgets.desc.divider' },
 ]
 
-export default function ComponentPalette() {
+export default function ComponentPalette({ containerWidgetIds }: { containerWidgetIds?: Set<string> }) {
   const addWidget = useDesignerStore(s => s.addWidget)
   const { t } = useTranslation()
 
@@ -33,7 +33,7 @@ export default function ComponentPalette() {
       {COMPONENTS.map(({ type, i18nKey, icon: Icon, descKey }) => (
         <button
           key={type}
-          onClick={() => addWidget(type)}
+          onClick={() => addWidget(type, containerWidgetIds)}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
             text-slate-700 dark:text-slate-300
             hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors text-left"

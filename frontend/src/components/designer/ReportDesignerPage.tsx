@@ -323,8 +323,18 @@ export default function ReportDesignerPage() {
         }))
 
         // Debug: log container mapping
+        console.log('[Save] widgets:', widgets.map(w => ({ clientId: w.id, serverId: w.serverId, title: w.title })))
         console.log('[Save] clientIdToServerId:', Object.fromEntries(clientIdToServerId))
-        console.log('[Save] containers tabGroups:', containers.map(c => c.tabGroups))
+        console.log('[Save] containers tabGroups:', JSON.stringify(containers.map(c => c.tabGroups)))
+        for (const c of containers) {
+          for (let ti = 0; ti < c.tabGroups.length; ti++) {
+            for (const cid of c.tabGroups[ti]) {
+              const sid = clientIdToServerId.get(cid)
+              const w = widgets.find(ww => ww.id === cid)
+              console.log(`[Save] tab[${ti}] clientId=${cid} -> serverId=${sid} title="${w?.title}" storeServerId=${w?.serverId}`)
+            }
+          }
+        }
 
         const existingContainers = await vizApi.getContainers(reportId)
         for (const ec of existingContainers) {
@@ -536,7 +546,7 @@ export default function ReportDesignerPage() {
         {/* Left: Component Palette */}
         {!previewMode && (
           <div className="w-52 flex-shrink-0 p-3 overflow-y-auto border-r border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30">
-            <ComponentPalette />
+            <ComponentPalette containerWidgetIds={new Set(containers.flatMap(c => c.tabGroups.flat()))} />
           </div>
         )}
 

@@ -51,7 +51,7 @@ interface DesignerState {
     parameters: Array<Record<string, unknown>>
   }) => void
 
-  addWidget: (type: DesignerWidget['widgetType']) => void
+  addWidget: (type: DesignerWidget['widgetType'], containerWidgetIds?: Set<string>) => void
   updateWidget: (id: string, updates: Partial<DesignerWidget>) => void
   removeWidget: (id: string) => void
   duplicateWidget: (id: string) => void
@@ -99,7 +99,6 @@ const pushHistory = (state: DesignerState): Partial<DesignerState> => {
 
 const findNextY = (widgets: DesignerWidget[]): number => {
   if (widgets.length === 0) return 0
-  // Group by Y position; overlapping widgets share Y, so only count the tallest at each Y
   const maxHByY = new Map<number, number>()
   for (const w of widgets) {
     const existing = maxHByY.get(w.position.y) || 0
@@ -181,7 +180,7 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
     })
   },
 
-  addWidget: (type) => set(state => {
+  addWidget: (type, containerWidgetIds) => set(state => {
     const defaults = WIDGET_DEFAULTS[type] || {}
     const widget: DesignerWidget = {
       id: genId(),
@@ -193,7 +192,7 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       chartConfig: (defaults.chartConfig as Record<string, unknown>) || {},
       position: {
         x: defaults.position?.x || 0,
-        y: findNextY(state.widgets),
+        y: findNextY(containerWidgetIds ? state.widgets.filter(w => !containerWidgetIds.has(w.id)) : state.widgets),
         w: defaults.position?.w || 6,
         h: defaults.position?.h || 4,
       },
