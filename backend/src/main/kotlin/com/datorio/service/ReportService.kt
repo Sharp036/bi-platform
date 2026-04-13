@@ -3,6 +3,9 @@ package com.datorio.service
 import com.datorio.model.*
 import com.datorio.model.dto.*
 import com.datorio.repository.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -22,7 +25,8 @@ class ReportService(
     private val vizService: VisualizationService,
     private val interactiveService: InteractiveDashboardService,
     private val controlService: ControlService,
-    private val drillService: DrillDownService
+    private val drillService: DrillDownService,
+    private val objectMapper: ObjectMapper
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -215,6 +219,26 @@ class ReportService(
         val widgetIdMap = mutableMapOf<Long, Long>()
         sourceWidgets.forEachIndexed { i, sw ->
             if (i < newWidgets.size) widgetIdMap[sw.id] = newWidgets[i].id
+        }
+
+        // Remap toggleWidgetIds in BUTTON widget chartConfigs
+        for (nw in newWidgets) {
+            if (nw.widgetType != "BUTTON") continue
+            try {
+                val root = objectMapper.readTree(nw.chartConfig) as? ObjectNode ?: continue
+                val toggleIds = root.get("toggleWidgetIds") ?: continue
+                if (!toggleIds.isArray || toggleIds.size() == 0) continue
+                val remapped = objectMapper.createArrayNode()
+                for (idNode in toggleIds) {
+                    val newId = widgetIdMap[idNode.asLong()]
+                    if (newId != null) remapped.add(newId)
+                }
+                root.set<ArrayNode>("toggleWidgetIds", remapped)
+                nw.chartConfig = objectMapper.writeValueAsString(root)
+                widgetRepo.save(nw)
+            } catch (e: Exception) {
+                log.warn("Failed to remap toggleWidgetIds for widget {}: {}", nw.id, e.message)
+            }
         }
 
         // Copy containers (tabs) with remapped widget IDs
