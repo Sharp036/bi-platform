@@ -223,7 +223,7 @@ class ReportService(
 
         // Remap toggleWidgetIds in BUTTON widget chartConfigs
         for (nw in newWidgets) {
-            if (nw.widgetType != "BUTTON") continue
+            if (nw.widgetType != WidgetType.BUTTON) continue
             try {
                 val root = objectMapper.readTree(nw.chartConfig) as? ObjectNode ?: continue
                 val toggleIds = root.get("toggleWidgetIds") ?: continue
