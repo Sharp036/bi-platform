@@ -47,7 +47,8 @@ function getEnabledCategories(): Set<string> | 'all' | null {
   } catch { /* ignore */ }
 
   const stored = localStorage.getItem(DEBUG_KEY)
-  if (!stored) return null
+  if (!stored) return 'all'  // Default: all logging enabled during development
+  if (stored === 'off') return null
   if (stored === 'all') return 'all'
   return new Set(stored.split(','))
 }
