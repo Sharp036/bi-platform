@@ -71,6 +71,9 @@ export const workspaceApi = {
   isFavorite: (objectType: string, objectId: number) =>
     api.get<{ isFavorite: boolean }>(`/workspace/favorites/check/${objectType}/${objectId}`).then(r => r.data),
 
+  isFavoriteBatch: (objectType: string, ids: number[]) =>
+    api.get<Record<number, boolean>>(`/workspace/favorites/check-batch/${objectType}`, { params: { ids: ids.join(',') } }).then(r => r.data),
+
   // Recent
   trackView: (objectType: string, objectId: number) =>
     api.post('/workspace/recent/track', { objectType, objectId }),
