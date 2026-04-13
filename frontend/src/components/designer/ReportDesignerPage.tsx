@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import { vizApi } from '@/api/visualization'
+import { log } from '@/utils/logger'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { ReportParameter } from '@/types'
 import ComponentPalette from './ComponentPalette'
@@ -322,19 +323,19 @@ export default function ReportDesignerPage() {
           }),
         }))
 
-        // Debug: log container mapping
-        console.log('[Save] widgets:', widgets.map(w => ({ clientId: w.id, serverId: w.serverId, title: w.title })))
-        console.log('[Save] clientIdToServerId:', Object.fromEntries(clientIdToServerId))
-        console.log('[Save] containers tabGroups:', JSON.stringify(containers.map(c => c.tabGroups)))
+        log.save('widgets', widgets.map(w => ({ clientId: w.id, serverId: w.serverId, title: w.title })))
+        log.save('clientIdToServerId', Object.fromEntries(clientIdToServerId))
+        const containerMapping: Record<string, unknown>[] = []
         for (const c of containers) {
           for (let ti = 0; ti < c.tabGroups.length; ti++) {
             for (const cid of c.tabGroups[ti]) {
               const sid = clientIdToServerId.get(cid)
               const w = widgets.find(ww => ww.id === cid)
-              console.log(`[Save] tab[${ti}] clientId=${cid} -> serverId=${sid} title="${w?.title}" storeServerId=${w?.serverId}`)
+              containerMapping.push({ tab: ti, clientId: cid, serverId: sid, title: w?.title, storeServerId: w?.serverId })
             }
           }
         }
+        log.save('container mapping', containerMapping)
 
         const existingContainers = await vizApi.getContainers(reportId)
         for (const ec of existingContainers) {

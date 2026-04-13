@@ -948,5 +948,6 @@
   "designer.button_toggle_hint": "Клик будет показывать/скрывать этот виджет",
   "designer.button_target_report": "ID целевого отчета",
   "designer.button_filter_value": "Значение фильтра",
-  "designer.button_label_active": "Текст при включении"
+  "designer.button_label_active": "Текст при включении",
+  "designer.select_datasource_first": "Сначала выберите источник данных"
 }

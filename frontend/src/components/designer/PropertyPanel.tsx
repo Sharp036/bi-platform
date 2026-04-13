@@ -341,12 +341,14 @@ export default function PropertyPanel() {
                 <textarea
                   value={widget.rawSql}
                   onChange={e => update({ rawSql: e.target.value, queryId: null })}
-                  placeholder={t('designer.sql_placeholder')}
+                  placeholder={widget.datasourceId ? t('designer.sql_placeholder') : t('designer.select_datasource_first')}
                   className="input text-xs font-mono h-20 resize-none pr-8"
+                  disabled={!widget.datasourceId}
                 />
                 <button
                   onClick={() => setSqlEditorOpen(true)}
-                  className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600"
+                  disabled={!widget.datasourceId}
+                  className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600 disabled:opacity-30"
                   title={t('designer.open_sql_editor')}
                 >
                   <MoreVertical className="w-3.5 h-3.5" />

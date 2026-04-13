@@ -1,17 +1,22 @@
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import i18n from '@/i18n'
+import { log } from '@/utils/logger'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 const api = axios.create({ baseURL: BASE_URL })
 
-// Request: attach access token
+// Request: attach access token, request ID, and log
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // Generate short request ID for correlation with backend logs
+  const reqId = Math.random().toString(36).substring(2, 10)
+  config.headers['X-Request-Id'] = reqId
+  log.api(`${config.method?.toUpperCase()} ${config.url}`, { reqId, params: config.params, dataKeys: config.data ? Object.keys(config.data) : undefined })
   return config
 })
 
@@ -41,6 +46,7 @@ function handleSessionExpired() {
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
+    log.error(`API ${error.config?.method?.toUpperCase()} ${error.config?.url}`, { reqId: error.config?.headers?.['X-Request-Id'], status: error.response?.status, message: error.response?.data?.message || error.message })
     const original = error.config
     const status = error.response?.status
     if ((status === 401 || status === 403) && !original._retry) {

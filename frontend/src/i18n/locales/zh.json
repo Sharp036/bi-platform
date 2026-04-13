@@ -948,5 +948,6 @@
   "designer.button_select_widget": "选择组件...",
   "designer.button_toggle_hint": "点击显示/隐藏此组件",
   "designer.button_target_report": "目标报告ID",
-  "designer.button_filter_value": "筛选值"
+  "designer.button_filter_value": "筛选值",
+  "designer.select_datasource_first": "请先选择数据源"
 }

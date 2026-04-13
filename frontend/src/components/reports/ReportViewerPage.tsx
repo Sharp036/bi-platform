@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import { drillApi } from '@/api/drilldown'
+import { log } from '@/utils/logger'
 import type { Report, RenderReportResponse, DrillAction, DrillNavigateResponse } from '@/types'
 import EnhancedParameterPanel from './EnhancedParameterPanel'
 import WidgetRenderer from './WidgetRenderer'
@@ -113,9 +114,11 @@ export default function ReportViewerPage() {
   const renderWithParams = useCallback(async (paramsToUse: Record<string, unknown>) => {
     const rId = currentReportId || (id ? report?.id || 0 : null)
     if (!rId) return
+    log.render('renderWithParams', { reportId: rId, params: paramsToUse })
     setRendering(true)
     try {
       const result = await reportApi.render(rId, paramsToUse)
+      log.render('renderResult', { widgetCount: result.widgets.length, executionMs: result.executionMs })
       setRenderResult(result)
       await loadDrillActions(rId)
       const widgetIds = result.widgets.map((w: any) => w.widgetId)
@@ -373,7 +376,7 @@ export default function ReportViewerPage() {
     return (
       <div
         key={w.widgetId}
-        className={`card p-4 overflow-hidden h-full ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''} ${drillEntry ? 'pt-10' : ''}`}
+        className={`${w.widgetType === 'BUTTON' || w.widgetType === 'SPACER' || w.widgetType === 'DIVIDER' ? '' : 'card p-4'} overflow-hidden h-full ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''} ${drillEntry ? 'pt-10' : ''}`}
         style={{ position: 'relative' }}
       >
         {showMenu && (

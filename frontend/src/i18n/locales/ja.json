@@ -948,5 +948,6 @@
   "designer.button_select_widget": "選択...",
   "designer.button_toggle_hint": "クリックで表示/非表示",
   "designer.button_target_report": "ターゲットレポートID",
-  "designer.button_filter_value": "フィルタ値"
+  "designer.button_filter_value": "フィルタ値",
+  "designer.select_datasource_first": "最初にデータソースを選択"
 }

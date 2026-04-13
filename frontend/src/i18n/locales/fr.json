@@ -948,5 +948,6 @@
   "designer.button_select_widget": "Sélectionner...",
   "designer.button_toggle_hint": "Le clic affiche/masque ce widget",
   "designer.button_target_report": "ID du rapport cible",
-  "designer.button_filter_value": "Valeur du filtre"
+  "designer.button_filter_value": "Valeur du filtre",
+  "designer.select_datasource_first": "Sélectionnez d'abord une source de données"
 }

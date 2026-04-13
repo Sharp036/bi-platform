@@ -948,5 +948,6 @@
   "designer.button_select_widget": "Виберіть...",
   "designer.button_toggle_hint": "Клік показує/ховає цей віджет",
   "designer.button_target_report": "ID цільового звіту",
-  "designer.button_filter_value": "Значення фільтру"
+  "designer.button_filter_value": "Значення фільтру",
+  "designer.select_datasource_first": "Спочатку виберіть джерело даних"
 }

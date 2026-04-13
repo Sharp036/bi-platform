@@ -75,8 +75,8 @@ export default function ReportListPage() {
       )}
       <Link to={`/reports/${r.slug}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
       {canEdit && (<>
-        <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
-        <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
+        <button onClick={async () => { await reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
+        <button onClick={async () => { await reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
       </>)}
       {canShare && (
         <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs" title={t('common.share')}><Share2 className="w-3.5 h-3.5" /></button>
