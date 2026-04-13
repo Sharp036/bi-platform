@@ -948,5 +948,6 @@
   "designer.button_select_widget": "Seleccionar...",
   "designer.button_toggle_hint": "El clic muestra/oculta este widget",
   "designer.button_target_report": "ID del informe destino",
-  "designer.button_filter_value": "Valor del filtro"
+  "designer.button_filter_value": "Valor del filtro",
+  "designer.select_datasource_first": "Seleccione primero una fuente de datos"
 }

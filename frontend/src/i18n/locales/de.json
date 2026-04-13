@@ -948,5 +948,6 @@
   "designer.button_select_widget": "Widget auswählen...",
   "designer.button_toggle_hint": "Klick blendet dieses Widget ein/aus",
   "designer.button_target_report": "Zielbericht-ID",
-  "designer.button_filter_value": "Filterwert"
+  "designer.button_filter_value": "Filterwert",
+  "designer.select_datasource_first": "Wählen Sie zuerst eine Datenquelle"
 }

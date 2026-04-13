@@ -948,5 +948,6 @@
   "designer.button_select_widget": "Select widget...",
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
-  "designer.button_filter_value": "Filter value"
+  "designer.button_filter_value": "Filter value",
+  "designer.select_datasource_first": "Select a data source first"
 }

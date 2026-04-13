@@ -4,6 +4,7 @@ import type { ReportParameter } from '@/types'
 import { controlsApi, ParameterControlConfig } from '@/api/controls'
 import { Play } from 'lucide-react'
 import clsx from 'clsx'
+import { log } from '@/utils/logger'
 
 interface Props {
   reportId: number
@@ -137,6 +138,7 @@ export default function EnhancedParameterPanel({
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it.
   // Keep the current value of dependent params; only clear it if the new options no longer include it.
   const handleChange = (paramName: string, value: string) => {
+    log.filter('handleChange', { paramName, value })
     // Track last non-empty selection
     if (value) lastKnownRef.current[paramName] = value
 
@@ -160,7 +162,7 @@ export default function EnhancedParameterPanel({
             }
             // Decide new value for dependent parameter
             if (prevValue && result.options.includes(prevValue)) {
-              // Current value still valid -- keep it
+              log.filter('cascade keep', { param: c.parameterName, prevValue })
             } else if (result.options.length > 0) {
               // Priority: last user selection > default value > first option (required) > empty
               const lastKnown = lastKnownRef.current[c.parameterName] || ''
@@ -168,6 +170,7 @@ export default function EnhancedParameterPanel({
               const fallback = result.options.includes(lastKnown) ? lastKnown
                 : result.options.includes(defaultVal) ? defaultVal
                 : param?.isRequired ? (result.options[0] || '') : ''
+              log.filter('cascade fallback', { param: c.parameterName, prevValue, lastKnown, defaultVal, fallback, optionsCount: result.options.length })
               setValues(v => ({ ...v, [c.parameterName]: fallback }))
             } else {
               // No options available -- clear

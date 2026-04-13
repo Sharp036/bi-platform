@@ -769,6 +769,7 @@
   "designer.button_target_report": "Target report ID",
   "designer.button_label_active": "Label when toggled on",
   "designer.button_filter_value": "Filter value",
+  "designer.select_datasource_first": "Select a data source first",
   "designer.open_sql_editor": "Open SQL editor",
   "designer.sql_editor": "SQL Editor",
   "designer.show_totals": "Totals row",

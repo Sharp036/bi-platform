@@ -82,22 +82,27 @@ export default function ButtonWidget({
     }
   }
 
-  const Icon = iconMap[config.buttonType?.toLowerCase()] || MousePointerClick
+  const Icon = iconMap[(config.buttonType || 'show_hide').toLowerCase()] || MousePointerClick
   const size = sizeClasses[config.size || 'medium'] || sizeClasses.medium
+  const colorClasses: Record<string, string> = {
+    brand: 'bg-brand-500 hover:bg-brand-600 text-white',
+    green: 'bg-emerald-500 hover:bg-emerald-600 text-white',
+    red: 'bg-red-500 hover:bg-red-600 text-white',
+    orange: 'bg-amber-500 hover:bg-amber-600 text-white',
+    slate: 'bg-slate-500 hover:bg-slate-600 text-white',
+  }
+  const colorClass = colorClasses[config.color || 'brand'] || colorClasses.brand
 
   return (
-    <div className="h-full flex items-center justify-center p-2">
+    <div className="h-full flex items-center justify-center">
       <button
         onClick={handleClick}
         className={clsx(
           'inline-flex items-center gap-2 rounded-lg font-medium transition-all',
           'shadow-sm hover:shadow-md active:scale-[0.98]',
-          size
+          size,
+          colorClass
         )}
-        style={{
-          backgroundColor: config.color || '#3b82f6',
-          color: '#ffffff',
-        }}
       >
         <Icon className="w-4 h-4" />
         {toggled && config.labelActive ? config.labelActive : (config.label || t('interactive.button.default_label'))}
