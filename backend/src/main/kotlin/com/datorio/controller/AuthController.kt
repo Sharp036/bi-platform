@@ -41,7 +41,8 @@ class AuthController(
     }
 
     @GetMapping("/me")
-    fun me(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<UserResponse> {
+    fun me(@AuthenticationPrincipal userDetails: UserDetails?): ResponseEntity<UserResponse> {
+        if (userDetails == null) return ResponseEntity.status(401).build()
         return ResponseEntity.ok(authService.getCurrentUser(userDetails.username))
     }
 }

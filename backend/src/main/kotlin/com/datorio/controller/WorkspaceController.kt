@@ -56,6 +56,17 @@ class WorkspaceController(
         return ResponseEntity.ok(mapOf("isFavorite" to isFav))
     }
 
+    @GetMapping("/favorites/check-batch/{objectType}")
+    fun isFavoriteBatch(
+        @PathVariable objectType: String,
+        @RequestParam ids: List<Long>,
+        @AuthenticationPrincipal user: UserDetails
+    ): ResponseEntity<Map<Long, Boolean>> {
+        val userId = getUserId(user)
+        val result = ids.associateWith { workspaceService.isFavorite(userId, objectType.uppercase(), it) }
+        return ResponseEntity.ok(result)
+    }
+
     // ─── Recent Items ───
 
     @PostMapping("/recent/track")
