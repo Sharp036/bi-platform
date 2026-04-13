@@ -314,9 +314,11 @@ class ReportService(
                 for (a in annotations) {
                     vizService.createAnnotation(AnnotationRequest(
                         widgetId = newId, annotationType = a.annotationType,
-                        axis = a.axis, value = a.value, endValue = a.endValue,
-                        label = a.label, color = a.color, isVisible = a.isVisible,
-                        config = a.config
+                        axis = a.axis, value = a.value, valueEnd = a.valueEnd,
+                        label = a.label, color = a.color, lineStyle = a.lineStyle,
+                        lineWidth = a.lineWidth, opacity = a.opacity, fillColor = a.fillColor,
+                        fillOpacity = a.fillOpacity, position = a.position, fontSize = a.fontSize,
+                        isVisible = a.isVisible, sortOrder = a.sortOrder, config = a.config
                     ))
                 }
             } catch (_: Exception) {}
@@ -325,7 +327,10 @@ class ReportService(
                 val tooltip = vizService.getTooltipConfig(oldId)
                 if (tooltip != null) {
                     vizService.saveTooltipConfig(TooltipConfigRequest(
-                        widgetId = newId, fields = tooltip.fields, format = tooltip.format
+                        widgetId = newId, isEnabled = tooltip.isEnabled, showTitle = tooltip.showTitle,
+                        titleField = tooltip.titleField, fields = tooltip.fields,
+                        showSparkline = tooltip.showSparkline, sparklineField = tooltip.sparklineField,
+                        htmlTemplate = tooltip.htmlTemplate, config = tooltip.config
                     ))
                 }
             } catch (_: Exception) {}
@@ -334,9 +339,12 @@ class ReportService(
                 val layers = interactiveService.getLayersForWidget(oldId)
                 for (l in layers) {
                     interactiveService.createLayer(ChartLayerRequest(
-                        widgetId = newId, name = l.name, chartType = l.chartType,
-                        valueColumn = l.valueColumn, yAxisIndex = l.yAxisIndex,
-                        color = l.color, config = l.config, sortOrder = l.sortOrder
+                        widgetId = newId, name = l.name, label = l.label,
+                        queryId = l.queryId, datasourceId = l.datasourceId,
+                        rawSql = l.rawSql, chartType = l.chartType, axis = l.axis,
+                        color = l.color, opacity = l.opacity, isVisible = l.isVisible,
+                        sortOrder = l.sortOrder, seriesConfig = l.seriesConfig,
+                        categoryField = l.categoryField, valueField = l.valueField
                     ))
                 }
             } catch (_: Exception) {}
@@ -347,7 +355,7 @@ class ReportService(
                     interactiveService.createVisibilityRule(VisibilityRuleRequest(
                         widgetId = newId, ruleType = r.ruleType,
                         parameterName = r.parameterName, operator = r.operator,
-                        value = r.value, config = r.config
+                        expectedValue = r.expectedValue
                     ))
                 }
             } catch (_: Exception) {}
@@ -359,9 +367,9 @@ class ReportService(
             for (o in overlays) {
                 interactiveService.createOverlay(OverlayRequest(
                     reportId = created.id, overlayType = o.overlayType,
-                    content = o.content, x = o.x, y = o.y,
+                    content = o.content, positionX = o.positionX, positionY = o.positionY,
                     width = o.width, height = o.height, zIndex = o.zIndex,
-                    opacity = o.opacity, clickUrl = o.clickUrl, config = o.config
+                    opacity = o.opacity, linkUrl = o.linkUrl, style = o.style
                 ))
             }
         } catch (e: Exception) {
