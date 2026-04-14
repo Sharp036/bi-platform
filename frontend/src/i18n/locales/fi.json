@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Kaikki valittu = kaikki sarakkeet",
   "designer.regression_lines": "Lineaarinen regressio",
   "charts.regression_short": "Lineaarinen",
+  "charts.legend_all": "Kaikki",
+  "charts.legend_inv": "Kaan",
   "designer.regression_lines_hint": "Näytä trendiviiva valituille mittareille",
   "designer.select_all": "Kaikki",
   "designer.deselect_all": "Ei mitaan",

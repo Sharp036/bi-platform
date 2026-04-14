@@ -250,6 +250,8 @@
   "designer.value_fields_hint": "Все отмечены = все столбцы",
   "designer.regression_lines": "Линейная регрессия",
   "charts.regression_short": "Линейная",
+  "charts.legend_all": "Все",
+  "charts.legend_inv": "Инв",
   "designer.regression_lines_hint": "Показывать линию тренда для выбранных метрик",
   "designer.select_all": "Все",
   "designer.deselect_all": "Ничего",

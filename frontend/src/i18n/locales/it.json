@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Tutto selezionato = tutte le colonne",
   "designer.regression_lines": "Regressione lineare",
   "charts.regression_short": "Lineare",
+  "charts.legend_all": "Tutti",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Mostra la linea di tendenza per le metriche selezionate",
   "designer.select_all": "Tutti",
   "designer.deselect_all": "Nessuno",

@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Wszystkie zaznaczone = wszystkie kolumny",
   "designer.regression_lines": "Regresja liniowa",
   "charts.regression_short": "Liniowa",
+  "charts.legend_all": "Wsz",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Pokaz linie trendu dla wybranych metryk",
   "designer.select_all": "Wszystko",
   "designer.deselect_all": "Nic",

@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Todos marcados = todas las columnas",
   "designer.regression_lines": "Regresion lineal",
   "charts.regression_short": "Lineal",
+  "charts.legend_all": "Todo",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Mostrar linea de tendencia para las metricas seleccionadas",
   "designer.select_all": "Todos",
   "designer.deselect_all": "Ninguno",

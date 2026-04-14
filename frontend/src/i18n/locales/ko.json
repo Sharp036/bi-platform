@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "모두 선택 = 모든 열 사용",
   "designer.regression_lines": "선형 회귀",
   "charts.regression_short": "선형",
+  "charts.legend_all": "전체",
+  "charts.legend_inv": "반전",
   "designer.regression_lines_hint": "선택한 메트릭에 대한 추세선 표시",
   "designer.select_all": "모두 선택",
   "designer.deselect_all": "선택 해제",

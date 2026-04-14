@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Alle markeret = alle kolonner",
   "designer.regression_lines": "Lineær regression",
   "charts.regression_short": "Lineær",
+  "charts.legend_all": "Alle",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Vis trendlinje for valgte metrikker",
   "designer.select_all": "Alle",
   "designer.deselect_all": "Ingen",

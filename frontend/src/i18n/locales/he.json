@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "הכל מסומן = כל העמודות",
   "designer.regression_lines": "רגרסיה ליניארית",
   "charts.regression_short": "ליניארי",
+  "charts.legend_all": "הכל",
+  "charts.legend_inv": "הפוך",
   "designer.regression_lines_hint": "הצגת קו מגמה עבור מדדים נבחרים",
   "designer.select_all": "הכל",
   "designer.deselect_all": "כלום",

@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Tümü seçili = tüm sütunlar",
   "designer.regression_lines": "Doğrusal Regresyon",
   "charts.regression_short": "Doğrusal",
+  "charts.legend_all": "Tum",
+  "charts.legend_inv": "Ters",
   "designer.regression_lines_hint": "Seçilen metrikler için trend çizgisi göster",
   "designer.select_all": "Tumunu sec",
   "designer.deselect_all": "Hicbiri",

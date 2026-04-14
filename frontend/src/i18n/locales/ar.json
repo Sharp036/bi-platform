@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "الكل محدد = جميع الأعمدة",
   "designer.regression_lines": "الانحدار الخطي",
   "charts.regression_short": "خطي",
+  "charts.legend_all": "الكل",
+  "charts.legend_inv": "عكس",
   "designer.regression_lines_hint": "إظهار خط الاتجاه للمقاييس المحددة",
   "designer.select_all": "الكل",
   "designer.deselect_all": "لا شيء",
