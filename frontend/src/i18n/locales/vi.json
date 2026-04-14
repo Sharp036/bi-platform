@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Chọn tất cả = dùng tất cả cột",
   "designer.regression_lines": "Hồi quy tuyến tính",
   "charts.regression_short": "Tuyến tính",
+  "charts.legend_all": "Tất cả",
+  "charts.legend_inv": "Đảo",
   "designer.regression_lines_hint": "Hiển thị đường xu hướng cho các chỉ số đã chọn",
   "designer.select_all": "Tat ca",
   "designer.deselect_all": "Khong chon",

@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Όλα επιλεγμένα = όλες οι στήλες",
   "designer.regression_lines": "Γραμμική παλινδρόμηση",
   "charts.regression_short": "Γραμμική",
+  "charts.legend_all": "Ολα",
+  "charts.legend_inv": "Αντ",
   "designer.regression_lines_hint": "Εμφάνιση γραμμής τάσης για επιλεγμένες μετρικές",
   "designer.select_all": "Ολα",
   "designer.deselect_all": "Κανενα",

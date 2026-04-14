@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Alla markerade = alla kolumner",
   "designer.regression_lines": "Linjär regression",
   "charts.regression_short": "Linjär",
+  "charts.legend_all": "Alla",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Visa trendlinje för valda mätvärden",
   "designer.select_all": "Alla",
   "designer.deselect_all": "Inga",

@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "全选 = 使用所有列",
   "designer.regression_lines": "线性回归",
   "charts.regression_short": "线性",
+  "charts.legend_all": "全选",
+  "charts.legend_inv": "反选",
   "designer.regression_lines_hint": "显示所选指标的趋势线",
   "designer.select_all": "全选",
   "designer.deselect_all": "全不选",

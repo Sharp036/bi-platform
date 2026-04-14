@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Mind kijelölve = összes oszlop",
   "designer.regression_lines": "Lineáris regresszió",
   "charts.regression_short": "Lineáris",
+  "charts.legend_all": "Mind",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Trendvonal megjelenítése a kiválasztott mérőszámokhoz",
   "designer.select_all": "Mind",
   "designer.deselect_all": "Egyik sem",

@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "全選択 = 全列使用",
   "designer.regression_lines": "線形回帰",
   "charts.regression_short": "線形",
+  "charts.legend_all": "全",
+  "charts.legend_inv": "反転",
   "designer.regression_lines_hint": "選択したメトリクスのトレンドラインを表示",
   "designer.select_all": "全選択",
   "designer.deselect_all": "全解除",

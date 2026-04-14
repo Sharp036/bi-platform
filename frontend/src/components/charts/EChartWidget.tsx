@@ -559,6 +559,17 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
 
   const isDraggingNow = !!dragState.current
 
+  const hasLegend = !!option?.legend
+  const legendPos = (config.legendPosition as string) || 'auto'
+  const legendBtnStyle: React.CSSProperties = {
+    fontSize: 10, lineHeight: '16px', padding: '0 4px', cursor: 'pointer',
+    background: 'none', border: 'none',
+    color: isDark ? '#aaa' : '#888',
+  }
+  const legendBtnPos: React.CSSProperties = legendPos === 'top'
+    ? { top: 1, right: 4 } : legendPos === 'left'
+    ? { bottom: 1, left: 4 } : { bottom: 1, right: 4 }
+
   return (
     <div className="h-full flex flex-col">
       {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
@@ -578,6 +589,14 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
           opts={{ renderer: 'canvas' }}
           onEvents={onEvents}
         />
+        {hasLegend && (
+          <div className="absolute flex gap-0.5" style={legendBtnPos}>
+            <button style={legendBtnStyle} className="hover:underline"
+              onClick={() => chartRef.current?.getEchartsInstance()?.dispatchAction({ type: 'legendAllSelect' })}>{t('charts.legend_all', 'All')}</button>
+            <button style={legendBtnStyle} className="hover:underline"
+              onClick={() => chartRef.current?.getEchartsInstance()?.dispatchAction({ type: 'legendInverseSelect' })}>{t('charts.legend_inv', 'Inv')}</button>
+          </div>
+        )}
         {isDraggingNow && dragging && (
           <div
             style={{

@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Tout coché = toutes les colonnes",
   "designer.regression_lines": "Regression lineaire",
   "charts.regression_short": "Lineaire",
+  "charts.legend_all": "Tous",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Afficher la ligne de tendance pour les metriques selectionnees",
   "designer.select_all": "Tout",
   "designer.deselect_all": "Aucun",

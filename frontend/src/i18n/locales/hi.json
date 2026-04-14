@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "सभी चयनित = सभी कॉलम",
   "designer.regression_lines": "रेखीय प्रतिगमन",
   "charts.regression_short": "रेखीय",
+  "charts.legend_all": "सभी",
+  "charts.legend_inv": "उलट",
   "designer.regression_lines_hint": "चयनित मेट्रिक्स के लिए ट्रेंड लाइन दिखाएं",
   "designer.select_all": "सभी",
   "designer.deselect_all": "कोई नहीं",

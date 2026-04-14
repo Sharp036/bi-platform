@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Toate bifate = toate coloanele",
   "designer.regression_lines": "Regresie liniara",
   "charts.regression_short": "Liniara",
+  "charts.legend_all": "Toate",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Afiseaza linia de tendinta pentru metricile selectate",
   "designer.select_all": "Toate",
   "designer.deselect_all": "Nimic",

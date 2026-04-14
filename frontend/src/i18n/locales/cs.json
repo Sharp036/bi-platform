@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Vše zaškrtnuto = všechny sloupce",
   "designer.regression_lines": "Lineární regrese",
   "charts.regression_short": "Lineární",
+  "charts.legend_all": "Vse",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Zobrazit trendovou čáru pro vybrané metriky",
   "designer.select_all": "Vse",
   "designer.deselect_all": "Nic",

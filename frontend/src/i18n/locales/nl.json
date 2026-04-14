@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "Alles aangevinkt = alle kolommen",
   "designer.regression_lines": "Lineaire regressie",
   "charts.regression_short": "Lineair",
+  "charts.legend_all": "Alle",
+  "charts.legend_inv": "Inv",
   "designer.regression_lines_hint": "Trendlijn tonen voor geselecteerde metrieken",
   "designer.select_all": "Alles",
   "designer.deselect_all": "Niets",

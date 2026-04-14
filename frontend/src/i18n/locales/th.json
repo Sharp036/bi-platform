@@ -238,6 +238,8 @@
   "designer.value_fields_hint": "เลือกทั้งหมด = ใช้ทุกคอลัมน์",
   "designer.regression_lines": "การถดถอยเชิงเส้น",
   "charts.regression_short": "เชิงเส้น",
+  "charts.legend_all": "ทั้งหมด",
+  "charts.legend_inv": "กลับ",
   "designer.regression_lines_hint": "แสดงเส้นแนวโน้มสำหรับเมตริกที่เลือก",
   "designer.select_all": "ทั้งหมด",
   "designer.deselect_all": "ไม่มี",
