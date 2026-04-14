@@ -144,6 +144,7 @@
   "reports.widgets_count": "{{count}} виджетов",
   "reports.params_count": "{{count}} параметров",
   "reports.duplicated": "Дублировано",
+  "reports.copy_suffix": "копия",
   "reports.archived": "Архивировано",
   "reports.view_grid": "Плитки",
   "reports.view_table": "Таблица",

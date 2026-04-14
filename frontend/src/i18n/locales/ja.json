@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} 個のウィジェット",
   "reports.params_count": "{{count}} 個のパラメータ",
   "reports.duplicated": "複製しました",
+  "reports.copy_suffix": "コピー",
   "reports.archived": "アーカイブしました",
   "reports.view_grid": "グリッド表示",
   "reports.view_table": "テーブル表示",

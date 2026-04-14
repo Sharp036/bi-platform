@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widgetů",
   "reports.params_count": "{{count}} parametrů",
   "reports.duplicated": "Duplikováno",
+  "reports.copy_suffix": "kopie",
   "reports.archived": "Archivováno",
   "reports.view_grid": "Mřížkové zobrazení",
   "reports.view_table": "Tabulkové zobrazení",

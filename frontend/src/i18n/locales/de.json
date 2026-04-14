@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} Widgets",
   "reports.params_count": "{{count}} Parameter",
   "reports.duplicated": "Dupliziert",
+  "reports.copy_suffix": "Kopie",
   "reports.archived": "Archiviert",
   "reports.view_grid": "Rasteransicht",
   "reports.view_table": "Tabellenansicht",

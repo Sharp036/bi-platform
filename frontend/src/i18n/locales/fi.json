@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widgettiä",
   "reports.params_count": "{{count}} parametria",
   "reports.duplicated": "Kopioitu",
+  "reports.copy_suffix": "kopio",
   "reports.archived": "Arkistoitu",
   "reports.view_grid": "Ruudukkonäkymä",
   "reports.view_table": "Taulukkonäkymä",

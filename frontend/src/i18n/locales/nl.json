@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widgets",
   "reports.params_count": "{{count}} parameters",
   "reports.duplicated": "Gedupliceerd",
+  "reports.copy_suffix": "kopie",
   "reports.archived": "Gearchiveerd",
   "reports.view_grid": "Rasterweergave",
   "reports.view_table": "Tabelweergave",

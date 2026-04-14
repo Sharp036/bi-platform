@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} віджетів",
   "reports.params_count": "{{count}} параметрів",
   "reports.duplicated": "Дубльовано",
+  "reports.copy_suffix": "копія",
   "reports.archived": "Архівовано",
   "reports.view_grid": "Сітковий вигляд",
   "reports.view_table": "Табличний вигляд",

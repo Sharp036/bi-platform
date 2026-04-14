@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} 个组件",
   "reports.params_count": "{{count}} 个参数",
   "reports.duplicated": "已复制",
+  "reports.copy_suffix": "副本",
   "reports.archived": "已归档",
   "reports.view_grid": "网格视图",
   "reports.view_table": "表格视图",
