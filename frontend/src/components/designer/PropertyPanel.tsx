@@ -234,23 +234,14 @@ export default function PropertyPanel() {
         >
           <Trash2 className="w-4 h-4" />
         </button>
-        <select
-          value={widget.widgetType}
-          onChange={e => update({ widgetType: e.target.value as DesignerWidget['widgetType'] })}
-          className="ml-auto input text-xs py-0.5 h-auto"
-          title={t('designer.widget_type')}
-        >
-          {([
-            ['CHART', t('widgets.type.chart')],
-            ['TABLE', t('widgets.type.table')],
-            ['KPI',   t('widgets.type.kpi')],
-            ['TEXT',  t('widgets.type.text')],
-            ['FILTER',t('widgets.type.filter')],
-            ['IMAGE', t('widgets.type.image')],
-          ] as const).map(([wt, label]) => (
-            <option key={wt} value={wt}>{label}</option>
-          ))}
-        </select>
+        <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 px-2 py-0.5 bg-surface-100 dark:bg-dark-surface-100 rounded">
+          {({
+            CHART: t('widgets.type.chart'), TABLE: t('widgets.type.table'), KPI: t('widgets.type.kpi'),
+            TEXT: t('widgets.type.text'), FILTER: t('widgets.type.filter'), IMAGE: t('widgets.type.image'),
+            BUTTON: t('widgets.type.button'), WEBPAGE: t('widgets.type.webpage'),
+            SPACER: t('widgets.type.spacer'), DIVIDER: t('widgets.type.divider'),
+          } as Record<string, string>)[widget.widgetType] || widget.widgetType}
+        </span>
       </div>
 
       {/* Title */}
@@ -305,7 +296,7 @@ export default function PropertyPanel() {
       </Field>
 
       {/* Data Binding */}
-      {widget.widgetType !== 'TEXT' && widget.widgetType !== 'IMAGE' && (() => {
+      {!['TEXT', 'IMAGE', 'BUTTON', 'SPACER', 'DIVIDER', 'WEBPAGE'].includes(widget.widgetType) && (() => {
         const cc = widget.chartConfig as Record<string, unknown>
         const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
@@ -350,12 +341,14 @@ export default function PropertyPanel() {
                 <textarea
                   value={widget.rawSql}
                   onChange={e => update({ rawSql: e.target.value, queryId: null })}
-                  placeholder={t('designer.sql_placeholder')}
+                  placeholder={widget.datasourceId ? t('designer.sql_placeholder') : t('designer.select_datasource_first')}
                   className="input text-xs font-mono h-20 resize-none pr-8"
+                  disabled={!widget.datasourceId}
                 />
                 <button
                   onClick={() => setSqlEditorOpen(true)}
-                  className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600"
+                  disabled={!widget.datasourceId}
+                  className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600 disabled:opacity-30"
                   title={t('designer.open_sql_editor')}
                 >
                   <MoreVertical className="w-3.5 h-3.5" />
@@ -987,10 +980,13 @@ export default function PropertyPanel() {
       {widget.widgetType === 'BUTTON' && (() => {
         const bc = (widget.chartConfig || {}) as Record<string, unknown>
         const updateBtn = (updates: Record<string, unknown>) => update({ chartConfig: { ...bc, ...updates } })
+        // Ensure buttonType is always saved
+        if (!bc.buttonType) updateBtn({ buttonType: 'SHOW_HIDE' })
+        const effectiveType = (bc.buttonType as string) || 'SHOW_HIDE'
         return (
           <>
             <Field label={t('designer.button_type')}>
-              <select value={bc.buttonType as string || 'SHOW_HIDE'} onChange={e => updateBtn({ buttonType: e.target.value })} className="input text-sm">
+              <select value={effectiveType} onChange={e => updateBtn({ buttonType: e.target.value })} className="input text-sm">
                 <option value="SHOW_HIDE">{t('designer.button_show_hide')}</option>
                 <option value="NAVIGATE">{t('designer.button_navigate')}</option>
                 <option value="FILTER">{t('designer.button_filter')}</option>
@@ -1001,6 +997,11 @@ export default function PropertyPanel() {
             <Field label={t('designer.button_label')}>
               <input value={bc.label as string || ''} onChange={e => updateBtn({ label: e.target.value })} className="input text-sm" placeholder={t('designer.button_label')} />
             </Field>
+            {(bc.buttonType === 'SHOW_HIDE' || !bc.buttonType) && (
+              <Field label={t('designer.button_label_active')}>
+                <input value={bc.labelActive as string || ''} onChange={e => updateBtn({ labelActive: e.target.value })} className="input text-sm" placeholder={t('designer.button_label_active')} />
+              </Field>
+            )}
             <Field label={t('designer.button_size')}>
               <select value={bc.size as string || 'medium'} onChange={e => updateBtn({ size: e.target.value })} className="input text-sm">
                 <option value="small">{t('designer.button_small')}</option>
@@ -1017,7 +1018,7 @@ export default function PropertyPanel() {
                 <option value="slate">Slate</option>
               </select>
             </Field>
-            {bc.buttonType === 'SHOW_HIDE' && (
+            {(bc.buttonType === 'SHOW_HIDE' || !bc.buttonType) && (
               <Field label={t('designer.button_toggle_ids')}>
                 <select
                   value={(bc.toggleWidgetIds as number[] || [])[0] || ''}
@@ -1199,10 +1200,11 @@ function SqlEditorModal({ sql, datasourceId, parameters, onSave, onClose }: {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); e.stopPropagation(); onSave(editSql) }
     }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+    document.addEventListener('keydown', handler, true)
+    return () => document.removeEventListener('keydown', handler, true)
+  }, [onClose, onSave, editSql])
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>

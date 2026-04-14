@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import { vizApi } from '@/api/visualization'
+import { log } from '@/utils/logger'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { ReportParameter } from '@/types'
 import ComponentPalette from './ComponentPalette'
@@ -159,7 +160,9 @@ export default function ReportDesignerPage() {
     return () => window.removeEventListener('keydown', handler)
   }, [undo, redo]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const savingRef = useRef(false)
   const handleSave = useCallback(async () => {
+    if (savingRef.current) return
     if (!reportName.trim()) { toast.error(t('designer.report_name_required')); return }
     const normalizedParamNames = parameters.map(p => (p.name || '').trim()).filter(Boolean)
     const hasDuplicateParamNames = new Set(normalizedParamNames).size !== normalizedParamNames.length
@@ -168,6 +171,7 @@ export default function ReportDesignerPage() {
       return
     }
 
+    savingRef.current = true
     setSaving(true)
     try {
       // Auto-match paramMapping before saving: extract :params from SQL,
@@ -288,15 +292,18 @@ export default function ReportDesignerPage() {
         const existingServerIdSet = new Set(existingWidgets.map(w => w.id))
 
         const clientIdToServerId = new Map<string, number>()
+        const usedServerIds = new Set<number>()
         for (let i = 0; i < widgets.length; i++) {
           const w = widgets[i]
           const wp = widgetPayloads[i]
-          if (w.serverId && existingServerIdSet.has(w.serverId)) {
+          if (w.serverId && existingServerIdSet.has(w.serverId) && !usedServerIds.has(w.serverId)) {
             await reportApi.updateWidget(w.serverId, wp)
             clientIdToServerId.set(w.id, w.serverId)
+            usedServerIds.add(w.serverId)
           } else {
             const created = await reportApi.addWidget(reportId, wp) as { id: number }
             clientIdToServerId.set(w.id, created.id)
+            usedServerIds.add(created.id)
           }
         }
 
@@ -307,11 +314,38 @@ export default function ReportDesignerPage() {
             await reportApi.deleteWidget(ew.id)
           }
         }
+
+        // Update serverId in store for newly created widgets (without marking dirty)
+        useDesignerStore.setState(state => ({
+          widgets: state.widgets.map(w => {
+            const sid = clientIdToServerId.get(w.id)
+            return sid && !w.serverId ? { ...w, serverId: sid } : w
+          }),
+        }))
+
+        log.save('widgets', widgets.map(w => ({ clientId: w.id, serverId: w.serverId, title: w.title })))
+        log.save('clientIdToServerId', Object.fromEntries(clientIdToServerId))
+        const containerMapping: Record<string, unknown>[] = []
+        for (const c of containers) {
+          for (let ti = 0; ti < c.tabGroups.length; ti++) {
+            for (const cid of c.tabGroups[ti]) {
+              const sid = clientIdToServerId.get(cid)
+              const w = widgets.find(ww => ww.id === cid)
+              containerMapping.push({ tab: ti, clientId: cid, serverId: sid, title: w?.title, storeServerId: w?.serverId })
+            }
+          }
+        }
+        log.save('container mapping', containerMapping)
+
         const existingContainers = await vizApi.getContainers(reportId)
         for (const ec of existingContainers) {
           await vizApi.deleteContainer(ec.id)
         }
         for (const c of containers) {
+          const resolved = c.tabGroups.map(g =>
+            g.map(cid => clientIdToServerId.get(cid) ?? -1).filter(id => id !== -1)
+          )
+          console.log('[Save] container', c.name, 'tabGroups resolved:', resolved)
           await vizApi.createContainer({
             reportId,
             containerType: c.containerType,
@@ -332,6 +366,7 @@ export default function ReportDesignerPage() {
       toast.error(msg || t('designer.failed_save'))
     } finally {
       setSaving(false)
+      savingRef.current = false
     }
   }, [
     reportName,
@@ -512,7 +547,7 @@ export default function ReportDesignerPage() {
         {/* Left: Component Palette */}
         {!previewMode && (
           <div className="w-52 flex-shrink-0 p-3 overflow-y-auto border-r border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/30">
-            <ComponentPalette />
+            <ComponentPalette containerWidgetIds={new Set(containers.flatMap(c => c.tabGroups.flat()))} />
           </div>
         )}
 

@@ -75,8 +75,20 @@ export default function ReportListPage() {
       )}
       <Link to={`/reports/${r.slug}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
       {canEdit && (<>
-        <button onClick={() => { reportApi.duplicate(r.id); toast.success(t('reports.duplicated')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
-        <button onClick={() => { reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
+        <button onClick={async () => {
+          const suffix = t('reports.copy_suffix', 'copy')
+          const existingNames = new Set(reports.map(x => x.name))
+          let copyName = `${r.name} (${suffix})`
+          let idx = 2
+          while (existingNames.has(copyName)) {
+            copyName = `${r.name} (${suffix} ${idx})`
+            idx++
+          }
+          await reportApi.duplicate(r.id, copyName)
+          toast.success(t('reports.duplicated'))
+          load()
+        }} className="btn-ghost p-1.5 text-xs" title={t('common.duplicate')}><Copy className="w-3.5 h-3.5" /></button>
+        <button onClick={async () => { await reportApi.archive(r.id); toast.success(t('reports.archived')); load() }} className="btn-ghost p-1.5 text-xs" title={t('common.archive')}><Archive className="w-3.5 h-3.5" /></button>
       </>)}
       {canShare && (
         <button onClick={(e) => { e.preventDefault(); setShareReport(r) }} className="btn-ghost p-1.5 text-xs" title={t('common.share')}><Share2 className="w-3.5 h-3.5" /></button>

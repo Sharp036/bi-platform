@@ -26,6 +26,11 @@ class ReportServiceTest {
     private lateinit var dashboardReportRepo: DashboardReportRepository
     private lateinit var scheduleRepo: ReportScheduleRepository
     private lateinit var snapshotRepo: ReportSnapshotRepository
+    private lateinit var vizService: VisualizationService
+    private lateinit var interactiveService: InteractiveDashboardService
+    private lateinit var controlService: ControlService
+    private lateinit var drillService: DrillDownService
+    private lateinit var objectMapper: ObjectMapper
     private lateinit var reportService: ReportService
 
     @BeforeEach
@@ -36,7 +41,12 @@ class ReportServiceTest {
         dashboardReportRepo = mock()
         scheduleRepo = mock()
         snapshotRepo = mock()
-        reportService = ReportService(reportRepo, paramRepo, widgetRepo, dashboardReportRepo, scheduleRepo, snapshotRepo)
+        vizService = mock()
+        interactiveService = mock()
+        controlService = mock()
+        drillService = mock()
+        objectMapper = jacksonObjectMapper()
+        reportService = ReportService(reportRepo, paramRepo, widgetRepo, dashboardReportRepo, scheduleRepo, snapshotRepo, vizService, interactiveService, controlService, drillService, objectMapper)
     }
 
     @Nested
@@ -214,6 +224,11 @@ class ReportServiceTest {
             ))
             whenever(reportRepo.findById(1L)).thenReturn(Optional.of(source))
             whenever(reportRepo.save(any<Report>())).thenAnswer { it.getArgument<Report>(0) }
+            whenever(vizService.getContainers(1L)).thenReturn(emptyList())
+            whenever(interactiveService.getActionsForReport(1L)).thenReturn(emptyList())
+            whenever(controlService.getParameterControls(1L)).thenReturn(emptyList())
+            whenever(drillService.getActionsForReport(1L)).thenReturn(emptyMap())
+            whenever(interactiveService.getOverlaysForReport(1L)).thenReturn(emptyList())
 
             val result = reportService.duplicateReport(1L, "Copy of Original", userId = 1L)
 

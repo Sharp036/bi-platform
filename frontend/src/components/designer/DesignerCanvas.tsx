@@ -426,6 +426,7 @@ function WidgetBlock({
 
   const cc = widget.chartConfig as Record<string, unknown>
   const chartConfigStr = (widget.widgetType === 'CHART' || widget.widgetType === 'TABLE') && previewData ? JSON.stringify(cc) : undefined
+  const noHeader = widget.widgetType === 'BUTTON' || widget.widgetType === 'SPACER' || widget.widgetType === 'DIVIDER'
 
   const tablePreviewData = widget.widgetType === 'TABLE' && previewData ? (() => {
     const visCols = cc.visibleColumns as string[] | undefined
@@ -479,33 +480,38 @@ function WidgetBlock({
           : 'border-surface-200 dark:border-dark-surface-100 bg-white dark:bg-dark-surface-50 hover:border-brand-300 dark:hover:border-brand-700',
         !widget.isVisible && 'opacity-40',
       )}>
-        {/* Header (draggable for move) */}
-        <div
-          className="flex items-center gap-1.5 px-2 py-1.5 border-b border-surface-100 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/50 flex-shrink-0 cursor-grab active:cursor-grabbing"
-          onMouseDown={!previewMode ? (e) => startDrag(e, 'move') : undefined}
-        >
-          <GripVertical
-            className="w-3 h-3 text-slate-400 dark:text-slate-500 flex-shrink-0"
-          />
-          <Icon className="w-3.5 h-3.5 text-brand-500" />
-          <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
-            {widget.title || widget.widgetType}
-          </span>
-          {hasDataSource && !previewData && (
-            <button
-              onClick={loadPreview}
-              disabled={previewLoading}
-              className="p-0.5 rounded hover:bg-brand-100 dark:hover:bg-brand-900/30 text-brand-500"
-              title={t('designer.load_preview')}
-            >
-              <Play className={`w-3 h-3 ${previewLoading ? 'animate-pulse' : ''}`} />
-            </button>
-          )}
-          {!widget.isVisible && <EyeOff className="w-3 h-3 text-slate-400" />}
-        </div>
+        {/* Header (draggable for move) — hidden for self-contained widgets like BUTTON */}
+        {!noHeader && (
+          <div
+            className="flex items-center gap-1.5 px-2 py-1.5 border-b border-surface-100 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-100/50 flex-shrink-0 cursor-grab active:cursor-grabbing"
+            onMouseDown={!previewMode ? (e) => startDrag(e, 'move') : undefined}
+          >
+            <GripVertical
+              className="w-3 h-3 text-slate-400 dark:text-slate-500 flex-shrink-0"
+            />
+            <Icon className="w-3.5 h-3.5 text-brand-500" />
+            <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
+              {widget.title || widget.widgetType}
+            </span>
+            {hasDataSource && !previewData && (
+              <button
+                onClick={loadPreview}
+                disabled={previewLoading}
+                className="p-0.5 rounded hover:bg-brand-100 dark:hover:bg-brand-900/30 text-brand-500"
+                title={t('designer.load_preview')}
+              >
+                <Play className={`w-3 h-3 ${previewLoading ? 'animate-pulse' : ''}`} />
+              </button>
+            )}
+            {!widget.isVisible && <EyeOff className="w-3 h-3 text-slate-400" />}
+          </div>
+        )}
 
         {/* Body */}
-        <div className="flex-1 flex items-center justify-center p-2 min-h-0">
+        <div
+          className={clsx('flex-1 flex items-center justify-center p-2 min-h-0', noHeader && !previewMode && 'cursor-grab active:cursor-grabbing')}
+          onMouseDown={noHeader && !previewMode ? (e) => startDrag(e, 'move') : undefined}
+        >
           {widget.widgetType === 'CHART' && previewData ? (
             <div className="w-full h-full">
               <EChartWidget data={previewData} chartConfig={chartConfigStr} />
@@ -545,6 +551,26 @@ function WidgetBlock({
               alt={widget.title}
               className="max-h-full max-w-full object-contain"
             />
+          ) : widget.widgetType === 'BUTTON' ? (
+            <button className={clsx(
+              'rounded-lg font-medium transition-colors',
+              cc.size === 'small' ? 'px-3 py-1.5 text-xs' : cc.size === 'large' ? 'px-6 py-3 text-base' : 'px-4 py-2 text-sm',
+              cc.color === 'green' ? 'bg-emerald-500 text-white' :
+              cc.color === 'red' ? 'bg-red-500 text-white' :
+              cc.color === 'orange' ? 'bg-amber-500 text-white' :
+              cc.color === 'slate' ? 'bg-slate-500 text-white' :
+              'bg-brand-500 text-white',
+            )}>
+              {(cc.label as string) || widget.title || 'Button'}
+            </button>
+          ) : widget.widgetType === 'SPACER' ? (
+            <div className="w-full h-full border border-dashed border-slate-200 dark:border-slate-700 rounded flex items-center justify-center">
+              <span className="text-[10px] text-slate-300">Spacer</span>
+            </div>
+          ) : widget.widgetType === 'DIVIDER' ? (
+            <div className="w-full flex items-center px-2">
+              <div className="w-full border-t border-slate-300 dark:border-slate-600" />
+            </div>
           ) : previewError ? (
             <p className="text-[10px] text-red-400">{previewError}</p>
           ) : (

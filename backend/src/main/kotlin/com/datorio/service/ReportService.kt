@@ -3,6 +3,9 @@ package com.datorio.service
 import com.datorio.model.*
 import com.datorio.model.dto.*
 import com.datorio.repository.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -18,7 +21,12 @@ class ReportService(
     private val widgetRepo: ReportWidgetRepository,
     private val dashboardReportRepo: DashboardReportRepository,
     private val scheduleRepo: ReportScheduleRepository,
-    private val snapshotRepo: ReportSnapshotRepository
+    private val snapshotRepo: ReportSnapshotRepository,
+    private val vizService: VisualizationService,
+    private val interactiveService: InteractiveDashboardService,
+    private val controlService: ControlService,
+    private val drillService: DrillDownService,
+    private val objectMapper: ObjectMapper
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -203,7 +211,197 @@ class ReportService(
             }
         )
         log.info("Duplicating report '{}' (id={}) as '{}'", source.name, id, createRequest.name)
-        return createReport(createRequest, userId)
+        val created = createReport(createRequest, userId)
+
+        // Build old widget ID -> new widget ID mapping
+        val sourceWidgets = widgetRepo.findByReportIdOrderBySortOrder(id)
+        val newWidgets = widgetRepo.findByReportIdOrderBySortOrder(created.id)
+        val widgetIdMap = mutableMapOf<Long, Long>()
+        sourceWidgets.forEachIndexed { i, sw ->
+            if (i < newWidgets.size) widgetIdMap[sw.id] = newWidgets[i].id
+        }
+
+        // Remap toggleWidgetIds in BUTTON widget chartConfigs
+        for (nw in newWidgets) {
+            if (nw.widgetType != WidgetType.BUTTON) continue
+            try {
+                val root = objectMapper.readTree(nw.chartConfig) as? ObjectNode ?: continue
+                val toggleIds = root.get("toggleWidgetIds") ?: continue
+                if (!toggleIds.isArray || toggleIds.size() == 0) continue
+                val remapped = objectMapper.createArrayNode()
+                for (idNode in toggleIds) {
+                    val newId = widgetIdMap[idNode.asLong()]
+                    if (newId != null) remapped.add(newId)
+                }
+                root.set<ArrayNode>("toggleWidgetIds", remapped)
+                nw.chartConfig = objectMapper.writeValueAsString(root)
+                widgetRepo.save(nw)
+            } catch (e: Exception) {
+                log.warn("Failed to remap toggleWidgetIds for widget {}: {}", nw.id, e.message)
+            }
+        }
+
+        // Copy containers (tabs) with remapped widget IDs
+        try {
+            val containers = vizService.getContainers(id)
+            for (c in containers) {
+                val remappedChildren = c.childWidgetIds.map { group ->
+                    group.mapNotNull { widgetIdMap[it] }
+                }
+                vizService.createContainer(ContainerRequest(
+                    reportId = created.id,
+                    containerType = c.containerType,
+                    name = c.name,
+                    childWidgetIds = remappedChildren,
+                    tabNames = c.tabNames,
+                    activeTab = c.activeTab,
+                    autoDistribute = c.autoDistribute,
+                    config = c.config,
+                    sortOrder = c.sortOrder
+                ))
+            }
+        } catch (e: Exception) {
+            log.warn("Failed to copy containers for report {}: {}", id, e.message)
+        }
+
+        // Copy dashboard actions with remapped widget IDs
+        try {
+            val actions = interactiveService.getActionsForReport(id)
+            for (a in actions) {
+                val newSourceId = a.sourceWidgetId?.let { widgetIdMap[it] }
+                val newTargetIds = a.targetWidgetIds?.split(",")
+                    ?.mapNotNull { it.trim().toLongOrNull()?.let { wid -> widgetIdMap[wid] } }
+                    ?.joinToString(",")
+                interactiveService.createAction(DashboardActionRequest(
+                    reportId = created.id,
+                    name = a.name,
+                    actionType = a.actionType,
+                    triggerType = a.triggerType,
+                    sourceWidgetId = newSourceId,
+                    targetWidgetIds = newTargetIds,
+                    sourceField = a.sourceField,
+                    targetField = a.targetField,
+                    targetReportId = a.targetReportId,
+                    urlTemplate = a.urlTemplate,
+                    config = a.config
+                ))
+            }
+        } catch (e: Exception) {
+            log.warn("Failed to copy actions for report {}: {}", id, e.message)
+        }
+
+        // Copy parameter controls
+        try {
+            val controls = controlService.getParameterControls(id)
+            for (c in controls) {
+                controlService.saveParameterControl(ParameterControlRequest(
+                    reportId = created.id,
+                    parameterName = c.parameterName,
+                    controlType = c.controlType,
+                    datasourceId = c.datasourceId,
+                    optionsQuery = c.optionsQuery,
+                    sliderMin = c.sliderMin,
+                    sliderMax = c.sliderMax,
+                    sliderStep = c.sliderStep,
+                    sortOrder = c.sortOrder
+                ))
+            }
+        } catch (e: Exception) {
+            log.warn("Failed to copy parameter controls for report {}: {}", id, e.message)
+        }
+
+        // Copy drill-down actions
+        try {
+            val drillActions = drillService.getActionsForReport(id)
+            for ((_, actions) in drillActions) {
+                for (a in actions) {
+                    val newSourceId = a.sourceWidgetId.let { widgetIdMap[it] } ?: continue
+                    drillService.create(DrillActionCreateRequest(
+                        sourceWidgetId = newSourceId,
+                        targetReportId = a.targetReportId,
+                        actionType = a.actionType,
+                        label = a.label,
+                        paramMapping = a.paramMapping,
+                        triggerType = a.triggerType,
+                        openMode = a.openMode
+                    ))
+                }
+            }
+        } catch (e: Exception) {
+            log.warn("Failed to copy drill actions for report {}: {}", id, e.message)
+        }
+
+        // Copy per-widget elements: annotations, tooltips, chart layers, visibility rules
+        for ((oldId, newId) in widgetIdMap) {
+            try {
+                val annotations = vizService.getAnnotations(oldId)
+                for (a in annotations) {
+                    vizService.createAnnotation(AnnotationRequest(
+                        widgetId = newId, annotationType = a.annotationType,
+                        axis = a.axis, value = a.value, valueEnd = a.valueEnd,
+                        label = a.label, color = a.color, lineStyle = a.lineStyle,
+                        lineWidth = a.lineWidth, opacity = a.opacity, fillColor = a.fillColor,
+                        fillOpacity = a.fillOpacity, position = a.position, fontSize = a.fontSize,
+                        isVisible = a.isVisible, sortOrder = a.sortOrder, config = a.config
+                    ))
+                }
+            } catch (_: Exception) {}
+
+            try {
+                val tooltip = vizService.getTooltipConfig(oldId)
+                if (tooltip != null) {
+                    vizService.saveTooltipConfig(TooltipConfigRequest(
+                        widgetId = newId, isEnabled = tooltip.isEnabled, showTitle = tooltip.showTitle,
+                        titleField = tooltip.titleField, fields = tooltip.fields,
+                        showSparkline = tooltip.showSparkline, sparklineField = tooltip.sparklineField,
+                        htmlTemplate = tooltip.htmlTemplate, config = tooltip.config
+                    ))
+                }
+            } catch (_: Exception) {}
+
+            try {
+                val layers = interactiveService.getLayersForWidget(oldId)
+                for (l in layers) {
+                    interactiveService.createLayer(ChartLayerRequest(
+                        widgetId = newId, name = l.name, label = l.label,
+                        queryId = l.queryId, datasourceId = l.datasourceId,
+                        rawSql = l.rawSql, chartType = l.chartType, axis = l.axis,
+                        color = l.color, opacity = l.opacity, isVisible = l.isVisible,
+                        sortOrder = l.sortOrder, seriesConfig = l.seriesConfig,
+                        categoryField = l.categoryField, valueField = l.valueField
+                    ))
+                }
+            } catch (_: Exception) {}
+
+            try {
+                val rules = interactiveService.getRulesForWidget(oldId)
+                for (r in rules) {
+                    interactiveService.createVisibilityRule(VisibilityRuleRequest(
+                        widgetId = newId, ruleType = r.ruleType,
+                        parameterName = r.parameterName, operator = r.operator,
+                        expectedValue = r.expectedValue
+                    ))
+                }
+            } catch (_: Exception) {}
+        }
+
+        // Copy overlays
+        try {
+            val overlays = interactiveService.getOverlaysForReport(id)
+            for (o in overlays) {
+                interactiveService.createOverlay(OverlayRequest(
+                    reportId = created.id, overlayType = o.overlayType,
+                    content = o.content, positionX = o.positionX, positionY = o.positionY,
+                    width = o.width, height = o.height, zIndex = o.zIndex,
+                    opacity = o.opacity, linkUrl = o.linkUrl, style = o.style
+                ))
+            }
+        } catch (e: Exception) {
+            log.warn("Failed to copy overlays for report {}: {}", id, e.message)
+        }
+
+        log.info("Duplicated report {} -> {} with all interactive elements", id, created.id)
+        return created
     }
 
     @Transactional

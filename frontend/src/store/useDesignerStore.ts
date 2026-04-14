@@ -51,7 +51,7 @@ interface DesignerState {
     parameters: Array<Record<string, unknown>>
   }) => void
 
-  addWidget: (type: DesignerWidget['widgetType']) => void
+  addWidget: (type: DesignerWidget['widgetType'], containerWidgetIds?: Set<string>) => void
   updateWidget: (id: string, updates: Partial<DesignerWidget>) => void
   removeWidget: (id: string) => void
   duplicateWidget: (id: string) => void
@@ -75,12 +75,16 @@ let nextId = 1
 const genId = () => `w_${nextId++}`
 
 const WIDGET_DEFAULTS: Record<string, Partial<DesignerWidget>> = {
-  CHART: { position: { x: 0, y: 0, w: 6, h: 4 }, chartConfig: { type: 'bar' } },
-  TABLE: { position: { x: 0, y: 0, w: 12, h: 4 }, chartConfig: {} },
-  KPI:   { position: { x: 0, y: 0, w: 3, h: 2 }, chartConfig: { format: 'number' } },
-  TEXT:  { position: { x: 0, y: 0, w: 6, h: 2 }, chartConfig: {} },
-  FILTER: { position: { x: 0, y: 0, w: 3, h: 1 }, chartConfig: {} },
-  IMAGE: { position: { x: 0, y: 0, w: 4, h: 3 }, chartConfig: {} },
+  CHART:   { position: { x: 0, y: 0, w: 6, h: 4 }, chartConfig: { type: 'bar' } },
+  TABLE:   { position: { x: 0, y: 0, w: 12, h: 4 }, chartConfig: {} },
+  KPI:     { position: { x: 0, y: 0, w: 3, h: 2 }, chartConfig: { format: 'number' } },
+  TEXT:    { position: { x: 0, y: 0, w: 6, h: 2 }, chartConfig: {} },
+  FILTER:  { position: { x: 0, y: 0, w: 3, h: 1 }, chartConfig: {} },
+  IMAGE:   { position: { x: 0, y: 0, w: 4, h: 3 }, chartConfig: {} },
+  BUTTON:  { position: { x: 0, y: 0, w: 2, h: 1 }, chartConfig: { buttonType: 'SHOW_HIDE', label: '', size: 'small' } },
+  WEBPAGE: { position: { x: 0, y: 0, w: 12, h: 6 }, chartConfig: {} },
+  SPACER:  { position: { x: 0, y: 0, w: 12, h: 1 }, chartConfig: {} },
+  DIVIDER: { position: { x: 0, y: 0, w: 12, h: 1 }, chartConfig: {} },
 }
 
 const pushHistory = (state: DesignerState): Partial<DesignerState> => {
@@ -95,7 +99,16 @@ const pushHistory = (state: DesignerState): Partial<DesignerState> => {
 
 const findNextY = (widgets: DesignerWidget[]): number => {
   if (widgets.length === 0) return 0
-  return Math.max(...widgets.map(w => w.position.y + w.position.h))
+  const maxHByY = new Map<number, number>()
+  for (const w of widgets) {
+    const existing = maxHByY.get(w.position.y) || 0
+    maxHByY.set(w.position.y, Math.max(existing, w.position.h))
+  }
+  let maxEnd = 0
+  for (const [y, h] of maxHByY) {
+    maxEnd = Math.max(maxEnd, y + h)
+  }
+  return maxEnd
 }
 
 export const useDesignerStore = create<DesignerState>((set, get) => ({
@@ -167,7 +180,7 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
     })
   },
 
-  addWidget: (type) => set(state => {
+  addWidget: (type, containerWidgetIds) => set(state => {
     const defaults = WIDGET_DEFAULTS[type] || {}
     const widget: DesignerWidget = {
       id: genId(),
@@ -179,7 +192,7 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       chartConfig: (defaults.chartConfig as Record<string, unknown>) || {},
       position: {
         x: defaults.position?.x || 0,
-        y: findNextY(state.widgets),
+        y: findNextY(containerWidgetIds ? state.widgets.filter(w => !containerWidgetIds.has(w.id)) : state.widgets),
         w: defaults.position?.w || 6,
         h: defaults.position?.h || 4,
       },

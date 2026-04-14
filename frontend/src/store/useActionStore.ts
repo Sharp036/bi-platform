@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { DashboardActionItem } from '@/types'
+import { log } from '@/utils/logger'
 
 /**
  * Active filters applied by cross-filter actions.
@@ -55,6 +56,7 @@ export const useActionStore = create<ActionState>((set, get) => ({
   setActions: (actions) => set({ actions }),
 
   triggerAction: (sourceWidgetId, triggerType, data) => {
+    log.action('triggerAction', { sourceWidgetId, triggerType, dataKeys: Object.keys(data), name: data.name, seriesName: data.seriesName })
     const { actions, activeFilters, highlightedValues } = get()
 
     // Find matching actions
@@ -185,6 +187,7 @@ export const useActionStore = create<ActionState>((set, get) => ({
   },
 
   undoDrillReplace: (sourceWidgetId: number) => {
+    log.action('undoDrillReplace', { sourceWidgetId })
     const { drillReplaceStack, activeFilters } = get()
     const idx = drillReplaceStack.findIndex(e => e.sourceWidgetId === sourceWidgetId)
     if (idx === -1) return

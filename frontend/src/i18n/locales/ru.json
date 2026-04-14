@@ -144,6 +144,7 @@
   "reports.widgets_count": "{{count}} виджетов",
   "reports.params_count": "{{count}} параметров",
   "reports.duplicated": "Дублировано",
+  "reports.copy_suffix": "копия",
   "reports.archived": "Архивировано",
   "reports.view_grid": "Плитки",
   "reports.view_table": "Таблица",
@@ -250,6 +251,8 @@
   "designer.value_fields_hint": "Все отмечены = все столбцы",
   "designer.regression_lines": "Линейная регрессия",
   "charts.regression_short": "Линейная",
+  "charts.legend_all": "Все",
+  "charts.legend_inv": "Инв",
   "designer.regression_lines_hint": "Показывать линию тренда для выбранных метрик",
   "designer.select_all": "Все",
   "designer.deselect_all": "Ничего",
@@ -947,5 +950,7 @@
   "designer.button_select_widget": "Выберите виджет...",
   "designer.button_toggle_hint": "Клик будет показывать/скрывать этот виджет",
   "designer.button_target_report": "ID целевого отчета",
-  "designer.button_filter_value": "Значение фильтра"
+  "designer.button_filter_value": "Значение фильтра",
+  "designer.button_label_active": "Текст при включении",
+  "designer.select_datasource_first": "Сначала выберите источник данных"
 }
