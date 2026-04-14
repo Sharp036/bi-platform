@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widgeter",
   "reports.params_count": "{{count}} parametere",
   "reports.duplicated": "Duplisert",
+  "reports.copy_suffix": "kopi",
   "reports.archived": "Arkivert",
   "reports.view_grid": "Rutenettvisning",
   "reports.view_table": "Tabellvisning",

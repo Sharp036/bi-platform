@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widget",
   "reports.params_count": "{{count}} parameter",
   "reports.duplicated": "Diduplikasi",
+  "reports.copy_suffix": "salinan",
   "reports.archived": "Diarsipkan",
   "reports.view_grid": "Tampilan grid",
   "reports.view_table": "Tampilan tabel",

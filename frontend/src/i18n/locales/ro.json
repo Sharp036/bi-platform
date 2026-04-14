@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widgeturi",
   "reports.params_count": "{{count}} parametri",
   "reports.duplicated": "Duplicat",
+  "reports.copy_suffix": "copie",
   "reports.archived": "Arhivat",
   "reports.view_grid": "Vizualizare grilă",
   "reports.view_table": "Vizualizare tabel",

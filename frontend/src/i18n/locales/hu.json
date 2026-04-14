@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widget",
   "reports.params_count": "{{count}} paraméter",
   "reports.duplicated": "Másolva",
+  "reports.copy_suffix": "masolat",
   "reports.archived": "Archiválva",
   "reports.view_grid": "Rácsnézet",
   "reports.view_table": "Táblázatnézet",

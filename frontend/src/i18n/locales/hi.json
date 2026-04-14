@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} विजेट",
   "reports.params_count": "{{count}} पैरामीटर",
   "reports.duplicated": "डुप्लिकेट किया गया",
+  "reports.copy_suffix": "प्रति",
   "reports.archived": "संग्रहित किया गया",
   "reports.view_grid": "ग्रिड दृश्य",
   "reports.view_table": "तालिका दृश्य",

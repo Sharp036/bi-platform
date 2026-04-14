@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widgetów",
   "reports.params_count": "{{count}} parametrów",
   "reports.duplicated": "Zduplikowano",
+  "reports.copy_suffix": "kopia",
   "reports.archived": "Zarchiwizowano",
   "reports.view_grid": "Widok siatki",
   "reports.view_table": "Widok tabeli",

@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widgetar",
   "reports.params_count": "{{count}} parametrar",
   "reports.duplicated": "Duplicerad",
+  "reports.copy_suffix": "kopia",
   "reports.archived": "Arkiverad",
   "reports.view_grid": "Rutnätsvy",
   "reports.view_table": "Tabellvy",

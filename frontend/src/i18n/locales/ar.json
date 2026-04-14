@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} عنصر واجهة",
   "reports.params_count": "{{count}} معامل",
   "reports.duplicated": "تم التكرار",
+  "reports.copy_suffix": "نسخة",
   "reports.archived": "تمت الأرشفة",
   "reports.view_grid": "عرض شبكي",
   "reports.view_table": "عرض جدولي",

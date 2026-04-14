@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} วิดเจ็ต",
   "reports.params_count": "{{count}} พารามิเตอร์",
   "reports.duplicated": "ทำซ้ำแล้ว",
+  "reports.copy_suffix": "สำเนา",
   "reports.archived": "เก็บถาวรแล้ว",
   "reports.view_grid": "มุมมองแบบกริด",
   "reports.view_table": "มุมมองแบบตาราง",

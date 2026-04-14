@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} widget",
   "reports.params_count": "{{count}} tham số",
   "reports.duplicated": "Đã nhân bản",
+  "reports.copy_suffix": "ban sao",
   "reports.archived": "Đã lưu trữ",
   "reports.view_grid": "Chế độ lưới",
   "reports.view_table": "Chế độ bảng",

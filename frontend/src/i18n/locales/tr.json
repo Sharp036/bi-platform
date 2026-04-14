@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} bileşen",
   "reports.params_count": "{{count}} parametre",
   "reports.duplicated": "Çoğaltıldı",
+  "reports.copy_suffix": "kopya",
   "reports.archived": "Arşivlendi",
   "reports.view_grid": "Izgara görünümü",
   "reports.view_table": "Tablo görünümü",

@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} ווידג'טים",
   "reports.params_count": "{{count}} פרמטרים",
   "reports.duplicated": "שוכפל",
+  "reports.copy_suffix": "עותק",
   "reports.archived": "הועבר לארכיון",
   "reports.view_grid": "תצוגת רשת",
   "reports.view_table": "תצוגת טבלה",

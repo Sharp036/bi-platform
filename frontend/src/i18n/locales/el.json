@@ -132,6 +132,7 @@
   "reports.widgets_count": "{{count}} στοιχεία",
   "reports.params_count": "{{count}} παράμετροι",
   "reports.duplicated": "Αντιγράφηκε",
+  "reports.copy_suffix": "αντίγραφο",
   "reports.archived": "Αρχειοθετήθηκε",
   "reports.view_grid": "Προβολή πλέγματος",
   "reports.view_table": "Προβολή πίνακα",
