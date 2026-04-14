@@ -41,10 +41,16 @@ function buildValueFormatter(format: string, currency: string, decimals?: number
   }
 }
 
-function buildLegendOption(seriesCount: number, legendPosition: string) {
+function buildLegendOption(seriesCount: number, legendPosition: string, selectorLabels?: { all: string; inv: string }) {
   if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
+  const selector = selectorLabels ? [
+    { type: 'all' as const, title: selectorLabels.all },
+    { type: 'inverse' as const, title: selectorLabels.inv },
+  ] : true
   const compact = {
     type: 'scroll' as const,
+    selector,
+    selectorLabel: { fontSize: 10, borderRadius: 2, padding: [2, 6] },
     itemWidth: 12,
     itemHeight: 7,
     itemGap: 6,
@@ -230,6 +236,7 @@ function buildOption(
   getChartWidth?: () => number,
   manualPositions?: Map<string, { x: number; y: number }>,
   placementsRef?: { current: Map<string, LabelPlacement> },
+  selectorLabels?: { all: string; inv: string },
 ) {
   const chartType = (config.type as string) || 'bar'
   const cols = data.columns || []
@@ -347,7 +354,7 @@ function buildOption(
   }
 
   const hasAxis = !['pie', 'radar', 'funnel', 'gauge', 'treemap', 'sankey'].includes(chartType)
-  const legend = buildLegendOption(series.length, legendPosition)
+  const legend = buildLegendOption(series.length, legendPosition, selectorLabels)
   const showLegend = !!legend
   const legendIsTop = showLegend && legendPosition === 'top'
   const legendIsBottom = showLegend && (legendPosition === 'bottom' || legendPosition === 'auto')
@@ -444,6 +451,7 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
   const option = buildOption(
     data, config, t('charts.regression_short', 'Linear'), isDark,
     getChartWidth, manualLabelPositions.current, labelPlacements,
+    { all: t('charts.legend_all', 'All'), inv: t('charts.legend_inv', 'Inv') },
   )
 
   // ── Drag handlers ─────────────────────────────────────────────────────────
@@ -559,17 +567,6 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
 
   const isDraggingNow = !!dragState.current
 
-  const hasLegend = !!option?.legend
-  const legendPos = (config.legendPosition as string) || 'auto'
-  const legendBtnStyle: React.CSSProperties = {
-    fontSize: 10, lineHeight: '16px', padding: '0 4px', cursor: 'pointer',
-    background: 'none', border: 'none',
-    color: isDark ? '#aaa' : '#888',
-  }
-  const legendBtnPos: React.CSSProperties = legendPos === 'top'
-    ? { top: 1, right: 4 } : legendPos === 'left'
-    ? { bottom: 1, left: 4 } : { bottom: 1, right: 4 }
-
   return (
     <div className="h-full flex flex-col">
       {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
@@ -589,14 +586,6 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
           opts={{ renderer: 'canvas' }}
           onEvents={onEvents}
         />
-        {hasLegend && (
-          <div className="absolute flex gap-0.5" style={legendBtnPos}>
-            <button style={legendBtnStyle} className="hover:underline"
-              onClick={() => chartRef.current?.getEchartsInstance()?.dispatchAction({ type: 'legendAllSelect' })}>{t('charts.legend_all', 'All')}</button>
-            <button style={legendBtnStyle} className="hover:underline"
-              onClick={() => chartRef.current?.getEchartsInstance()?.dispatchAction({ type: 'legendInverseSelect' })}>{t('charts.legend_inv', 'Inv')}</button>
-          </div>
-        )}
         {isDraggingNow && dragging && (
           <div
             style={{
