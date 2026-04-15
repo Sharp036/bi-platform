@@ -28,7 +28,8 @@ LABEL maintainer="your-email@example.com"
 LABEL description="Datorio Platform"
 
 # Install nginx for serving frontend + reverse proxy
-RUN apk add --no-cache nginx \
+RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.yandex.ru/mirrors/alpine|g' /etc/apk/repositories \
+    && apk add --no-cache nginx \
     && mkdir -p /run/nginx
 
 WORKDIR /app
