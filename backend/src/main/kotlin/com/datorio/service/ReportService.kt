@@ -477,13 +477,12 @@ class ReportService(
             sortOrder = request.sortOrder,
             isVisible = request.isVisible
         )
-        report.widgets.add(widget)
+        val saved = widgetRepo.save(widget)
         report.updatedBy = userId
         report.updatedAt = Instant.now()
         reportRepo.save(report)
 
-        val saved = report.widgets.last()
-        log.info("Added widget '{}' to report id={}", saved.title ?: saved.widgetType, reportId)
+        log.info("Added widget '{}' (id={}) to report id={}", saved.title ?: saved.widgetType, saved.id, reportId)
         return toWidgetResponse(saved)
     }
 

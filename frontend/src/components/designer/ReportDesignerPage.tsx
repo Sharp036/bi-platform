@@ -315,11 +315,12 @@ export default function ReportDesignerPage() {
           }
         }
 
-        // Update serverId in store for newly created widgets (without marking dirty)
+        // Update serverId in store for all widgets from the save mapping.
+        // Always overwrite — a previous save may have stored a wrong serverId.
         useDesignerStore.setState(state => ({
           widgets: state.widgets.map(w => {
             const sid = clientIdToServerId.get(w.id)
-            return sid && !w.serverId ? { ...w, serverId: sid } : w
+            return sid ? { ...w, serverId: sid } : w
           }),
         }))
 
