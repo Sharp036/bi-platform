@@ -56,6 +56,8 @@ export default function ReportViewerPage() {
   const [loading, setLoading] = useState(true)
   const [rendering, setRendering] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState<number | null>(null)
+  // Incremented by the Refresh button to force filter dropdowns to refetch options
+  const [filterRefreshKey, setFilterRefreshKey] = useState(0)
 
   const [drillActions, setDrillActions] = useState<Record<number, DrillAction[]>>({})
   const [navStack, setNavStack] = useState<BreadcrumbEntry[]>([])
@@ -592,6 +594,7 @@ export default function ReportViewerPage() {
               loading={rendering}
               compact
               currentParameters={currentParams}
+              refreshKey={filterRefreshKey}
             />
           )}
         </div>
@@ -654,7 +657,11 @@ export default function ReportViewerPage() {
               <option value="300">5m</option>
             </select>
           </div>
-          <button onClick={() => handleRender()} disabled={rendering} className="btn-secondary text-xs py-1">
+          <button
+            onClick={() => { setFilterRefreshKey(k => k + 1); handleRender() }}
+            disabled={rendering}
+            className="btn-secondary text-xs py-1"
+          >
             <RefreshCw className={`w-4 h-4 ${rendering ? 'animate-spin' : ''}`} /> {t('common.refresh')}
           </button>
           <button
@@ -702,6 +709,7 @@ export default function ReportViewerPage() {
           loading={rendering}
           className="mb-4"
           currentParameters={currentParams}
+          refreshKey={filterRefreshKey}
         />
       )}
 
@@ -735,6 +743,7 @@ export default function ReportViewerPage() {
           loading={rendering}
           className="mt-4"
           currentParameters={currentParams}
+          refreshKey={filterRefreshKey}
         />
       )}
     </div>
