@@ -39,10 +39,15 @@ const DEBUG_ROLES: string[] = ['ADMIN']
 
 function isDebugUser(): boolean {
   try {
-    const { useAuthStore } = require('@/store/authStore')
-    const roles = useAuthStore.getState().user?.roles
-    if (!roles) return true // before auth loads, allow logging
-    return roles.some((r: string) => DEBUG_ROLES.includes(r))
+    const token = localStorage.getItem('accessToken')
+    if (!token) return true // before login, allow logging
+    const payload = token.split('.')[1]
+    if (!payload) return false
+    // base64url -> base64
+    const b64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const json = JSON.parse(atob(b64))
+    const roles: string[] = json.roles || []
+    return roles.some(r => DEBUG_ROLES.includes(r))
   } catch {
     return true
   }
