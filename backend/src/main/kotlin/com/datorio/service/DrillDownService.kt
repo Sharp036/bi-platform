@@ -88,7 +88,12 @@ class DrillDownService(
 
     /**
      * Get all drill actions for all widgets in a report (batch).
+     *
+     * readOnly transaction is required because [report.widgets] is a LAZY
+     * collection; without an active Hibernate session accessing it would
+     * throw LazyInitializationException.
      */
+    @Transactional(readOnly = true)
     fun getActionsForReport(reportId: Long): Map<Long, List<DrillActionResponse>> {
         val report = reportRepo.findById(reportId)
             .orElseThrow { IllegalArgumentException("Report not found: $reportId") }
