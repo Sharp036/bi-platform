@@ -103,6 +103,27 @@ export default function EnhancedParameterPanel({
     return result
   }, [])
 
+  // Convert string-valued form state into typed params for the render API.
+  // Used by handleApply (user click) and by the auto-fill cascade (initial render).
+  const toTyped = useCallback((vals: Record<string, string>): Record<string, unknown> => {
+    const typed: Record<string, unknown> = {}
+    parameters.forEach(p => {
+      const v = vals[p.name]
+      if (v === undefined) return
+      if (v === '') {
+        // Send empty string so backend knows user chose "All" (don't fall back to default)
+        typed[p.name] = ''
+        return
+      }
+      switch (p.paramType) {
+        case 'NUMBER': typed[p.name] = Number(v); break
+        case 'BOOLEAN': typed[p.name] = v === 'true'; break
+        default: typed[p.name] = v
+      }
+    })
+    return typed
+  }, [parameters])
+
   // Stable key derived from parameter names — avoids resetting values on every render
   const paramKey = parameters.map(p => p.name).join(',')
 
@@ -193,6 +214,11 @@ export default function EnhancedParameterPanel({
           loadOptions(name, collectParentValues(name, updatedVals)),
         ),
       )
+
+      // Re-render widgets with the auto-filled required params.
+      // Without this, widgets initially render with empty :ml_dt, and their
+      // SQL fails on toDate('') in ClickHouse.
+      onApply(toTyped(updatedVals))
     }
 
     runCascade()
@@ -250,22 +276,7 @@ export default function EnhancedParameterPanel({
   if (parameters.length === 0) return null
 
   const handleApply = () => {
-    const typed: Record<string, unknown> = {}
-    parameters.forEach(p => {
-      const v = values[p.name]
-      if (v === undefined) return
-      if (v === '') {
-        // Send empty string so backend knows user chose "All" (don't fall back to default)
-        typed[p.name] = ''
-        return
-      }
-      switch (p.paramType) {
-        case 'NUMBER': typed[p.name] = Number(v); break
-        case 'BOOLEAN': typed[p.name] = v === 'true'; break
-        default: typed[p.name] = v
-      }
-    })
-    onApply(typed)
+    onApply(toTyped(values))
   }
 
   const getControl = (paramName: string) => controls.find(c => c.parameterName === paramName)
