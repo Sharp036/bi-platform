@@ -243,7 +243,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
             className="input text-xs w-full"
           >
             <option value="">{t('interactive.action.source_widget')}</option>
-            {widgets.map(w => (
+            {[...widgets].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => (
               <option key={w.id} value={w.id}>{w.title || `Widget #${w.id}`} ({w.widgetType})</option>
             ))}
           </select>
@@ -258,7 +258,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
                   className="input text-xs w-full"
                 >
                   <option value="">{t('interactive.action.target_widget')}</option>
-                  {widgets.filter(w => w.id !== form.sourceWidgetId).map(w => (
+                  {widgets.filter(w => w.id !== form.sourceWidgetId).sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => (
                     <option key={w.id} value={String(w.id)}>
                       {w.title || `Widget #${w.id}`} ({w.widgetType})
                     </option>
@@ -268,7 +268,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
                 <div className="space-y-1">
                   <div className="text-[10px] text-slate-400">{t('interactive.action.target_widgets')}</div>
                   <div className="max-h-32 overflow-y-auto border border-slate-200 rounded p-1 space-y-0.5">
-                    {widgets.filter(w => w.id !== form.sourceWidgetId).map(w => {
+                    {widgets.filter(w => w.id !== form.sourceWidgetId).sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => {
                       const selected = (form.targetWidgetIds || '').split(',').map(s => s.trim()).filter(Boolean)
                       const isChecked = selected.includes(String(w.id))
                       return (

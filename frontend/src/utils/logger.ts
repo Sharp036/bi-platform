@@ -32,6 +32,22 @@ const MAX_ENTRIES = 300
 const STORAGE_KEY = 'app_logs'
 const DEBUG_KEY = 'debug'
 
+/** Roles for which detailed logging is enabled.
+ *  Users without any of these roles only get error logging.
+ *  Edit this list to add/remove debug roles. */
+const DEBUG_ROLES: string[] = ['ADMIN']
+
+function isDebugUser(): boolean {
+  try {
+    const { useAuthStore } = require('@/store/authStore')
+    const roles = useAuthStore.getState().user?.roles
+    if (!roles) return true // before auth loads, allow logging
+    return roles.some((r: string) => DEBUG_ROLES.includes(r))
+  } catch {
+    return true
+  }
+}
+
 function getEnabledCategories(): Set<string> | 'all' | null {
   // Check URL param first
   try {
@@ -110,8 +126,12 @@ function sanitize(obj: unknown, depth = 0): unknown {
 
 function createCategoryLogger(cat: LogCategory) {
   return (msg: string, data?: unknown) => {
-    const enabled = getEnabledCategories()
     const isError = cat === 'error'
+
+    // Non-debug users: only log errors
+    if (!isError && !isDebugUser()) return
+
+    const enabled = getEnabledCategories()
 
     // Always persist errors, persist others only if enabled
     if (isError || enabled === 'all' || (enabled && enabled.has(cat))) {
