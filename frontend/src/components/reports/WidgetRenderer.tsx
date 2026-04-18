@@ -108,7 +108,18 @@ export default function WidgetRenderer({
         />
       )
     case 'TABLE':
-      return <TableWidget data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
+      return (
+        <TableWidget
+          data={widget.data}
+          title={widget.title}
+          chartConfig={widget.chartConfig}
+          clickable={!!onChartClick}
+          onRowClick={(row) => {
+            onChartClick?.(row)
+            if (onDrillDown) onDrillDown(row)
+          }}
+        />
+      )
     case 'KPI':
       return <KpiCard data={widget.data} title={widget.title} chartConfig={widget.chartConfig} />
     case 'FILTER':

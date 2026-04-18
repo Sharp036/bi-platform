@@ -14,6 +14,10 @@ interface Props {
   compact?: boolean
   className?: string
   currentParameters?: Record<string, unknown>
+  /** Changing this value triggers a reload of all dropdown options.
+   *  Bump from the parent (e.g. on Refresh button) to refetch filter options
+   *  after the underlying data source changed. */
+  refreshKey?: number
 }
 
 export default function EnhancedParameterPanel({
@@ -24,6 +28,7 @@ export default function EnhancedParameterPanel({
   compact = false,
   className = '',
   currentParameters,
+  refreshKey = 0,
 }: Props) {
   const { t } = useTranslation()
   const resolveDynamicDefault = (p: ReportParameter): string => {
@@ -65,15 +70,17 @@ export default function EnhancedParameterPanel({
   // Remember last non-empty user-selected value per parameter for smart cascade restore
   const lastKnownRef = useRef<Record<string, string>>({})
 
-  // Load control configs
+  // Load control configs. Refetch when refreshKey bumps so users pick up
+  // newly added controls without page reload.
   useEffect(() => {
     controlsApi.getParameterControls(reportId)
       .then(setControls)
       .catch(() => {})
-  }, [reportId])
+  }, [reportId, refreshKey])
 
-  // Load dynamic options
-  const loadOptions = useCallback(async (paramName: string, parentValues: Record<string, string> = {}) => {
+  // Load dynamic options for a single parameter. Returns the loaded options
+  // so callers can decide whether to auto-select (e.g. for required params).
+  const loadOptions = useCallback(async (paramName: string, parentValues: Record<string, string> = {}): Promise<string[]> => {
     try {
       const result = await controlsApi.loadOptions(reportId, paramName, parentValues)
       setDynamicOptions(prev => ({ ...prev, [paramName]: result.options }))
@@ -81,7 +88,10 @@ export default function EnhancedParameterPanel({
       if (result.columnName) {
         setColumnByParam(prev => ({ ...prev, [paramName]: result.columnName! }))
       }
-    } catch { /* ignore */ }
+      return result.options
+    } catch {
+      return []
+    }
   }, [reportId])
 
   // Collect all other non-empty parameter values (so any :param in options SQL gets substituted)
@@ -110,30 +120,83 @@ export default function EnhancedParameterPanel({
     setValues(init)
   }, [paramKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load dropdown options whenever controls are ready or visible parameters change
+  // Load dropdown options whenever controls are ready, visible parameters change,
+  // or the parent bumps refreshKey (e.g. via the Refresh button after data changed).
+  //
+  // Two-phase loading handles required parameters with auto-select:
+  //   Phase 1: Load options for ALL dropdowns in parallel with known values.
+  //   Phase 2: For any required parameter that ended up empty, auto-select
+  //            the first option, then reload dropdowns whose SQL references
+  //            that parameter (so their options reflect the auto-fill).
+  //
+  // Without phase 2, ClickHouse queries like `WHERE toDate(:ml_dt)` fail on
+  // empty strings, leaving dependent dropdowns with no options.
   useEffect(() => {
     if (controls.length === 0) return
-    // Build values from ALL report params (not just visible) so :param references resolve
-    const allVals: Record<string, string> = {}
-    // First, fill from all report-level parameters (including those on other tabs)
-    if (currentParameters) {
-      for (const [k, v] of Object.entries(currentParameters)) {
-        if (v !== undefined && v !== null && v !== '') allVals[k] = String(v)
+
+    const runCascade = async () => {
+      const allVals: Record<string, string> = {}
+      if (currentParameters) {
+        for (const [k, v] of Object.entries(currentParameters)) {
+          if (v !== undefined && v !== null && v !== '') allVals[k] = String(v)
+        }
       }
+      parameters.forEach(p => {
+        if (!(p.name in allVals) && p.defaultValue) {
+          allVals[p.name] = resolveDynamicDefault(p)
+        }
+      })
+      const visibleNames = new Set(parameters.map(p => p.name))
+      const relevantControls = controls.filter(
+        c => c.optionsQuery && c.datasourceId && visibleNames.has(c.parameterName),
+      )
+
+      // Phase 1: load all dropdown options in parallel
+      const phase1 = await Promise.all(
+        relevantControls.map(async c => {
+          const options = await loadOptions(
+            c.parameterName,
+            collectParentValues(c.parameterName, allVals),
+          )
+          return { control: c, options }
+        }),
+      )
+
+      // Phase 2: auto-select first option for required params and collect affected names
+      const autoFilled: Record<string, string> = {}
+      phase1.forEach(({ control: c, options }) => {
+        if (options.length === 0) return
+        const p = parameters.find(p => p.name === c.parameterName)
+        if (!p?.isRequired) return
+        const currentVal = allVals[c.parameterName] || ''
+        if (!currentVal || !options.includes(currentVal)) {
+          autoFilled[c.parameterName] = options[0]
+        }
+      })
+
+      if (Object.keys(autoFilled).length === 0) return
+
+      setValues(prev => ({ ...prev, ...autoFilled }))
+      const updatedVals = { ...allVals, ...autoFilled }
+
+      // Reload dropdowns that reference any auto-filled parameter
+      const affected = new Set<string>()
+      for (const filledName of Object.keys(autoFilled)) {
+        const pattern = new RegExp(`:${filledName}(?![a-zA-Z0-9_])`)
+        relevantControls.forEach(c => {
+          if (c.parameterName === filledName) return
+          if (pattern.test(c.optionsQuery!)) affected.add(c.parameterName)
+        })
+      }
+      await Promise.all(
+        [...affected].map(name =>
+          loadOptions(name, collectParentValues(name, updatedVals)),
+        ),
+      )
     }
-    // Then overlay visible parameter defaults
-    parameters.forEach(p => {
-      if (!(p.name in allVals) && p.defaultValue) {
-        allVals[p.name] = resolveDynamicDefault(p)
-      }
-    })
-    const visibleNames = new Set(parameters.map(p => p.name))
-    controls.forEach(c => {
-      if (c.optionsQuery && c.datasourceId && visibleNames.has(c.parameterName)) {
-        loadOptions(c.parameterName, collectParentValues(c.parameterName, allVals))
-      }
-    })
-  }, [controls, paramKey, loadOptions, collectParentValues]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    runCascade()
+  }, [controls, paramKey, refreshKey, loadOptions, collectParentValues]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle cascading: when any parameter changes, reload dropdowns whose SQL references it.
   // Keep the current value of dependent params; only clear it if the new options no longer include it.
