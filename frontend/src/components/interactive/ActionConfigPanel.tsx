@@ -265,12 +265,31 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
                   ))}
                 </select>
               ) : (
-                <input
-                  value={form.targetWidgetIds || ''}
-                  onChange={e => setForm(f => ({ ...f, targetWidgetIds: e.target.value }))}
-                  placeholder={t('interactive.action.target_widgets')}
-                  className="input text-xs w-full"
-                />
+                <div className="space-y-1">
+                  <div className="text-[10px] text-slate-400">{t('interactive.action.target_widgets')}</div>
+                  <div className="max-h-32 overflow-y-auto border border-slate-200 rounded p-1 space-y-0.5">
+                    {widgets.filter(w => w.id !== form.sourceWidgetId).map(w => {
+                      const selected = (form.targetWidgetIds || '').split(',').map(s => s.trim()).filter(Boolean)
+                      const isChecked = selected.includes(String(w.id))
+                      return (
+                        <label key={w.id} className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-slate-50 rounded px-1 py-0.5">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => {
+                              const next = isChecked
+                                ? selected.filter(s => s !== String(w.id))
+                                : [...selected, String(w.id)]
+                              setForm(f => ({ ...f, targetWidgetIds: next.join(',') }))
+                            }}
+                            className="accent-blue-500"
+                          />
+                          {w.title || `Widget #${w.id}`} ({w.widgetType})
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
               )}
               <div className="grid grid-cols-2 gap-2">
                 {sourceCols.length > 0 ? (
