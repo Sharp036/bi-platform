@@ -247,6 +247,7 @@ class ReportServiceTest {
             val report = createTestReport(1L, "Test Report")
             whenever(reportRepo.findById(1L)).thenReturn(Optional.of(report))
             whenever(reportRepo.save(any<Report>())).thenAnswer { it.getArgument<Report>(0) }
+            whenever(widgetRepo.save(any<ReportWidget>())).thenAnswer { it.getArgument<ReportWidget>(0) }
 
             val request = CreateWidgetRequest(
                 widgetType = WidgetType.KPI,
