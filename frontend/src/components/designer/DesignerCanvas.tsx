@@ -111,7 +111,7 @@ export default function DesignerCanvas({ containers = [] }: DesignerCanvasProps)
                 </button>
               </div>
               <div className="overflow-y-auto flex-1 p-1">
-                {widgets.map(w => {
+                {[...widgets].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => {
                   const Icon = ICON_MAP[w.widgetType] || BarChart3
                   const isHidden = hiddenLayerIds.has(w.id)
                   const isSelected = w.id === selectedId
