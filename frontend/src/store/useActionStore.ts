@@ -206,6 +206,13 @@ export const useActionStore = create<ActionState>((set, get) => ({
   reset: () => set({ activeFilters: {}, highlightedValues: {}, drillReplaceStack: [], actions: [] }),
 }))
 
+// Expose store on window for diagnostic console access:
+//   __actionStore.getState().activeFilters
+//   __actionStore.getState().drillReplaceStack
+if (typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).__actionStore = useActionStore
+}
+
 function resolveTargetWidgets(action: DashboardActionItem): number[] {
   const raw = action.targetWidgetIds
   if (!raw || raw === '*') return [] // '*' handled at render level
