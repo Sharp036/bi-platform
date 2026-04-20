@@ -11,7 +11,7 @@ import DrillDownBreadcrumb from './DrillDownBreadcrumb'
 import type { BreadcrumbEntry } from './DrillDownBreadcrumb'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
-import { ArrowLeft, RefreshCw, Clock, Camera, Link2 } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Clock, Camera, Link2, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ExportMenu from './ExportMenu'
 import WidgetContextMenu from './WidgetContextMenu'
@@ -69,6 +69,10 @@ export default function ReportViewerPage() {
 
   const [filterPanelPosition, setFilterPanelPosition] = useState<FilterPanelPosition>('top')
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
+  // Drill transition is pending while drill target data is being fetched.
+  // During this phase the UI stays on the source widget (with spinner)
+  // and only flips to the target after data arrives.
+  const [drillPending, setDrillPending] = useState(false)
   const [filterPanelWidth, setFilterPanelWidth] = useState(320) // w-80 = 320px
 
   const [containers, setContainers] = useState<ContainerItem[]>([])
@@ -113,15 +117,36 @@ export default function ReportViewerPage() {
     }
   }, [])
 
-  const renderWithParams = useCallback(async (paramsToUse: Record<string, unknown>) => {
+  const renderWithParams = useCallback(async (paramsToUse: Record<string, unknown>, opts?: { drillTargetIds?: number[] }) => {
     const rId = currentReportId || (id ? report?.id || 0 : null)
     if (!rId) return
-    log.render('renderWithParams', { reportId: rId, params: paramsToUse })
+    log.render('renderWithParams', { reportId: rId, params: paramsToUse, drillTargetIds: opts?.drillTargetIds })
     setRendering(true)
     try {
       const result = await reportApi.render(rId, paramsToUse)
       log.render('renderResult', { widgetCount: result.widgets.length, executionMs: result.executionMs })
-      setRenderResult(result)
+      // When rendering for a drill activation, only apply NEW data for the
+      // drill target widgets. Non-target widgets keep their previously-
+      // rendered data (cached in renderResult). This avoids the parent
+      // (source) widget being filtered by drill params in its WHERE clause.
+      const targetIds = opts?.drillTargetIds
+      if (targetIds && targetIds.length > 0) {
+        setRenderResult(prev => {
+          if (!prev) return result
+          const targetSet = new Set(targetIds)
+          const newByIdx = new Map(result.widgets.map(w => [w.widgetId, w]))
+          return {
+            ...result,
+            widgets: prev.widgets.map(w =>
+              targetSet.has(w.widgetId) && newByIdx.has(w.widgetId)
+                ? newByIdx.get(w.widgetId)!
+                : w
+            ),
+          }
+        })
+      } else {
+        setRenderResult(result)
+      }
       await loadDrillActions(rId)
       const widgetIds = result.widgets.map((w: any) => w.widgetId)
       interactiveApi.getMeta(rId, widgetIds).then(meta => {
@@ -144,7 +169,13 @@ export default function ReportViewerPage() {
     // filter-panel values. The store is the source of truth for drill state.
     const drillStack = useActionStore.getState().drillReplaceStack
     const effective = mergeDrillParams(finalParams, drillStack)
-    await renderWithParams(effective)
+    // When drill is active, only refresh data for drill target widgets;
+    // keep non-target widgets' cached data so source widgets don't get
+    // accidentally filtered by drill params.
+    const drillTargetIds = drillStack.length > 0
+      ? [...new Set(drillStack.flatMap(e => e.targetWidgetIds))]
+      : undefined
+    await renderWithParams(effective, drillTargetIds ? { drillTargetIds } : undefined)
   }, [currentParams, renderWithParams])
 
   useEffect(() => {
@@ -259,11 +290,16 @@ export default function ReportViewerPage() {
   }, [allActions])
 
   const isWidgetHidden = useCallback((widgetId: number) => {
-    if (drillHiddenSources.has(widgetId)) return true
-    if (drillVisibleTargets.has(widgetId)) return false
+    // While a drill is pending (data still loading), keep pre-drill
+    // visibility: source stays visible (with overlay spinner) and target
+    // stays hidden. Flip only after data arrives.
+    if (!drillPending) {
+      if (drillHiddenSources.has(widgetId)) return true
+      if (drillVisibleTargets.has(widgetId)) return false
+    }
     if (drillReplaceTargets.has(widgetId)) return true
     return hiddenWidgetIds.includes(widgetId)
-  }, [hiddenWidgetIds, drillHiddenSources, drillVisibleTargets, drillReplaceTargets])
+  }, [hiddenWidgetIds, drillHiddenSources, drillVisibleTargets, drillReplaceTargets, drillPending])
 
   const getDrillEntryForTarget = useCallback((widgetId: number): DrillReplaceEntry | undefined => {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
@@ -279,7 +315,34 @@ export default function ReportViewerPage() {
   }, [drillReplaceStack])
 
   useEffect(() => {
-    if (report && currentReportId) handleRender()
+    if (!report || !currentReportId) return
+    // Skip render when drill stack is empty. On drill undo, non-target
+    // widgets already have correct pre-drill data cached in renderResult -
+    // re-rendering would waste a round trip. Target widgets become hidden
+    // so their stale data is invisible anyway.
+    if (drillReplaceStack.length === 0) return
+
+    // Mark drill as pending: source widget stays visible with spinner,
+    // target stays hidden until data arrives. Prevents user from seeing
+    // an empty target widget followed by a sudden data arrival.
+    setDrillPending(true)
+
+    // Clear target widget data before fetching so the old cached result
+    // (e.g. the first-load full list of 10000 rows) doesn't flash for a
+    // second before the drill-filtered data arrives.
+    const targetIds = new Set(drillReplaceStack.flatMap(e => e.targetWidgetIds))
+    setRenderResult(prev => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        widgets: prev.widgets.map(w =>
+          targetIds.has(w.widgetId)
+            ? { ...w, data: undefined as unknown as typeof w.data }
+            : w
+        ),
+      }
+    })
+    handleRender().finally(() => setDrillPending(false))
   }, [drillStackFingerprint]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Client-side cross-filter for drill-replace and other actions ─────────────
@@ -392,12 +455,20 @@ export default function ReportViewerPage() {
     const showMenu = !NON_DATA_WIDGETS.has(w.widgetType)
     const drillEntry = getDrillEntryForTarget(w.widgetId)
     const filtered = applyClientFilters(w)
+    // Show overlay spinner on the source widget while its drill is pending.
+    // The UI stays on the source until the target widget's data arrives.
+    const isDrillSource = drillPending && drillHiddenSources.has(w.widgetId)
     return (
       <div
         key={w.widgetId}
         className={`${w.widgetType === 'BUTTON' || w.widgetType === 'SPACER' || w.widgetType === 'DIVIDER' ? '' : 'card p-4'} overflow-hidden h-full ${hasDrill ? 'ring-1 ring-brand-200 dark:ring-brand-800' : ''} ${drillEntry ? 'pt-10' : ''}`}
         style={{ position: 'relative' }}
       >
+        {isDrillSource && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 dark:bg-dark-surface-50/70 backdrop-blur-sm">
+            <Loader2 className="w-6 h-6 text-brand-500 animate-spin" />
+          </div>
+        )}
         {showMenu && (
           <div className="absolute top-2 right-2 z-10">
             <WidgetContextMenu

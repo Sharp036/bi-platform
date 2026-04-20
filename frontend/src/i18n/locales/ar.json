@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
   "designer.button_filter_value": "Filter value",
-  "designer.select_datasource_first": "Select a data source first"
+  "designer.select_datasource_first": "Select a data source first",
+  "interactive.action.param_name": "معامل التقرير",
+  "interactive.action.param_name_tooltip": "اختياري. إذا تم تعيينه، سيتم حقن قيمة الحقل المصدر في معامل التقرير هذا، وسيتم إعادة عرض الودجة الهدف مع وجوده في SQL الخاص بها. بدون معامل، يتم استخدام التصفية من جانب العميل حسب حقل الهدف.",
+  "interactive.action.param_name_none": "(مرشح من جانب العميل حسب حقل الهدف)"
 }

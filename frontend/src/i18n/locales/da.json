@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
   "designer.button_filter_value": "Filter value",
-  "designer.select_datasource_first": "Select a data source first"
+  "designer.select_datasource_first": "Select a data source first",
+  "interactive.action.param_name": "Rapportparameter",
+  "interactive.action.param_name_tooltip": "Valgfri. Hvis indstillet, vil vaerdien fra kildefeltet blive indsat i denne rapportparameter, og malwidgeten vil blive gengengivet med det i dens SQL. Uden parameter bruges klientsidefiltrering efter malfelt.",
+  "interactive.action.param_name_none": "(klientsidefilter efter malfelt)"
 }

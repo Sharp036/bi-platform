@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
   "designer.button_filter_value": "Filter value",
-  "designer.select_datasource_first": "Select a data source first"
+  "designer.select_datasource_first": "Select a data source first",
+  "interactive.action.param_name": "Jelentesparameter",
+  "interactive.action.param_name_tooltip": "Opcionalis. Ha be van allitva, a forrasmezo erteke ebbe a jelentesparameterbe lesz beszurva, es a cel-widget ujrarendelodik vele az SQL-jeben. Parameter nelkul az ugyfeloldali szures celmezo szerint hasznalodik.",
+  "interactive.action.param_name_none": "(ugyfeloldali szuro celmezo szerint)"
 }
