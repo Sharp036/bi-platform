@@ -189,16 +189,20 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
           </thead>
           <tbody className="divide-y divide-surface-200 dark:divide-dark-surface-100">
             {pageRows.map((row, i) => {
-              // Conditional row background via chartConfig.rowColorBy + rowColors.
-              // Usage in chartConfig:
+              // Conditional background via chartConfig.rowColorBy + rowColors.
               //   "rowColorBy": "Приоритет",
-              //   "rowColors": { "Высокий": "#dcfce7", "Средний": "#fef3c7" }
-              // The colour column is matched against row[rowColorBy].
+              //   "rowColors": { "Высокий": "#dcfce7", "Средний": "#fef3c7" },
+              //   "rowColorMode": "row" | "cell"   (default: "row")
+              // When rowColorMode === "cell", only the cell in the rowColorBy
+              // column gets the background; the rest of the row stays neutral.
               const rowColorBy = typeof config.rowColorBy === 'string' ? config.rowColorBy : undefined
               const rowColors = (config.rowColors as Record<string, string> | undefined) || undefined
-              const rowBg = rowColorBy && rowColors
+              const rowColorMode = config.rowColorMode === 'cell' ? 'cell' : 'row'
+              const matchedBg = rowColorBy && rowColors
                 ? rowColors[String(row[rowColorBy] ?? '')]
                 : undefined
+              const rowBg = rowColorMode === 'row' ? matchedBg : undefined
+              const cellBg = rowColorMode === 'cell' ? matchedBg : undefined
               return (
                 <tr
                   key={safeePage * pageSize + i}
@@ -209,7 +213,11 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
                   }`}
                 >
                   {visibleCols.map((col) => (
-                    <td key={col} className={`${cellPad} whitespace-nowrap text-slate-700 dark:text-slate-300`}>
+                    <td
+                      key={col}
+                      style={cellBg && col === rowColorBy ? { backgroundColor: cellBg } : undefined}
+                      className={`${cellPad} whitespace-nowrap text-slate-700 dark:text-slate-300`}
+                    >
                       {row[col] != null ? String(row[col]) : <span className="text-slate-400">null</span>}
                     </td>
                   ))}

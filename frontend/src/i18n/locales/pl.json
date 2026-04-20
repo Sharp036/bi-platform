@@ -960,5 +960,9 @@
   "designer.row_color_by": "Kolor wiersza wg kolumny",
   "designer.row_color_by_hint": "Wybierz kolumnę. Wiersze z dopasowanymi wartościami są kolorowane.",
   "designer.row_color_preview_needed": "Uruchom podgląd, aby załadować przykładowe wartości.",
-  "common.clear": "Wyczyść"
+  "common.clear": "Wyczyść",
+  "designer.row_color_add_value": "Dodaj wartość...",
+  "designer.row_color_apply_to": "Zastosuj do",
+  "designer.row_color_mode_row": "Cały wiersz",
+  "designer.row_color_mode_cell": "Tylko komórka"
 }

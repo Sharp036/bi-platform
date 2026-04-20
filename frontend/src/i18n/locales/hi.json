@@ -960,5 +960,9 @@
   "designer.row_color_by": "कॉलम के अनुसार पंक्ति रंग",
   "designer.row_color_by_hint": "एक कॉलम चुनें। मिलान मूल्यों वाली पंक्तियाँ रंगीन होती हैं।",
   "designer.row_color_preview_needed": "नमूना मान लोड करने के लिए पूर्वावलोकन चलाएँ।",
-  "common.clear": "साफ़ करें"
+  "common.clear": "साफ़ करें",
+  "designer.row_color_add_value": "मान जोड़ें...",
+  "designer.row_color_apply_to": "लागू करें",
+  "designer.row_color_mode_row": "पूरी पंक्ति",
+  "designer.row_color_mode_cell": "केवल सेल"
 }

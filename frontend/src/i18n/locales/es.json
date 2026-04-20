@@ -960,5 +960,9 @@
   "designer.row_color_by": "Color de fila por columna",
   "designer.row_color_by_hint": "Elija una columna. Las filas con valores coincidentes se colorearán.",
   "designer.row_color_preview_needed": "Ejecute la vista previa para cargar valores de muestra.",
-  "common.clear": "Borrar"
+  "common.clear": "Borrar",
+  "designer.row_color_add_value": "Agregar valor...",
+  "designer.row_color_apply_to": "Aplicar a",
+  "designer.row_color_mode_row": "Fila completa",
+  "designer.row_color_mode_cell": "Solo la celda"
 }

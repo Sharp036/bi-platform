@@ -960,5 +960,9 @@
   "designer.row_color_by": "Цвет строки по колонке",
   "designer.row_color_by_hint": "Выберите колонку. Строки с определёнными значениями будут окрашены.",
   "designer.row_color_preview_needed": "Выполните превью, чтобы загрузить значения.",
-  "common.clear": "Очистить"
+  "common.clear": "Очистить",
+  "designer.row_color_add_value": "Добавить значение...",
+  "designer.row_color_apply_to": "Применять к",
+  "designer.row_color_mode_row": "Вся строка",
+  "designer.row_color_mode_cell": "Только ячейка"
 }

@@ -960,5 +960,9 @@
   "designer.row_color_by": "按列颜色行",
   "designer.row_color_by_hint": "选择一列。具有匹配值的行将被着色。",
   "designer.row_color_preview_needed": "运行预览以加载示例值。",
-  "common.clear": "清除"
+  "common.clear": "清除",
+  "designer.row_color_add_value": "添加值...",
+  "designer.row_color_apply_to": "应用于",
+  "designer.row_color_mode_row": "整行",
+  "designer.row_color_mode_cell": "仅单元格"
 }

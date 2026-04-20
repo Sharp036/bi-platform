@@ -960,5 +960,9 @@
   "designer.row_color_by": "Culoare rand dupa coloana",
   "designer.row_color_by_hint": "Alegeți o coloană. Rândurile cu valori corespunzătoare sunt colorate.",
   "designer.row_color_preview_needed": "Rulați previzualizarea pentru a încărca valori de eșantion.",
-  "common.clear": "Ștergeți"
+  "common.clear": "Ștergeți",
+  "designer.row_color_add_value": "Adauga valoare...",
+  "designer.row_color_apply_to": "Aplicati la",
+  "designer.row_color_mode_row": "Rand intreg",
+  "designer.row_color_mode_cell": "Doar celula"
 }

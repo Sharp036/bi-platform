@@ -960,5 +960,9 @@
   "designer.row_color_by": "Rivin vari sarakkeen mukaan",
   "designer.row_color_by_hint": "Valitse sarake. Vastaavan arvon rivit varjataan.",
   "designer.row_color_preview_needed": "Suorita esikatselu lataamaan näytearvoja.",
-  "common.clear": "Tyhjenna"
+  "common.clear": "Tyhjenna",
+  "designer.row_color_add_value": "Lisaa arvo...",
+  "designer.row_color_apply_to": "Kayta",
+  "designer.row_color_mode_row": "Koko rivi",
+  "designer.row_color_mode_cell": "Vain solu"
 }
