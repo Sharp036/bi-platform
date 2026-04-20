@@ -17,7 +17,7 @@ import ExportMenu from './ExportMenu'
 import WidgetContextMenu from './WidgetContextMenu'
 import BookmarkBar from './BookmarkBar'
 import OverlayLayer from '@/components/interactive/OverlayLayer'
-import { useActionStore, type DrillReplaceEntry } from '@/store/useActionStore'
+import { useActionStore, mergeDrillParams, type DrillReplaceEntry } from '@/store/useActionStore'
 import { interactiveApi } from '@/api/interactive'
 import type { InteractiveMeta } from '@/types'
 import { workspaceApi } from '@/api/workspace'
@@ -140,7 +140,11 @@ export default function ReportViewerPage() {
     // Replace params entirely (not merge) so cleared filters don't persist
     const finalParams = params ?? currentParams
     setCurrentParams(finalParams)
-    await renderWithParams(finalParams)
+    // Drill-replace may push additional param overrides on top of the user's
+    // filter-panel values. The store is the source of truth for drill state.
+    const drillStack = useActionStore.getState().drillReplaceStack
+    const effective = mergeDrillParams(finalParams, drillStack)
+    await renderWithParams(effective)
   }, [currentParams, renderWithParams])
 
   useEffect(() => {
@@ -264,6 +268,19 @@ export default function ReportViewerPage() {
   const getDrillEntryForTarget = useCallback((widgetId: number): DrillReplaceEntry | undefined => {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
   }, [drillReplaceStack])
+
+  // Re-render when the drill stack changes so param-based drills take effect.
+  // Fingerprint the stack's param overrides to avoid spurious renders when the
+  // stack object reference changes but the content does not.
+  const drillStackFingerprint = useMemo(() => {
+    return drillReplaceStack
+      .map(e => Object.entries(e.paramOverrides || {}).sort().map(([k, v]) => `${k}=${v}`).join(','))
+      .join('|')
+  }, [drillReplaceStack])
+
+  useEffect(() => {
+    if (report && currentReportId) handleRender()
+  }, [drillStackFingerprint]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Client-side cross-filter for drill-replace and other actions ─────────────
   const activeFilters = useActionStore(s => s.activeFilters)
