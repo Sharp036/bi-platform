@@ -367,17 +367,28 @@ export default function MultiLayerChart({
             data: rows.map(r => ({ name: String(r[categoryCol] ?? ''), value: r[col] ?? 0 })),
           })
         } else {
+          // Per-bar/point coloring via chartConfig.colorBy + colors.
+          // Usage in chartConfig:
+          //   "colorBy": "Приоритет",
+          //   "colors": { "Высокий": "#22c55e", "Средний": "#eab308" }
+          // If a row's value in colorBy matches a key in colors, that bar
+          // uses the matched colour; otherwise falls back to seriesColor.
+          const colorBy = typeof config.colorBy === 'string' ? config.colorBy : undefined
+          const colorMap = (config.colors as Record<string, string> | undefined) || undefined
+
           series.push({
             name: col, type: chartType,
             connectNulls: false,
             data: rows.map((r, dataIndex) => {
               const v = r[col]
               const rawValue = (v == null || v === '') ? (nullHandling === 'gap' ? '-' : 0) : (Number(v) || 0)
-              if (!showDataLabels || isLabelVisible(dataIndex)) return rawValue
+              const perItemColor = colorBy && colorMap ? colorMap[String(r[colorBy] ?? '')] : undefined
+              const labelHidden = showDataLabels && !isLabelVisible(dataIndex)
+              if (!perItemColor && !labelHidden) return rawValue
               return {
                 value: rawValue,
-                label: { show: false },
-                labelLine: { show: false },
+                ...(perItemColor ? { itemStyle: { color: perItemColor } } : {}),
+                ...(labelHidden ? { label: { show: false }, labelLine: { show: false } } : {}),
               }
             }),
             smooth: chartType === 'line',
