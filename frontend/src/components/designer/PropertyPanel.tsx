@@ -495,17 +495,42 @@ export default function PropertyPanel() {
                           </button>
                         </div>
                         <div className="space-y-1 max-h-36 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                          {allNonCat.map(col => (
-                            <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
-                              <input
-                                type="checkbox"
-                                checked={isAllSelected || valFields.includes(col)}
-                                onChange={() => handleToggleValue(col)}
-                                className="rounded border-slate-300"
-                              />
-                              {col}
-                            </label>
-                          ))}
+                          {allNonCat.map((col, idx) => {
+                            // Read per-series colour from chartConfig.option.color
+                            // (positional array). Falls back to chart's default
+                            // palette when not set.
+                            const optColors = (cc.option as Record<string, unknown> | undefined)?.color
+                            const currentColor = Array.isArray(optColors) && typeof optColors[idx] === 'string'
+                              ? (optColors[idx] as string)
+                              : ''
+                            const setColor = (hex: string) => {
+                              const option = (cc.option as Record<string, unknown> | undefined) || {}
+                              const arr = Array.isArray(option.color) ? [...(option.color as unknown[])] : []
+                              while (arr.length <= idx) arr.push('')
+                              arr[idx] = hex
+                              update({ chartConfig: { ...cc, option: { ...option, color: arr } } })
+                            }
+                            return (
+                              <div key={col} className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white flex-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={isAllSelected || valFields.includes(col)}
+                                    onChange={() => handleToggleValue(col)}
+                                    className="rounded border-slate-300"
+                                  />
+                                  {col}
+                                </label>
+                                <input
+                                  type="color"
+                                  value={currentColor || '#5470c6'}
+                                  onChange={e => setColor(e.target.value)}
+                                  title={t('designer.series_color', 'Цвет серии')}
+                                  className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                                />
+                              </div>
+                            )
+                          })}
                         </div>
                         <p className="text-[10px] text-slate-400 mt-1">{t('designer.value_fields_hint')}</p>
                       </Field>

@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "פרמטר דוח",
   "interactive.action.param_name_tooltip": "אופציונלי. אם מוגדר, הערך משדה המקור יוזרק לפרמטר דוח זה, והווידגט היעד ירונדר מחדש איתו ב-SQL שלו. ללא פרמטר, משתמשים בסינון צד-לקוח לפי שדה יעד.",
-  "interactive.action.param_name_none": "(סינון צד-לקוח לפי שדה יעד)"
+  "interactive.action.param_name_none": "(סינון צד-לקוח לפי שדה יעד)",
+  "designer.series_color": "צבע סדרה"
 }

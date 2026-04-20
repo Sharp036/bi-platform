@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Parametr reportu",
   "interactive.action.param_name_tooltip": "Volitelne. Pokud je nastaveno, hodnota ze zdrojoveho pole bude vlozena do tohoto parametru reportu, cilovy widget se prerenderuje s jeho SQL. Bez parametru se pouziva klientsky filtr podle ciloveho pole.",
-  "interactive.action.param_name_none": "(klientsky filtr podle ciloveho pole)"
+  "interactive.action.param_name_none": "(klientsky filtr podle ciloveho pole)",
+  "designer.series_color": "Barva rady"
 }

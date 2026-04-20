@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Parametr raportu",
   "interactive.action.param_name_tooltip": "Opcjonalne. Jesli ustawione, wartosc z pola zrodlowego zostanie wstawiona do tego parametru raportu, a widget docelowy zostanie ponownie wyrenderowany z nim w SQL. Bez parametru uzywane jest filtrowanie po stronie klienta wedlug pola docelowego.",
-  "interactive.action.param_name_none": "(filtr po stronie klienta wedlug pola docelowego)"
+  "interactive.action.param_name_none": "(filtr po stronie klienta wedlug pola docelowego)",
+  "designer.series_color": "Kolor serii"
 }

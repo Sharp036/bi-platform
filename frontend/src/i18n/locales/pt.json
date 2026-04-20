@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Selecione primeiro uma fonte de dados",
   "interactive.action.param_name": "Parametro do relatorio",
   "interactive.action.param_name_tooltip": "Opcional. Se definido, o valor do campo de origem sera injetado neste parametro do relatorio, e o widget de destino sera renderizado novamente com ele em seu SQL. Sem parametro, e usada a filtragem no lado do cliente por campo de destino.",
-  "interactive.action.param_name_none": "(filtro no lado do cliente por campo de destino)"
+  "interactive.action.param_name_none": "(filtro no lado do cliente por campo de destino)",
+  "designer.series_color": "Cor da serie"
 }
