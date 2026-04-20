@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Rapportparameter",
   "interactive.action.param_name_tooltip": "Valfri. Om angiven, kommer vardet fran kallfaltet att injiceras i denna rapportparameter, och malwidgeten kommer att renderas om med den i dess SQL. Utan parameter anvands klientsidefiltrering efter malfalt.",
   "interactive.action.param_name_none": "(klientsidefilter efter malfalt)",
-  "designer.series_color": "Seriefarg"
+  "designer.series_color": "Seriefarg",
+  "designer.row_color_by": "Radfarg efter kolumn",
+  "designer.row_color_by_hint": "Välj en kolumn. Rader med matchande värden färgas.",
+  "designer.row_color_preview_needed": "Kör förhandsgranskning för att ladda exempelvärden.",
+  "common.clear": "Rensa"
 }

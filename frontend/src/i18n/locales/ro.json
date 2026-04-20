@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Parametru raport",
   "interactive.action.param_name_tooltip": "Optional. Daca este setat, valoarea din campul sursa va fi injectata in acest parametru de raport, iar widget-ul tinta va fi re-randat cu el in SQL-ul sau. Fara parametru, se foloseste filtrarea pe partea clientului dupa campul tinta.",
   "interactive.action.param_name_none": "(filtru pe partea clientului dupa campul tinta)",
-  "designer.series_color": "Culoare serie"
+  "designer.series_color": "Culoare serie",
+  "designer.row_color_by": "Culoare rand dupa coloana",
+  "designer.row_color_by_hint": "Alegeți o coloană. Rândurile cu valori corespunzătoare sunt colorate.",
+  "designer.row_color_preview_needed": "Rulați previzualizarea pentru a încărca valori de eșantion.",
+  "common.clear": "Ștergeți"
 }

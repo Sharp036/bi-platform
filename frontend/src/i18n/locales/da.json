@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Rapportparameter",
   "interactive.action.param_name_tooltip": "Valgfri. Hvis indstillet, vil vaerdien fra kildefeltet blive indsat i denne rapportparameter, og malwidgeten vil blive gengengivet med det i dens SQL. Uden parameter bruges klientsidefiltrering efter malfelt.",
   "interactive.action.param_name_none": "(klientsidefilter efter malfelt)",
-  "designer.series_color": "Seriefarve"
+  "designer.series_color": "Seriefarve",
+  "designer.row_color_by": "Raekkefarve efter kolonne",
+  "designer.row_color_by_hint": "Vælg en kolonne. Rækker med matchende værdier farves.",
+  "designer.row_color_preview_needed": "Kør forhåndsvisning for at indlæse stikprøveværdier.",
+  "common.clear": "Ryd"
 }

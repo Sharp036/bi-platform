@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Parametr reportu",
   "interactive.action.param_name_tooltip": "Volitelne. Pokud je nastaveno, hodnota ze zdrojoveho pole bude vlozena do tohoto parametru reportu, cilovy widget se prerenderuje s jeho SQL. Bez parametru se pouziva klientsky filtr podle ciloveho pole.",
   "interactive.action.param_name_none": "(klientsky filtr podle ciloveho pole)",
-  "designer.series_color": "Barva rady"
+  "designer.series_color": "Barva rady",
+  "designer.row_color_by": "Barva radku podle sloupce",
+  "designer.row_color_by_hint": "Vyberte sloupec. Radky s odpovidajicimi hodnotami se obarvi.",
+  "designer.row_color_preview_needed": "Spustte nahled pro nacteni vzorku hodnot.",
+  "common.clear": "Vymazat"
 }

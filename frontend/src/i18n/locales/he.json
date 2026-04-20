@@ -956,5 +956,9 @@
   "interactive.action.param_name": "פרמטר דוח",
   "interactive.action.param_name_tooltip": "אופציונלי. אם מוגדר, הערך משדה המקור יוזרק לפרמטר דוח זה, והווידגט היעד ירונדר מחדש איתו ב-SQL שלו. ללא פרמטר, משתמשים בסינון צד-לקוח לפי שדה יעד.",
   "interactive.action.param_name_none": "(סינון צד-לקוח לפי שדה יעד)",
-  "designer.series_color": "צבע סדרה"
+  "designer.series_color": "צבע סדרה",
+  "designer.row_color_by": "צבע שורה לפי עמודה",
+  "designer.row_color_by_hint": "בחר עמודה. שורות עם ערכים תואמים ייצבעו.",
+  "designer.row_color_preview_needed": "הפעל תצוגה מקדימה לטעינת ערכי דוגמה.",
+  "common.clear": "נקה"
 }
