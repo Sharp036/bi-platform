@@ -960,5 +960,9 @@
   "designer.row_color_by": "Radfarge etter kolonne",
   "designer.row_color_by_hint": "Velg en kolonne. Rader med matchende verdier farges.",
   "designer.row_color_preview_needed": "Kjør forhåndsvisning for å laste inn eksempelverdier.",
-  "common.clear": "Fjern"
+  "common.clear": "Fjern",
+  "designer.row_color_add_value": "Legg til verdi...",
+  "designer.row_color_apply_to": "Bruk pa",
+  "designer.row_color_mode_row": "Hele raden",
+  "designer.row_color_mode_cell": "Bare cellen"
 }

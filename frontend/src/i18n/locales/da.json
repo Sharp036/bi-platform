@@ -960,5 +960,9 @@
   "designer.row_color_by": "Raekkefarve efter kolonne",
   "designer.row_color_by_hint": "Vælg en kolonne. Rækker med matchende værdier farves.",
   "designer.row_color_preview_needed": "Kør forhåndsvisning for at indlæse stikprøveværdier.",
-  "common.clear": "Ryd"
+  "common.clear": "Ryd",
+  "designer.row_color_add_value": "Tilfoj vaerdi...",
+  "designer.row_color_apply_to": "Anvend pa",
+  "designer.row_color_mode_row": "Hele rækken",
+  "designer.row_color_mode_cell": "Kun cellen"
 }

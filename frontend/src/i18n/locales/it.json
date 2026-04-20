@@ -960,5 +960,9 @@
   "designer.row_color_by": "Colore riga per colonna",
   "designer.row_color_by_hint": "Scegli una colonna. Le righe con valori corrispondenti vengono colorate.",
   "designer.row_color_preview_needed": "Esegui l'anteprima per caricare valori di esempio.",
-  "common.clear": "Cancella"
+  "common.clear": "Cancella",
+  "designer.row_color_add_value": "Aggiungi valore...",
+  "designer.row_color_apply_to": "Applica a",
+  "designer.row_color_mode_row": "Intera riga",
+  "designer.row_color_mode_cell": "Solo la cella"
 }

@@ -960,5 +960,9 @@
   "designer.row_color_by": "لون الصف حسب العمود",
   "designer.row_color_by_hint": "اختر عمودا. يتم تلوين الصفوف ذات القيم المطابقة.",
   "designer.row_color_preview_needed": "قم بتشغيل المعاينة لتحميل القيم النموذجية.",
-  "common.clear": "مسح"
+  "common.clear": "مسح",
+  "designer.row_color_add_value": "اضافة قيمة...",
+  "designer.row_color_apply_to": "تطبيق على",
+  "designer.row_color_mode_row": "صف كامل",
+  "designer.row_color_mode_cell": "الخلية فقط"
 }

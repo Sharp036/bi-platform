@@ -960,5 +960,9 @@
   "designer.row_color_by": "Barva radku podle sloupce",
   "designer.row_color_by_hint": "Vyberte sloupec. Radky s odpovidajicimi hodnotami se obarvi.",
   "designer.row_color_preview_needed": "Spustte nahled pro nacteni vzorku hodnot.",
-  "common.clear": "Vymazat"
+  "common.clear": "Vymazat",
+  "designer.row_color_add_value": "Pridat hodnotu...",
+  "designer.row_color_apply_to": "Pouzit na",
+  "designer.row_color_mode_row": "Cely radek",
+  "designer.row_color_mode_cell": "Pouze bunka"
 }

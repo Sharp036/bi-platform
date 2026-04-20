@@ -960,5 +960,9 @@
   "designer.row_color_by": "สีแถวตามคอลัมน์",
   "designer.row_color_by_hint": "เลือกคอลัมน์ แถวที่มีค่าตรงกันจะถูกระบายสี",
   "designer.row_color_preview_needed": "เรียกใช้ตัวอย่างเพื่อโหลดค่าตัวอย่าง",
-  "common.clear": "ล้าง"
+  "common.clear": "ล้าง",
+  "designer.row_color_add_value": "เพิ่มค่า...",
+  "designer.row_color_apply_to": "ใช้กับ",
+  "designer.row_color_mode_row": "ทั้งแถว",
+  "designer.row_color_mode_cell": "เฉพาะเซลล์"
 }

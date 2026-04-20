@@ -960,5 +960,9 @@
   "designer.row_color_by": "Warna baris berdasarkan kolom",
   "designer.row_color_by_hint": "Pilih kolom. Baris dengan nilai yang cocok akan diwarnai.",
   "designer.row_color_preview_needed": "Jalankan pratinjau untuk memuat nilai sampel.",
-  "common.clear": "Hapus"
+  "common.clear": "Hapus",
+  "designer.row_color_add_value": "Tambah nilai...",
+  "designer.row_color_apply_to": "Terapkan ke",
+  "designer.row_color_mode_row": "Seluruh baris",
+  "designer.row_color_mode_cell": "Hanya sel"
 }

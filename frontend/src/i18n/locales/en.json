@@ -960,5 +960,9 @@
   "designer.row_color_by": "Row colour by column",
   "designer.row_color_by_hint": "Pick a column. Rows with matching values get a chosen colour.",
   "designer.row_color_preview_needed": "Run preview to load sample values.",
-  "common.clear": "Clear"
+  "common.clear": "Clear",
+  "designer.row_color_add_value": "Add value...",
+  "designer.row_color_apply_to": "Apply to",
+  "designer.row_color_mode_row": "Whole row",
+  "designer.row_color_mode_cell": "Only the cell"
 }

@@ -960,5 +960,9 @@
   "designer.row_color_by": "Zeilenfarbe nach Spalte",
   "designer.row_color_by_hint": "Spalte wählen. Zeilen mit passenden Werten werden eingefärbt.",
   "designer.row_color_preview_needed": "Führen Sie die Vorschau aus, um Beispielwerte zu laden.",
-  "common.clear": "Löschen"
+  "common.clear": "Löschen",
+  "designer.row_color_add_value": "Wert hinzufugen...",
+  "designer.row_color_apply_to": "Anwenden auf",
+  "designer.row_color_mode_row": "Ganze Zeile",
+  "designer.row_color_mode_cell": "Nur die Zelle"
 }

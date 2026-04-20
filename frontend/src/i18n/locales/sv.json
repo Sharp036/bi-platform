@@ -960,5 +960,9 @@
   "designer.row_color_by": "Radfarg efter kolumn",
   "designer.row_color_by_hint": "Välj en kolumn. Rader med matchande värden färgas.",
   "designer.row_color_preview_needed": "Kör förhandsgranskning för att ladda exempelvärden.",
-  "common.clear": "Rensa"
+  "common.clear": "Rensa",
+  "designer.row_color_add_value": "Lagg till varde...",
+  "designer.row_color_apply_to": "Anvand pa",
+  "designer.row_color_mode_row": "Hela raden",
+  "designer.row_color_mode_cell": "Bara cellen"
 }

@@ -960,5 +960,9 @@
   "designer.row_color_by": "列ごとの行の色",
   "designer.row_color_by_hint": "列を選択してください。一致する値の行が色付けされます。",
   "designer.row_color_preview_needed": "サンプル値を読み込むにはプレビューを実行してください。",
-  "common.clear": "クリア"
+  "common.clear": "クリア",
+  "designer.row_color_add_value": "値を追加...",
+  "designer.row_color_apply_to": "適用先",
+  "designer.row_color_mode_row": "行全体",
+  "designer.row_color_mode_cell": "セルのみ"
 }

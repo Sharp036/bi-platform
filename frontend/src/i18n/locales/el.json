@@ -960,5 +960,9 @@
   "designer.row_color_by": "Χρωμα σειρας ανα στηλη",
   "designer.row_color_by_hint": "Επιλεξτε μια στηλη. Οι σειρες με αντιστοιχες τιμες χρωματιζονται.",
   "designer.row_color_preview_needed": "Εκτελεστε προεπισκοπηση για να φορτωσετε δειγματα τιμων.",
-  "common.clear": "Εκκαθαριση"
+  "common.clear": "Εκκαθαριση",
+  "designer.row_color_add_value": "Προσθηκη τιμης...",
+  "designer.row_color_apply_to": "Εφαρμογη σε",
+  "designer.row_color_mode_row": "Ολη η σειρα",
+  "designer.row_color_mode_cell": "Μονο το κελι"
 }

@@ -960,5 +960,9 @@
   "designer.row_color_by": "Mau hang theo cot",
   "designer.row_color_by_hint": "Chọn một cột. Các hàng có giá trị khớp sẽ được tô màu.",
   "designer.row_color_preview_needed": "Chạy xem trước để tải các giá trị mẫu.",
-  "common.clear": "Xóa"
+  "common.clear": "Xóa",
+  "designer.row_color_add_value": "Them gia tri...",
+  "designer.row_color_apply_to": "Ap dung cho",
+  "designer.row_color_mode_row": "Ca hang",
+  "designer.row_color_mode_cell": "Chi o"
 }

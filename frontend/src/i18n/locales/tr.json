@@ -960,5 +960,9 @@
   "designer.row_color_by": "Sutuna gore satir rengi",
   "designer.row_color_by_hint": "Bir sütun seçin. Eşleşen değerlere sahip satırlar renklendirilir.",
   "designer.row_color_preview_needed": "Örnek değerleri yüklemek için önizlemeyi çalıştırın.",
-  "common.clear": "Temizle"
+  "common.clear": "Temizle",
+  "designer.row_color_add_value": "Deger ekle...",
+  "designer.row_color_apply_to": "Uygula",
+  "designer.row_color_mode_row": "Tum satir",
+  "designer.row_color_mode_cell": "Sadece hucre"
 }

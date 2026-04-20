@@ -889,18 +889,19 @@ export default function PropertyPanel() {
                       {!!cc.rowColorBy && (() => {
                         const colorBy = cc.rowColorBy as string
                         const currentColors = (cc.rowColors as Record<string, string> | undefined) || {}
-                        // Gather distinct values from data for this column
-                        const distinct: string[] = Array.from(new Set(
+                        // Values list: union of (sample distinct) + (already configured).
+                        // The preview sample may not cover all values (e.g. sort by
+                        // priority_rank means first 100 rows are all 'Высокий').
+                        // Users can type additional values in the input below.
+                        const sampleDistinct = Array.from(new Set(
                           (previewRows || [])
                             .map(r => r[colorBy])
                             .filter(v => v != null && String(v).trim() !== '')
                             .map(v => String(v))
-                        )).sort()
-                        if (distinct.length === 0) {
-                          return (
-                            <p className="text-[10px] text-slate-400 mt-2">{t('designer.row_color_preview_needed')}</p>
-                          )
-                        }
+                        ))
+                        const allValues: string[] = Array.from(
+                          new Set([...sampleDistinct, ...Object.keys(currentColors)])
+                        ).sort()
                         const setValueColor = (val: string, hex: string) => {
                           const nextColors = { ...currentColors, [val]: hex }
                           update({ chartConfig: { ...cc, rowColors: nextColors } })
@@ -912,7 +913,34 @@ export default function PropertyPanel() {
                         }
                         return (
                           <div className="mt-2 space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                            {distinct.map(val => {
+                            {/* Apply colour to whole row or just the reference cell */}
+                            <div className="flex items-center gap-3 text-[10px] text-slate-500 dark:text-slate-400 pb-1 border-b border-surface-100 dark:border-dark-surface-100">
+                              <span>{t('designer.row_color_apply_to')}:</span>
+                              <label className="inline-flex items-center gap-1 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`rcm_${widget.id}`}
+                                  checked={(cc.rowColorMode as string) !== 'cell'}
+                                  onChange={() => update({ chartConfig: { ...cc, rowColorMode: 'row' } })}
+                                />
+                                {t('designer.row_color_mode_row')}
+                              </label>
+                              <label className="inline-flex items-center gap-1 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`rcm_${widget.id}`}
+                                  checked={cc.rowColorMode === 'cell'}
+                                  onChange={() => update({ chartConfig: { ...cc, rowColorMode: 'cell' } })}
+                                />
+                                {t('designer.row_color_mode_cell')}
+                              </label>
+                            </div>
+                            {allValues.length === 0 && (
+                              <p className="text-[10px] text-slate-400 px-1">
+                                {t('designer.row_color_preview_needed')}
+                              </p>
+                            )}
+                            {allValues.map(val => {
                               const hex = currentColors[val] || ''
                               return (
                                 <div key={val} className="flex items-center gap-2 text-xs">
@@ -922,6 +950,21 @@ export default function PropertyPanel() {
                                     value={hex || '#ffffff'}
                                     onChange={e => setValueColor(val, e.target.value)}
                                     className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={hex}
+                                    onChange={e => {
+                                      const v = e.target.value.trim()
+                                      // Accept "#rgb", "#rrggbb", or empty to clear
+                                      if (v === '') { clearValueColor(val); return }
+                                      if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) {
+                                        setValueColor(val, v.toLowerCase())
+                                      }
+                                    }}
+                                    placeholder="#rrggbb"
+                                    maxLength={7}
+                                    className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
                                   />
                                   {hex && (
                                     <button
@@ -933,6 +976,14 @@ export default function PropertyPanel() {
                                 </div>
                               )
                             })}
+                            {/* Add value manually - useful when preview sample doesn't
+                                surface all possible values (sorted/filtered queries). */}
+                            <AddColorValueRow
+                              existingValues={allValues}
+                              defaultColor="#fef3c7"
+                              onAdd={(val, hex) => setValueColor(val, hex)}
+                              placeholder={t('designer.row_color_add_value')}
+                            />
                           </div>
                         )
                       })()}
@@ -1370,6 +1421,57 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{label}</label>
       {children}
+    </div>
+  )
+}
+
+/**
+ * Inline row to add a new (value, colour) pair to rowColorBy/colorBy maps.
+ * Useful when the preview sample doesn't surface all possible values
+ * (e.g. sort order hides some categories past the sample limit).
+ */
+function AddColorValueRow({
+  existingValues,
+  defaultColor,
+  onAdd,
+  placeholder,
+}: {
+  existingValues: string[]
+  defaultColor: string
+  onAdd: (value: string, hex: string) => void
+  placeholder: string
+}) {
+  const [value, setValue] = useState('')
+  const [color, setColor] = useState(defaultColor)
+  const commit = () => {
+    const v = value.trim()
+    if (!v) return
+    if (existingValues.includes(v)) return // already configured
+    onAdd(v, color)
+    setValue('')
+  }
+  return (
+    <div className="flex items-center gap-2 text-xs pt-1 border-t border-surface-100 dark:border-dark-surface-100">
+      <input
+        type="text"
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit() } }}
+        placeholder={placeholder}
+        className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+      />
+      <input
+        type="color"
+        value={color}
+        onChange={e => setColor(e.target.value)}
+        className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+      />
+      <button
+        onClick={commit}
+        disabled={!value.trim()}
+        className="text-brand-500 hover:text-brand-700 disabled:text-slate-300 disabled:cursor-not-allowed text-base leading-none"
+        title={placeholder}
+      >+</button>
     </div>
   )
 }

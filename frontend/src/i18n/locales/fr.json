@@ -960,5 +960,9 @@
   "designer.row_color_by": "Couleur de ligne par colonne",
   "designer.row_color_by_hint": "Choisissez une colonne. Les lignes avec des valeurs correspondantes sont colorées.",
   "designer.row_color_preview_needed": "Exécutez l'aperçu pour charger des exemples de valeurs.",
-  "common.clear": "Effacer"
+  "common.clear": "Effacer",
+  "designer.row_color_add_value": "Ajouter une valeur...",
+  "designer.row_color_apply_to": "Appliquer a",
+  "designer.row_color_mode_row": "Ligne entiere",
+  "designer.row_color_mode_cell": "Seulement la cellule"
 }
