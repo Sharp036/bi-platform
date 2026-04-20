@@ -960,5 +960,9 @@
   "designer.row_color_by": "Колір рядка за колонкою",
   "designer.row_color_by_hint": "Виберіть колонку. Рядки з відповідними значеннями будуть забарвлені.",
   "designer.row_color_preview_needed": "Виконайте прев'ю для завантаження значень.",
-  "common.clear": "Очистити"
+  "common.clear": "Очистити",
+  "designer.row_color_add_value": "Додати значення...",
+  "designer.row_color_apply_to": "Застосувати до",
+  "designer.row_color_mode_row": "Весь рядок",
+  "designer.row_color_mode_cell": "Тільки комірка"
 }

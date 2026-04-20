@@ -960,5 +960,9 @@
   "designer.row_color_by": "Sor szine oszlop szerint",
   "designer.row_color_by_hint": "Válasszon oszlopot. Az egyező értékű sorok színesek lesznek.",
   "designer.row_color_preview_needed": "Futtasson előnézetet a mintaértékek betöltéséhez.",
-  "common.clear": "Torles"
+  "common.clear": "Torles",
+  "designer.row_color_add_value": "Ertek hozzaadasa...",
+  "designer.row_color_apply_to": "Alkalmazas",
+  "designer.row_color_mode_row": "Teljes sor",
+  "designer.row_color_mode_cell": "Csak a cella"
 }

@@ -960,5 +960,9 @@
   "designer.row_color_by": "Rijkleur per kolom",
   "designer.row_color_by_hint": "Kies een kolom. Rijen met overeenkomende waarden krijgen een kleur.",
   "designer.row_color_preview_needed": "Voer voorbeeld uit om voorbeeldwaarden te laden.",
-  "common.clear": "Wissen"
+  "common.clear": "Wissen",
+  "designer.row_color_add_value": "Waarde toevoegen...",
+  "designer.row_color_apply_to": "Toepassen op",
+  "designer.row_color_mode_row": "Hele rij",
+  "designer.row_color_mode_cell": "Alleen de cel"
 }

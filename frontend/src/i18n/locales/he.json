@@ -960,5 +960,9 @@
   "designer.row_color_by": "צבע שורה לפי עמודה",
   "designer.row_color_by_hint": "בחר עמודה. שורות עם ערכים תואמים ייצבעו.",
   "designer.row_color_preview_needed": "הפעל תצוגה מקדימה לטעינת ערכי דוגמה.",
-  "common.clear": "נקה"
+  "common.clear": "נקה",
+  "designer.row_color_add_value": "הוסף ערך...",
+  "designer.row_color_apply_to": "החל על",
+  "designer.row_color_mode_row": "כל השורה",
+  "designer.row_color_mode_cell": "התא בלבד"
 }
