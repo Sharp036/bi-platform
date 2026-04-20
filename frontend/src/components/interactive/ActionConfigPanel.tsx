@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, Zap, Filter, Pointer, Navigation, ExternalLink, Layers, Pencil } from 'lucide-react'
-import type { DashboardActionItem, DashboardActionRequest, WidgetListItem } from '@/types'
+import type { DashboardActionItem, DashboardActionRequest, WidgetListItem, ReportParameter } from '@/types'
 import { interactiveApi } from '@/api/interactive'
 import { queryApi } from '@/api/queries'
+import { reportApi } from '@/api/reports'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
@@ -36,11 +37,12 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
   const [actions, setActions] = useState<DashboardActionItem[]>([])
   const [showAdd, setShowAdd] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [form, setForm] = useState<Partial<DashboardActionRequest>>({
+  const [form, setForm] = useState<Partial<DashboardActionRequest> & { paramName?: string }>({
     reportId, actionType: 'FILTER', triggerType: 'CLICK',
   })
   const [sourceCols, setSourceCols] = useState<string[]>([])
   const [targetCols, setTargetCols] = useState<string[]>([])
+  const [reportParameters, setReportParameters] = useState<ReportParameter[]>([])
 
   const loadWidgetColumns = useCallback(async (w: WidgetListItem): Promise<string[]> => {
     try {
@@ -72,6 +74,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
 
   useEffect(() => {
     interactiveApi.getActionsForReport(reportId).then(setActions).catch(() => {})
+    reportApi.getParameters(reportId).then(ps => setReportParameters(ps as ReportParameter[])).catch(() => {})
   }, [reportId])
 
   const buildRequest = (): DashboardActionRequest => ({
@@ -85,7 +88,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
     targetField: form.targetField || undefined,
     targetReportId: form.targetReportId || undefined,
     urlTemplate: form.urlTemplate || undefined,
-    config: {},
+    config: form.paramName ? { paramName: form.paramName } : {},
   })
 
   const handleSave = async () => {
@@ -106,6 +109,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
   }
 
   const handleEdit = (action: DashboardActionItem) => {
+    const cfgParamName = (action.config as Record<string, unknown> | undefined)?.paramName
     setForm({
       reportId,
       name: action.name,
@@ -117,6 +121,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
       targetField: action.targetField || undefined,
       targetReportId: action.targetReportId || undefined,
       urlTemplate: action.urlTemplate || undefined,
+      paramName: typeof cfgParamName === 'string' ? cfgParamName : undefined,
     })
     setEditingId(action.id)
     setShowAdd(true)
@@ -289,6 +294,31 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
                       )
                     })}
                   </div>
+                </div>
+              )}
+              {form.actionType === 'DRILL_REPLACE' && (
+                <div className="space-y-1">
+                  <div className="text-[10px] text-slate-400">
+                    Параметр отчёта (опционально) - если задан, значение из sourceField
+                    будет подставлено в этот параметр отчёта, целевой виджет
+                    перерендерится с ним. Без параметра используется клиент-сайд
+                    фильтрация по targetField (старый режим).
+                  </div>
+                  <select
+                    value={form.paramName || ''}
+                    onChange={e => setForm(f => ({ ...f, paramName: e.target.value || undefined }))}
+                    className="input text-xs w-full"
+                  >
+                    <option value="">(клиент-сайд фильтр по targetField)</option>
+                    {reportParameters
+                      .slice()
+                      .sort((a, b) => (a.label || a.name).localeCompare(b.label || b.name))
+                      .map(p => (
+                        <option key={p.name} value={p.name}>
+                          {p.label ? `${p.label} (${p.name})` : p.name}
+                        </option>
+                      ))}
+                  </select>
                 </div>
               )}
               <div className="grid grid-cols-2 gap-2">

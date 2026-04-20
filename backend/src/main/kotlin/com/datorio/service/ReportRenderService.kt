@@ -176,24 +176,6 @@ class ReportRenderService(
             WidgetType.TEXT, WidgetType.IMAGE, WidgetType.BUTTON,
             WidgetType.WEBPAGE, WidgetType.SPACER, WidgetType.DIVIDER
         )
-
-        const val DEFAULT_MAX_ROWS = 10000
-        const val ABSOLUTE_MAX_ROWS = 1_000_000  // hard upper bound to prevent OOM
-    }
-
-    /**
-     * Read maxRows from a widget's chartConfig JSON. Falls back to
-     * DEFAULT_MAX_ROWS if not set or invalid. Capped at ABSOLUTE_MAX_ROWS.
-     */
-    private fun readMaxRowsFromConfig(chartConfig: String): Int {
-        if (chartConfig.isBlank() || chartConfig == "{}") return DEFAULT_MAX_ROWS
-        return try {
-            val node = objectMapper.readTree(chartConfig)
-            val maxRows = node.get("maxRows")?.asInt() ?: return DEFAULT_MAX_ROWS
-            maxRows.coerceIn(1, ABSOLUTE_MAX_ROWS)
-        } catch (e: Exception) {
-            DEFAULT_MAX_ROWS
-        }
     }
 
     private fun renderWidget(widget: ReportWidget, reportParams: Map<String, Any?>, username: String): RenderedWidget {
@@ -295,10 +277,7 @@ class ReportRenderService(
                     datasourceId = widget.datasourceId!!,
                     sql = widget.rawSql!!,
                     parameters = params,
-                    // Cap is read from chartConfig.maxRows (default 10000).
-                    // Widgets that need more (e.g. drill-replace targets that
-                    // filter client-side) set chartConfig.maxRows explicitly.
-                    limit = readMaxRowsFromConfig(widget.chartConfig)
+                    limit = 10000
                 )
                 val result = savedQueryService.executeAdHocQuery(
                     request = request,
