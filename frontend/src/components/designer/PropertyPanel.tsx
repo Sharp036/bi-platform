@@ -868,7 +868,7 @@ export default function PropertyPanel() {
                   </Field>
 
                   {/* Conditional row coloring: pick a column, map its values to colours */}
-                  {cols.length > 0 && (
+                  {availableCols.length > 0 && (
                     <Field label={t('designer.row_color_by')}>
                       <select
                         value={(cc.rowColorBy as string) || ''}
@@ -882,15 +882,15 @@ export default function PropertyPanel() {
                         className="input text-sm"
                       >
                         <option value="">{t('common.none')}</option>
-                        {cols.map(c => <option key={c} value={c}>{c}</option>)}
+                        {availableCols.map((c: string) => <option key={c} value={c}>{c}</option>)}
                       </select>
                       <p className="text-[10px] text-slate-400 mt-1">{t('designer.row_color_by_hint')}</p>
 
-                      {cc.rowColorBy && (() => {
+                      {!!cc.rowColorBy && (() => {
                         const colorBy = cc.rowColorBy as string
                         const currentColors = (cc.rowColors as Record<string, string> | undefined) || {}
                         // Gather distinct values from data for this column
-                        const distinct = Array.from(new Set(
+                        const distinct: string[] = Array.from(new Set(
                           (previewRows || [])
                             .map(r => r[colorBy])
                             .filter(v => v != null && String(v).trim() !== '')
