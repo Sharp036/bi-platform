@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Report parameter",
   "interactive.action.param_name_tooltip": "Optional. If set, the source field value will be injected into this report parameter, and the target widget will re-render with it in its SQL. Without a parameter, legacy client-side filtering by target field is used.",
   "interactive.action.param_name_none": "(client-side filter by target field)",
-  "designer.series_color": "Series colour"
+  "designer.series_color": "Series colour",
+  "designer.row_color_by": "Row colour by column",
+  "designer.row_color_by_hint": "Pick a column. Rows with matching values get a chosen colour.",
+  "designer.row_color_preview_needed": "Run preview to load sample values.",
+  "common.clear": "Clear"
 }

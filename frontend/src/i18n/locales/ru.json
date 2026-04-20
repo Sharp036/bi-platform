@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Параметр отчёта",
   "interactive.action.param_name_tooltip": "Опционально. Если задан, значение из исходного поля будет подставлено в этот параметр отчёта, целевой виджет перерендерится с ним в SQL. Без параметра используется клиент-сайд фильтрация по целевому полю.",
   "interactive.action.param_name_none": "(клиент-сайд фильтр по целевому полю)",
-  "designer.series_color": "Цвет серии"
+  "designer.series_color": "Цвет серии",
+  "designer.row_color_by": "Цвет строки по колонке",
+  "designer.row_color_by_hint": "Выберите колонку. Строки с определёнными значениями будут окрашены.",
+  "designer.row_color_preview_needed": "Выполните превью, чтобы загрузить значения.",
+  "common.clear": "Очистить"
 }

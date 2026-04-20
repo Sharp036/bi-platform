@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Параметр звіту",
   "interactive.action.param_name_tooltip": "Опціонально. Якщо встановлено, значення з поля-джерела буде підставлено у цей параметр звіту, цільовий віджет перерендериться з ним у SQL. Без параметра використовується клієнт-сайд фільтрація за цільовим полем.",
   "interactive.action.param_name_none": "(клієнт-сайд фільтр за цільовим полем)",
-  "designer.series_color": "Колір серії"
+  "designer.series_color": "Колір серії",
+  "designer.row_color_by": "Колір рядка за колонкою",
+  "designer.row_color_by_hint": "Виберіть колонку. Рядки з відповідними значеннями будуть забарвлені.",
+  "designer.row_color_preview_needed": "Виконайте прев'ю для завантаження значень.",
+  "common.clear": "Очистити"
 }

@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Raportin parametri",
   "interactive.action.param_name_tooltip": "Valinnainen. Jos asetettu, lahdekentan arvo syotetaan tahan raportin parametriin, ja kohdewidget renderoidaan uudelleen sen kanssa SQL:ssaan. Ilman parametria kaytetaan asiakaspuolen suodatusta kohdekentan mukaan.",
   "interactive.action.param_name_none": "(asiakaspuolen suodatin kohdekentan mukaan)",
-  "designer.series_color": "Sarjan vari"
+  "designer.series_color": "Sarjan vari",
+  "designer.row_color_by": "Rivin vari sarakkeen mukaan",
+  "designer.row_color_by_hint": "Valitse sarake. Vastaavan arvon rivit varjataan.",
+  "designer.row_color_preview_needed": "Suorita esikatselu lataamaan näytearvoja.",
+  "common.clear": "Tyhjenna"
 }

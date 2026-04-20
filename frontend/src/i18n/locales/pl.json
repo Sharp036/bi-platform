@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Parametr raportu",
   "interactive.action.param_name_tooltip": "Opcjonalne. Jesli ustawione, wartosc z pola zrodlowego zostanie wstawiona do tego parametru raportu, a widget docelowy zostanie ponownie wyrenderowany z nim w SQL. Bez parametru uzywane jest filtrowanie po stronie klienta wedlug pola docelowego.",
   "interactive.action.param_name_none": "(filtr po stronie klienta wedlug pola docelowego)",
-  "designer.series_color": "Kolor serii"
+  "designer.series_color": "Kolor serii",
+  "designer.row_color_by": "Kolor wiersza wg kolumny",
+  "designer.row_color_by_hint": "Wybierz kolumnę. Wiersze z dopasowanymi wartościami są kolorowane.",
+  "designer.row_color_preview_needed": "Uruchom podgląd, aby załadować przykładowe wartości.",
+  "common.clear": "Wyczyść"
 }

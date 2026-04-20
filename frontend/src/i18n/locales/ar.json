@@ -956,5 +956,9 @@
   "interactive.action.param_name": "معامل التقرير",
   "interactive.action.param_name_tooltip": "اختياري. إذا تم تعيينه، سيتم حقن قيمة الحقل المصدر في معامل التقرير هذا، وسيتم إعادة عرض الودجة الهدف مع وجوده في SQL الخاص بها. بدون معامل، يتم استخدام التصفية من جانب العميل حسب حقل الهدف.",
   "interactive.action.param_name_none": "(مرشح من جانب العميل حسب حقل الهدف)",
-  "designer.series_color": "لون السلسلة"
+  "designer.series_color": "لون السلسلة",
+  "designer.row_color_by": "لون الصف حسب العمود",
+  "designer.row_color_by_hint": "اختر عمودا. يتم تلوين الصفوف ذات القيم المطابقة.",
+  "designer.row_color_preview_needed": "قم بتشغيل المعاينة لتحميل القيم النموذجية.",
+  "common.clear": "مسح"
 }

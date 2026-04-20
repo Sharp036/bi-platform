@@ -956,5 +956,9 @@
   "interactive.action.param_name": "रिपोर्ट पैरामीटर",
   "interactive.action.param_name_tooltip": "वैकल्पिक। यदि सेट है, तो स्रोत फील्ड से मान इस रिपोर्ट पैरामीटर में इंजेक्ट किया जाएगा, और लक्ष्य विजेट अपने SQL में इसके साथ पुनः-रेंडर होगा। पैरामीटर के बिना, लक्ष्य फील्ड द्वारा क्लाइंट-साइड फिल्टरिंग का उपयोग किया जाता है।",
   "interactive.action.param_name_none": "(लक्ष्य फील्ड द्वारा क्लाइंट-साइड फिल्टर)",
-  "designer.series_color": "श्रृंखला रंग"
+  "designer.series_color": "श्रृंखला रंग",
+  "designer.row_color_by": "कॉलम के अनुसार पंक्ति रंग",
+  "designer.row_color_by_hint": "एक कॉलम चुनें। मिलान मूल्यों वाली पंक्तियाँ रंगीन होती हैं।",
+  "designer.row_color_preview_needed": "नमूना मान लोड करने के लिए पूर्वावलोकन चलाएँ।",
+  "common.clear": "साफ़ करें"
 }

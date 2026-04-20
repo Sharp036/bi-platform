@@ -956,5 +956,9 @@
   "interactive.action.param_name": "พารามิเตอร์รายงาน",
   "interactive.action.param_name_tooltip": "ทางเลือก หากตั้งค่าไว้ ค่าจากฟิลด์ต้นทางจะถูกแทรกเข้าไปในพารามิเตอร์รายงานนี้ และวิดเจ็ตเป้าหมายจะถูกเรนเดอร์ใหม่พร้อมกับค่านั้นใน SQL ของมัน หากไม่มีพารามิเตอร์ จะใช้การกรองฝั่งไคลเอนต์ตามฟิลด์เป้าหมาย",
   "interactive.action.param_name_none": "(ตัวกรองฝั่งไคลเอนต์ตามฟิลด์เป้าหมาย)",
-  "designer.series_color": "สีชุดข้อมูล"
+  "designer.series_color": "สีชุดข้อมูล",
+  "designer.row_color_by": "สีแถวตามคอลัมน์",
+  "designer.row_color_by_hint": "เลือกคอลัมน์ แถวที่มีค่าตรงกันจะถูกระบายสี",
+  "designer.row_color_preview_needed": "เรียกใช้ตัวอย่างเพื่อโหลดค่าตัวอย่าง",
+  "common.clear": "ล้าง"
 }

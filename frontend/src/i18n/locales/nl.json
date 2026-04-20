@@ -956,5 +956,9 @@
   "interactive.action.param_name": "Rapportparameter",
   "interactive.action.param_name_tooltip": "Optioneel. Indien ingesteld wordt de waarde van het bronveld in deze rapportparameter geinjecteerd en wordt het doelwidget opnieuw weergegeven met deze waarde in zijn SQL. Zonder parameter wordt filtering aan de clientzijde op doelveld gebruikt.",
   "interactive.action.param_name_none": "(clientzijde filter op doelveld)",
-  "designer.series_color": "Reekskleur"
+  "designer.series_color": "Reekskleur",
+  "designer.row_color_by": "Rijkleur per kolom",
+  "designer.row_color_by_hint": "Kies een kolom. Rijen met overeenkomende waarden krijgen een kleur.",
+  "designer.row_color_preview_needed": "Voer voorbeeld uit om voorbeeldwaarden te laden.",
+  "common.clear": "Wissen"
 }

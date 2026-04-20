@@ -956,5 +956,9 @@
   "interactive.action.param_name": "报告参数",
   "interactive.action.param_name_tooltip": "可选。如果设置，源字段的值将被注入到此报告参数中，目标组件将在其 SQL 中使用它重新渲染。没有参数时，使用按目标字段的客户端过滤。",
   "interactive.action.param_name_none": "(按目标字段的客户端过滤)",
-  "designer.series_color": "系列颜色"
+  "designer.series_color": "系列颜色",
+  "designer.row_color_by": "按列颜色行",
+  "designer.row_color_by_hint": "选择一列。具有匹配值的行将被着色。",
+  "designer.row_color_preview_needed": "运行预览以加载示例值。",
+  "common.clear": "清除"
 }
