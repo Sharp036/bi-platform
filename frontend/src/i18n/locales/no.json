@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Rapportparameter",
   "interactive.action.param_name_tooltip": "Valgfri. Hvis angitt, vil verdien fra kildefeltet bli injisert i denne rapportparameteren, og malwidgeten vil bli gjengitt paa nytt med den i SQL-en. Uten parameter brukes klientsidefiltrering etter malfelt.",
-  "interactive.action.param_name_none": "(klientsidefilter etter malfelt)"
+  "interactive.action.param_name_none": "(klientsidefilter etter malfelt)",
+  "designer.series_color": "Seriefarge"
 }

@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Tham so bao cao",
   "interactive.action.param_name_tooltip": "Tuy chon. Neu duoc dat, gia tri tu truong nguon se duoc chen vao tham so bao cao nay va widget dich se duoc hien thi lai voi no trong SQL cua no. Khong co tham so, bo loc phia may khach theo truong dich se duoc su dung.",
-  "interactive.action.param_name_none": "(bo loc phia may khach theo truong dich)"
+  "interactive.action.param_name_none": "(bo loc phia may khach theo truong dich)",
+  "designer.series_color": "Mau chuoi"
 }

@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "พารามิเตอร์รายงาน",
   "interactive.action.param_name_tooltip": "ทางเลือก หากตั้งค่าไว้ ค่าจากฟิลด์ต้นทางจะถูกแทรกเข้าไปในพารามิเตอร์รายงานนี้ และวิดเจ็ตเป้าหมายจะถูกเรนเดอร์ใหม่พร้อมกับค่านั้นใน SQL ของมัน หากไม่มีพารามิเตอร์ จะใช้การกรองฝั่งไคลเอนต์ตามฟิลด์เป้าหมาย",
-  "interactive.action.param_name_none": "(ตัวกรองฝั่งไคลเอนต์ตามฟิลด์เป้าหมาย)"
+  "interactive.action.param_name_none": "(ตัวกรองฝั่งไคลเอนต์ตามฟิลด์เป้าหมาย)",
+  "designer.series_color": "สีชุดข้อมูล"
 }

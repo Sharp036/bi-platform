@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Rapportparameter",
   "interactive.action.param_name_tooltip": "Optioneel. Indien ingesteld wordt de waarde van het bronveld in deze rapportparameter geinjecteerd en wordt het doelwidget opnieuw weergegeven met deze waarde in zijn SQL. Zonder parameter wordt filtering aan de clientzijde op doelveld gebruikt.",
-  "interactive.action.param_name_none": "(clientzijde filter op doelveld)"
+  "interactive.action.param_name_none": "(clientzijde filter op doelveld)",
+  "designer.series_color": "Reekskleur"
 }

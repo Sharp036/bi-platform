@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Rapportparameter",
   "interactive.action.param_name_tooltip": "Valfri. Om angiven, kommer vardet fran kallfaltet att injiceras i denna rapportparameter, och malwidgeten kommer att renderas om med den i dess SQL. Utan parameter anvands klientsidefiltrering efter malfalt.",
-  "interactive.action.param_name_none": "(klientsidefilter efter malfalt)"
+  "interactive.action.param_name_none": "(klientsidefilter efter malfalt)",
+  "designer.series_color": "Seriefarg"
 }

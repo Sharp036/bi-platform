@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Sélectionnez d'abord une source de données",
   "interactive.action.param_name": "Parametre du rapport",
   "interactive.action.param_name_tooltip": "Facultatif. Si defini, la valeur du champ source sera injectee dans ce parametre du rapport, et le widget cible sera rerendu avec dans son SQL. Sans parametre, le filtrage cote client par champ cible est utilise.",
-  "interactive.action.param_name_none": "(filtre cote client par champ cible)"
+  "interactive.action.param_name_none": "(filtre cote client par champ cible)",
+  "designer.series_color": "Couleur de la serie"
 }

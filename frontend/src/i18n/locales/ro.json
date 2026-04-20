@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Parametru raport",
   "interactive.action.param_name_tooltip": "Optional. Daca este setat, valoarea din campul sursa va fi injectata in acest parametru de raport, iar widget-ul tinta va fi re-randat cu el in SQL-ul sau. Fara parametru, se foloseste filtrarea pe partea clientului dupa campul tinta.",
-  "interactive.action.param_name_none": "(filtru pe partea clientului dupa campul tinta)"
+  "interactive.action.param_name_none": "(filtru pe partea clientului dupa campul tinta)",
+  "designer.series_color": "Culoare serie"
 }

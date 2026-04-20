@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Rapor parametresi",
   "interactive.action.param_name_tooltip": "Istege bagli. Ayarlanirsa, kaynak alanin degeri bu rapor parametresine enjekte edilir ve hedef widget bununla SQL-inde yeniden olusturulur. Parametre olmadan, hedef alana gore istemci tarafli filtreleme kullanilir.",
-  "interactive.action.param_name_none": "(hedef alana gore istemci tarafli filtre)"
+  "interactive.action.param_name_none": "(hedef alana gore istemci tarafli filtre)",
+  "designer.series_color": "Seri rengi"
 }

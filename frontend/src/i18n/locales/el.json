@@ -955,5 +955,6 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Παραμετρος αναφορας",
   "interactive.action.param_name_tooltip": "Προαιρετικο. Αν οριστει, η τιμη απο το πεδιο πηγης θα εισαχθει σε αυτην την παραμετρο αναφορας και το widget προορισμου θα επανα-αποδοθει με αυτην στο SQL του. Χωρις παραμετρο, χρησιμοποιειται φιλτραρισμα απο την πλευρα του πελατη κατα πεδιο προορισμου.",
-  "interactive.action.param_name_none": "(φιλτρο απο την πλευρα του πελατη κατα πεδιο προορισμου)"
+  "interactive.action.param_name_none": "(φιλτρο απο την πλευρα του πελατη κατα πεδιο προορισμου)",
+  "designer.series_color": "Χρωμα σειρας"
 }
