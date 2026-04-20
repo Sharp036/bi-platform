@@ -151,16 +151,6 @@ export default function ReportViewerPage() {
     if (report && currentReportId) handleRender()
   }, [report, currentReportId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Re-render when the drill stack changes so param-based drills take effect.
-  // Track stack length + last entry's param overrides to avoid spurious renders.
-  const drillStackFingerprint = useMemo(() => {
-    return drillReplaceStack.map(e => Object.entries(e.paramOverrides || {}).sort().map(([k, v]) => `${k}=${v}`).join(',')).join('|')
-  }, [drillReplaceStack])
-
-  useEffect(() => {
-    if (report && currentReportId) handleRender()
-  }, [drillStackFingerprint]) // eslint-disable-line react-hooks/exhaustive-deps
-
   useAutoRefresh(() => handleRender(), autoRefresh)
 
   const handleDrillDown = useCallback(async (
@@ -278,6 +268,19 @@ export default function ReportViewerPage() {
   const getDrillEntryForTarget = useCallback((widgetId: number): DrillReplaceEntry | undefined => {
     return drillReplaceStack.find(e => e.targetWidgetIds.includes(widgetId))
   }, [drillReplaceStack])
+
+  // Re-render when the drill stack changes so param-based drills take effect.
+  // Fingerprint the stack's param overrides to avoid spurious renders when the
+  // stack object reference changes but the content does not.
+  const drillStackFingerprint = useMemo(() => {
+    return drillReplaceStack
+      .map(e => Object.entries(e.paramOverrides || {}).sort().map(([k, v]) => `${k}=${v}`).join(','))
+      .join('|')
+  }, [drillReplaceStack])
+
+  useEffect(() => {
+    if (report && currentReportId) handleRender()
+  }, [drillStackFingerprint]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Client-side cross-filter for drill-replace and other actions ─────────────
   const activeFilters = useActionStore(s => s.activeFilters)
