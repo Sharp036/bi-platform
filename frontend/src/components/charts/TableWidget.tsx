@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { WidgetData } from '@/types'
-import { ChevronLeft, ChevronRight, Download, ZoomIn, ZoomOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Download, ZoomIn, ZoomOut } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
 const DENSITY_CONFIG = {
@@ -162,36 +162,60 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
         }}>
           <thead className="sticky top-0 bg-surface-100 dark:bg-dark-surface-100">
             <tr>
-              {visibleCols.map((col) => (
-                <th
-                  key={col}
-                  onClick={() => handleSort(col)}
-                  className={`${cellPad} text-left font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap cursor-pointer select-none hover:text-slate-800 dark:hover:text-slate-200`}
-                >
-                  {col}
-                  {sortCol === col && (
-                    <span className="ml-1 text-brand-500">{sortDir === 'asc' ? ' ^' : ' v'}</span>
-                  )}
-                </th>
-              ))}
+              {visibleCols.map((col) => {
+                const isActive = sortCol === col
+                return (
+                  <th
+                    key={col}
+                    onClick={() => handleSort(col)}
+                    className={`${cellPad} text-left font-medium whitespace-nowrap cursor-pointer select-none hover:text-slate-800 dark:hover:text-slate-200 ${
+                      isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {col}
+                      {isActive ? (
+                        sortDir === 'asc'
+                          ? <ChevronUp className="w-3 h-3" />
+                          : <ChevronDown className="w-3 h-3" />
+                      ) : (
+                        <ChevronsUpDown className="w-3 h-3 opacity-30" />
+                      )}
+                    </span>
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-200 dark:divide-dark-surface-100">
-            {pageRows.map((row, i) => (
-              <tr
-                key={safeePage * pageSize + i}
-                onClick={onRowClick ? () => onRowClick(row as Record<string, unknown>) : undefined}
-                className={`hover:bg-surface-50 dark:hover:bg-dark-surface-50/50 transition-colors ${
-                  clickable ? 'cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-900/20' : ''
-                }`}
-              >
-                {visibleCols.map((col) => (
-                  <td key={col} className={`${cellPad} whitespace-nowrap text-slate-700 dark:text-slate-300`}>
-                    {row[col] != null ? String(row[col]) : <span className="text-slate-400">null</span>}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {pageRows.map((row, i) => {
+              // Conditional row background via chartConfig.rowColorBy + rowColors.
+              // Usage in chartConfig:
+              //   "rowColorBy": "Приоритет",
+              //   "rowColors": { "Высокий": "#dcfce7", "Средний": "#fef3c7" }
+              // The colour column is matched against row[rowColorBy].
+              const rowColorBy = typeof config.rowColorBy === 'string' ? config.rowColorBy : undefined
+              const rowColors = (config.rowColors as Record<string, string> | undefined) || undefined
+              const rowBg = rowColorBy && rowColors
+                ? rowColors[String(row[rowColorBy] ?? '')]
+                : undefined
+              return (
+                <tr
+                  key={safeePage * pageSize + i}
+                  onClick={onRowClick ? () => onRowClick(row as Record<string, unknown>) : undefined}
+                  style={rowBg ? { backgroundColor: rowBg } : undefined}
+                  className={`hover:bg-surface-50 dark:hover:bg-dark-surface-50/50 transition-colors ${
+                    clickable ? 'cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-900/20' : ''
+                  }`}
+                >
+                  {visibleCols.map((col) => (
+                    <td key={col} className={`${cellPad} whitespace-nowrap text-slate-700 dark:text-slate-300`}>
+                      {row[col] != null ? String(row[col]) : <span className="text-slate-400">null</span>}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
           </tbody>
           {!!config.showTotals && (() => {
             const defaultAgg = (config.totalsAggregation as string) || 'SUM'
