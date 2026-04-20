@@ -91,5 +91,5 @@ export default function SqlCodeEditor({ value, onChange, onExecute, readOnly, pl
     }
   }, [value])
 
-  return <div ref={containerRef} className={`overflow-hidden rounded-lg border border-surface-200 dark:border-dark-surface-100 ${className || ''}`} />
+  return <div ref={containerRef} className={`h-full overflow-hidden rounded-lg border border-surface-200 dark:border-dark-surface-100 ${className || ''}`} />
 }
