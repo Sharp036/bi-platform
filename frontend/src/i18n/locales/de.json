@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Klick blendet dieses Widget ein/aus",
   "designer.button_target_report": "Zielbericht-ID",
   "designer.button_filter_value": "Filterwert",
-  "designer.select_datasource_first": "Wählen Sie zuerst eine Datenquelle"
+  "designer.select_datasource_first": "Wählen Sie zuerst eine Datenquelle",
+  "interactive.action.param_name": "Berichtsparameter",
+  "interactive.action.param_name_tooltip": "Optional. Wenn gesetzt, wird der Wert aus dem Quellfeld in diesen Berichtsparameter injiziert und das Ziel-Widget mit ihm in seiner SQL neu gerendert. Ohne Parameter wird die clientseitige Filterung nach Zielfeld verwendet.",
+  "interactive.action.param_name_none": "(clientseitiger Filter nach Zielfeld)"
 }

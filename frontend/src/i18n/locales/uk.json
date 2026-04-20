@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Клік показує/ховає цей віджет",
   "designer.button_target_report": "ID цільового звіту",
   "designer.button_filter_value": "Значення фільтру",
-  "designer.select_datasource_first": "Спочатку виберіть джерело даних"
+  "designer.select_datasource_first": "Спочатку виберіть джерело даних",
+  "interactive.action.param_name": "Параметр звіту",
+  "interactive.action.param_name_tooltip": "Опціонально. Якщо встановлено, значення з поля-джерела буде підставлено у цей параметр звіту, цільовий віджет перерендериться з ним у SQL. Без параметра використовується клієнт-сайд фільтрація за цільовим полем.",
+  "interactive.action.param_name_none": "(клієнт-сайд фільтр за цільовим полем)"
 }

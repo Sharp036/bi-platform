@@ -22,11 +22,30 @@ const navItems = [
   { to: '/profile/password', icon: KeyRound, i18nKey: 'nav.password' },
 ]
 
+const SIDEBAR_COLLAPSED_KEY = 'sidebar_collapsed'
+
+function getInitialCollapsed(): boolean {
+  const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
+  // Default: collapsed on first visit. Any saved value wins; if the key is
+  // missing the sidebar starts folded. Users toggle via the button at the
+  // bottom; the new state persists automatically.
+  if (stored === null) return true
+  return stored === 'true'
+}
+
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState<boolean>(getInitialCollapsed)
   const { t } = useTranslation()
   const permissions = useAuthStore(s => s.user?.permissions ?? [])
   const visibleNavItems = navItems.filter(item => !item.permission || permissions.includes(item.permission))
+
+  const toggleCollapsed = () => {
+    setCollapsed(prev => {
+      const next = !prev
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next))
+      return next
+    })
+  }
 
   return (
     <aside className={clsx(
@@ -63,7 +82,7 @@ export default function Sidebar() {
 
       {/* Collapse toggle */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={toggleCollapsed}
         className="flex items-center justify-center h-10 border-t border-surface-200 dark:border-dark-surface-100
                    text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
       >

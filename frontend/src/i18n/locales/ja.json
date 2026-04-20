@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "クリックで表示/非表示",
   "designer.button_target_report": "ターゲットレポートID",
   "designer.button_filter_value": "フィルタ値",
-  "designer.select_datasource_first": "最初にデータソースを選択"
+  "designer.select_datasource_first": "最初にデータソースを選択",
+  "interactive.action.param_name": "レポートパラメータ",
+  "interactive.action.param_name_tooltip": "オプション。設定されている場合、ソースフィールドの値がこのレポートパラメータに注入され、ターゲットウィジェットはそれを含むSQLで再レンダリングされます。パラメータなしの場合、ターゲットフィールドによるクライアント側フィルタリングが使用されます。",
+  "interactive.action.param_name_none": "(ターゲットフィールドによるクライアント側フィルタ)"
 }

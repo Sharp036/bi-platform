@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "클릭으로 표시/숨김",
   "designer.button_target_report": "대상 보고서 ID",
   "designer.button_filter_value": "필터 값",
-  "designer.select_datasource_first": "먼저 데이터 소스를 선택하세요"
+  "designer.select_datasource_first": "먼저 데이터 소스를 선택하세요",
+  "interactive.action.param_name": "보고서 매개변수",
+  "interactive.action.param_name_tooltip": "선택 사항. 설정된 경우 소스 필드의 값이 이 보고서 매개변수에 주입되며, 대상 위젯은 해당 값이 포함된 SQL로 다시 렌더링됩니다. 매개변수 없이 대상 필드에 의한 클라이언트 측 필터링이 사용됩니다.",
+  "interactive.action.param_name_none": "(대상 필드에 의한 클라이언트 측 필터)"
 }

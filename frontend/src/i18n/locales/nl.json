@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
   "designer.button_filter_value": "Filter value",
-  "designer.select_datasource_first": "Select a data source first"
+  "designer.select_datasource_first": "Select a data source first",
+  "interactive.action.param_name": "Rapportparameter",
+  "interactive.action.param_name_tooltip": "Optioneel. Indien ingesteld wordt de waarde van het bronveld in deze rapportparameter geinjecteerd en wordt het doelwidget opnieuw weergegeven met deze waarde in zijn SQL. Zonder parameter wordt filtering aan de clientzijde op doelveld gebruikt.",
+  "interactive.action.param_name_none": "(clientzijde filter op doelveld)"
 }

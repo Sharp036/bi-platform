@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
   "designer.button_filter_value": "Filter value",
-  "designer.select_datasource_first": "Select a data source first"
+  "designer.select_datasource_first": "Select a data source first",
+  "interactive.action.param_name": "Raportin parametri",
+  "interactive.action.param_name_tooltip": "Valinnainen. Jos asetettu, lahdekentan arvo syotetaan tahan raportin parametriin, ja kohdewidget renderoidaan uudelleen sen kanssa SQL:ssaan. Ilman parametria kaytetaan asiakaspuolen suodatusta kohdekentan mukaan.",
+  "interactive.action.param_name_none": "(asiakaspuolen suodatin kohdekentan mukaan)"
 }
