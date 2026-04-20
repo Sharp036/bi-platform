@@ -952,5 +952,8 @@
   "designer.button_target_report": "ID целевого отчета",
   "designer.button_filter_value": "Значение фильтра",
   "designer.button_label_active": "Текст при включении",
-  "designer.select_datasource_first": "Сначала выберите источник данных"
+  "designer.select_datasource_first": "Сначала выберите источник данных",
+  "interactive.action.param_name": "Параметр отчёта",
+  "interactive.action.param_name_tooltip": "Опционально. Если задан, значение из исходного поля будет подставлено в этот параметр отчёта, целевой виджет перерендерится с ним в SQL. Без параметра используется клиент-сайд фильтрация по целевому полю.",
+  "interactive.action.param_name_none": "(клиент-сайд фильтр по целевому полю)"
 }

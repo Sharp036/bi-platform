@@ -135,6 +135,198 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
     } catch { toast.error(t('interactive.action.failed_delete')) }
   }
 
+  const renderForm = () => (
+    <div className="bg-surface-50 dark:bg-dark-surface-100 rounded-lg p-3 space-y-3 border border-surface-200 dark:border-dark-surface-100">
+      <input
+        value={form.name || ''}
+        onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+        placeholder={t('interactive.action.action_name')}
+        className="input text-xs w-full"
+      />
+
+      {/* Action type */}
+      <div className="grid grid-cols-2 gap-2">
+        {actionTypeConfig.map(({ type, icon: Icon, label }) => (
+          <button
+            key={type}
+            onClick={() => setForm(f => ({ ...f, actionType: type }))}
+            className={clsx(
+              'flex items-center gap-2 p-2 rounded border text-xs',
+              form.actionType === type
+                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                : 'border-surface-200 dark:border-dark-surface-100'
+            )}
+          >
+            <Icon className="w-3.5 h-3.5" /> {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Trigger */}
+      <div className="flex gap-2">
+        {triggerTypes.map(trigger => (
+          <button
+            key={trigger}
+            onClick={() => setForm(f => ({ ...f, triggerType: trigger }))}
+            className={clsx(
+              'px-3 py-1 rounded text-xs border',
+              form.triggerType === trigger
+                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600'
+                : 'border-surface-200 dark:border-dark-surface-100 text-slate-500'
+            )}
+          >
+            {trigger.toLowerCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Source widget */}
+      <select
+        value={form.sourceWidgetId || ''}
+        onChange={e => setForm(f => ({ ...f, sourceWidgetId: Number(e.target.value) || undefined }))}
+        className="input text-xs w-full"
+      >
+        <option value="">{t('interactive.action.source_widget')}</option>
+        {[...widgets].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => (
+          <option key={w.id} value={w.id}>{w.title || `Widget #${w.id}`} ({w.widgetType})</option>
+        ))}
+      </select>
+
+      {/* Target */}
+      {(form.actionType === 'FILTER' || form.actionType === 'HIGHLIGHT' || form.actionType === 'DRILL_REPLACE') && (
+        <>
+          {form.actionType === 'DRILL_REPLACE' ? (
+            <select
+              value={form.targetWidgetIds || ''}
+              onChange={e => setForm(f => ({ ...f, targetWidgetIds: e.target.value }))}
+              className="input text-xs w-full"
+            >
+              <option value="">{t('interactive.action.target_widget')}</option>
+              {widgets.filter(w => w.id !== form.sourceWidgetId).sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => (
+                <option key={w.id} value={String(w.id)}>
+                  {w.title || `Widget #${w.id}`} ({w.widgetType})
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="space-y-1">
+              <div className="text-[10px] text-slate-400">{t('interactive.action.target_widgets')}</div>
+              <div className="max-h-32 overflow-y-auto border border-slate-200 rounded p-1 space-y-0.5">
+                {widgets.filter(w => w.id !== form.sourceWidgetId).sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => {
+                  const selected = (form.targetWidgetIds || '').split(',').map(s => s.trim()).filter(Boolean)
+                  const isChecked = selected.includes(String(w.id))
+                  return (
+                    <label key={w.id} className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-slate-50 rounded px-1 py-0.5">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {
+                          const next = isChecked
+                            ? selected.filter(s => s !== String(w.id))
+                            : [...selected, String(w.id)]
+                          setForm(f => ({ ...f, targetWidgetIds: next.join(',') }))
+                        }}
+                        className="accent-blue-500"
+                      />
+                      {w.title || `Widget #${w.id}`} ({w.widgetType})
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+          {form.actionType === 'DRILL_REPLACE' && (
+            <div className="space-y-1">
+              <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                <span>{t('interactive.action.param_name')}</span>
+                <span
+                  title={t('interactive.action.param_name_tooltip')}
+                  className="cursor-help text-slate-400 hover:text-slate-600"
+                >ⓘ</span>
+              </div>
+              <select
+                value={form.paramName || ''}
+                onChange={e => setForm(f => ({ ...f, paramName: e.target.value || undefined }))}
+                className="input text-xs w-full"
+                title={t('interactive.action.param_name_tooltip')}
+              >
+                <option value="">{t('interactive.action.param_name_none')}</option>
+                {reportParameters
+                  .slice()
+                  .sort((a, b) => (a.label || a.name).localeCompare(b.label || b.name))
+                  .map(p => (
+                    <option key={p.name} value={p.name}>
+                      {p.label ? `${p.label} (${p.name})` : p.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            {sourceCols.length > 0 ? (
+              <select
+                value={form.sourceField || ''}
+                onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
+                className="input text-xs"
+              >
+                <option value="">{t('interactive.action.source_field')}</option>
+                {sourceCols.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            ) : (
+              <input
+                value={form.sourceField || ''}
+                onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
+                placeholder={t('interactive.action.source_field')}
+                className="input text-xs"
+              />
+            )}
+            {targetCols.length > 0 ? (
+              <select
+                value={form.targetField || ''}
+                onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
+                className="input text-xs"
+              >
+                <option value="">{t('interactive.action.target_field')}</option>
+                {targetCols.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            ) : (
+              <input
+                value={form.targetField || ''}
+                onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
+                placeholder={t('interactive.action.target_field')}
+                className="input text-xs"
+              />
+            )}
+          </div>
+        </>
+      )}
+
+      {form.actionType === 'NAVIGATE' && (
+        <input
+          type="number"
+          value={form.targetReportId || ''}
+          onChange={e => setForm(f => ({ ...f, targetReportId: Number(e.target.value) || undefined }))}
+          placeholder={t('interactive.action.target_report')}
+          className="input text-xs w-full"
+        />
+      )}
+
+      {form.actionType === 'URL' && (
+        <input
+          value={form.urlTemplate || ''}
+          onChange={e => setForm(f => ({ ...f, urlTemplate: e.target.value }))}
+          placeholder={t('interactive.action.url_template_placeholder')}
+          className="input text-xs w-full"
+        />
+      )}
+
+      <div className="flex justify-end gap-2">
+        <button onClick={() => { setShowAdd(false); setEditingId(null) }} className="btn-secondary text-xs">{t('common.cancel')}</button>
+        <button onClick={handleSave} className="btn-primary text-xs">{editingId ? t('common.save') : t('common.create')}</button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -156,37 +348,41 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
         const cfg = actionTypeConfig.find(c => c.type === action.actionType)
         const Icon = cfg?.icon || Zap
         const sourceWidget = widgets.find(w => w.id === action.sourceWidgetId)
+        const isEditing = editingId === action.id
 
         return (
-          <div key={action.id} className="flex items-center gap-2 p-2 bg-surface-50 dark:bg-dark-surface-100 rounded-lg text-xs">
-            <Icon className="w-4 h-4 text-brand-500 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="font-medium text-slate-700 dark:text-slate-300 truncate">{action.name}</div>
-              <div className="text-slate-400">
-                {sourceWidget?.title || `Widget #${action.sourceWidgetId}`}
-                {' → '}
-                {action.targetWidgetIds === '*'
-                  ? t('common.all')
-                  : (action.targetWidgetIds || '').split(',').map(id => {
-                      const tw = widgets.find(w => w.id === Number(id.trim()))
-                      return tw?.title || `#${id.trim()}`
-                    }).join(', ')
-                }
-                {' '}{t('common.on')}{' '}{action.triggerType.toLowerCase()}
+          <div key={action.id} className="space-y-2">
+            <div className="flex items-center gap-2 p-2 bg-surface-50 dark:bg-dark-surface-100 rounded-lg text-xs">
+              <Icon className="w-4 h-4 text-brand-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-slate-700 dark:text-slate-300 truncate">{action.name}</div>
+                <div className="text-slate-400">
+                  {sourceWidget?.title || `Widget #${action.sourceWidgetId}`}
+                  {' → '}
+                  {action.targetWidgetIds === '*'
+                    ? t('common.all')
+                    : (action.targetWidgetIds || '').split(',').map(id => {
+                        const tw = widgets.find(w => w.id === Number(id.trim()))
+                        return tw?.title || `#${id.trim()}`
+                      }).join(', ')
+                  }
+                  {' '}{t('common.on')}{' '}{action.triggerType.toLowerCase()}
+                </div>
               </div>
+              <span className={clsx(
+                'text-[10px] px-1.5 py-0.5 rounded font-medium',
+                action.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+              )}>
+                {action.actionType}
+              </span>
+              <button onClick={() => handleEdit(action)} className="text-slate-400 hover:text-brand-600">
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => handleDelete(action.id)} className="text-red-400 hover:text-red-600">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <span className={clsx(
-              'text-[10px] px-1.5 py-0.5 rounded font-medium',
-              action.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
-            )}>
-              {action.actionType}
-            </span>
-            <button onClick={() => handleEdit(action)} className="text-slate-400 hover:text-brand-600">
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => handleDelete(action.id)} className="text-red-400 hover:text-red-600">
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
+            {isEditing && renderForm()}
           </div>
         )
       })}
@@ -195,196 +391,8 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
         <p className="text-xs text-slate-400 text-center py-2">{t('interactive.action.no_actions')}</p>
       )}
 
-      {/* Add form */}
-      {showAdd && (
-        <div className="bg-surface-50 dark:bg-dark-surface-100 rounded-lg p-3 space-y-3 border border-surface-200 dark:border-dark-surface-100">
-          <input
-            value={form.name || ''}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            placeholder={t('interactive.action.action_name')}
-            className="input text-xs w-full"
-          />
-
-          {/* Action type */}
-          <div className="grid grid-cols-2 gap-2">
-            {actionTypeConfig.map(({ type, icon: Icon, label }) => (
-              <button
-                key={type}
-                onClick={() => setForm(f => ({ ...f, actionType: type }))}
-                className={clsx(
-                  'flex items-center gap-2 p-2 rounded border text-xs',
-                  form.actionType === type
-                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                    : 'border-surface-200 dark:border-dark-surface-100'
-                )}
-              >
-                <Icon className="w-3.5 h-3.5" /> {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Trigger */}
-          <div className="flex gap-2">
-            {triggerTypes.map(trigger => (
-              <button
-                key={trigger}
-                onClick={() => setForm(f => ({ ...f, triggerType: trigger }))}
-                className={clsx(
-                  'px-3 py-1 rounded text-xs border',
-                  form.triggerType === trigger
-                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600'
-                    : 'border-surface-200 dark:border-dark-surface-100 text-slate-500'
-                )}
-              >
-                {trigger.toLowerCase()}
-              </button>
-            ))}
-          </div>
-
-          {/* Source widget */}
-          <select
-            value={form.sourceWidgetId || ''}
-            onChange={e => setForm(f => ({ ...f, sourceWidgetId: Number(e.target.value) || undefined }))}
-            className="input text-xs w-full"
-          >
-            <option value="">{t('interactive.action.source_widget')}</option>
-            {[...widgets].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => (
-              <option key={w.id} value={w.id}>{w.title || `Widget #${w.id}`} ({w.widgetType})</option>
-            ))}
-          </select>
-
-          {/* Target */}
-          {(form.actionType === 'FILTER' || form.actionType === 'HIGHLIGHT' || form.actionType === 'DRILL_REPLACE') && (
-            <>
-              {form.actionType === 'DRILL_REPLACE' ? (
-                <select
-                  value={form.targetWidgetIds || ''}
-                  onChange={e => setForm(f => ({ ...f, targetWidgetIds: e.target.value }))}
-                  className="input text-xs w-full"
-                >
-                  <option value="">{t('interactive.action.target_widget')}</option>
-                  {widgets.filter(w => w.id !== form.sourceWidgetId).sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => (
-                    <option key={w.id} value={String(w.id)}>
-                      {w.title || `Widget #${w.id}`} ({w.widgetType})
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div className="space-y-1">
-                  <div className="text-[10px] text-slate-400">{t('interactive.action.target_widgets')}</div>
-                  <div className="max-h-32 overflow-y-auto border border-slate-200 rounded p-1 space-y-0.5">
-                    {widgets.filter(w => w.id !== form.sourceWidgetId).sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(w => {
-                      const selected = (form.targetWidgetIds || '').split(',').map(s => s.trim()).filter(Boolean)
-                      const isChecked = selected.includes(String(w.id))
-                      return (
-                        <label key={w.id} className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-slate-50 rounded px-1 py-0.5">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => {
-                              const next = isChecked
-                                ? selected.filter(s => s !== String(w.id))
-                                : [...selected, String(w.id)]
-                              setForm(f => ({ ...f, targetWidgetIds: next.join(',') }))
-                            }}
-                            className="accent-blue-500"
-                          />
-                          {w.title || `Widget #${w.id}`} ({w.widgetType})
-                        </label>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-              {form.actionType === 'DRILL_REPLACE' && (
-                <div className="space-y-1">
-                  <div className="text-[10px] text-slate-400">
-                    Параметр отчёта (опционально) - если задан, значение из sourceField
-                    будет подставлено в этот параметр отчёта, целевой виджет
-                    перерендерится с ним. Без параметра используется клиент-сайд
-                    фильтрация по targetField (старый режим).
-                  </div>
-                  <select
-                    value={form.paramName || ''}
-                    onChange={e => setForm(f => ({ ...f, paramName: e.target.value || undefined }))}
-                    className="input text-xs w-full"
-                  >
-                    <option value="">(клиент-сайд фильтр по targetField)</option>
-                    {reportParameters
-                      .slice()
-                      .sort((a, b) => (a.label || a.name).localeCompare(b.label || b.name))
-                      .map(p => (
-                        <option key={p.name} value={p.name}>
-                          {p.label ? `${p.label} (${p.name})` : p.name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-2">
-                {sourceCols.length > 0 ? (
-                  <select
-                    value={form.sourceField || ''}
-                    onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
-                    className="input text-xs"
-                  >
-                    <option value="">{t('interactive.action.source_field')}</option>
-                    {sourceCols.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                ) : (
-                  <input
-                    value={form.sourceField || ''}
-                    onChange={e => setForm(f => ({ ...f, sourceField: e.target.value }))}
-                    placeholder={t('interactive.action.source_field')}
-                    className="input text-xs"
-                  />
-                )}
-                {targetCols.length > 0 ? (
-                  <select
-                    value={form.targetField || ''}
-                    onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
-                    className="input text-xs"
-                  >
-                    <option value="">{t('interactive.action.target_field')}</option>
-                    {targetCols.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                ) : (
-                  <input
-                    value={form.targetField || ''}
-                    onChange={e => setForm(f => ({ ...f, targetField: e.target.value }))}
-                    placeholder={t('interactive.action.target_field')}
-                    className="input text-xs"
-                  />
-                )}
-              </div>
-            </>
-          )}
-
-          {form.actionType === 'NAVIGATE' && (
-            <input
-              type="number"
-              value={form.targetReportId || ''}
-              onChange={e => setForm(f => ({ ...f, targetReportId: Number(e.target.value) || undefined }))}
-              placeholder={t('interactive.action.target_report')}
-              className="input text-xs w-full"
-            />
-          )}
-
-          {form.actionType === 'URL' && (
-            <input
-              value={form.urlTemplate || ''}
-              onChange={e => setForm(f => ({ ...f, urlTemplate: e.target.value }))}
-              placeholder={t('interactive.action.url_template_placeholder')}
-              className="input text-xs w-full"
-            />
-          )}
-
-          <div className="flex justify-end gap-2">
-            <button onClick={() => { setShowAdd(false); setEditingId(null) }} className="btn-secondary text-xs">{t('common.cancel')}</button>
-            <button onClick={handleSave} className="btn-primary text-xs">{editingId ? t('common.save') : t('common.create')}</button>
-          </div>
-        </div>
-      )}
+      {/* Add form for new action (shown at the bottom) */}
+      {showAdd && editingId === null && renderForm()}
     </div>
   )
 }

@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "Click will show/hide this widget",
   "designer.button_target_report": "Target report ID",
   "designer.button_filter_value": "Filter value",
-  "designer.select_datasource_first": "Select a data source first"
+  "designer.select_datasource_first": "Select a data source first",
+  "interactive.action.param_name": "Parameter laporan",
+  "interactive.action.param_name_tooltip": "Opsional. Jika ditetapkan, nilai dari field sumber akan disuntikkan ke parameter laporan ini, dan widget target akan dirender ulang dengannya di SQL-nya. Tanpa parameter, pemfilteran sisi klien berdasarkan field target digunakan.",
+  "interactive.action.param_name_none": "(filter sisi klien berdasarkan field target)"
 }

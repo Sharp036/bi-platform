@@ -952,5 +952,8 @@
   "designer.button_toggle_hint": "El clic muestra/oculta este widget",
   "designer.button_target_report": "ID del informe destino",
   "designer.button_filter_value": "Valor del filtro",
-  "designer.select_datasource_first": "Seleccione primero una fuente de datos"
+  "designer.select_datasource_first": "Seleccione primero una fuente de datos",
+  "interactive.action.param_name": "Parametro del informe",
+  "interactive.action.param_name_tooltip": "Opcional. Si se establece, el valor del campo fuente se inyectara en este parametro del informe, y el widget de destino se volvera a renderizar con el en su SQL. Sin parametro, se usa el filtrado del lado del cliente por campo de destino.",
+  "interactive.action.param_name_none": "(filtro del lado del cliente por campo de destino)"
 }
