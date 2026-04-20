@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Parameter laporan",
   "interactive.action.param_name_tooltip": "Opsional. Jika ditetapkan, nilai dari field sumber akan disuntikkan ke parameter laporan ini, dan widget target akan dirender ulang dengannya di SQL-nya. Tanpa parameter, pemfilteran sisi klien berdasarkan field target digunakan.",
-  "interactive.action.param_name_none": "(filter sisi klien berdasarkan field target)"
+  "interactive.action.param_name_none": "(filter sisi klien berdasarkan field target)",
+  "designer.series_color": "Warna seri",
+  "designer.row_color_by": "Warna baris berdasarkan kolom",
+  "designer.row_color_by_hint": "Pilih kolom. Baris dengan nilai yang cocok akan diwarnai.",
+  "designer.row_color_preview_needed": "Jalankan pratinjau untuk memuat nilai sampel.",
+  "common.clear": "Hapus"
 }

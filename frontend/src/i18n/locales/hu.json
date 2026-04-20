@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Jelentesparameter",
   "interactive.action.param_name_tooltip": "Opcionalis. Ha be van allitva, a forrasmezo erteke ebbe a jelentesparameterbe lesz beszurva, es a cel-widget ujrarendelodik vele az SQL-jeben. Parameter nelkul az ugyfeloldali szures celmezo szerint hasznalodik.",
-  "interactive.action.param_name_none": "(ugyfeloldali szuro celmezo szerint)"
+  "interactive.action.param_name_none": "(ugyfeloldali szuro celmezo szerint)",
+  "designer.series_color": "Sorozat szine",
+  "designer.row_color_by": "Sor szine oszlop szerint",
+  "designer.row_color_by_hint": "Válasszon oszlopot. Az egyező értékű sorok színesek lesznek.",
+  "designer.row_color_preview_needed": "Futtasson előnézetet a mintaértékek betöltéséhez.",
+  "common.clear": "Torles"
 }

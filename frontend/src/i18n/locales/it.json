@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Parametro del report",
   "interactive.action.param_name_tooltip": "Opzionale. Se impostato, il valore del campo sorgente verra iniettato in questo parametro del report e il widget di destinazione verra rirenderizzato con esso nel suo SQL. Senza parametro, viene utilizzato il filtraggio lato client per campo di destinazione.",
-  "interactive.action.param_name_none": "(filtro lato client per campo di destinazione)"
+  "interactive.action.param_name_none": "(filtro lato client per campo di destinazione)",
+  "designer.series_color": "Colore serie",
+  "designer.row_color_by": "Colore riga per colonna",
+  "designer.row_color_by_hint": "Scegli una colonna. Le righe con valori corrispondenti vengono colorate.",
+  "designer.row_color_preview_needed": "Esegui l'anteprima per caricare valori di esempio.",
+  "common.clear": "Cancella"
 }

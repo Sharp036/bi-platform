@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "Wählen Sie zuerst eine Datenquelle",
   "interactive.action.param_name": "Berichtsparameter",
   "interactive.action.param_name_tooltip": "Optional. Wenn gesetzt, wird der Wert aus dem Quellfeld in diesen Berichtsparameter injiziert und das Ziel-Widget mit ihm in seiner SQL neu gerendert. Ohne Parameter wird die clientseitige Filterung nach Zielfeld verwendet.",
-  "interactive.action.param_name_none": "(clientseitiger Filter nach Zielfeld)"
+  "interactive.action.param_name_none": "(clientseitiger Filter nach Zielfeld)",
+  "designer.series_color": "Reihenfarbe",
+  "designer.row_color_by": "Zeilenfarbe nach Spalte",
+  "designer.row_color_by_hint": "Spalte wählen. Zeilen mit passenden Werten werden eingefärbt.",
+  "designer.row_color_preview_needed": "Führen Sie die Vorschau aus, um Beispielwerte zu laden.",
+  "common.clear": "Löschen"
 }

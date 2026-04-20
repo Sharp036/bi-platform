@@ -42,6 +42,9 @@ export default function PropertyPanel() {
   const [queries, setQueries] = useState<SavedQuery[]>([])
   const [datasources, setDatasources] = useState<DataSource[]>([])
   const [availableCols, setAvailableCols] = useState<string[]>([])
+  // Sample rows from the widget's preview query, used to populate distinct
+  // value lists in conditional formatting UI (rowColorBy colour pickers).
+  const [previewRows, setPreviewRows] = useState<Record<string, unknown>[]>([])
   const [loadingCols, setLoadingCols] = useState(false)
   const [sqlEditorOpen, setSqlEditorOpen] = useState(false)
 
@@ -53,7 +56,7 @@ export default function PropertyPanel() {
   }, [])
 
   // Auto-load columns when widget selection changes (for saved widgets with a data source)
-  useEffect(() => { setAvailableCols([]) }, [selected])
+  useEffect(() => { setAvailableCols([]); setPreviewRows([]) }, [selected])
 
   useEffect(() => {
     if (!widget) return
@@ -121,13 +124,15 @@ export default function PropertyPanel() {
       let paramValues = buildDesignerParameterValues(parameters)
       let res
       // Prefer inline SQL when present, even if stale queryId is still set.
+      // Fetch a small sample (100 rows) rather than 1 - distinct values from
+      // this sample feed the rowColorBy/colorBy conditional-formatting UI.
       if (widget.datasourceId && widget.rawSql?.trim()) {
         paramValues = mergeSqlParameterKeys(widget.rawSql, paramValues)
         res = await queryApi.executeAdHoc({
           datasourceId: widget.datasourceId,
           sql: widget.rawSql,
           parameters: paramValues,
-          limit: 1,
+          limit: 100,
         })
       } else if (widget.queryId) {
         const selectedQuery = queries.find(q => q.id === widget.queryId)
@@ -141,11 +146,12 @@ export default function PropertyPanel() {
             // Ignore fallback fetch errors; execution error will be surfaced below.
           }
         }
-        res = await queryApi.execute(widget.queryId, paramValues, 1)
+        res = await queryApi.execute(widget.queryId, paramValues, 100)
       }
       if (res?.columns) {
         const cols = res.columns.map((c: string | { name: string }) => typeof c === 'string' ? c : c.name)
         setAvailableCols(cols)
+        setPreviewRows(Array.isArray(res.rows) ? (res.rows as Record<string, unknown>[]) : [])
 
         // Drop stale field references after SQL/query column changes.
         const chartCfg = (widget.chartConfig || {}) as Record<string, unknown>
@@ -495,17 +501,42 @@ export default function PropertyPanel() {
                           </button>
                         </div>
                         <div className="space-y-1 max-h-36 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                          {allNonCat.map(col => (
-                            <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
-                              <input
-                                type="checkbox"
-                                checked={isAllSelected || valFields.includes(col)}
-                                onChange={() => handleToggleValue(col)}
-                                className="rounded border-slate-300"
-                              />
-                              {col}
-                            </label>
-                          ))}
+                          {allNonCat.map((col, idx) => {
+                            // Read per-series colour from chartConfig.option.color
+                            // (positional array). Falls back to chart's default
+                            // palette when not set.
+                            const optColors = (cc.option as Record<string, unknown> | undefined)?.color
+                            const currentColor = Array.isArray(optColors) && typeof optColors[idx] === 'string'
+                              ? (optColors[idx] as string)
+                              : ''
+                            const setColor = (hex: string) => {
+                              const option = (cc.option as Record<string, unknown> | undefined) || {}
+                              const arr = Array.isArray(option.color) ? [...(option.color as unknown[])] : []
+                              while (arr.length <= idx) arr.push('')
+                              arr[idx] = hex
+                              update({ chartConfig: { ...cc, option: { ...option, color: arr } } })
+                            }
+                            return (
+                              <div key={col} className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white flex-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={isAllSelected || valFields.includes(col)}
+                                    onChange={() => handleToggleValue(col)}
+                                    className="rounded border-slate-300"
+                                  />
+                                  {col}
+                                </label>
+                                <input
+                                  type="color"
+                                  value={currentColor || '#5470c6'}
+                                  onChange={e => setColor(e.target.value)}
+                                  title={t('designer.series_color', 'Цвет серии')}
+                                  className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                                />
+                              </div>
+                            )
+                          })}
                         </div>
                         <p className="text-[10px] text-slate-400 mt-1">{t('designer.value_fields_hint')}</p>
                       </Field>
@@ -835,6 +866,78 @@ export default function PropertyPanel() {
                       <span className="text-sm text-slate-600 dark:text-slate-400">{t('designer.show_totals_hint')}</span>
                     </label>
                   </Field>
+
+                  {/* Conditional row coloring: pick a column, map its values to colours */}
+                  {cols.length > 0 && (
+                    <Field label={t('designer.row_color_by')}>
+                      <select
+                        value={(cc.rowColorBy as string) || ''}
+                        onChange={e => {
+                          const val = e.target.value || undefined
+                          const next: Record<string, unknown> = { ...cc }
+                          if (val) next.rowColorBy = val
+                          else { delete next.rowColorBy; delete next.rowColors }
+                          update({ chartConfig: next })
+                        }}
+                        className="input text-sm"
+                      >
+                        <option value="">{t('common.none')}</option>
+                        {cols.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <p className="text-[10px] text-slate-400 mt-1">{t('designer.row_color_by_hint')}</p>
+
+                      {cc.rowColorBy && (() => {
+                        const colorBy = cc.rowColorBy as string
+                        const currentColors = (cc.rowColors as Record<string, string> | undefined) || {}
+                        // Gather distinct values from data for this column
+                        const distinct = Array.from(new Set(
+                          (previewRows || [])
+                            .map(r => r[colorBy])
+                            .filter(v => v != null && String(v).trim() !== '')
+                            .map(v => String(v))
+                        )).sort()
+                        if (distinct.length === 0) {
+                          return (
+                            <p className="text-[10px] text-slate-400 mt-2">{t('designer.row_color_preview_needed')}</p>
+                          )
+                        }
+                        const setValueColor = (val: string, hex: string) => {
+                          const nextColors = { ...currentColors, [val]: hex }
+                          update({ chartConfig: { ...cc, rowColors: nextColors } })
+                        }
+                        const clearValueColor = (val: string) => {
+                          const nextColors = { ...currentColors }
+                          delete nextColors[val]
+                          update({ chartConfig: { ...cc, rowColors: nextColors } })
+                        }
+                        return (
+                          <div className="mt-2 space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+                            {distinct.map(val => {
+                              const hex = currentColors[val] || ''
+                              return (
+                                <div key={val} className="flex items-center gap-2 text-xs">
+                                  <span className="flex-1 truncate text-slate-600 dark:text-slate-300" title={val}>{val}</span>
+                                  <input
+                                    type="color"
+                                    value={hex || '#ffffff'}
+                                    onChange={e => setValueColor(val, e.target.value)}
+                                    className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                                  />
+                                  {hex && (
+                                    <button
+                                      onClick={() => clearValueColor(val)}
+                                      title={t('common.clear')}
+                                      className="text-slate-400 hover:text-red-500"
+                                    >×</button>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )
+                      })()}
+                    </Field>
+                  )}
                 </>
               )
             })()}

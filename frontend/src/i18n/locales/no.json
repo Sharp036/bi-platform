@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Rapportparameter",
   "interactive.action.param_name_tooltip": "Valgfri. Hvis angitt, vil verdien fra kildefeltet bli injisert i denne rapportparameteren, og malwidgeten vil bli gjengitt paa nytt med den i SQL-en. Uten parameter brukes klientsidefiltrering etter malfelt.",
-  "interactive.action.param_name_none": "(klientsidefilter etter malfelt)"
+  "interactive.action.param_name_none": "(klientsidefilter etter malfelt)",
+  "designer.series_color": "Seriefarge",
+  "designer.row_color_by": "Radfarge etter kolonne",
+  "designer.row_color_by_hint": "Velg en kolonne. Rader med matchende verdier farges.",
+  "designer.row_color_preview_needed": "Kjør forhåndsvisning for å laste inn eksempelverdier.",
+  "common.clear": "Fjern"
 }

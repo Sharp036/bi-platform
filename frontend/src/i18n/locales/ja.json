@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "最初にデータソースを選択",
   "interactive.action.param_name": "レポートパラメータ",
   "interactive.action.param_name_tooltip": "オプション。設定されている場合、ソースフィールドの値がこのレポートパラメータに注入され、ターゲットウィジェットはそれを含むSQLで再レンダリングされます。パラメータなしの場合、ターゲットフィールドによるクライアント側フィルタリングが使用されます。",
-  "interactive.action.param_name_none": "(ターゲットフィールドによるクライアント側フィルタ)"
+  "interactive.action.param_name_none": "(ターゲットフィールドによるクライアント側フィルタ)",
+  "designer.series_color": "シリーズ色",
+  "designer.row_color_by": "列ごとの行の色",
+  "designer.row_color_by_hint": "列を選択してください。一致する値の行が色付けされます。",
+  "designer.row_color_preview_needed": "サンプル値を読み込むにはプレビューを実行してください。",
+  "common.clear": "クリア"
 }

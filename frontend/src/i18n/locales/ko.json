@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "먼저 데이터 소스를 선택하세요",
   "interactive.action.param_name": "보고서 매개변수",
   "interactive.action.param_name_tooltip": "선택 사항. 설정된 경우 소스 필드의 값이 이 보고서 매개변수에 주입되며, 대상 위젯은 해당 값이 포함된 SQL로 다시 렌더링됩니다. 매개변수 없이 대상 필드에 의한 클라이언트 측 필터링이 사용됩니다.",
-  "interactive.action.param_name_none": "(대상 필드에 의한 클라이언트 측 필터)"
+  "interactive.action.param_name_none": "(대상 필드에 의한 클라이언트 측 필터)",
+  "designer.series_color": "시리즈 색상",
+  "designer.row_color_by": "열별 행 색상",
+  "designer.row_color_by_hint": "열을 선택하세요. 일치하는 값의 행이 색상이 지정됩니다.",
+  "designer.row_color_preview_needed": "샘플 값을 로드하려면 미리보기를 실행하세요.",
+  "common.clear": "지우기"
 }

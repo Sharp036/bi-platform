@@ -955,5 +955,10 @@
   "designer.select_datasource_first": "Select a data source first",
   "interactive.action.param_name": "Tham so bao cao",
   "interactive.action.param_name_tooltip": "Tuy chon. Neu duoc dat, gia tri tu truong nguon se duoc chen vao tham so bao cao nay va widget dich se duoc hien thi lai voi no trong SQL cua no. Khong co tham so, bo loc phia may khach theo truong dich se duoc su dung.",
-  "interactive.action.param_name_none": "(bo loc phia may khach theo truong dich)"
+  "interactive.action.param_name_none": "(bo loc phia may khach theo truong dich)",
+  "designer.series_color": "Mau chuoi",
+  "designer.row_color_by": "Mau hang theo cot",
+  "designer.row_color_by_hint": "Chọn một cột. Các hàng có giá trị khớp sẽ được tô màu.",
+  "designer.row_color_preview_needed": "Chạy xem trước để tải các giá trị mẫu.",
+  "common.clear": "Xóa"
 }
