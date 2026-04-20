@@ -15,12 +15,10 @@ export interface ActionFilter {
 export interface DrillReplaceEntry {
   sourceWidgetId: number
   targetWidgetIds: number[]
-  filters: ActionFilter[]
+  filters: ActionFilter[]               // legacy client-side filters (no paramName configured)
+  paramOverrides: Record<string, unknown> // param-based drill (action.config.paramName set)
   label: string
   seriesName?: string
-  paramName?: string
-  paramValue?: string
-  prevParamValue?: string
 }
 
 interface ActionState {
@@ -71,6 +69,16 @@ export const useActionStore = create<ActionState>((set, get) => ({
     const newFilters = { ...activeFilters }
     const newHighlights = { ...highlightedValues }
     let newDrillStack: DrillReplaceEntry[] | null = null
+
+    // Batch DRILL_REPLACE actions from the same trigger into ONE stack entry.
+    // Each action may contribute either a parameter override (preferred) or a
+    // client-side field filter (legacy, for actions without config.paramName).
+    const drillParamOverrides: Record<string, unknown> = {}
+    const drillFilters: ActionFilter[] = []
+    const drillTargets = new Set<number>()
+    const drillLabels: string[] = []
+    let drillSeries: string | undefined
+    let hasDrillAction = false
 
     for (const action of matching) {
       const targetIds = resolveTargetWidgets(action)
@@ -127,13 +135,23 @@ export const useActionStore = create<ActionState>((set, get) => ({
         }
 
         case 'DRILL_REPLACE': {
-          const drillFilters: ActionFilter[] = []
-          const clickedSeries = data.seriesName != null ? String(data.seriesName) : undefined
-          if (sourceValue !== undefined && sourceValue !== null) {
+          hasDrillAction = true
+          targetIds.forEach(t => drillTargets.add(t))
+          if (data.seriesName != null) drillSeries = String(data.seriesName)
+          if (sourceValue === undefined || sourceValue === null) break
+
+          const paramName = (action.config as Record<string, unknown> | undefined)?.paramName
+          if (typeof paramName === 'string' && paramName) {
+            // Param-based drill: push value into report parameters. Widget SQL
+            // re-runs with the new parameter in WHERE, so ClickHouse returns
+            // only matching rows (no client-side truncation).
+            drillParamOverrides[paramName] = sourceValue
+          } else {
+            // Legacy field-based drill: client-side filter on widget data.
+            const filterField = action.targetField || action.sourceField || ''
+            const filter: ActionFilter = { sourceWidgetId, field: filterField, value: sourceValue }
+            drillFilters.push(filter)
             for (const targetId of targetIds) {
-              const filterField = action.targetField || action.sourceField || ''
-              const filter: ActionFilter = { sourceWidgetId, field: filterField, value: sourceValue }
-              drillFilters.push(filter)
               const existing = newFilters[targetId] || []
               const filtered = existing.filter(f =>
                 !(f.sourceWidgetId === sourceWidgetId && f.field === filterField)
@@ -142,17 +160,23 @@ export const useActionStore = create<ActionState>((set, get) => ({
               newFilters[targetId] = filtered
             }
           }
-          const entry: DrillReplaceEntry = {
-            sourceWidgetId,
-            targetWidgetIds: targetIds,
-            filters: drillFilters,
-            label: sourceValue != null ? String(sourceValue) : '',
-            seriesName: clickedSeries,
-          }
-          newDrillStack = [...get().drillReplaceStack, entry]
+          drillLabels.push(String(sourceValue))
           break
         }
       }
+    }
+
+    // Combine all DRILL_REPLACE actions from this trigger into one stack entry
+    if (hasDrillAction && drillTargets.size > 0) {
+      const entry: DrillReplaceEntry = {
+        sourceWidgetId,
+        targetWidgetIds: [...drillTargets],
+        filters: drillFilters,
+        paramOverrides: drillParamOverrides,
+        label: drillLabels.join(' / '),
+        seriesName: drillSeries,
+      }
+      newDrillStack = [...get().drillReplaceStack, entry]
     }
 
     set({
@@ -217,6 +241,23 @@ function resolveTargetWidgets(action: DashboardActionItem): number[] {
   const raw = action.targetWidgetIds
   if (!raw || raw === '*') return [] // '*' handled at render level
   return raw.split(',').map(s => s.trim()).filter(s => !s.startsWith('-')).map(Number).filter(n => !isNaN(n))
+}
+
+/**
+ * Compute effective report parameters by applying drill-replace overrides
+ * on top of the user's filter-panel values. Later entries override earlier.
+ */
+export function mergeDrillParams(
+  basePrams: Record<string, unknown>,
+  drillStack: DrillReplaceEntry[],
+): Record<string, unknown> {
+  let result = { ...basePrams }
+  for (const entry of drillStack) {
+    if (entry.paramOverrides) {
+      result = { ...result, ...entry.paramOverrides }
+    }
+  }
+  return result
 }
 
 /**
