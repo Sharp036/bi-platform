@@ -1,6 +1,7 @@
 package com.datorio.service
 
 import com.datorio.model.OutputFormat
+import com.datorio.model.WidgetType
 import com.datorio.model.dto.*
 import com.datorio.repository.ReportSnapshotRepository
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -39,25 +40,47 @@ class ExportService(
         request: ExportRequest,
         username: String
     ): Pair<ByteArray, String> {
-        // Render the report
-        val renderResult = renderService.renderReport(
-            reportId, RenderReportRequest(request.parameters), username
-        )
-
-        // Filter widgets if specified
-        val widgets = if (request.widgetIds != null) {
-            renderResult.widgets.filter { it.widgetId in request.widgetIds }
+        // Prefer a client-supplied snapshot (what's currently on screen).
+        // Fall back to a full re-render if the snapshot is absent.
+        val (reportName, widgets) = if (request.snapshot != null) {
+            val snap = request.snapshot
+            val mapped = snap.widgets.map { ws ->
+                RenderedWidget(
+                    widgetId = ws.widgetId,
+                    widgetType = WidgetType.TABLE,
+                    title = ws.title,
+                    chartConfig = "",
+                    position = "",
+                    style = "",
+                    data = WidgetData(
+                        columns = ws.columns,
+                        rows = ws.rows,
+                        rowCount = ws.rows.size,
+                        executionMs = 0L
+                    ),
+                    error = null
+                )
+            }
+            snap.reportName to mapped
         } else {
-            renderResult.widgets
-        }.filter { it.data != null }
+            val renderResult = renderService.renderReport(
+                reportId, RenderReportRequest(request.parameters), username
+            )
+            val filtered = if (request.widgetIds != null) {
+                renderResult.widgets.filter { it.widgetId in request.widgetIds }
+            } else {
+                renderResult.widgets
+            }.filter { it.data != null }
+            renderResult.reportName to filtered
+        }
 
         return when (request.format.uppercase()) {
-            "CSV" -> exportCsv(renderResult.reportName, widgets, request) to
-                "${sanitizeFilename(renderResult.reportName)}.csv"
-            "EXCEL", "XLSX" -> exportExcel(renderResult.reportName, widgets, request) to
-                "${sanitizeFilename(renderResult.reportName)}.xlsx"
-            "PDF" -> exportPdf(renderResult.reportName, widgets, request) to
-                "${sanitizeFilename(renderResult.reportName)}.pdf"
+            "CSV" -> exportCsv(reportName, widgets, request) to
+                "${sanitizeFilename(reportName)}.csv"
+            "EXCEL", "XLSX" -> exportExcel(reportName, widgets, request) to
+                "${sanitizeFilename(reportName)}.xlsx"
+            "PDF" -> exportPdf(reportName, widgets, request) to
+                "${sanitizeFilename(reportName)}.pdf"
             else -> throw IllegalArgumentException("Unsupported format: ${request.format}")
         }
     }

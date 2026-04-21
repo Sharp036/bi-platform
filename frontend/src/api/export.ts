@@ -1,11 +1,30 @@
 import api from './client'
 import type { ExportStatusResponse, EmailDeliveryResponse, EmbedToken } from '@/types'
 
+export interface ReportSnapshot {
+  reportName: string
+  widgets: Array<{
+    widgetId: number
+    title?: string
+    columns: string[]
+    rows: Array<Record<string, unknown>>
+  }>
+}
+
 export const exportApi = {
-  // Direct download (returns blob)
-  download: (reportId: number, format: string, parameters?: Record<string, unknown>) =>
-    api.post(`/export/reports/${reportId}`, { format, parameters }, { responseType: 'blob' })
-      .then(r => r.data),
+  // Direct download (returns blob). If `snapshot` is provided, the backend
+  // formats that exact data instead of re-rendering the report.
+  download: (
+    reportId: number,
+    format: string,
+    parameters?: Record<string, unknown>,
+    snapshot?: ReportSnapshot,
+  ) =>
+    api.post(
+      `/export/reports/${reportId}`,
+      { format, parameters, snapshot },
+      { responseType: 'blob' },
+    ).then(r => r.data),
 
   // Export & save (returns download URL)
   exportAndSave: (reportId: number, format: string, parameters?: Record<string, unknown>) =>

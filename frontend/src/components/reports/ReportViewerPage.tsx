@@ -448,6 +448,39 @@ export default function ReportViewerPage() {
 
   const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
 
+  // Per-widget display state published by table widgets (sort order, visible columns).
+  // Ref, not state - we only read it at export time, no re-render needed.
+  const widgetDisplayStatesRef = useRef<Map<number, { columns: string[]; rows: Record<string, unknown>[] }>>(new Map())
+  const handleWidgetDisplay = useCallback(
+    (widgetId: number, state: { columns: string[]; rows: Record<string, unknown>[] }) => {
+      widgetDisplayStatesRef.current.set(widgetId, state)
+    },
+    []
+  )
+
+  // Called by ExportMenu at click time so we see the freshest on-screen state.
+  // Merges: (1) only visible widgets, (2) client cross-filters, (3) table sort/columns.
+  const getVisibleRenderedWidgets = useCallback((): RenderReportResponse['widgets'] => {
+    if (!renderResult) return []
+    return renderResult.widgets
+      .filter(w => visibleWidgetIds.has(w.widgetId))
+      .filter(w => !NON_DATA_WIDGETS.has(w.widgetType) && w.widgetType !== 'FILTER')
+      .map(applyClientFilters)
+      .map(w => {
+        const display = widgetDisplayStatesRef.current.get(w.widgetId)
+        if (!display || !w.data) return w
+        return {
+          ...w,
+          data: {
+            ...w.data,
+            columns: display.columns,
+            rows: display.rows,
+            rowCount: display.rows.length,
+          },
+        }
+      })
+  }, [renderResult, visibleWidgetIds, applyClientFilters])
+
   const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
     const widgetDrillActions = drillActions[w.widgetId] || []
     const hasDrill = widgetDrillActions.length > 0
@@ -513,6 +546,7 @@ export default function ReportViewerPage() {
           onChartClick={(data) => {
             useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
           }}
+          onWidgetDisplay={handleWidgetDisplay}
         />
       </div>
     )
@@ -769,7 +803,7 @@ export default function ReportViewerPage() {
           >
             <Link2 className="w-4 h-4" />
           </button>
-          <ExportMenu reportId={report?.id || 0} reportName={report.name} />
+          <ExportMenu reportId={report?.id || 0} reportName={report.name} getVisibleWidgets={getVisibleRenderedWidgets} />
         </div>
       </div>
 

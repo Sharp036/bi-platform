@@ -3,14 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { exportApi } from '@/api/export'
 import { Download, FileSpreadsheet, FileText, FileDown, Mail, X } from 'lucide-react'
 import toast from 'react-hot-toast'
+import type { RenderedWidget } from '@/types'
 
 interface Props {
   reportId: number
   reportName: string
   parameters?: Record<string, unknown>
+  // Called at click time so the export captures the freshest on-screen state
+  // (sort order, column selection, pagination changes that happened between renders).
+  getVisibleWidgets?: () => RenderedWidget[]
 }
 
-export default function ExportMenu({ reportId, reportName, parameters = {} }: Props) {
+export default function ExportMenu({ reportId, reportName, parameters = {}, getVisibleWidgets }: Props) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [showEmail, setShowEmail] = useState(false)
@@ -30,11 +34,27 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
+  const buildSnapshot = () => {
+    const widgets = getVisibleWidgets?.() ?? []
+    const widgetsWithData = widgets.filter(w => w.data && w.data.columns.length > 0)
+    if (widgetsWithData.length === 0) return undefined
+    return {
+      reportName,
+      widgets: widgetsWithData.map(w => ({
+        widgetId: w.widgetId,
+        title: w.title,
+        columns: w.data!.columns,
+        rows: w.data!.rows,
+      })),
+    }
+  }
+
   const handleDownload = async (format: string) => {
     setOpen(false)
     toast.loading(t('export.exporting_as', { format }), { id: 'export' })
     try {
-      const blob = await exportApi.download(reportId, format, parameters)
+      const snapshot = buildSnapshot()
+      const blob = await exportApi.download(reportId, format, parameters, snapshot)
       const ext = format === 'EXCEL' ? 'xlsx' : format.toLowerCase()
       const filename = `${reportName.replace(/[<>:"/\\|?*]/g, '_')}.${ext}`
 
