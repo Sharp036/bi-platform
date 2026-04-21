@@ -90,6 +90,8 @@ tasks.withType<Test> {
 
 // Copy frontend build output into Spring Boot's static resources
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    // Fonts live on the filesystem in Docker (stable cached layer), not inside the fat JAR.
+    exclude("fonts/**")
     // After Phase 6, uncomment to embed frontend:
     // from("../frontend/dist") { into("static") }
 }

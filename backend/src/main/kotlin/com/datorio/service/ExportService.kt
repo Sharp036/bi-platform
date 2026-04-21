@@ -28,6 +28,9 @@ class ExportService(
     @Value("\${datorio.export.directory:/tmp/datalens-exports}")
     private lateinit var exportDir: String
 
+    @Value("\${datorio.export.fonts-dir:/app/fonts}")
+    private lateinit var fontsDir: String
+
     /**
      * Export a report to the requested format. Returns file bytes.
      */
@@ -281,19 +284,19 @@ class ExportService(
         // first registered font that has the glyph, so order = priority.
         // DejaVu covers Latin/Cyrillic/Greek/Hebrew/basic Arabic; Noto fills the rest.
         val fonts = listOf(
-            "/fonts/DejaVuSans.ttf",                  // required baseline
-            "/fonts/NotoSansArabic-Regular.ttf",      // Arabic presentation forms
-            "/fonts/NotoSansThai-Regular.ttf",        // Thai
-            "/fonts/NotoSansDevanagari-Regular.ttf",  // Hindi / Devanagari
-            "/fonts/NotoSansJP-Regular.otf",          // Japanese kana + kanji
-            "/fonts/NotoSansKR-Regular.otf",          // Korean hangul + hanja
-            "/fonts/NotoSansSC-Regular.otf"           // Simplified Chinese (covers shared CJK ideographs)
+            "DejaVuSans.ttf",                  // required baseline
+            "NotoSansArabic-Regular.ttf",      // Arabic presentation forms
+            "NotoSansThai-Regular.ttf",        // Thai
+            "NotoSansDevanagari-Regular.ttf",  // Hindi / Devanagari
+            "NotoSansJP-Regular.otf",          // Japanese kana + kanji
+            "NotoSansKR-Regular.otf",          // Korean hangul + hanja
+            "NotoSansSC-Regular.otf"           // Simplified Chinese (covers shared CJK ideographs)
         )
         var registered = 0
-        for (path in fonts) {
-            val bytes = javaClass.getResourceAsStream(path)?.use { it.readBytes() }
+        for (filename in fonts) {
+            val bytes = loadFontBytes(filename)
             if (bytes == null) {
-                log.warn("PDF export font missing on classpath: {} - glyphs from this script will be blank", path)
+                log.warn("PDF export font missing: {} (tried {} and classpath /fonts/)", filename, fontsDir)
                 continue
             }
             builder.useFont(
@@ -306,8 +309,16 @@ class ExportService(
             registered++
         }
         if (registered == 0) {
-            error("No PDF fonts found on classpath. Place at least DejaVuSans.ttf under backend/src/main/resources/fonts/.")
+            error("No PDF fonts found. Place fonts in $fontsDir (Docker) or backend/src/main/resources/fonts/ (dev).")
         }
+    }
+
+    private fun loadFontBytes(filename: String): ByteArray? {
+        // Production: fonts live on the filesystem as a separate cached Docker layer.
+        val fsPath = Paths.get(fontsDir, filename)
+        if (Files.exists(fsPath)) return Files.readAllBytes(fsPath)
+        // Dev/test fallback: fonts on classpath from src/main/resources/fonts/.
+        return javaClass.getResourceAsStream("/fonts/$filename")?.use { it.readBytes() }
     }
 
     private fun buildPdfHtml(reportName: String, widgets: List<RenderedWidget>): String {
