@@ -322,10 +322,12 @@ class ExportService(
     }
 
     private fun buildPdfHtml(reportName: String, widgets: List<RenderedWidget>): String {
+        // openhtmltopdf parses input as strict XHTML, so void tags must be self-closed
+        // and text interpolated into tags must be XML-escaped.
         val sb = StringBuilder()
         sb.appendLine("<!DOCTYPE html>")
-        sb.appendLine("<html><head><meta charset='UTF-8'>")
-        sb.appendLine("<title>$reportName</title>")
+        sb.appendLine("<html><head><meta charset=\"UTF-8\"/>")
+        sb.appendLine("<title>${escapeHtml(reportName)}</title>")
         sb.appendLine("<style>")
         sb.appendLine("body { font-family: 'Report Font', 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }")
         sb.appendLine("h1 { color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }")
@@ -338,13 +340,13 @@ class ExportService(
         sb.appendLine(".widget-info { color: #64748b; font-size: 11px; }")
         sb.appendLine("@media print { body { margin: 20px; } }")
         sb.appendLine("</style></head><body>")
-        sb.appendLine("<h1>$reportName</h1>")
+        sb.appendLine("<h1>${escapeHtml(reportName)}</h1>")
         sb.appendLine("<p class='meta'>Exported: ${java.time.LocalDateTime.now().toString().replace('T', ' ').substringBefore('.')}</p>")
 
         for (widget in widgets) {
             val data = widget.data ?: continue
-            sb.appendLine("<h2>${widget.title ?: "Data"}</h2>")
-            sb.appendLine("<p class='widget-info'>${data.rowCount} rows · ${data.executionMs}ms</p>")
+            sb.appendLine("<h2>${escapeHtml(widget.title ?: "Data")}</h2>")
+            sb.appendLine("<p class='widget-info'>${data.rowCount} rows, ${data.executionMs}ms</p>")
             sb.appendLine("<table>")
 
             // Header
