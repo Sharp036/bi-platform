@@ -4,11 +4,14 @@ import com.datorio.model.OutputFormat
 import com.datorio.model.dto.*
 import com.datorio.repository.ReportSnapshotRepository
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
+import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -262,22 +265,49 @@ class ExportService(
         widgets: List<RenderedWidget>,
         request: ExportRequest
     ): ByteArray {
-        // Generate HTML table representation, then convert to PDF-like format
-        // Using simple HTML → byte array approach with a table-based layout
         val html = buildPdfHtml(reportName, widgets)
+        val out = ByteArrayOutputStream()
+        val builder = PdfRendererBuilder()
+        builder.useFastMode()
+        registerPdfFont(builder)
+        builder.withHtmlContent(html, null)
+        builder.toStream(out)
+        builder.run()
+        return out.toByteArray()
+    }
 
-        // Since we want minimal dependencies, we generate a well-formatted HTML
-        // that can be viewed directly. For true PDF, add openhtmltopdf to build.gradle.kts.
-        // For now, we produce clean HTML exported as .pdf (many tools open it).
-        // TODO: Replace with openhtmltopdf when dependency is added:
-        //   val builder = PdfRendererBuilder()
-        //   val out = ByteArrayOutputStream()
-        //   builder.withHtmlContent(html, null)
-        //   builder.toStream(out)
-        //   builder.run()
-        //   return out.toByteArray()
-
-        return html.toByteArray(Charsets.UTF_8)
+    private fun registerPdfFont(builder: PdfRendererBuilder) {
+        // Register fonts under one family "Report Font". openhtmltopdf picks the
+        // first registered font that has the glyph, so order = priority.
+        // DejaVu covers Latin/Cyrillic/Greek/Hebrew/basic Arabic; Noto fills the rest.
+        val fonts = listOf(
+            "/fonts/DejaVuSans.ttf",                  // required baseline
+            "/fonts/NotoSansArabic-Regular.ttf",      // Arabic presentation forms
+            "/fonts/NotoSansThai-Regular.ttf",        // Thai
+            "/fonts/NotoSansDevanagari-Regular.ttf",  // Hindi / Devanagari
+            "/fonts/NotoSansJP-Regular.otf",          // Japanese kana + kanji
+            "/fonts/NotoSansKR-Regular.otf",          // Korean hangul + hanja
+            "/fonts/NotoSansSC-Regular.otf"           // Simplified Chinese (covers shared CJK ideographs)
+        )
+        var registered = 0
+        for (path in fonts) {
+            val bytes = javaClass.getResourceAsStream(path)?.use { it.readBytes() }
+            if (bytes == null) {
+                log.warn("PDF export font missing on classpath: {} - glyphs from this script will be blank", path)
+                continue
+            }
+            builder.useFont(
+                { ByteArrayInputStream(bytes) },
+                "Report Font",
+                400,
+                BaseRendererBuilder.FontStyle.NORMAL,
+                true
+            )
+            registered++
+        }
+        if (registered == 0) {
+            error("No PDF fonts found on classpath. Place at least DejaVuSans.ttf under backend/src/main/resources/fonts/.")
+        }
     }
 
     private fun buildPdfHtml(reportName: String, widgets: List<RenderedWidget>): String {
@@ -286,7 +316,7 @@ class ExportService(
         sb.appendLine("<html><head><meta charset='UTF-8'>")
         sb.appendLine("<title>$reportName</title>")
         sb.appendLine("<style>")
-        sb.appendLine("body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }")
+        sb.appendLine("body { font-family: 'Report Font', 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }")
         sb.appendLine("h1 { color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }")
         sb.appendLine("h2 { color: #475569; margin-top: 30px; }")
         sb.appendLine("table { border-collapse: collapse; width: 100%; margin: 10px 0 20px; }")
