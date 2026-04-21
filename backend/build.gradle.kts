@@ -61,6 +61,9 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.11.0")  // CSV/TSV parsing
     implementation("jakarta.mail:jakarta.mail-api:2.1.3")
     implementation("org.eclipse.angus:angus-mail:2.0.3")
+    implementation("com.openhtmltopdf:openhtmltopdf-core:1.0.10")
+    implementation("com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10")
+    implementation("com.openhtmltopdf:openhtmltopdf-slf4j:1.0.10")
 
     // ── Caching ──
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
