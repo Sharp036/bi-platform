@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { WidgetData } from '@/types'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Download, ZoomIn, ZoomOut } from 'lucide-react'
@@ -19,6 +19,9 @@ interface Props {
   chartConfig?: string
   onRowClick?: (row: Record<string, unknown>) => void
   clickable?: boolean
+  // Publishes the currently sorted/column-filtered table state so the parent
+  // (ReportViewerPage) can feed the exact on-screen data into export.
+  onDisplayStateChange?: (state: { columns: string[]; rows: Record<string, unknown>[] }) => void
 }
 
 function parseConfig(raw?: string): Record<string, unknown> {
@@ -60,9 +63,9 @@ function exportXlsx(cols: string[], rows: Record<string, unknown>[], filename: s
   XLSX.writeFile(wb, filename + '.xlsx')
 }
 
-export default function TableWidget({ data, title, chartConfig, onRowClick, clickable }: Props) {
+export default function TableWidget({ data, title, chartConfig, onRowClick, clickable, onDisplayStateChange }: Props) {
   const { t } = useTranslation()
-  const config = parseConfig(chartConfig)
+  const config = useMemo(() => parseConfig(chartConfig), [chartConfig])
   const density: Density = (config.tableDensity as string) in DENSITY_CONFIG
     ? (config.tableDensity as Density)
     : 'default'
@@ -71,9 +74,11 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
   const allRows = data.rows || []
 
   // Determine visible columns from config
-  const visibleCols = Array.isArray(config.visibleColumns)
-    ? (config.visibleColumns as string[]).filter(c => cols.includes(c))
-    : cols
+  const visibleCols = useMemo(() => (
+    Array.isArray(config.visibleColumns)
+      ? (config.visibleColumns as string[]).filter(c => cols.includes(c))
+      : cols
+  ), [config.visibleColumns, cols])
 
   // Configurable page size from chartConfig, 0 or undefined = auto
   const configPageSize = Number(config.tablePageSize) || 0
@@ -82,19 +87,21 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
   const [sortCol, setSortCol] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
 
-  const sortedRows = sortCol
-    ? [...allRows].sort((a, b) => {
-        const av = a[sortCol], bv = b[sortCol]
-        if (av == null && bv == null) return 0
-        if (av == null) return 1
-        if (bv == null) return -1
-        const an = Number(av), bn = Number(bv)
-        const cmp = (!isNaN(an) && !isNaN(bn))
-          ? an - bn
-          : String(av).localeCompare(String(bv))
-        return sortDir === 'asc' ? cmp : -cmp
-      })
-    : allRows
+  const sortedRows = useMemo(() => (
+    sortCol
+      ? [...allRows].sort((a, b) => {
+          const av = a[sortCol], bv = b[sortCol]
+          if (av == null && bv == null) return 0
+          if (av == null) return 1
+          if (bv == null) return -1
+          const an = Number(av), bn = Number(bv)
+          const cmp = (!isNaN(an) && !isNaN(bn))
+            ? an - bn
+            : String(av).localeCompare(String(bv))
+          return sortDir === 'asc' ? cmp : -cmp
+        })
+      : allRows
+  ), [allRows, sortCol, sortDir])
 
   const handleSort = useCallback((col: string) => {
     if (sortCol === col) {
@@ -137,7 +144,15 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
 
   const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize))
   const safeePage = Math.min(page, totalPages - 1)
-  const pageRows = sortedRows.slice(safeePage * pageSize, (safeePage + 1) * pageSize)
+  const pageRows = useMemo(
+    () => sortedRows.slice(safeePage * pageSize, (safeePage + 1) * pageSize),
+    [sortedRows, safeePage, pageSize]
+  )
+
+  // Publish current page (what's literally on screen) so export acts like a screenshot.
+  useEffect(() => {
+    onDisplayStateChange?.({ columns: visibleCols, rows: pageRows })
+  }, [onDisplayStateChange, visibleCols, pageRows])
 
   const goTo = useCallback((p: number) => {
     setPage(Math.max(0, Math.min(p, totalPages - 1)))

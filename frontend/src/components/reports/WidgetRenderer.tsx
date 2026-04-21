@@ -24,6 +24,7 @@ interface Props {
   onApplyFilter?: (field: string, value: string) => void
   annotations?: AnnotationItem[]
   tooltipConfig?: TooltipConfigItem
+  onWidgetDisplay?: (widgetId: number, state: { columns: string[]; rows: Record<string, unknown>[] }) => void
 }
 
 export default function WidgetRenderer({
@@ -31,7 +32,8 @@ export default function WidgetRenderer({
   onChartClick, highlightField, highlightValue,
   drillActions, onDrillDown,
   reportId, onToggleWidgets, onApplyFilter,
-  annotations, tooltipConfig
+  annotations, tooltipConfig,
+  onWidgetDisplay,
 }: Props) {
   const { t } = useTranslation()
   if (widget.error) {
@@ -118,6 +120,7 @@ export default function WidgetRenderer({
             onChartClick?.(row)
             if (onDrillDown) onDrillDown(row)
           }}
+          onDisplayStateChange={onWidgetDisplay ? state => onWidgetDisplay(widget.widgetId, state) : undefined}
         />
       )
     case 'KPI':
