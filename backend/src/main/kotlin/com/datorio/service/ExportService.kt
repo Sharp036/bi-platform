@@ -272,31 +272,36 @@ class ExportService(
         val out = ByteArrayOutputStream()
         val builder = PdfRendererBuilder()
         builder.useFastMode()
-        registerPdfFont(builder)
+        registerPdfFont(builder, html)
         builder.withHtmlContent(html, null)
         builder.toStream(out)
         builder.run()
         return out.toByteArray()
     }
 
-    private fun registerPdfFont(builder: PdfRendererBuilder) {
-        // Register fonts under one family "Report Font". openhtmltopdf picks the
-        // first registered font that has the glyph, so order = priority.
-        // DejaVu covers Latin/Cyrillic/Greek/Hebrew/basic Arabic; Noto fills the rest.
+    /**
+     * Register fonts under one family "Report Font". Only fonts whose Unicode blocks
+     * are present in the rendered HTML are loaded, because PDFBox 2.x cannot subset
+     * CFF-outlined (.otf) fonts and would otherwise embed each ~5 MB file in full.
+     */
+    private fun registerPdfFont(builder: PdfRendererBuilder, html: String) {
+        // DejaVu always loaded: Latin, Cyrillic, Greek, Hebrew, basic Arabic.
+        data class FontDef(val filename: String, val needed: (String) -> Boolean)
         val fonts = listOf(
-            "DejaVuSans.ttf",                  // required baseline
-            "NotoSansArabic-Regular.ttf",      // Arabic presentation forms
-            "NotoSansThai-Regular.ttf",        // Thai
-            "NotoSansDevanagari-Regular.ttf",  // Hindi / Devanagari
-            "NotoSansJP-Regular.otf",          // Japanese kana + kanji
-            "NotoSansKR-Regular.otf",          // Korean hangul + hanja
-            "NotoSansSC-Regular.otf"           // Simplified Chinese (covers shared CJK ideographs)
+            FontDef("DejaVuSans.ttf") { true },
+            FontDef("NotoSansArabic-Regular.ttf") { s -> s.any { it.code in 0x0600..0x06FF || it.code in 0xFB50..0xFEFF } },
+            FontDef("NotoSansThai-Regular.ttf") { s -> s.any { it.code in 0x0E00..0x0E7F } },
+            FontDef("NotoSansDevanagari-Regular.ttf") { s -> s.any { it.code in 0x0900..0x097F } },
+            FontDef("NotoSansJP-Regular.otf") { s -> s.any { it.code in 0x3040..0x30FF } },
+            FontDef("NotoSansKR-Regular.otf") { s -> s.any { it.code in 0xAC00..0xD7AF } },
+            FontDef("NotoSansSC-Regular.otf") { s -> s.any { it.code in 0x4E00..0x9FFF } }
         )
         var registered = 0
-        for (filename in fonts) {
-            val bytes = loadFontBytes(filename)
+        for (font in fonts) {
+            if (!font.needed(html)) continue
+            val bytes = loadFontBytes(font.filename)
             if (bytes == null) {
-                log.warn("PDF export font missing: {} (tried {} and classpath /fonts/)", filename, fontsDir)
+                log.warn("PDF export font missing: {} (tried {} and classpath /fonts/)", font.filename, fontsDir)
                 continue
             }
             builder.useFont(
@@ -311,6 +316,7 @@ class ExportService(
         if (registered == 0) {
             error("No PDF fonts found. Place fonts in $fontsDir (Docker) or backend/src/main/resources/fonts/ (dev).")
         }
+        log.debug("PDF export: registered {} font(s) for this document", registered)
     }
 
     private fun loadFontBytes(filename: String): ByteArray? {
