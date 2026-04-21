@@ -12,15 +12,15 @@ data class ExportRequest(
     val widgetIds: List<Long>? = null,      // null = all widgets
     val includeHeaders: Boolean = true,
     val sheetPerWidget: Boolean = true,     // Excel: separate sheet per widget
-    val snapshot: ReportSnapshot? = null    // if present: export exactly what the UI shows, no re-render
+    val snapshot: ExportSnapshot? = null    // if present: export exactly what the UI shows, no re-render
 )
 
-data class ReportSnapshot(
+data class ExportSnapshot(
     val reportName: String,
-    val widgets: List<WidgetSnapshot>
+    val widgets: List<ExportWidgetSnapshot>
 )
 
-data class WidgetSnapshot(
+data class ExportWidgetSnapshot(
     val widgetId: Long,
     val title: String? = null,
     val columns: List<String>,
