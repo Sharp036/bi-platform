@@ -30,6 +30,8 @@ import TabContainer from '@/components/interactive/TabContainer'
 
 type FilterPanelPosition = 'top' | 'bottom' | 'left' | 'right'
 
+const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
+
 function getFilterPanelLayout(layout?: string): { position: FilterPanelPosition; collapsed: boolean } {
   if (!layout) return { position: 'top', collapsed: false }
   try {
@@ -433,23 +435,9 @@ export default function ReportViewerPage() {
     return ids
   }, [report, usedParamNames, containers])
 
-  if (loading) return <LoadingSpinner />
-  if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
-
-  const parsePosition = (pos?: string) => {
-    if (!pos) return { x: 0, y: 0, w: 12, h: 4 }
-    try { return JSON.parse(pos) } catch { return { x: 0, y: 0, w: 12, h: 4 } }
-  }
-
-  const parseStyle = (style?: string) => {
-    if (!style) return {}
-    try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
-  }
-
-  const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
-
   // Per-widget display state published by table widgets (sort order, visible columns).
   // Ref, not state - we only read it at export time, no re-render needed.
+  // MUST be declared above any early return to keep hook count stable across renders.
   const widgetDisplayStatesRef = useRef<Map<number, { columns: string[]; rows: Record<string, unknown>[] }>>(new Map())
   const handleWidgetDisplay = useCallback(
     (widgetId: number, state: { columns: string[]; rows: Record<string, unknown>[] }) => {
@@ -480,6 +468,19 @@ export default function ReportViewerPage() {
         }
       })
   }, [renderResult, visibleWidgetIds, applyClientFilters])
+
+  if (loading) return <LoadingSpinner />
+  if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
+
+  const parsePosition = (pos?: string) => {
+    if (!pos) return { x: 0, y: 0, w: 12, h: 4 }
+    try { return JSON.parse(pos) } catch { return { x: 0, y: 0, w: 12, h: 4 } }
+  }
+
+  const parseStyle = (style?: string) => {
+    if (!style) return {}
+    try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
+  }
 
   const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
     const widgetDrillActions = drillActions[w.widgetId] || []
