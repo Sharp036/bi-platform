@@ -36,8 +36,6 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.yandex.ru/mir
 WORKDIR /app
 
 # Stable layers first so Harbor can dedup them across builds.
-# Fonts (~18 MB) are bundled outside the JAR to avoid re-pushing them on every code change.
-COPY backend/src/main/resources/fonts /app/fonts
 
 # Copy nginx config (overrides default)
 COPY docker/nginx/frontend.conf /etc/nginx/http.d/default.conf
