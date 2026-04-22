@@ -5,17 +5,13 @@ import com.datorio.model.WidgetType
 import com.datorio.model.dto.*
 import com.datorio.repository.ReportSnapshotRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
-import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 
 @Service
@@ -28,9 +24,6 @@ class ExportService(
 
     @Value("\${datorio.export.directory:/tmp/datalens-exports}")
     private lateinit var exportDir: String
-
-    @Value("\${datorio.export.fonts-dir:/app/fonts}")
-    private lateinit var fontsDir: String
 
     /**
      * Export a report to the requested format. Returns file bytes.
@@ -79,8 +72,9 @@ class ExportService(
                 "${sanitizeFilename(reportName)}.csv"
             "EXCEL", "XLSX" -> exportExcel(reportName, widgets, request) to
                 "${sanitizeFilename(reportName)}.xlsx"
-            "PDF" -> exportPdf(reportName, widgets, request) to
-                "${sanitizeFilename(reportName)}.pdf"
+            "PDF" -> throw IllegalArgumentException(
+                "PDF export is generated client-side (html2canvas + jsPDF); this endpoint only handles CSV/EXCEL"
+            )
             else -> throw IllegalArgumentException("Unsupported format: ${request.format}")
         }
     }
@@ -284,135 +278,12 @@ class ExportService(
         return rowIdx
     }
 
-    // ── PDF Export ──
-
-    private fun exportPdf(
-        reportName: String,
-        widgets: List<RenderedWidget>,
-        request: ExportRequest
-    ): ByteArray {
-        val html = buildPdfHtml(reportName, widgets)
-        val out = ByteArrayOutputStream()
-        val builder = PdfRendererBuilder()
-        builder.useFastMode()
-        registerPdfFont(builder, html)
-        builder.withHtmlContent(html, null)
-        builder.toStream(out)
-        builder.run()
-        return out.toByteArray()
-    }
-
-    /**
-     * Register fonts under one family "Report Font". Only fonts whose Unicode blocks
-     * are present in the rendered HTML are loaded, because PDFBox 2.x cannot subset
-     * CFF-outlined (.otf) fonts and would otherwise embed each ~5 MB file in full.
-     */
-    private fun registerPdfFont(builder: PdfRendererBuilder, html: String) {
-        // DejaVu always loaded: Latin, Cyrillic, Greek, Hebrew, basic Arabic.
-        data class FontDef(val filename: String, val needed: (String) -> Boolean)
-        val fonts = listOf(
-            FontDef("DejaVuSans.ttf") { true },
-            FontDef("NotoSansArabic-Regular.ttf") { s -> s.any { it.code in 0x0600..0x06FF || it.code in 0xFB50..0xFEFF } },
-            FontDef("NotoSansThai-Regular.ttf") { s -> s.any { it.code in 0x0E00..0x0E7F } },
-            FontDef("NotoSansDevanagari-Regular.ttf") { s -> s.any { it.code in 0x0900..0x097F } },
-            FontDef("NotoSansJP-Regular.otf") { s -> s.any { it.code in 0x3040..0x30FF } },
-            FontDef("NotoSansKR-Regular.otf") { s -> s.any { it.code in 0xAC00..0xD7AF } },
-            FontDef("NotoSansSC-Regular.otf") { s -> s.any { it.code in 0x4E00..0x9FFF } }
-        )
-        var registered = 0
-        for (font in fonts) {
-            if (!font.needed(html)) continue
-            val bytes = loadFontBytes(font.filename)
-            if (bytes == null) {
-                log.warn("PDF export font missing: {} (tried {} and classpath /fonts/)", font.filename, fontsDir)
-                continue
-            }
-            builder.useFont(
-                { ByteArrayInputStream(bytes) },
-                "Report Font",
-                400,
-                BaseRendererBuilder.FontStyle.NORMAL,
-                true
-            )
-            registered++
-        }
-        if (registered == 0) {
-            error("No PDF fonts found. Place fonts in $fontsDir (Docker) or backend/src/main/resources/fonts/ (dev).")
-        }
-        log.debug("PDF export: registered {} font(s) for this document", registered)
-    }
-
-    private fun loadFontBytes(filename: String): ByteArray? {
-        // Production: fonts live on the filesystem as a separate cached Docker layer.
-        val fsPath = Paths.get(fontsDir, filename)
-        if (Files.exists(fsPath)) return Files.readAllBytes(fsPath)
-        // Dev/test fallback: fonts on classpath from src/main/resources/fonts/.
-        return javaClass.getResourceAsStream("/fonts/$filename")?.use { it.readBytes() }
-    }
-
-    private fun buildPdfHtml(reportName: String, widgets: List<RenderedWidget>): String {
-        // openhtmltopdf parses input as strict XHTML, so void tags must be self-closed
-        // and text interpolated into tags must be XML-escaped.
-        val sb = StringBuilder()
-        sb.appendLine("<!DOCTYPE html>")
-        sb.appendLine("<html><head><meta charset=\"UTF-8\"/>")
-        sb.appendLine("<title>${escapeHtml(reportName)}</title>")
-        sb.appendLine("<style>")
-        sb.appendLine("body { font-family: 'Report Font', 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }")
-        sb.appendLine("h1 { color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }")
-        sb.appendLine("h2 { color: #475569; margin-top: 30px; }")
-        sb.appendLine("table { border-collapse: collapse; width: 100%; margin: 10px 0 20px; }")
-        sb.appendLine("th { background: #f1f5f9; color: #334155; font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid #e2e8f0; }")
-        sb.appendLine("td { padding: 6px 12px; border: 1px solid #e2e8f0; }")
-        sb.appendLine("tr:nth-child(even) { background: #f8fafc; }")
-        sb.appendLine(".meta { color: #94a3b8; font-size: 12px; margin-bottom: 20px; }")
-        sb.appendLine(".widget-info { color: #64748b; font-size: 11px; }")
-        sb.appendLine("@media print { body { margin: 20px; } }")
-        sb.appendLine("</style></head><body>")
-        sb.appendLine("<h1>${escapeHtml(reportName)}</h1>")
-        sb.appendLine("<p class='meta'>Exported: ${java.time.LocalDateTime.now().toString().replace('T', ' ').substringBefore('.')}</p>")
-
-        for (widget in widgets) {
-            val data = widget.data ?: continue
-            sb.appendLine("<h2>${escapeHtml(widget.title ?: "Data")}</h2>")
-            sb.appendLine("<p class='widget-info'>${data.rowCount} rows, ${data.executionMs}ms</p>")
-            sb.appendLine("<table>")
-
-            // Header
-            sb.appendLine("<thead><tr>")
-            for (col in data.columns) {
-                sb.appendLine("<th>${escapeHtml(col)}</th>")
-            }
-            sb.appendLine("</tr></thead>")
-
-            // Rows
-            sb.appendLine("<tbody>")
-            for (row in data.rows) {
-                sb.appendLine("<tr>")
-                for (col in data.columns) {
-                    val value = row[col]
-                    sb.appendLine("<td>${escapeHtml(value?.toString() ?: "")}</td>")
-                }
-                sb.appendLine("</tr>")
-            }
-            sb.appendLine("</tbody></table>")
-        }
-
-        sb.appendLine("</body></html>")
-        return sb.toString()
-    }
-
     // ── Utilities ──
 
     private fun escapeCsv(value: String): String {
         return if (value.contains(',') || value.contains('"') || value.contains('\n')) {
             "\"${value.replace("\"", "\"\"")}\""
         } else value
-    }
-
-    private fun escapeHtml(value: String): String {
-        return value.replace("&", "&amp;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace("\"", "&quot;")
     }
 
     private fun sanitizeFilename(name: String): String {

@@ -435,6 +435,9 @@ export default function ReportViewerPage() {
     return ids
   }, [report, usedParamNames, containers])
 
+  // Dashboard container ref — used by ExportMenu to capture a PDF screenshot of the live UI.
+  const dashboardRef = useRef<HTMLDivElement | null>(null)
+
   // Per-widget display state published by table widgets (sort order, visible columns).
   // Ref, not state - we only read it at export time, no re-render needed.
   // MUST be declared above any early return to keep hook count stable across renders.
@@ -585,7 +588,7 @@ export default function ReportViewerPage() {
         {rendering && !renderResult ? (
           <LoadingSpinner />
         ) : renderResult ? (
-          <div className="space-y-4">
+          <div ref={dashboardRef} className="space-y-4">
             {/* TABS containers */}
             {tabsContainers.map(container => {
               // Each group = one tab; filter out hidden widgets, keep original index for labels
@@ -804,7 +807,12 @@ export default function ReportViewerPage() {
           >
             <Link2 className="w-4 h-4" />
           </button>
-          <ExportMenu reportId={report?.id || 0} reportName={report.name} getVisibleWidgets={getVisibleRenderedWidgets} />
+          <ExportMenu
+            reportId={report?.id || 0}
+            reportName={report.name}
+            getVisibleWidgets={getVisibleRenderedWidgets}
+            dashboardRef={dashboardRef}
+          />
         </div>
       </div>
 
