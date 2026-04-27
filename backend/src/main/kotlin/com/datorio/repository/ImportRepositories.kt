@@ -3,6 +3,8 @@ package com.datorio.repository
 import com.datorio.model.ImportLog
 import com.datorio.model.ImportLogError
 import com.datorio.model.ImportSource
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -23,8 +25,37 @@ interface ImportSourceRepository : JpaRepository<ImportSource, Long> {
 
 @Repository
 interface ImportLogRepository : JpaRepository<ImportLog, Long> {
-    fun findAllByOrderByUploadedAtDesc(): List<ImportLog>
-    fun findAllByUploadedByUsernameOrderByUploadedAtDesc(username: String): List<ImportLog>
+
+    @Query(
+        value = """
+            SELECT l FROM ImportLog l
+            LEFT JOIN l.uploadedBy u
+            JOIN l.source s
+            WHERE (:username IS NULL OR u.username = :username)
+              AND (:sourceName IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :sourceName, '%')))
+              AND (:filename   IS NULL OR LOWER(l.filename) LIKE LOWER(CONCAT('%', :filename, '%')))
+              AND (:userFilter IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userFilter, '%')))
+              AND (:status     IS NULL OR l.status = :status)
+        """,
+        countQuery = """
+            SELECT COUNT(l) FROM ImportLog l
+            LEFT JOIN l.uploadedBy u
+            JOIN l.source s
+            WHERE (:username IS NULL OR u.username = :username)
+              AND (:sourceName IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :sourceName, '%')))
+              AND (:filename   IS NULL OR LOWER(l.filename) LIKE LOWER(CONCAT('%', :filename, '%')))
+              AND (:userFilter IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userFilter, '%')))
+              AND (:status     IS NULL OR l.status = :status)
+        """,
+    )
+    fun findFiltered(
+        username: String?,
+        sourceName: String?,
+        filename: String?,
+        userFilter: String?,
+        status: String?,
+        pageable: Pageable,
+    ): Page<ImportLog>
 }
 
 @Repository
