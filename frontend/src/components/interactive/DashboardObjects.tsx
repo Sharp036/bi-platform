@@ -112,12 +112,62 @@ export function DividerWidget({
 //  Rich Text Widget (enhanced TEXT)
 // ═══════════════════════════════════════════
 
+import type { WidgetData } from '@/types'
+
 interface RichTextWidgetProps {
   content: string
   style?: Record<string, unknown>
+  // When provided, placeholders {columnName} or {columnName:format} in content are
+  // replaced with values from data.rows[0]. Supported formats:
+  //   {col}               — toLocaleString() for numbers, String() for text
+  //   {col:int}           — Math.round + toLocaleString
+  //   {col:fixed2}        — toFixed(2)
+  //   {col:percent1}      — (v*100).toFixed(1) + '%'
+  //   {col:millions}      — (v/1_000_000).toFixed(2) + ' млн'
+  // Missing columns render as em-dash.
+  data?: WidgetData
 }
 
-export function RichTextWidget({ content, style }: RichTextWidgetProps) {
+const PLACEHOLDER_RE = /\{([A-Za-zА-Яа-я0-9_\-.,% ]+?)(?::([a-zA-Z0-9]+))?\}/g
+
+function formatPlaceholderValue(value: unknown, format?: string): string {
+  if (value == null) return '—'
+  const num = Number(value)
+  const hasNum = Number.isFinite(num)
+  switch (format) {
+    case 'int':
+      return hasNum ? Math.round(num).toLocaleString() : String(value)
+    case 'fixed1':
+      return hasNum ? num.toFixed(1) : String(value)
+    case 'fixed2':
+      return hasNum ? num.toFixed(2) : String(value)
+    case 'fixed3':
+      return hasNum ? num.toFixed(3) : String(value)
+    case 'percent':
+    case 'percent1':
+      return hasNum ? `${(num * 100).toFixed(1)}%` : String(value)
+    case 'percent0':
+      return hasNum ? `${Math.round(num * 100)}%` : String(value)
+    case 'thousands':
+      return hasNum ? `${(num / 1000).toFixed(1)}K` : String(value)
+    case 'millions':
+      return hasNum ? `${(num / 1_000_000).toFixed(2)} млн` : String(value)
+    default:
+      return hasNum ? num.toLocaleString() : String(value)
+  }
+}
+
+function interpolateContent(content: string, data?: WidgetData): string {
+  if (!data || !data.rows || data.rows.length === 0) return content
+  const row = data.rows[0]
+  return content.replace(PLACEHOLDER_RE, (match, colName, format) => {
+    const trimmed = String(colName).trim()
+    if (!(trimmed in row)) return match  // leave unknown placeholders as-is
+    return formatPlaceholderValue(row[trimmed], format)
+  })
+}
+
+export function RichTextWidget({ content, style, data }: RichTextWidgetProps) {
   const customStyle: React.CSSProperties = {
     fontSize: style?.fontSize ? `${style.fontSize}px` : undefined,
     color: style?.color as string | undefined,
@@ -126,12 +176,14 @@ export function RichTextWidget({ content, style }: RichTextWidgetProps) {
     padding: style?.padding ? `${style.padding}px` : undefined,
   }
 
+  const rendered = data ? interpolateContent(content, data) : content
+
   return (
     <div className="h-full flex items-center p-4">
       <div
         className="prose dark:prose-invert text-sm w-full max-w-none"
         style={customStyle}
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: rendered }}
       />
     </div>
   )

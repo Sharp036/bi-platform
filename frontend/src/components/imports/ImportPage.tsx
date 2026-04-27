@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Upload, Database, FileSpreadsheet, CheckCircle, XCircle,
@@ -9,6 +9,7 @@ import { importApi } from '@/api/import'
 import type {
   ImportSource, ImportSourceForm, ImportSourceMappingForm,
   ImportLog, ImportPreviewResponse, ImportUploadResult, ImportErrorDetail,
+  PageResponse, ImportLogSortKey,
 } from '@/api/import'
 import { datasourceApi } from '@/api/datasources'
 import type { TableInfo } from '@/api/datasources'
@@ -598,15 +599,18 @@ function UploadCard({ source }: UploadCardProps) {
 
 // ---- History Tab ----
 
-type SortKey = 'sourceName' | 'filename' | 'uploadedBy' | 'uploadedAt' | 'rowsTotal' | 'rowsImported' | 'rowsFailed' | 'status'
+const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const
 
 function HistoryTab({ canManage }: { canManage: boolean }) {
   const { t } = useTranslation()
-  const [logs, setLogs] = useState<ImportLog[]>([])
+  const [data, setData] = useState<PageResponse<ImportLog> | null>(null)
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [logErrors, setLogErrors] = useState<Record<number, ImportErrorDetail[]>>({})
-  const [sortKey, setSortKey] = useState<SortKey>('uploadedAt')
+
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(50)
+  const [sortKey, setSortKey] = useState<ImportLogSortKey>('uploadedAt')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [filterName, setFilterName] = useState('')
   const [filterFile, setFilterFile] = useState('')
@@ -614,11 +618,24 @@ function HistoryTab({ canManage }: { canManage: boolean }) {
   const [filterStatus, setFilterStatus] = useState('')
 
   useEffect(() => {
-    importApi.listLogs()
-      .then(setLogs)
-      .catch(() => toast.error(t('common.failed_to_load')))
-      .finally(() => setLoading(false))
-  }, [])
+    const handle = setTimeout(() => {
+      setLoading(true)
+      importApi.listLogs({
+        page,
+        size: pageSize,
+        sort: sortKey,
+        sortDir,
+        sourceName: filterName || undefined,
+        filename: filterFile || undefined,
+        uploadedBy: filterUser || undefined,
+        status: filterStatus || undefined,
+      })
+        .then(setData)
+        .catch(() => toast.error(t('common.failed_to_load')))
+        .finally(() => setLoading(false))
+    }, 250)
+    return () => clearTimeout(handle)
+  }, [page, pageSize, sortKey, sortDir, filterName, filterFile, filterUser, filterStatus])
 
   const handleExpand = async (log: ImportLog) => {
     if (log.status !== 'error') return
@@ -634,31 +651,30 @@ function HistoryTab({ canManage }: { canManage: boolean }) {
     }
   }
 
-  const handleSort = (key: SortKey) => {
+  const handleSort = (key: ImportLogSortKey) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortKey(key); setSortDir('asc') }
+    setPage(0)
   }
 
-  const displayed = useMemo(() => {
-    let result = logs
-    if (filterName) result = result.filter(l => l.sourceName.toLowerCase().includes(filterName.toLowerCase()))
-    if (filterFile) result = result.filter(l => l.filename.toLowerCase().includes(filterFile.toLowerCase()))
-    if (filterUser) result = result.filter(l => (l.uploadedBy ?? '').toLowerCase().includes(filterUser.toLowerCase()))
-    if (filterStatus) result = result.filter(l => l.status === filterStatus)
-    return [...result].sort((a, b) => {
-      const av = a[sortKey] ?? ''
-      const bv = b[sortKey] ?? ''
-      const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true })
-      return sortDir === 'asc' ? cmp : -cmp
-    })
-  }, [logs, filterName, filterFile, filterUser, filterStatus, sortKey, sortDir])
+  const updateFilter = (setter: (v: string) => void, value: string) => {
+    setter(value)
+    setPage(0)
+  }
 
-  if (loading) return <LoadingSpinner />
-  if (logs.length === 0) return <EmptyState icon={<Clock className="w-12 h-12" />} title={t('import.no_history')} />
+  const logs = data?.content ?? []
+  const totalElements = data?.totalElements ?? 0
+  const totalPages = data?.totalPages ?? 0
+  const hasFilters = !!(filterName || filterFile || filterUser || filterStatus)
+
+  if (loading && !data) return <LoadingSpinner />
+  if (!loading && totalElements === 0 && !hasFilters) {
+    return <EmptyState icon={<Clock className="w-12 h-12" />} title={t('import.no_history')} />
+  }
 
   const colSpan = canManage ? 8 : 7
 
-  const SortIcon = ({ col }: { col: SortKey }) => {
+  const SortIcon = ({ col }: { col: ImportLogSortKey }) => {
     if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 ml-1 opacity-40 inline-block flex-shrink-0" />
     return sortDir === 'asc'
       ? <ChevronUp className="w-3 h-3 ml-1 inline-block flex-shrink-0" />
@@ -669,88 +685,130 @@ function HistoryTab({ canManage }: { canManage: boolean }) {
   const filterInputCls = 'w-full text-xs border border-surface-200 dark:border-dark-surface-100 rounded px-1.5 py-0.5 bg-white dark:bg-dark-surface-200 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-brand-400 mt-1 font-normal cursor-text'
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm" style={{ tableLayout: 'fixed', minWidth: '700px' }}>
-        <thead>
-          <tr className="text-left text-xs text-slate-500 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
-            <th className={thSortCls} style={{ resize: 'horizontal', width: '22%', minWidth: '120px' }} onClick={() => handleSort('sourceName')}>
-              <span className="flex items-center">{t('import.source_name')}<SortIcon col="sourceName" /></span>
-              <input className={filterInputCls} value={filterName} onChange={e => setFilterName(e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
-            </th>
-            <th className={thSortCls} style={{ resize: 'horizontal', width: '18%', minWidth: '100px' }} onClick={() => handleSort('filename')}>
-              <span className="flex items-center">{t('import.history.file')}<SortIcon col="filename" /></span>
-              <input className={filterInputCls} value={filterFile} onChange={e => setFilterFile(e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
-            </th>
-            {canManage && (
-              <th className={thSortCls} style={{ resize: 'horizontal', width: '10%', minWidth: '80px' }} onClick={() => handleSort('uploadedBy')}>
-                <span className="flex items-center">{t('import.history.user')}<SortIcon col="uploadedBy" /></span>
-                <input className={filterInputCls} value={filterUser} onChange={e => setFilterUser(e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
+    <div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm" style={{ tableLayout: 'fixed', minWidth: '700px' }}>
+          <thead>
+            <tr className="text-left text-xs text-slate-500 dark:text-slate-400 border-b border-surface-200 dark:border-dark-surface-100">
+              <th className={thSortCls} style={{ resize: 'horizontal', width: '22%', minWidth: '120px' }} onClick={() => handleSort('sourceName')}>
+                <span className="flex items-center">{t('import.source_name')}<SortIcon col="sourceName" /></span>
+                <input className={filterInputCls} value={filterName} onChange={e => updateFilter(setFilterName, e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
               </th>
-            )}
-            <th className={thSortCls} style={{ resize: 'horizontal', width: '15%', minWidth: '130px' }} onClick={() => handleSort('uploadedAt')}>
-              <span className="flex items-center">{t('import.history.date')}<SortIcon col="uploadedAt" /></span>
-            </th>
-            <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsTotal')}>
-              <span className="flex items-center justify-end">{t('import.rows_total_short')}<SortIcon col="rowsTotal" /></span>
-            </th>
-            <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsImported')}>
-              <span className="flex items-center justify-end">{t('import.rows_imported_short')}<SortIcon col="rowsImported" /></span>
-            </th>
-            <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsFailed')}>
-              <span className="flex items-center justify-end">{t('import.rows_failed_short')}<SortIcon col="rowsFailed" /></span>
-            </th>
-            <th className={thSortCls} style={{ resize: 'horizontal', width: '11%', minWidth: '80px' }} onClick={() => handleSort('status')}>
-              <span className="flex items-center">{t('common.status')}<SortIcon col="status" /></span>
-              <select className={filterInputCls} value={filterStatus} onChange={e => setFilterStatus(e.target.value)} onClick={e => e.stopPropagation()}>
-                <option value="">{t('common.all')}</option>
-                {(['success', 'error', 'importing', 'validating', 'valid'] as ImportLog['status'][]).map(s => (
-                  <option key={s} value={s}>{t(`import.status.${s}`)}</option>
-                ))}
-              </select>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-surface-100 dark:divide-dark-surface-100">
-          {displayed.map(log => (
-            <>
-              <tr
-                key={log.id}
-                className={log.status === 'error' ? 'cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10' : ''}
-                onClick={() => handleExpand(log)}
-              >
-                <td className="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300 truncate" title={log.sourceName}>{log.sourceName}</td>
-                <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate" title={log.filename}>{log.filename}</td>
-                {canManage && (
-                  <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate" title={log.uploadedBy ?? '-'}>{log.uploadedBy ?? '-'}</td>
-                )}
-                <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">{new Date(log.uploadedAt).toLocaleString()}</td>
-                <td className="py-2 pr-3 text-right text-slate-500 dark:text-slate-400">{log.rowsTotal ?? '-'}</td>
-                <td className="py-2 pr-3 text-right text-emerald-600 dark:text-emerald-400">{log.rowsImported ?? '-'}</td>
-                <td className="py-2 pr-3 text-right text-red-500">{log.rowsFailed ?? '-'}</td>
-                <td className="py-2">{statusBadge(log.status, t)}</td>
-              </tr>
-              {expandedId === log.id && (
-                <tr key={`${log.id}-errors`}>
-                  <td colSpan={colSpan} className="pb-3 pt-1 px-4 bg-red-50 dark:bg-red-900/10">
-                    <div className="space-y-1">
-                      {log.errorDetail && (
-                        <div className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">
-                          {log.errorDetail}
-                        </div>
-                      )}
-                      {logErrors[log.id]?.slice(0, 20).map((err, i) => (
-                        <div key={i} className="text-xs text-red-600 dark:text-red-400">
-                          {t('import.history.row')} {err.rowNumber}{err.columnName ? ` / ${err.columnName}` : ''}: {err.errorMessage}
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
+              <th className={thSortCls} style={{ resize: 'horizontal', width: '18%', minWidth: '100px' }} onClick={() => handleSort('filename')}>
+                <span className="flex items-center">{t('import.history.file')}<SortIcon col="filename" /></span>
+                <input className={filterInputCls} value={filterFile} onChange={e => updateFilter(setFilterFile, e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
+              </th>
+              {canManage && (
+                <th className={thSortCls} style={{ resize: 'horizontal', width: '10%', minWidth: '80px' }} onClick={() => handleSort('uploadedBy')}>
+                  <span className="flex items-center">{t('import.history.user')}<SortIcon col="uploadedBy" /></span>
+                  <input className={filterInputCls} value={filterUser} onChange={e => updateFilter(setFilterUser, e.target.value)} onClick={e => e.stopPropagation()} placeholder="..." />
+                </th>
               )}
-            </>
-          ))}
-        </tbody>
-      </table>
+              <th className={thSortCls} style={{ resize: 'horizontal', width: '15%', minWidth: '130px' }} onClick={() => handleSort('uploadedAt')}>
+                <span className="flex items-center">{t('import.history.date')}<SortIcon col="uploadedAt" /></span>
+              </th>
+              <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsTotal')}>
+                <span className="flex items-center justify-end">{t('import.rows_total_short')}<SortIcon col="rowsTotal" /></span>
+              </th>
+              <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsImported')}>
+                <span className="flex items-center justify-end">{t('import.rows_imported_short')}<SortIcon col="rowsImported" /></span>
+              </th>
+              <th className={`${thSortCls} text-right pr-3`} style={{ width: '8%', minWidth: '50px' }} onClick={() => handleSort('rowsFailed')}>
+                <span className="flex items-center justify-end">{t('import.rows_failed_short')}<SortIcon col="rowsFailed" /></span>
+              </th>
+              <th className={thSortCls} style={{ resize: 'horizontal', width: '11%', minWidth: '80px' }} onClick={() => handleSort('status')}>
+                <span className="flex items-center">{t('common.status')}<SortIcon col="status" /></span>
+                <select className={filterInputCls} value={filterStatus} onChange={e => updateFilter(setFilterStatus, e.target.value)} onClick={e => e.stopPropagation()}>
+                  <option value="">{t('common.all')}</option>
+                  {(['success', 'error', 'importing', 'validating', 'valid'] as ImportLog['status'][]).map(s => (
+                    <option key={s} value={s}>{t(`import.status.${s}`)}</option>
+                  ))}
+                </select>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-surface-100 dark:divide-dark-surface-100">
+            {logs.map(log => (
+              <>
+                <tr
+                  key={log.id}
+                  className={log.status === 'error' ? 'cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10' : ''}
+                  onClick={() => handleExpand(log)}
+                >
+                  <td className="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300 truncate" title={log.sourceName}>{log.sourceName}</td>
+                  <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate" title={log.filename}>{log.filename}</td>
+                  {canManage && (
+                    <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 truncate" title={log.uploadedBy ?? '-'}>{log.uploadedBy ?? '-'}</td>
+                  )}
+                  <td className="py-2 pr-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">{new Date(log.uploadedAt).toLocaleString()}</td>
+                  <td className="py-2 pr-3 text-right text-slate-500 dark:text-slate-400">{log.rowsTotal ?? '-'}</td>
+                  <td className="py-2 pr-3 text-right text-emerald-600 dark:text-emerald-400">{log.rowsImported ?? '-'}</td>
+                  <td className="py-2 pr-3 text-right text-red-500">{log.rowsFailed ?? '-'}</td>
+                  <td className="py-2">{statusBadge(log.status, t)}</td>
+                </tr>
+                {expandedId === log.id && (
+                  <tr key={`${log.id}-errors`}>
+                    <td colSpan={colSpan} className="pb-3 pt-1 px-4 bg-red-50 dark:bg-red-900/10">
+                      <div className="space-y-1">
+                        {log.errorDetail && (
+                          <div className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">
+                            {log.errorDetail}
+                          </div>
+                        )}
+                        {logErrors[log.id]?.slice(0, 20).map((err, i) => (
+                          <div key={i} className="text-xs text-red-600 dark:text-red-400">
+                            {t('import.history.row')} {err.rowNumber}{err.columnName ? ` / ${err.columnName}` : ''}: {err.errorMessage}
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+            {logs.length === 0 && !loading && (
+              <tr>
+                <td colSpan={colSpan} className="py-6 text-center text-sm text-slate-400">
+                  {t('import.history.no_results')}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between mt-3 px-1 text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
+        <div>
+          {t('import.history.total', { count: totalElements })}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-1">
+            {t('import.history.page_size')}
+            <select
+              value={pageSize}
+              onChange={e => { setPageSize(Number(e.target.value)); setPage(0) }}
+              className="border border-surface-200 dark:border-dark-surface-100 rounded px-1.5 py-0.5 bg-white dark:bg-dark-surface-200 text-slate-700 dark:text-slate-300"
+            >
+              {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </label>
+          <button
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0 || loading}
+            className="btn-secondary text-xs py-1 px-2 disabled:opacity-40"
+          >
+            {t('common.pagination.prev')}
+          </button>
+          <span>{t('common.pagination.page_of', { current: Math.min(page + 1, Math.max(totalPages, 1)), total: Math.max(totalPages, 1) })}</span>
+          <button
+            onClick={() => setPage(p => p + 1)}
+            disabled={page >= totalPages - 1 || loading}
+            className="btn-secondary text-xs py-1 px-2 disabled:opacity-40"
+          >
+            {t('common.pagination.next')}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
