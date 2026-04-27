@@ -11,7 +11,20 @@ data class ExportRequest(
     val parameters: Map<String, Any?> = emptyMap(),
     val widgetIds: List<Long>? = null,      // null = all widgets
     val includeHeaders: Boolean = true,
-    val sheetPerWidget: Boolean = true      // Excel: separate sheet per widget
+    val sheetPerWidget: Boolean = true,     // Excel: separate sheet per widget
+    val snapshot: ExportSnapshot? = null    // if present: export exactly what the UI shows, no re-render
+)
+
+data class ExportSnapshot(
+    val reportName: String,
+    val widgets: List<ExportWidgetSnapshot>
+)
+
+data class ExportWidgetSnapshot(
+    val widgetId: Long,
+    val title: String? = null,
+    val columns: List<String>,
+    val rows: List<Map<String, Any?>>
 )
 
 data class ExportStatusResponse(

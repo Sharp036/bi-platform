@@ -30,6 +30,8 @@ import TabContainer from '@/components/interactive/TabContainer'
 
 type FilterPanelPosition = 'top' | 'bottom' | 'left' | 'right'
 
+const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
+
 function getFilterPanelLayout(layout?: string): { position: FilterPanelPosition; collapsed: boolean } {
   if (!layout) return { position: 'top', collapsed: false }
   try {
@@ -433,6 +435,43 @@ export default function ReportViewerPage() {
     return ids
   }, [report, usedParamNames, containers])
 
+  // Dashboard container ref — used by ExportMenu to capture a PDF screenshot of the live UI.
+  const dashboardRef = useRef<HTMLDivElement | null>(null)
+
+  // Per-widget display state published by table widgets (sort order, visible columns).
+  // Ref, not state - we only read it at export time, no re-render needed.
+  // MUST be declared above any early return to keep hook count stable across renders.
+  const widgetDisplayStatesRef = useRef<Map<number, { columns: string[]; rows: Record<string, unknown>[] }>>(new Map())
+  const handleWidgetDisplay = useCallback(
+    (widgetId: number, state: { columns: string[]; rows: Record<string, unknown>[] }) => {
+      widgetDisplayStatesRef.current.set(widgetId, state)
+    },
+    []
+  )
+
+  // Called by ExportMenu at click time so we see the freshest on-screen state.
+  // Merges: (1) only visible widgets, (2) client cross-filters, (3) table sort/columns.
+  const getVisibleRenderedWidgets = useCallback((): RenderReportResponse['widgets'] => {
+    if (!renderResult) return []
+    return renderResult.widgets
+      .filter(w => visibleWidgetIds.has(w.widgetId))
+      .filter(w => !NON_DATA_WIDGETS.has(w.widgetType) && w.widgetType !== 'FILTER')
+      .map(applyClientFilters)
+      .map(w => {
+        const display = widgetDisplayStatesRef.current.get(w.widgetId)
+        if (!display || !w.data) return w
+        return {
+          ...w,
+          data: {
+            ...w.data,
+            columns: display.columns,
+            rows: display.rows,
+            rowCount: display.rows.length,
+          },
+        }
+      })
+  }, [renderResult, visibleWidgetIds, applyClientFilters])
+
   if (loading) return <LoadingSpinner />
   if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
 
@@ -445,8 +484,6 @@ export default function ReportViewerPage() {
     if (!style) return {}
     try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
   }
-
-  const NON_DATA_WIDGETS = new Set(['TEXT', 'IMAGE', 'BUTTON', 'WEBPAGE', 'SPACER', 'DIVIDER'])
 
   const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
     const widgetDrillActions = drillActions[w.widgetId] || []
@@ -513,6 +550,7 @@ export default function ReportViewerPage() {
           onChartClick={(data) => {
             useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
           }}
+          onWidgetDisplay={handleWidgetDisplay}
         />
       </div>
     )
@@ -550,7 +588,7 @@ export default function ReportViewerPage() {
         {rendering && !renderResult ? (
           <LoadingSpinner />
         ) : renderResult ? (
-          <div className="space-y-4">
+          <div ref={dashboardRef} className="space-y-4">
             {/* TABS containers */}
             {tabsContainers.map(container => {
               // Each group = one tab; filter out hidden widgets, keep original index for labels
@@ -769,7 +807,12 @@ export default function ReportViewerPage() {
           >
             <Link2 className="w-4 h-4" />
           </button>
-          <ExportMenu reportId={report?.id || 0} reportName={report.name} />
+          <ExportMenu
+            reportId={report?.id || 0}
+            reportName={report.name}
+            getVisibleWidgets={getVisibleRenderedWidgets}
+            dashboardRef={dashboardRef}
+          />
         </div>
       </div>
 

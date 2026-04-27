@@ -10,6 +10,8 @@ import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DateUtil
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -271,10 +273,50 @@ class ImportService(
     // ── Logs ──────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    fun getLogs(username: String, showAll: Boolean): List<ImportLogResponse> {
-        val logs = if (showAll) logRepo.findAllByOrderByUploadedAtDesc()
-                   else logRepo.findAllByUploadedByUsernameOrderByUploadedAtDesc(username)
-        return logs.map { it.toResponse() }
+    fun getLogs(
+        username: String,
+        showAll: Boolean,
+        page: Int,
+        size: Int,
+        sort: String,
+        sortDir: String,
+        sourceName: String?,
+        filename: String?,
+        userFilter: String?,
+        status: String?,
+    ): PageResponse<ImportLogResponse> {
+        val direction = if (sortDir.equals("asc", ignoreCase = true)) Sort.Direction.ASC else Sort.Direction.DESC
+        val sortProperty = mapSortKey(sort)
+        val pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty))
+
+        val result = logRepo.findFiltered(
+            username = if (showAll) null else username,
+            sourceName = sourceName?.takeIf { it.isNotBlank() },
+            filename = filename?.takeIf { it.isNotBlank() },
+            userFilter = if (showAll) userFilter?.takeIf { it.isNotBlank() } else null,
+            status = status?.takeIf { it.isNotBlank() },
+            pageable = pageable,
+        )
+
+        return PageResponse(
+            content = result.content.map { it.toResponse() },
+            page = result.number,
+            size = result.size,
+            totalElements = result.totalElements,
+            totalPages = result.totalPages,
+        )
+    }
+
+    private fun mapSortKey(key: String): String = when (key) {
+        "sourceName"   -> "source.name"
+        "filename"     -> "filename"
+        "uploadedBy"   -> "uploadedBy.username"
+        "uploadedAt"   -> "uploadedAt"
+        "rowsTotal"    -> "rowsTotal"
+        "rowsImported" -> "rowsImported"
+        "rowsFailed"   -> "rowsFailed"
+        "status"       -> "status"
+        else           -> "uploadedAt"
     }
 
     fun getErrors(logId: Long): List<ImportErrorDetail> =

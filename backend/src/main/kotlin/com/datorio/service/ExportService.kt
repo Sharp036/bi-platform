@@ -1,20 +1,17 @@
 package com.datorio.service
 
 import com.datorio.model.OutputFormat
+import com.datorio.model.WidgetType
 import com.datorio.model.dto.*
 import com.datorio.repository.ReportSnapshotRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
-import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 
 @Service
@@ -36,25 +33,48 @@ class ExportService(
         request: ExportRequest,
         username: String
     ): Pair<ByteArray, String> {
-        // Render the report
-        val renderResult = renderService.renderReport(
-            reportId, RenderReportRequest(request.parameters), username
-        )
-
-        // Filter widgets if specified
-        val widgets = if (request.widgetIds != null) {
-            renderResult.widgets.filter { it.widgetId in request.widgetIds }
+        // Prefer a client-supplied snapshot (what's currently on screen).
+        // Fall back to a full re-render if the snapshot is absent.
+        val (reportName, widgets) = if (request.snapshot != null) {
+            val snap = request.snapshot
+            val mapped = snap.widgets.map { ws ->
+                RenderedWidget(
+                    widgetId = ws.widgetId,
+                    widgetType = WidgetType.TABLE,
+                    title = ws.title,
+                    chartConfig = "",
+                    position = "",
+                    style = "",
+                    data = WidgetData(
+                        columns = ws.columns,
+                        rows = ws.rows,
+                        rowCount = ws.rows.size,
+                        executionMs = 0L
+                    ),
+                    error = null
+                )
+            }
+            snap.reportName to mapped
         } else {
-            renderResult.widgets
-        }.filter { it.data != null }
+            val renderResult = renderService.renderReport(
+                reportId, RenderReportRequest(request.parameters), username
+            )
+            val filtered = if (request.widgetIds != null) {
+                renderResult.widgets.filter { it.widgetId in request.widgetIds }
+            } else {
+                renderResult.widgets
+            }.filter { it.data != null }
+            renderResult.reportName to filtered
+        }
 
         return when (request.format.uppercase()) {
-            "CSV" -> exportCsv(renderResult.reportName, widgets, request) to
-                "${sanitizeFilename(renderResult.reportName)}.csv"
-            "EXCEL", "XLSX" -> exportExcel(renderResult.reportName, widgets, request) to
-                "${sanitizeFilename(renderResult.reportName)}.xlsx"
-            "PDF" -> exportPdf(renderResult.reportName, widgets, request) to
-                "${sanitizeFilename(renderResult.reportName)}.pdf"
+            "CSV" -> exportCsv(reportName, widgets, request) to
+                "${sanitizeFilename(reportName)}.csv"
+            "EXCEL", "XLSX" -> exportExcel(reportName, widgets, request) to
+                "${sanitizeFilename(reportName)}.xlsx"
+            "PDF" -> throw IllegalArgumentException(
+                "PDF export is generated client-side (html2canvas + jsPDF); this endpoint only handles CSV/EXCEL"
+            )
             else -> throw IllegalArgumentException("Unsupported format: ${request.format}")
         }
     }
@@ -258,119 +278,12 @@ class ExportService(
         return rowIdx
     }
 
-    // ── PDF Export ──
-
-    private fun exportPdf(
-        reportName: String,
-        widgets: List<RenderedWidget>,
-        request: ExportRequest
-    ): ByteArray {
-        val html = buildPdfHtml(reportName, widgets)
-        val out = ByteArrayOutputStream()
-        val builder = PdfRendererBuilder()
-        builder.useFastMode()
-        registerPdfFont(builder)
-        builder.withHtmlContent(html, null)
-        builder.toStream(out)
-        builder.run()
-        return out.toByteArray()
-    }
-
-    private fun registerPdfFont(builder: PdfRendererBuilder) {
-        // Register fonts under one family "Report Font". openhtmltopdf picks the
-        // first registered font that has the glyph, so order = priority.
-        // DejaVu covers Latin/Cyrillic/Greek/Hebrew/basic Arabic; Noto fills the rest.
-        val fonts = listOf(
-            "/fonts/DejaVuSans.ttf",                  // required baseline
-            "/fonts/NotoSansArabic-Regular.ttf",      // Arabic presentation forms
-            "/fonts/NotoSansThai-Regular.ttf",        // Thai
-            "/fonts/NotoSansDevanagari-Regular.ttf",  // Hindi / Devanagari
-            "/fonts/NotoSansJP-Regular.otf",          // Japanese kana + kanji
-            "/fonts/NotoSansKR-Regular.otf",          // Korean hangul + hanja
-            "/fonts/NotoSansSC-Regular.otf"           // Simplified Chinese (covers shared CJK ideographs)
-        )
-        var registered = 0
-        for (path in fonts) {
-            val bytes = javaClass.getResourceAsStream(path)?.use { it.readBytes() }
-            if (bytes == null) {
-                log.warn("PDF export font missing on classpath: {} - glyphs from this script will be blank", path)
-                continue
-            }
-            builder.useFont(
-                { ByteArrayInputStream(bytes) },
-                "Report Font",
-                400,
-                BaseRendererBuilder.FontStyle.NORMAL,
-                true
-            )
-            registered++
-        }
-        if (registered == 0) {
-            error("No PDF fonts found on classpath. Place at least DejaVuSans.ttf under backend/src/main/resources/fonts/.")
-        }
-    }
-
-    private fun buildPdfHtml(reportName: String, widgets: List<RenderedWidget>): String {
-        val sb = StringBuilder()
-        sb.appendLine("<!DOCTYPE html>")
-        sb.appendLine("<html><head><meta charset='UTF-8'>")
-        sb.appendLine("<title>$reportName</title>")
-        sb.appendLine("<style>")
-        sb.appendLine("body { font-family: 'Report Font', 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }")
-        sb.appendLine("h1 { color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }")
-        sb.appendLine("h2 { color: #475569; margin-top: 30px; }")
-        sb.appendLine("table { border-collapse: collapse; width: 100%; margin: 10px 0 20px; }")
-        sb.appendLine("th { background: #f1f5f9; color: #334155; font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid #e2e8f0; }")
-        sb.appendLine("td { padding: 6px 12px; border: 1px solid #e2e8f0; }")
-        sb.appendLine("tr:nth-child(even) { background: #f8fafc; }")
-        sb.appendLine(".meta { color: #94a3b8; font-size: 12px; margin-bottom: 20px; }")
-        sb.appendLine(".widget-info { color: #64748b; font-size: 11px; }")
-        sb.appendLine("@media print { body { margin: 20px; } }")
-        sb.appendLine("</style></head><body>")
-        sb.appendLine("<h1>$reportName</h1>")
-        sb.appendLine("<p class='meta'>Exported: ${java.time.LocalDateTime.now().toString().replace('T', ' ').substringBefore('.')}</p>")
-
-        for (widget in widgets) {
-            val data = widget.data ?: continue
-            sb.appendLine("<h2>${widget.title ?: "Data"}</h2>")
-            sb.appendLine("<p class='widget-info'>${data.rowCount} rows · ${data.executionMs}ms</p>")
-            sb.appendLine("<table>")
-
-            // Header
-            sb.appendLine("<thead><tr>")
-            for (col in data.columns) {
-                sb.appendLine("<th>${escapeHtml(col)}</th>")
-            }
-            sb.appendLine("</tr></thead>")
-
-            // Rows
-            sb.appendLine("<tbody>")
-            for (row in data.rows) {
-                sb.appendLine("<tr>")
-                for (col in data.columns) {
-                    val value = row[col]
-                    sb.appendLine("<td>${escapeHtml(value?.toString() ?: "")}</td>")
-                }
-                sb.appendLine("</tr>")
-            }
-            sb.appendLine("</tbody></table>")
-        }
-
-        sb.appendLine("</body></html>")
-        return sb.toString()
-    }
-
     // ── Utilities ──
 
     private fun escapeCsv(value: String): String {
         return if (value.contains(',') || value.contains('"') || value.contains('\n')) {
             "\"${value.replace("\"", "\"\"")}\""
         } else value
-    }
-
-    private fun escapeHtml(value: String): String {
-        return value.replace("&", "&amp;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace("\"", "&quot;")
     }
 
     private fun sanitizeFilename(name: String): String {

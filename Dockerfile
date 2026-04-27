@@ -35,11 +35,7 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.yandex.ru/mir
 
 WORKDIR /app
 
-# Copy backend JAR
-COPY --from=backend-build /app/backend/build/libs/*.jar app.jar
-
-# Copy frontend build
-COPY --from=frontend-build /app/dist ./static
+# Stable layers first so Harbor can dedup them across builds.
 
 # Copy nginx config (overrides default)
 COPY docker/nginx/frontend.conf /etc/nginx/http.d/default.conf
@@ -47,6 +43,12 @@ COPY docker/nginx/frontend.conf /etc/nginx/http.d/default.conf
 # Copy startup script
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
+
+# Frequently changing layers last
+COPY --from=backend-build /app/backend/build/libs/*.jar app.jar
+
+# Copy frontend build
+COPY --from=frontend-build /app/dist ./static
 
 # Health check (hits nginx:8080 → proxies to java:8081)
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

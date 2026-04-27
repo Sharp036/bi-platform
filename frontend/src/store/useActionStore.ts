@@ -140,12 +140,36 @@ export const useActionStore = create<ActionState>((set, get) => ({
           if (data.seriesName != null) drillSeries = String(data.seriesName)
           if (sourceValue === undefined || sourceValue === null) break
 
-          const paramName = (action.config as Record<string, unknown> | undefined)?.paramName
-          if (typeof paramName === 'string' && paramName) {
-            // Param-based drill: push value into report parameters. Widget SQL
-            // re-runs with the new parameter in WHERE, so ClickHouse returns
-            // only matching rows (no client-side truncation).
-            drillParamOverrides[paramName] = sourceValue
+          const cfg = (action.config as Record<string, unknown> | undefined) ?? {}
+          const paramName = cfg.paramName as string | undefined
+          const split = cfg.split as { separator?: string; index?: number } | undefined
+          const paramMappings = cfg.paramMappings as Array<{
+            paramName: string
+            sourceField?: string
+            split?: { separator?: string; index?: number }
+          }> | undefined
+
+          const applyValue = (raw: unknown, splitCfg?: { separator?: string; index?: number }): unknown => {
+            if (!splitCfg || !splitCfg.separator || typeof raw !== 'string') return raw
+            const parts = raw.split(splitCfg.separator)
+            const idx = typeof splitCfg.index === 'number' ? splitCfg.index : 0
+            return parts[idx] ?? raw
+          }
+
+          if (Array.isArray(paramMappings) && paramMappings.length > 0) {
+            // Multi-param drill: one click sets several report parameters,
+            // each with its own source column and optional split.
+            for (const mapping of paramMappings) {
+              if (!mapping.paramName) continue
+              const srcField = mapping.sourceField || action.sourceField || ''
+              const raw = srcField ? data[srcField] : sourceValue
+              if (raw == null) continue
+              drillParamOverrides[mapping.paramName] = applyValue(raw, mapping.split)
+            }
+          } else if (typeof paramName === 'string' && paramName) {
+            // Single-param drill (optionally with split). Widget SQL re-runs with
+            // the new parameter in WHERE, so ClickHouse returns only matching rows.
+            drillParamOverrides[paramName] = applyValue(sourceValue, split)
           } else {
             // Legacy field-based drill: client-side filter on widget data.
             const filterField = action.targetField || action.sourceField || ''

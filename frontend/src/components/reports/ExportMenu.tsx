@@ -1,16 +1,23 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { exportApi } from '@/api/export'
 import { Download, FileSpreadsheet, FileText, FileDown, Mail, X } from 'lucide-react'
 import toast from 'react-hot-toast'
+import type { RenderedWidget } from '@/types'
 
 interface Props {
   reportId: number
   reportName: string
   parameters?: Record<string, unknown>
+  // Called at click time so the export captures the freshest on-screen state
+  // (sort order, column selection, pagination changes that happened between renders).
+  getVisibleWidgets?: () => RenderedWidget[]
+  // DOM node to snapshot for PDF export. When provided, PDF is generated entirely
+  // client-side (html2canvas + jsPDF) so the output matches exactly what's on screen.
+  dashboardRef?: RefObject<HTMLDivElement | null>
 }
 
-export default function ExportMenu({ reportId, reportName, parameters = {} }: Props) {
+export default function ExportMenu({ reportId, reportName, parameters = {}, getVisibleWidgets, dashboardRef }: Props) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [showEmail, setShowEmail] = useState(false)
@@ -30,13 +37,37 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
+  const buildSnapshot = () => {
+    const widgets = getVisibleWidgets?.() ?? []
+    const widgetsWithData = widgets.filter(w => w.data && w.data.columns.length > 0)
+    if (widgetsWithData.length === 0) return undefined
+    return {
+      reportName,
+      widgets: widgetsWithData.map(w => ({
+        widgetId: w.widgetId,
+        title: w.title,
+        columns: w.data!.columns,
+        rows: w.data!.rows,
+      })),
+    }
+  }
+
   const handleDownload = async (format: string) => {
     setOpen(false)
     toast.loading(t('export.exporting_as', { format }), { id: 'export' })
     try {
-      const blob = await exportApi.download(reportId, format, parameters)
+      const safeName = reportName.replace(/[<>:"/\\|?*]/g, '_')
+
+      if (format === 'PDF') {
+        await exportDashboardAsPdf(safeName)
+        toast.success(t('export.downloaded', { filename: `${safeName}.pdf` }), { id: 'export' })
+        return
+      }
+
+      const snapshot = buildSnapshot()
+      const blob = await exportApi.download(reportId, format, parameters, snapshot)
       const ext = format === 'EXCEL' ? 'xlsx' : format.toLowerCase()
-      const filename = `${reportName.replace(/[<>:"/\\|?*]/g, '_')}.${ext}`
+      const filename = `${safeName}.${ext}`
 
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -48,9 +79,54 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
       window.URL.revokeObjectURL(url)
 
       toast.success(t('export.downloaded', { filename }), { id: 'export' })
-    } catch {
+    } catch (err) {
+      console.error('Export failed:', err)
       toast.error(t('export.export_failed'), { id: 'export' })
     }
+  }
+
+  // Captures the dashboard DOM node to a canvas and splits it across A4 pages.
+  // Lazy-imports html2canvas and jsPDF so initial bundle stays small.
+  const exportDashboardAsPdf = async (safeName: string) => {
+    const node = dashboardRef?.current
+    if (!node) throw new Error('Dashboard container is not available for PDF capture')
+
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ])
+
+    const canvas = await html2canvas(node, {
+      scale: 2,               // retina-quality capture
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    })
+
+    // A4 portrait, mm. Image width fits page width; height scales by aspect ratio.
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
+    const pageW = pdf.internal.pageSize.getWidth()
+    const pageH = pdf.internal.pageSize.getHeight()
+    const imgW = pageW
+    const imgH = (canvas.height * imgW) / canvas.width
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.92)
+
+    // If the dashboard fits on one page, add directly. Otherwise tile vertically.
+    if (imgH <= pageH) {
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH)
+    } else {
+      let remaining = imgH
+      let offset = 0
+      while (remaining > 0) {
+        pdf.addImage(imgData, 'JPEG', 0, -offset, imgW, imgH)
+        remaining -= pageH
+        offset += pageH
+        if (remaining > 0) pdf.addPage()
+      }
+    }
+
+    pdf.save(`${safeName}.pdf`)
   }
 
   const handleEmail = async () => {
@@ -153,7 +229,6 @@ export default function ExportMenu({ reportId, reportName, parameters = {} }: Pr
                 <select value={emailFormat} onChange={e => setEmailFormat(e.target.value)} className="input text-sm">
                   <option value="CSV">{t('export.csv')}</option>
                   <option value="EXCEL">{t('export.excel')}</option>
-                  <option value="PDF">{t('export.pdf')}</option>
                 </select>
               </div>
             </div>

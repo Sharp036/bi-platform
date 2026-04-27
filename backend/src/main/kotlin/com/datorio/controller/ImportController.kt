@@ -104,9 +104,30 @@ class ImportController(
 
     @GetMapping("/logs")
     @PreAuthorize("hasAnyAuthority('IMPORT_MANAGE', 'IMPORT_UPLOAD')")
-    fun getLogs(@AuthenticationPrincipal user: UserDetails): ResponseEntity<List<ImportLogResponse>> {
+    fun getLogs(
+        @AuthenticationPrincipal user: UserDetails,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "50") size: Int,
+        @RequestParam(defaultValue = "uploadedAt") sort: String,
+        @RequestParam(defaultValue = "desc") sortDir: String,
+        @RequestParam(required = false) sourceName: String?,
+        @RequestParam(required = false) filename: String?,
+        @RequestParam(required = false) uploadedBy: String?,
+        @RequestParam(required = false) status: String?,
+    ): ResponseEntity<PageResponse<ImportLogResponse>> {
         val showAll = user.authorities.any { it.authority == "IMPORT_MANAGE" }
-        return ResponseEntity.ok(importService.getLogs(user.username, showAll))
+        return ResponseEntity.ok(importService.getLogs(
+            username = user.username,
+            showAll = showAll,
+            page = page,
+            size = size,
+            sort = sort,
+            sortDir = sortDir,
+            sourceName = sourceName,
+            filename = filename,
+            userFilter = uploadedBy,
+            status = status,
+        ))
     }
 
     @GetMapping("/logs/{id}/errors")

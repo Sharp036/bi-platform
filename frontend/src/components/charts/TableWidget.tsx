@@ -1,8 +1,158 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { WidgetData } from '@/types'
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Download, ZoomIn, ZoomOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Download, ZoomIn, ZoomOut, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import * as XLSX from 'xlsx'
+
+// ═════════════════════════════════════════════════════════════════════
+// Column formatters — visual enrichment for individual table columns.
+// ═════════════════════════════════════════════════════════════════════
+
+type ColorStop = { at: number; color: string }
+
+interface DeltaFormatter {
+  type: 'delta'
+  // When `true`, renders an up/down arrow icon alongside the number. Default: true.
+  showArrow?: boolean
+  // Determines text color. 'sign' colors positive green / negative red (default);
+  // 'none' keeps the default text color.
+  colorMode?: 'sign' | 'none'
+}
+
+interface HeatmapFormatter {
+  type: 'heatmap'
+  // step = discrete buckets, gradient = linear interpolation (default).
+  colorMode?: 'step' | 'gradient'
+  // Mandatory - defines the color scale for the column's value range.
+  colorStops: ColorStop[]
+  // When true, colors the whole cell background. Otherwise colors the text.
+  background?: boolean
+}
+
+interface BarFormatter {
+  type: 'bar'
+  // Maximum for the bar scale. 'auto' (default) uses the max of the column.
+  // Number sets a fixed scale (useful for absolute context like "out of 100").
+  max?: number | 'auto'
+  // Color of the filled portion of the bar (default brand blue).
+  color?: string
+}
+
+type ColumnFormatter = DeltaFormatter | HeatmapFormatter | BarFormatter
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  const h = hex.replace('#', '').trim()
+  if (h.length !== 6 && h.length !== 3) return null
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h
+  const r = parseInt(full.slice(0, 2), 16)
+  const g = parseInt(full.slice(2, 4), 16)
+  const b = parseInt(full.slice(4, 6), 16)
+  if ([r, g, b].some(Number.isNaN)) return null
+  return [r, g, b]
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)))
+  return '#' + [clamp(r), clamp(g), clamp(b)].map(v => v.toString(16).padStart(2, '0')).join('')
+}
+
+function pickStopColor(value: number, stops: ColorStop[], mode: 'step' | 'gradient'): string | undefined {
+  if (!stops.length || !Number.isFinite(value)) return undefined
+  const sorted = [...stops].sort((a, b) => a.at - b.at)
+  if (mode === 'step') {
+    for (const s of sorted) if (value <= s.at) return s.color
+    return sorted[sorted.length - 1].color
+  }
+  if (value <= sorted[0].at) return sorted[0].color
+  if (value >= sorted[sorted.length - 1].at) return sorted[sorted.length - 1].color
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i], b = sorted[i + 1]
+    if (value >= a.at && value <= b.at) {
+      const t = (value - a.at) / (b.at - a.at || 1)
+      const av = hexToRgb(a.color), bv = hexToRgb(b.color)
+      if (!av || !bv) return a.color
+      return rgbToHex(
+        av[0] + (bv[0] - av[0]) * t,
+        av[1] + (bv[1] - av[1]) * t,
+        av[2] + (bv[2] - av[2]) * t,
+      )
+    }
+  }
+  return undefined
+}
+
+function renderCellStyle(
+  fmt: ColumnFormatter | undefined,
+  rawValue: unknown,
+  _colMax: number | undefined,
+  baseBg: string | undefined,
+): CSSProperties | undefined {
+  const style: CSSProperties = {}
+  if (baseBg) style.backgroundColor = baseBg
+  if (fmt?.type === 'heatmap') {
+    const num = Number(rawValue)
+    if (Number.isFinite(num)) {
+      const mode = fmt.colorMode === 'step' ? 'step' : 'gradient'
+      const color = pickStopColor(num, fmt.colorStops, mode)
+      if (color) {
+        if (fmt.background) style.backgroundColor = color
+        else style.color = color
+      }
+    }
+  }
+  return Object.keys(style).length > 0 ? style : undefined
+}
+
+function renderCellContent(
+  fmt: ColumnFormatter | undefined,
+  rawValue: unknown,
+  colMax: number | undefined,
+): ReactNode {
+  if (rawValue == null) return <span className="text-slate-400">null</span>
+
+  if (fmt?.type === 'delta') {
+    const num = Number(rawValue)
+    const showArrow = fmt.showArrow !== false
+    const colorMode = fmt.colorMode === 'none' ? 'none' : 'sign'
+    const colorClass = colorMode === 'sign'
+      ? (num > 0 ? 'text-emerald-600 dark:text-emerald-400'
+        : num < 0 ? 'text-red-600 dark:text-red-400'
+        : 'text-slate-500')
+      : ''
+    const Icon = num > 0 ? TrendingUp : num < 0 ? TrendingDown : Minus
+    const sign = num > 0 ? '+' : ''
+    return (
+      <span className={`inline-flex items-center gap-1 ${colorClass}`}>
+        {showArrow && <Icon className="w-3 h-3 shrink-0" aria-hidden="true" />}
+        {Number.isFinite(num) ? `${sign}${num}` : String(rawValue)}
+      </span>
+    )
+  }
+
+  if (fmt?.type === 'bar') {
+    const num = Number(rawValue)
+    const max = colMax && colMax > 0 ? colMax : 1
+    const ratio = Number.isFinite(num) ? Math.min(1, Math.abs(num) / max) : 0
+    const color = fmt.color || '#3b82f6'
+    return (
+      <span className="inline-flex items-center gap-2 min-w-[80px]">
+        <span className="relative h-2 flex-1 bg-slate-200 dark:bg-slate-700 rounded overflow-hidden">
+          <span
+            className="absolute inset-y-0 left-0"
+            style={{ width: `${ratio * 100}%`, backgroundColor: color }}
+          />
+        </span>
+        <span className="tabular-nums text-xs">
+          {Number.isFinite(num) ? num.toLocaleString() : String(rawValue)}
+        </span>
+      </span>
+    )
+  }
+
+  // Default / heatmap text (style is applied via renderCellStyle).
+  return String(rawValue)
+}
 
 const DENSITY_CONFIG = {
   compact:  { rowHeight: 25, textClass: 'text-xs',  cellPad: 'px-2 py-0.5', headerHeight: 29 },
@@ -19,6 +169,9 @@ interface Props {
   chartConfig?: string
   onRowClick?: (row: Record<string, unknown>) => void
   clickable?: boolean
+  // Publishes the currently sorted/column-filtered table state so the parent
+  // (ReportViewerPage) can feed the exact on-screen data into export.
+  onDisplayStateChange?: (state: { columns: string[]; rows: Record<string, unknown>[] }) => void
 }
 
 function parseConfig(raw?: string): Record<string, unknown> {
@@ -60,9 +213,9 @@ function exportXlsx(cols: string[], rows: Record<string, unknown>[], filename: s
   XLSX.writeFile(wb, filename + '.xlsx')
 }
 
-export default function TableWidget({ data, title, chartConfig, onRowClick, clickable }: Props) {
+export default function TableWidget({ data, title, chartConfig, onRowClick, clickable, onDisplayStateChange }: Props) {
   const { t } = useTranslation()
-  const config = parseConfig(chartConfig)
+  const config = useMemo(() => parseConfig(chartConfig), [chartConfig])
   const density: Density = (config.tableDensity as string) in DENSITY_CONFIG
     ? (config.tableDensity as Density)
     : 'default'
@@ -71,9 +224,37 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
   const allRows = data.rows || []
 
   // Determine visible columns from config
-  const visibleCols = Array.isArray(config.visibleColumns)
-    ? (config.visibleColumns as string[]).filter(c => cols.includes(c))
-    : cols
+  const visibleCols = useMemo(() => (
+    Array.isArray(config.visibleColumns)
+      ? (config.visibleColumns as string[]).filter(c => cols.includes(c))
+      : cols
+  ), [config.visibleColumns, cols])
+
+  // Per-column formatters (delta arrows, heatmap, bar). Keyed by column name.
+  const columnFormatters = useMemo(() => {
+    const raw = config.columnFormatters as Record<string, ColumnFormatter> | undefined
+    return raw && typeof raw === 'object' ? raw : {}
+  }, [config.columnFormatters])
+
+  // Pre-compute column max absolute value for 'bar' formatters with max='auto'.
+  // Also used as the heatmap normalization hint when colorStops lie in 0..1.
+  const columnMax = useMemo(() => {
+    const out: Record<string, number> = {}
+    for (const [col, fmt] of Object.entries(columnFormatters)) {
+      if (fmt.type !== 'bar') continue
+      if (typeof fmt.max === 'number' && Number.isFinite(fmt.max)) {
+        out[col] = Math.abs(fmt.max)
+      } else {
+        let m = 0
+        for (const r of allRows) {
+          const v = Math.abs(Number(r[col]))
+          if (Number.isFinite(v) && v > m) m = v
+        }
+        out[col] = m
+      }
+    }
+    return out
+  }, [columnFormatters, allRows])
 
   // Configurable page size from chartConfig, 0 or undefined = auto
   const configPageSize = Number(config.tablePageSize) || 0
@@ -82,19 +263,21 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
   const [sortCol, setSortCol] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
 
-  const sortedRows = sortCol
-    ? [...allRows].sort((a, b) => {
-        const av = a[sortCol], bv = b[sortCol]
-        if (av == null && bv == null) return 0
-        if (av == null) return 1
-        if (bv == null) return -1
-        const an = Number(av), bn = Number(bv)
-        const cmp = (!isNaN(an) && !isNaN(bn))
-          ? an - bn
-          : String(av).localeCompare(String(bv))
-        return sortDir === 'asc' ? cmp : -cmp
-      })
-    : allRows
+  const sortedRows = useMemo(() => (
+    sortCol
+      ? [...allRows].sort((a, b) => {
+          const av = a[sortCol], bv = b[sortCol]
+          if (av == null && bv == null) return 0
+          if (av == null) return 1
+          if (bv == null) return -1
+          const an = Number(av), bn = Number(bv)
+          const cmp = (!isNaN(an) && !isNaN(bn))
+            ? an - bn
+            : String(av).localeCompare(String(bv))
+          return sortDir === 'asc' ? cmp : -cmp
+        })
+      : allRows
+  ), [allRows, sortCol, sortDir])
 
   const handleSort = useCallback((col: string) => {
     if (sortCol === col) {
@@ -137,7 +320,15 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
 
   const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize))
   const safeePage = Math.min(page, totalPages - 1)
-  const pageRows = sortedRows.slice(safeePage * pageSize, (safeePage + 1) * pageSize)
+  const pageRows = useMemo(
+    () => sortedRows.slice(safeePage * pageSize, (safeePage + 1) * pageSize),
+    [sortedRows, safeePage, pageSize]
+  )
+
+  // Publish current page (what's literally on screen) so export acts like a screenshot.
+  useEffect(() => {
+    onDisplayStateChange?.({ columns: visibleCols, rows: pageRows })
+  }, [onDisplayStateChange, visibleCols, pageRows])
 
   const goTo = useCallback((p: number) => {
     setPage(Math.max(0, Math.min(p, totalPages - 1)))
@@ -212,15 +403,20 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
                     clickable ? 'cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-900/20' : ''
                   }`}
                 >
-                  {visibleCols.map((col) => (
-                    <td
-                      key={col}
-                      style={cellBg && col === rowColorBy ? { backgroundColor: cellBg } : undefined}
-                      className={`${cellPad} whitespace-nowrap text-slate-700 dark:text-slate-300`}
-                    >
-                      {row[col] != null ? String(row[col]) : <span className="text-slate-400">null</span>}
-                    </td>
-                  ))}
+                  {visibleCols.map((col) => {
+                    const baseBg = cellBg && col === rowColorBy ? cellBg : undefined
+                    const fmt = columnFormatters[col]
+                    const rawValue = row[col]
+                    return (
+                      <td
+                        key={col}
+                        style={renderCellStyle(fmt, rawValue, columnMax[col], baseBg)}
+                        className={`${cellPad} whitespace-nowrap text-slate-700 dark:text-slate-300`}
+                      >
+                        {renderCellContent(fmt, rawValue, columnMax[col])}
+                      </td>
+                    )
+                  })}
                 </tr>
               )
             })}

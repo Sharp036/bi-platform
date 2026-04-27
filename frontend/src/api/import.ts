@@ -66,6 +66,29 @@ export interface ImportLog {
   errorDetail?: string
 }
 
+export interface PageResponse<T> {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+export type ImportLogSortKey =
+  | 'sourceName' | 'filename' | 'uploadedBy' | 'uploadedAt'
+  | 'rowsTotal' | 'rowsImported' | 'rowsFailed' | 'status'
+
+export interface ListLogsParams {
+  page: number
+  size: number
+  sort: ImportLogSortKey
+  sortDir: 'asc' | 'desc'
+  sourceName?: string
+  filename?: string
+  uploadedBy?: string
+  status?: string
+}
+
 export const importApi = {
   listSources: () =>
     api.get<ImportSource[]>('/import/sources').then(r => r.data),
@@ -95,8 +118,19 @@ export const importApi = {
     }).then(r => r.data)
   },
 
-  listLogs: () =>
-    api.get<ImportLog[]>('/import/logs').then(r => r.data),
+  listLogs: (params: ListLogsParams) => {
+    const query: Record<string, string> = {
+      page: String(params.page),
+      size: String(params.size),
+      sort: params.sort,
+      sortDir: params.sortDir,
+    }
+    if (params.sourceName) query.sourceName = params.sourceName
+    if (params.filename)   query.filename   = params.filename
+    if (params.uploadedBy) query.uploadedBy = params.uploadedBy
+    if (params.status)     query.status     = params.status
+    return api.get<PageResponse<ImportLog>>('/import/logs', { params: query }).then(r => r.data)
+  },
 
   getLogErrors: (id: number) =>
     api.get<ImportErrorDetail[]>(`/import/logs/${id}/errors`).then(r => r.data),
