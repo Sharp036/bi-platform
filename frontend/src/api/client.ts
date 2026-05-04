@@ -46,7 +46,6 @@ function handleSessionExpired() {
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    log.error(`API ${error.config?.method?.toUpperCase()} ${error.config?.url}`, { reqId: error.config?.headers?.['X-Request-Id'], status: error.response?.status, message: error.response?.data?.message || error.message })
     const original = error.config
     const status = error.response?.status
     if ((status === 401 || status === 403) && !original._retry) {
@@ -66,6 +65,7 @@ api.interceptors.response.use(
         return handleSessionExpired()
       }
     }
+    log.error(`API ${error.config?.method?.toUpperCase()} ${error.config?.url}`, { reqId: error.config?.headers?.['X-Request-Id'], status: error.response?.status, message: error.response?.data?.message || error.message })
     return Promise.reject(error)
   }
 )
