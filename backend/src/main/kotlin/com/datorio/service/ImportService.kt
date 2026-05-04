@@ -290,11 +290,11 @@ class ImportService(
         val pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty))
 
         val result = logRepo.findFiltered(
-            username = if (showAll) null else username,
-            sourceName = sourceName?.takeIf { it.isNotBlank() },
-            filename = filename?.takeIf { it.isNotBlank() },
-            userFilter = if (showAll) userFilter?.takeIf { it.isNotBlank() } else null,
-            status = status?.takeIf { it.isNotBlank() },
+            username = if (showAll) "" else username,
+            sourceName = sourceName?.takeIf { it.isNotBlank() } ?: "",
+            filename = filename?.takeIf { it.isNotBlank() } ?: "",
+            userFilter = if (showAll) (userFilter?.takeIf { it.isNotBlank() } ?: "") else "",
+            status = status?.takeIf { it.isNotBlank() } ?: "",
             pageable = pageable,
         )
 

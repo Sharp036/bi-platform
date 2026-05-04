@@ -31,29 +31,29 @@ interface ImportLogRepository : JpaRepository<ImportLog, Long> {
             SELECT l FROM ImportLog l
             LEFT JOIN l.uploadedBy u
             JOIN l.source s
-            WHERE (:username IS NULL OR u.username = :username)
-              AND (:sourceName IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :sourceName, '%')))
-              AND (:filename   IS NULL OR LOWER(l.filename) LIKE LOWER(CONCAT('%', :filename, '%')))
-              AND (:userFilter IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userFilter, '%')))
-              AND (:status     IS NULL OR l.status = :status)
+            WHERE (:username   = '' OR u.username = :username)
+              AND (:sourceName = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :sourceName, '%')))
+              AND (:filename   = '' OR LOWER(l.filename) LIKE LOWER(CONCAT('%', :filename, '%')))
+              AND (:userFilter = '' OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userFilter, '%')))
+              AND (:status     = '' OR l.status = :status)
         """,
         countQuery = """
             SELECT COUNT(l) FROM ImportLog l
             LEFT JOIN l.uploadedBy u
             JOIN l.source s
-            WHERE (:username IS NULL OR u.username = :username)
-              AND (:sourceName IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :sourceName, '%')))
-              AND (:filename   IS NULL OR LOWER(l.filename) LIKE LOWER(CONCAT('%', :filename, '%')))
-              AND (:userFilter IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userFilter, '%')))
-              AND (:status     IS NULL OR l.status = :status)
+            WHERE (:username   = '' OR u.username = :username)
+              AND (:sourceName = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :sourceName, '%')))
+              AND (:filename   = '' OR LOWER(l.filename) LIKE LOWER(CONCAT('%', :filename, '%')))
+              AND (:userFilter = '' OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userFilter, '%')))
+              AND (:status     = '' OR l.status = :status)
         """,
     )
     fun findFiltered(
-        username: String?,
-        sourceName: String?,
-        filename: String?,
-        userFilter: String?,
-        status: String?,
+        username: String,
+        sourceName: String,
+        filename: String,
+        userFilter: String,
+        status: String,
         pageable: Pageable,
     ): Page<ImportLog>
 }
