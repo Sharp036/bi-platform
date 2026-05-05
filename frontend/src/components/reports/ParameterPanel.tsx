@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportParameter } from '@/types'
+import NumberInput from '@/components/common/NumberInput'
 import { Play } from 'lucide-react'
 
 interface Props {
@@ -72,9 +73,16 @@ export default function ParameterPanel({ parameters, onApply, loading }: Props) 
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
+            ) : p.paramType === 'NUMBER' ? (
+              <NumberInput
+                value={values[p.name] || ''}
+                onChange={v => setValues({ ...values, [p.name]: v })}
+                placeholder={p.defaultValue || ''}
+                className="input text-sm"
+              />
             ) : (
               <input
-                type={p.paramType === 'NUMBER' ? 'number' : 'text'}
+                type="text"
                 value={values[p.name] || ''}
                 onChange={e => setValues({ ...values, [p.name]: e.target.value })}
                 placeholder={p.defaultValue || ''}

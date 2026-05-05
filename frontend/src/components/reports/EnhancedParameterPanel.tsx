@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportParameter } from '@/types'
 import { controlsApi, ParameterControlConfig } from '@/api/controls'
+import NumberInput from '@/components/common/NumberInput'
 import { Play } from 'lucide-react'
 import clsx from 'clsx'
 import { log } from '@/utils/logger'
@@ -354,9 +355,16 @@ export default function EnhancedParameterPanel({
                   <option value="true">{t('common.yes')}</option>
                   <option value="false">{t('common.no')}</option>
                 </select>
+              ) : p.paramType === 'NUMBER' ? (
+                <NumberInput
+                  value={values[p.name] || ''}
+                  onChange={v => handleChange(p.name, v)}
+                  placeholder={p.defaultValue || ''}
+                  className="input text-sm"
+                />
               ) : (
                 <input
-                  type={p.paramType === 'NUMBER' ? 'number' : 'text'}
+                  type="text"
                   value={values[p.name] || ''}
                   onChange={e => handleChange(p.name, e.target.value)}
                   placeholder={p.defaultValue || ''}
