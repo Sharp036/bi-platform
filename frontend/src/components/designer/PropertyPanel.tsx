@@ -1343,10 +1343,43 @@ export default function PropertyPanel() {
                       className="input text-sm"
                     >
                       <option value="number">{t('designer.format.number')}</option>
+                      <option value="thousands">{t('designer.format.thousands')}</option>
+                      <option value="millions">{t('designer.format.millions')}</option>
+                      <option value="billions">{t('designer.format.billions')}</option>
                       <option value="currency">{t('designer.format.currency')}</option>
                       <option value="percent">{t('designer.format.percent')}</option>
                     </select>
                   </Field>
+
+                  <Field label={t('designer.kpi_decimals')}>
+                    <NumericInput
+                      value={cc.decimals as number | undefined}
+                      onChange={v => update({
+                        chartConfig: {
+                          ...cc,
+                          decimals: v != null ? Math.max(0, Math.min(6, Math.floor(v))) : undefined,
+                        },
+                      })}
+                      className="input text-sm"
+                      placeholder={t('designer.kpi_decimals_placeholder')}
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.kpi_decimals_hint')}</p>
+                  </Field>
+
+                  {cc.format === 'currency' && (
+                    <Field label={t('designer.currency')}>
+                      <select
+                        value={cc.currency as string || 'USD'}
+                        onChange={e => update({ chartConfig: { ...cc, currency: e.target.value } })}
+                        className="input text-sm"
+                      >
+                        {CURRENCIES.map(c => (
+                          <option key={c.code} value={c.code}>{c.symbol} {c.code} - {c.name}</option>
+                        ))}
+                      </select>
+                    </Field>
+                  )}
+
                   <Field label={t('designer.prefix_suffix')}>
                     <div className="flex gap-2">
                       <input

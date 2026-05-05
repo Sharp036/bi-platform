@@ -11,28 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { createCollisionFreeLayout, createInlineLabelLayout } from '@/components/charts/labelLayout'
 import type { LabelPlacement } from '@/components/charts/labelLayout'
 import InfoTooltip from '@/components/common/InfoTooltip'
-
-function defaultAxisDecimals(format: string): number {
-  if (format === 'currency') return 0
-  if (format === 'percent') return 1
-  if (format === 'thousands' || format === 'millions' || format === 'billions') return 1
-  return 0
-}
-
-function buildValueFormatter(format: string, currency: string, decimals?: number): ((value: number) => string) | undefined {
-  const d = Math.max(0, Math.min(6, Number.isFinite(Number(decimals)) ? Number(decimals) : defaultAxisDecimals(format)))
-  switch (format) {
-    case 'thousands': return (v: number) => (v / 1000).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + 'K'
-    case 'millions': return (v: number) => (v / 1_000_000).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + 'M'
-    case 'billions': return (v: number) => (v / 1_000_000_000).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + 'B'
-    case 'currency': return (v: number) => v.toLocaleString(undefined, { style: 'currency', currency, minimumFractionDigits: d, maximumFractionDigits: d })
-    case 'percent': return (v: number) => (v * 100).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) + '%'
-    case 'plain': return decimals != null
-      ? (v: number) => v.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d })
-      : undefined
-    default: return undefined
-  }
-}
+import { buildValueFormatter } from '@/utils/formatValue'
 
 function buildLegendOption(seriesCount: number, legendPosition: string, selectorLabels?: { all: string; inv: string }) {
   if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
