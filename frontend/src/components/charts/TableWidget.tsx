@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { WidgetData } from '@/types'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Download, ZoomIn, ZoomOut, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import * as XLSX from 'xlsx'
+import InfoTooltip from '@/components/common/InfoTooltip'
 
 // ═════════════════════════════════════════════════════════════════════
 // Column formatters — visual enrichment for individual table columns.
@@ -342,9 +343,16 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
 
   const filename = (title || 'data').replace(/[^a-zA-Zа-яА-ЯёЁ0-9_-]/g, '_')
 
+  const description = config.description as string | undefined
+
   return (
     <div ref={containerRef} className="h-full flex flex-col overflow-hidden">
-      {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
+      {(title || description) && (
+        <div className="flex items-center gap-1 mb-2 px-1">
+          {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{title}</h3>}
+          <InfoTooltip description={description} />
+        </div>
+      )}
       <div className="flex-1 overflow-auto rounded-lg border border-surface-200 dark:border-dark-surface-100">
         <table className={`w-full ${textClass}`} style={{
           transform: `scale(${zoomFactor})`,

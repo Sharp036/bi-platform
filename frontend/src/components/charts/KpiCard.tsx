@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import type { WidgetData } from '@/types'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import clsx from 'clsx'
+import InfoTooltip from '@/components/common/InfoTooltip'
 
 interface Props { data: WidgetData; title?: string; chartConfig?: string }
 
 type ColorStop = { at: number; color: string }
 type ColorMode = 'step' | 'gradient'
+type SparklinePoint = { label: string; value: number }
 
 interface KpiConfig {
   valueColumn?: string
@@ -26,6 +29,9 @@ interface KpiConfig {
   // When set, sparkline uses the same colorStops to pick its stroke color based on
   // the LAST data point's value. Useful to make the sparkline go red/green too.
   sparklineColorFromStops?: boolean
+  // Free-form description shown as a markdown tooltip on a small (i) icon next
+  // to the title. Empty/undefined hides the icon entirely.
+  description?: string
 }
 
 function parseConfig(raw?: string): KpiConfig {
@@ -88,37 +94,50 @@ function pickColor(value: number, stops: ColorStop[], mode: ColorMode): string |
   return undefined
 }
 
-function parseSparklineValues(cell: unknown, rows: Array<Record<string, unknown>>, field: string): number[] {
+function parseSparklinePoints(
+  cell: unknown,
+  rows: Array<Record<string, unknown>>,
+  field: string,
+  labelField: string | undefined,
+): SparklinePoint[] {
   // Priority 1: cell itself contains the trend (array or comma/JSON string).
-  if (Array.isArray(cell)) return cell.map(Number).filter(Number.isFinite)
+  // No labels available - fall back to 1-based index.
+  const fromArr = (arr: unknown[]): SparklinePoint[] => arr
+    .map((v, i) => ({ label: String(i + 1), value: Number(v) }))
+    .filter(p => Number.isFinite(p.value))
+
+  if (Array.isArray(cell)) return fromArr(cell)
   if (typeof cell === 'string' && cell.length > 0) {
     const trimmed = cell.trim()
     if (trimmed.startsWith('[')) {
       try {
         const parsed = JSON.parse(trimmed)
-        if (Array.isArray(parsed)) return parsed.map(Number).filter(Number.isFinite)
+        if (Array.isArray(parsed)) return fromArr(parsed)
       } catch { /* fall through */ }
     }
     if (trimmed.includes(',')) {
-      return trimmed.split(',').map(s => Number(s.trim())).filter(Number.isFinite)
+      return fromArr(trimmed.split(',').map(s => s.trim()))
     }
   }
-  // Priority 2: trend spans across multiple data rows via the same field.
+  // Priority 2: trend spans across multiple data rows. Pull a paired label
+  // from labelField when available (typically the X-axis column - week/date).
   if (rows.length > 1) {
-    return rows.map(r => Number(r[field])).filter(Number.isFinite)
+    return rows
+      .map(r => ({
+        label: labelField ? String(r[labelField] ?? '') : '',
+        value: Number(r[field]),
+      }))
+      .filter(p => Number.isFinite(p.value))
   }
   return []
 }
 
-function buildSparklinePath(values: number[], width: number, height: number): string {
-  if (values.length === 0) return ''
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  const range = max - min || 1
-  const step = values.length > 1 ? width / (values.length - 1) : 0
-  return values.map((v, i) => {
+function buildSparklinePath(points: SparklinePoint[], width: number, height: number, min: number, range: number): string {
+  if (points.length === 0) return ''
+  const step = points.length > 1 ? width / (points.length - 1) : 0
+  return points.map((p, i) => {
     const x = i * step
-    const y = height - ((v - min) / range) * height
+    const y = height - ((p.value - min) / range) * height
     return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
   }).join(' ')
 }
@@ -140,10 +159,14 @@ export default function KpiCard({ data, title, chartConfig }: Props) {
   const isNegative = delta !== undefined && delta < 0
 
   const sparklineField = config.sparklineField
-  const sparklineValues = sparklineField
-    ? parseSparklineValues(row[sparklineField], rows, sparklineField)
+  // Pick a label column for sparkline points: first column that is not the
+  // value/sparkline/delta column. Typical SQL shape: SELECT x_label, y_value FROM ...
+  // - so the first non-value column happens to be the X axis.
+  const labelField = cols.find(c => c !== valueCol && c !== sparklineField && c !== deltaCol)
+  const sparklinePoints = sparklineField
+    ? parseSparklinePoints(row[sparklineField], rows, sparklineField, labelField)
     : []
-  // When the sparkline spans multiple rows (priority 2 of parseSparklineValues),
+  // When the sparkline spans multiple rows (priority 2 of parseSparklinePoints),
   // the KPI's main value should be the LATEST point, not the first. SQL is expected
   // to ORDER BY date ASC so the sparkline renders chronologically - last row = latest.
   const primaryRow = sparklineField && rows.length > 1 && !Array.isArray(row[sparklineField])
@@ -171,13 +194,49 @@ export default function KpiCard({ data, title, chartConfig }: Props) {
   const sparklineColor = config.sparklineColorFromStops && statusColor
     ? statusColor
     : config.sparklineColor || '#3b82f6'
-  const sparklinePath = sparklineValues.length > 1
-    ? buildSparklinePath(sparklineValues, 100, 24)
+
+  const SVG_W = 100
+  const SVG_H = 24
+  const sparkValues = sparklinePoints.map(p => p.value)
+  const sparkMin = sparkValues.length ? Math.min(...sparkValues) : 0
+  const sparkMax = sparkValues.length ? Math.max(...sparkValues) : 0
+  const sparkRange = sparkMax - sparkMin || 1
+  const sparklinePath = sparklinePoints.length > 1
+    ? buildSparklinePath(sparklinePoints, SVG_W, SVG_H, sparkMin, sparkRange)
     : ''
+
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
+
+  const onSparkMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (sparklinePoints.length < 2) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    if (rect.width === 0) return
+    const xRel = (e.clientX - rect.left) / rect.width
+    const exact = xRel * (sparklinePoints.length - 1)
+    const idx = Math.max(0, Math.min(sparklinePoints.length - 1, Math.round(exact)))
+    if (idx !== hoverIdx) setHoverIdx(idx)
+  }
+
+  const hoverPoint = hoverIdx !== null ? sparklinePoints[hoverIdx] : null
+  const hoverX = hoverIdx !== null && sparklinePoints.length > 1
+    ? (hoverIdx / (sparklinePoints.length - 1)) * SVG_W
+    : 0
+  const hoverY = hoverPoint
+    ? SVG_H - ((hoverPoint.value - sparkMin) / sparkRange) * SVG_H
+    : 0
 
   return (
     <div className="h-full flex flex-col justify-center px-4 rounded-lg" style={tintStyle}>
-      {title && <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{title}</p>}
+      {(title || config.description) && (
+        <div className="flex items-center gap-1 mb-1">
+          {title && (
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              {title}
+            </p>
+          )}
+          <InfoTooltip description={config.description} />
+        </div>
+      )}
       <p
         className={clsx('text-3xl font-bold', !statusColor && 'text-slate-800 dark:text-white')}
         style={statusColor ? { color: statusColor } : undefined}
@@ -196,22 +255,49 @@ export default function KpiCard({ data, title, chartConfig }: Props) {
         </div>
       )}
       {sparklinePath && (
-        <svg
-          viewBox="0 0 100 24"
-          preserveAspectRatio="none"
-          className="mt-1 w-full h-6"
-          aria-hidden="true"
-        >
-          <path
-            d={sparklinePath}
-            fill="none"
-            stroke={sparklineColor}
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+        <div className="relative mt-1 w-full h-6">
+          <svg
+            viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+            preserveAspectRatio="none"
+            className="w-full h-full"
+            onMouseMove={onSparkMove}
+            onMouseLeave={() => setHoverIdx(null)}
+          >
+            <path
+              d={sparklinePath}
+              fill="none"
+              stroke={sparklineColor}
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+            {hoverPoint && (
+              <circle
+                cx={hoverX}
+                cy={hoverY}
+                r="2.5"
+                fill={sparklineColor}
+                stroke="white"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            )}
+          </svg>
+          {hoverPoint && (
+            <div
+              className="absolute pointer-events-none -translate-x-1/2 bg-slate-800 text-white text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap shadow"
+              style={{
+                left: `${(hoverIdx! / (sparklinePoints.length - 1)) * 100}%`,
+                top: '-22px',
+              }}
+            >
+              {hoverPoint.label && <span className="opacity-80">{hoverPoint.label}: </span>}
+              <strong>{Number.isFinite(hoverPoint.value) ? hoverPoint.value.toLocaleString() : '—'}</strong>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
