@@ -59,6 +59,25 @@ export default function PropertyPanel() {
   // Auto-load columns when widget selection changes (for saved widgets with a data source)
   useEffect(() => { setAvailableCols([]); setPreviewRows([]) }, [selected])
 
+  // Legacy migration for TEXT widgets: the previous convention was to store
+  // the HTML body in widget.title (capped at VARCHAR(300) on save) and an
+  // intermediate fix put the display name in chartConfig.widgetName. We now
+  // standardize on widget.title=name and chartConfig.content=HTML body.
+  // On first render of a legacy TEXT widget (HTML in title, no content yet)
+  // move the body into chartConfig.content; reuse widgetName as the new title
+  // when present, else clear title so the user can type a fresh name.
+  useEffect(() => {
+    if (!widget || widget.widgetType !== 'TEXT') return
+    const cc = widget.chartConfig as Record<string, unknown>
+    const titleHasHtml = typeof widget.title === 'string' && /<[^>]+>/.test(widget.title)
+    const needsMigration = cc.content === undefined && titleHasHtml
+    if (!needsMigration) return
+    const widgetName = (cc.widgetName as string | undefined) || ''
+    const nextCc: Record<string, unknown> = { ...cc, content: widget.title }
+    delete nextCc.widgetName
+    updateWidget(widget.id, { title: widgetName, chartConfig: nextCc })
+  }, [widget?.id, widget?.widgetType])  // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!widget) return
     const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
@@ -251,32 +270,17 @@ export default function PropertyPanel() {
         </span>
       </div>
 
-      {/* Title. For TEXT widgets the title shown in canvas / dashboard headers
-          is stored in chartConfig.widgetName, not widget.title - the latter is
-          repurposed as the HTML body of the widget. Other widget types use
-          widget.title directly as the displayed heading. */}
-      {widget.widgetType !== 'TEXT' ? (
-        <Field label={t('designer.widget_title')}>
-          <input
-            value={widget.title} onChange={e => update({ title: e.target.value })}
-            className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
-          />
-          <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
-        </Field>
-      ) : (
-        <Field label={t('designer.widget_title')}>
-          <input
-            value={(widget.chartConfig as Record<string, unknown>).widgetName as string || ''}
-            onChange={e => update({
-              chartConfig: {
-                ...widget.chartConfig,
-                widgetName: e.target.value || undefined,
-              },
-            })}
-            className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
-          />
-        </Field>
-      )}
+      {/* Title is uniformly bound to widget.title across all widget types.
+          For TEXT widgets the HTML body lives in chartConfig.content (a JSONB
+          field with no length limit) - the legacy convention of storing the
+          body in widget.title was hitting the VARCHAR(300) cap on save. */}
+      <Field label={t('designer.widget_title')}>
+        <input
+          value={widget.title} onChange={e => update({ title: e.target.value })}
+          className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
+        />
+        <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
+      </Field>
 
       {/* Description (rendered as a markdown tooltip on a small (i) icon
           next to the widget title in view mode). Empty -> no icon. */}
@@ -1844,12 +1848,18 @@ export default function PropertyPanel() {
         )
       })()}
 
-      {/* Text content */}
+      {/* Text content - stored in chartConfig.content (JSONB) so the body
+          is not capped at the VARCHAR(300) limit of widget.title. */}
       {widget.widgetType === 'TEXT' && (
         <Field label={t('designer.content_html')}>
           <textarea
-            value={widget.title}
-            onChange={e => update({ title: e.target.value })}
+            value={(widget.chartConfig as Record<string, unknown>).content as string || ''}
+            onChange={e => update({
+              chartConfig: {
+                ...widget.chartConfig,
+                content: e.target.value || undefined,
+              },
+            })}
             className="input text-sm h-32 resize-none font-mono"
             placeholder={t('designer.html_placeholder')}
           />

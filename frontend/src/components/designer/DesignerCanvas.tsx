@@ -469,15 +469,7 @@ function WidgetBlock({
             />
             <Icon className="w-3.5 h-3.5 text-brand-500" />
             <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
-              {/* TEXT widgets repurpose .title as raw HTML body, so use the
-                  separate chartConfig.widgetName for the canvas header. Falls
-                  back to a stripped preview of legacy widgets where the name
-                  field is not yet set, then to the widget type label. */}
-              {widget.widgetType === 'TEXT'
-                ? ((cc.widgetName as string)
-                  || widget.title?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60)
-                  || t('widgets.type.text'))
-                : (widget.title || widget.widgetType)}
+              {widget.title || widget.widgetType}
             </span>
             {hasDataSource && !previewData && (
               <button

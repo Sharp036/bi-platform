@@ -122,10 +122,15 @@ export default function WidgetRenderer({
   }
 
   // TEXT widget: rendered whether or not a SQL query is attached. When data is
-  // present, {column} placeholders in widget.title are interpolated from row[0].
+  // present, {column:format} placeholders in the body are interpolated from
+  // row[0]. New convention: HTML body in chartConfig.content (no length limit
+  // since JSONB), display name in widget.title. Legacy widgets that still
+  // have HTML in widget.title fall back transparently here.
   if (widget.widgetType === 'TEXT') {
     const styleConfig = widget.style ? JSON.parse(widget.style) : {}
-    return <RichTextWidget content={widget.title || ''} style={styleConfig} data={widget.data} />
+    const cfg = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
+    const body = (typeof cfg.content === 'string' ? cfg.content : undefined) ?? widget.title ?? ''
+    return <RichTextWidget content={body} style={styleConfig} data={widget.data} />
   }
 
   if (!widget.data) {
