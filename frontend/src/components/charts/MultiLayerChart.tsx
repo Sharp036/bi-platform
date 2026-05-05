@@ -10,6 +10,7 @@ import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTy
 import { useTranslation } from 'react-i18next'
 import { createCollisionFreeLayout, createInlineLabelLayout } from '@/components/charts/labelLayout'
 import type { LabelPlacement } from '@/components/charts/labelLayout'
+import InfoTooltip from '@/components/common/InfoTooltip'
 
 function defaultAxisDecimals(format: string): number {
   if (format === 'currency') return 0
@@ -728,11 +729,14 @@ export default function MultiLayerChart({
     <div className="h-full flex flex-col">
       {/* Header: title + layer toggles */}
       <div className="flex items-start justify-between mb-1 px-1">
-        {title && (
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">
-            {title}
-          </h3>
-        )}
+        <div className="flex items-center gap-1 min-w-0">
+          {title && (
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">
+              {title}
+            </h3>
+          )}
+          <InfoTooltip description={config.description as string | undefined} />
+        </div>
         {layersWithVisibility.length > 0 && (
           <LayerTogglePanel
             layers={layersWithVisibility}

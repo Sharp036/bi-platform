@@ -5,6 +5,7 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createCollisionFreeLayout, createInlineLabelLayout } from '@/components/charts/labelLayout'
 import type { LabelPlacement } from '@/components/charts/labelLayout'
+import InfoTooltip from '@/components/common/InfoTooltip'
 
 interface Props {
   data: WidgetData
@@ -848,9 +849,16 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
 
   const isDraggingNow = !!dragState.current
 
+  const description = config.description as string | undefined
+
   return (
     <div className="h-full flex flex-col">
-      {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">{title}</h3>}
+      {(title || description) && (
+        <div className="flex items-center gap-1 mb-2 px-1">
+          {title && <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{title}</h3>}
+          <InfoTooltip description={description} />
+        </div>
+      )}
       <div
         ref={containerRef}
         className={`flex-1 min-h-0 relative select-none${isDraggingNow ? ' cursor-grabbing' : (clickable ? ' cursor-pointer' : '')}`}
