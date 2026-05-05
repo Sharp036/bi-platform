@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useDesignerStore } from '@/store/useDesignerStore'
+import NumberInput from '@/components/common/NumberInput'
 import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 
 const PARAM_TYPES = ['STRING', 'NUMBER', 'DATE', 'DATE_RANGE', 'SELECT', 'MULTI_SELECT', 'BOOLEAN']
@@ -78,10 +79,19 @@ export default function ParameterDesigner() {
                 >
                   {PARAM_TYPES.map(pt => <option key={pt} value={pt}>{pt}</option>)}
                 </select>
-                <input
-                  value={p.defaultValue} onChange={e => updateParam(i, { defaultValue: e.target.value })}
-                  className="input text-xs py-1" placeholder={t('designer.param_default')}
-                />
+                {p.paramType === 'NUMBER' ? (
+                  <NumberInput
+                    value={p.defaultValue}
+                    onChange={v => updateParam(i, { defaultValue: v })}
+                    className="input text-xs py-1"
+                    placeholder={t('designer.param_default')}
+                  />
+                ) : (
+                  <input
+                    value={p.defaultValue} onChange={e => updateParam(i, { defaultValue: e.target.value })}
+                    className="input text-xs py-1" placeholder={t('designer.param_default')}
+                  />
+                )}
                 {(p.paramType === 'DATE' || p.paramType === 'DATE_RANGE') && (
                   <select
                     value={DATE_DEFAULTS.some(d => d.value === p.defaultValue) ? p.defaultValue : ''}
