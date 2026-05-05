@@ -256,6 +256,7 @@ export default function PropertyPanel() {
           value={widget.title} onChange={e => update({ title: e.target.value })}
           className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
         />
+        <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
       </Field>
 
       {/* Position & Size */}
@@ -730,6 +731,129 @@ export default function PropertyPanel() {
                       </div>
                     )}
                   </Field>
+
+                  {AXIS_CHART_TYPES.includes((cc.type as string) || 'bar') && (
+                    <Field label={t('designer.chart_threshold_lines')}>
+                      {(() => {
+                        type ThresholdLine = { value: number; color?: string; label?: string; style?: string }
+                        const lines = (cc.thresholdLines as ThresholdLine[]) || []
+                        const setLines = (next: ThresholdLine[]) =>
+                          update({ chartConfig: { ...cc, thresholdLines: next.length ? next : undefined } })
+                        const updateLine = (idx: number, patch: Partial<ThresholdLine>) => {
+                          const next = [...lines]
+                          next[idx] = { ...next[idx], ...patch }
+                          setLines(next)
+                        }
+                        return (
+                          <div className="space-y-1">
+                            {lines.map((ln, idx) => (
+                              <div key={idx} className="space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded p-1.5">
+                                <div className="flex items-center gap-1.5 text-xs">
+                                  <input
+                                    type="number" step="any"
+                                    value={ln.value}
+                                    onChange={e => updateLine(idx, { value: Number(e.target.value) })}
+                                    className="w-20 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+                                    placeholder={t('designer.chart_threshold_value')}
+                                  />
+                                  <input
+                                    type="color"
+                                    value={ln.color || '#94a3b8'}
+                                    onChange={e => updateLine(idx, { color: e.target.value })}
+                                    className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                                  />
+                                  <select
+                                    value={ln.style || 'dashed'}
+                                    onChange={e => updateLine(idx, { style: e.target.value })}
+                                    className="input text-xs flex-1 py-0.5"
+                                  >
+                                    <option value="solid">{t('designer.chart_threshold_style.solid')}</option>
+                                    <option value="dashed">{t('designer.chart_threshold_style.dashed')}</option>
+                                    <option value="dotted">{t('designer.chart_threshold_style.dotted')}</option>
+                                  </select>
+                                  <button
+                                    onClick={() => setLines(lines.filter((_, i) => i !== idx))}
+                                    className="text-red-500 hover:text-red-700 p-0.5"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                                <input
+                                  type="text"
+                                  value={ln.label || ''}
+                                  onChange={e => updateLine(idx, { label: e.target.value || undefined })}
+                                  placeholder={t('designer.chart_threshold_label')}
+                                  className="w-full text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+                                />
+                              </div>
+                            ))}
+                            <button
+                              onClick={() => setLines([...lines, { value: 0, color: '#94a3b8', style: 'dashed' }])}
+                              className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5"
+                            >
+                              <Plus className="w-3 h-3" /> {t('designer.chart_add_threshold')}
+                            </button>
+                          </div>
+                        )
+                      })()}
+                    </Field>
+                  )}
+
+                  {((cc.type as string) || 'bar') === 'line' && (() => {
+                    type HighlightConfig = { size?: number; colorMode?: 'step' | 'gradient'; colorStops?: Array<{ at: number; color: string }> }
+                    const hl = cc.highlightLastPoint as HighlightConfig | undefined
+                    const enabled = !!hl
+                    return (
+                      <Field label={t('designer.chart_highlight_last_point')}>
+                        <label className="inline-flex items-center gap-1.5 text-xs mb-1">
+                          <input
+                            type="checkbox"
+                            checked={enabled}
+                            onChange={e => update({ chartConfig: { ...cc, highlightLastPoint: e.target.checked ? {} : undefined } })}
+                            className="h-3.5 w-3.5"
+                          />
+                          <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_highlight_last_enable')}</span>
+                        </label>
+                        {enabled && hl && (
+                          <div className="space-y-1.5 pl-1 border-l-2 border-surface-200 dark:border-dark-surface-100">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.chart_highlight_size')}:</span>
+                              <input
+                                type="number" min={4} max={50}
+                                value={hl.size || 12}
+                                onChange={e => update({ chartConfig: { ...cc, highlightLastPoint: { ...hl, size: Number(e.target.value) || 12 } } })}
+                                className="w-16 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.kpi_color_mode')}:</span>
+                              <select
+                                value={hl.colorMode || 'step'}
+                                onChange={e => update({ chartConfig: { ...cc, highlightLastPoint: { ...hl, colorMode: e.target.value as 'step' | 'gradient' } } })}
+                                className="input text-xs flex-1 py-0.5"
+                              >
+                                <option value="step">{t('designer.kpi_color_mode.step')}</option>
+                                <option value="gradient">{t('designer.kpi_color_mode.gradient')}</option>
+                              </select>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">{t('designer.kpi_color_stops')}:</span>
+                              <ColorStopsEditor
+                                stops={hl.colorStops || []}
+                                onChange={stops => update({
+                                  chartConfig: {
+                                    ...cc,
+                                    highlightLastPoint: { ...hl, colorStops: stops.length ? stops : undefined },
+                                  },
+                                })}
+                                addLabel={t('designer.kpi_add_stop')}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </Field>
+                    )
+                  })()}
                 </>
               )
             })()}
@@ -989,6 +1113,169 @@ export default function PropertyPanel() {
                       })()}
                     </Field>
                   )}
+
+                  <Field label={t('designer.table_column_formatters')}>
+                    {(() => {
+                      type ColorStop = { at: number; color: string }
+                      type DeltaFmt = { type: 'delta'; showArrow?: boolean; colorMode?: 'sign' | 'none' }
+                      type HeatmapFmt = { type: 'heatmap'; colorMode?: 'step' | 'gradient'; colorStops: ColorStop[]; background?: boolean }
+                      type BarFmt = { type: 'bar'; max?: number | 'auto'; color?: string }
+                      type ColumnFormatter = DeltaFmt | HeatmapFmt | BarFmt
+
+                      const formatters = (cc.columnFormatters as Record<string, ColumnFormatter>) || {}
+                      const setFormatter = (col: string, fmt: ColumnFormatter | undefined) => {
+                        const next = { ...formatters }
+                        if (fmt === undefined) delete next[col]
+                        else next[col] = fmt
+                        const hasAny = Object.keys(next).length > 0
+                        update({ chartConfig: { ...cc, columnFormatters: hasAny ? next : undefined } })
+                      }
+                      const remainingCols = availableCols.filter(c => !(c in formatters))
+                      const defaultHeatmap: HeatmapFmt = {
+                        type: 'heatmap',
+                        colorMode: 'gradient',
+                        colorStops: [{ at: 0, color: '#ef4444' }, { at: 1, color: '#22c55e' }],
+                      }
+
+                      return (
+                        <div className="space-y-2">
+                          {Object.entries(formatters).map(([col, fmt]) => (
+                            <div key={col} className="border border-surface-200 dark:border-dark-surface-100 rounded p-2 space-y-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 flex-1 truncate" title={col}>{col}</span>
+                                <select
+                                  value={fmt.type}
+                                  onChange={e => {
+                                    const nextType = e.target.value as 'heatmap' | 'bar' | 'delta'
+                                    if (nextType === 'heatmap') setFormatter(col, defaultHeatmap)
+                                    else if (nextType === 'bar') setFormatter(col, { type: 'bar', max: 'auto', color: '#3b82f6' })
+                                    else setFormatter(col, { type: 'delta', colorMode: 'sign', showArrow: true })
+                                  }}
+                                  className="input text-xs py-0.5 w-24"
+                                >
+                                  <option value="heatmap">{t('designer.table_formatter.heatmap')}</option>
+                                  <option value="bar">{t('designer.table_formatter.bar')}</option>
+                                  <option value="delta">{t('designer.table_formatter.delta')}</option>
+                                </select>
+                                <button
+                                  onClick={() => setFormatter(col, undefined)}
+                                  className="text-red-500 hover:text-red-700 p-0.5"
+                                  title={t('common.delete')}
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+
+                              {fmt.type === 'heatmap' && (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.kpi_color_mode')}:</span>
+                                    <select
+                                      value={fmt.colorMode || 'gradient'}
+                                      onChange={e => setFormatter(col, { ...fmt, colorMode: e.target.value as 'step' | 'gradient' })}
+                                      className="input text-xs flex-1 py-0.5"
+                                    >
+                                      <option value="step">{t('designer.kpi_color_mode.step')}</option>
+                                      <option value="gradient">{t('designer.kpi_color_mode.gradient')}</option>
+                                    </select>
+                                  </div>
+                                  <ColorStopsEditor
+                                    stops={fmt.colorStops}
+                                    onChange={stops => setFormatter(col, { ...fmt, colorStops: stops })}
+                                    addLabel={t('designer.kpi_add_stop')}
+                                  />
+                                  <label className="inline-flex items-center gap-1.5 text-xs">
+                                    <input
+                                      type="checkbox"
+                                      checked={!!fmt.background}
+                                      onChange={e => setFormatter(col, { ...fmt, background: e.target.checked || undefined })}
+                                      className="h-3.5 w-3.5"
+                                    />
+                                    <span className="text-slate-500 dark:text-slate-400">{t('designer.table_formatter_background')}</span>
+                                  </label>
+                                </div>
+                              )}
+
+                              {fmt.type === 'bar' && (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.table_formatter_max')}:</span>
+                                    <input
+                                      type="text"
+                                      value={fmt.max === 'auto' || fmt.max === undefined ? 'auto' : String(fmt.max)}
+                                      onChange={e => {
+                                        const v = e.target.value.trim()
+                                        if (v === '' || v === 'auto') setFormatter(col, { ...fmt, max: 'auto' })
+                                        else if (Number.isFinite(Number(v))) setFormatter(col, { ...fmt, max: Number(v) })
+                                      }}
+                                      placeholder="auto"
+                                      className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+                                    />
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.table_formatter_color')}:</span>
+                                    <input
+                                      type="color"
+                                      value={fmt.color || '#3b82f6'}
+                                      onChange={e => setFormatter(col, { ...fmt, color: e.target.value })}
+                                      className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={fmt.color || ''}
+                                      onChange={e => setFormatter(col, { ...fmt, color: e.target.value || undefined })}
+                                      placeholder="#3b82f6"
+                                      className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50 font-mono"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+
+                              {fmt.type === 'delta' && (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.kpi_color_mode')}:</span>
+                                    <select
+                                      value={fmt.colorMode || 'sign'}
+                                      onChange={e => setFormatter(col, { ...fmt, colorMode: e.target.value as 'sign' | 'none' })}
+                                      className="input text-xs flex-1 py-0.5"
+                                    >
+                                      <option value="sign">{t('designer.table_formatter_delta_color_mode.sign')}</option>
+                                      <option value="none">{t('designer.table_formatter_delta_color_mode.none')}</option>
+                                    </select>
+                                  </div>
+                                  <label className="inline-flex items-center gap-1.5 text-xs">
+                                    <input
+                                      type="checkbox"
+                                      checked={fmt.showArrow !== false}
+                                      onChange={e => setFormatter(col, { ...fmt, showArrow: e.target.checked })}
+                                      className="h-3.5 w-3.5"
+                                    />
+                                    <span className="text-slate-500 dark:text-slate-400">{t('designer.table_formatter_show_arrow')}</span>
+                                  </label>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+
+                          {remainingCols.length > 0 && (
+                            <select
+                              value=""
+                              onChange={e => {
+                                const col = e.target.value
+                                if (!col) return
+                                setFormatter(col, defaultHeatmap)
+                              }}
+                              className="input text-xs"
+                            >
+                              <option value="">{t('designer.table_add_formatter')}</option>
+                              {remainingCols.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          )}
+                        </div>
+                      )
+                    })()}
+                  </Field>
                 </>
               )
             })()}
@@ -1061,6 +1348,97 @@ export default function PropertyPanel() {
                       />
                     </div>
                   </Field>
+
+                  <Field label={t('designer.kpi_color_mode')}>
+                    <select
+                      value={cc.colorMode as string || 'step'}
+                      onChange={e => update({ chartConfig: { ...cc, colorMode: e.target.value } })}
+                      className="input text-sm"
+                    >
+                      <option value="step">{t('designer.kpi_color_mode.step')}</option>
+                      <option value="gradient">{t('designer.kpi_color_mode.gradient')}</option>
+                    </select>
+                  </Field>
+
+                  <Field label={t('designer.kpi_color_stops')}>
+                    <ColorStopsEditor
+                      stops={(cc.colorStops as Array<{ at: number; color: string }>) || []}
+                      onChange={next => update({ chartConfig: { ...cc, colorStops: next.length ? next : undefined } })}
+                      addLabel={t('designer.kpi_add_stop')}
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.kpi_color_stops_hint')}</p>
+                  </Field>
+
+                  <Field label={t('designer.kpi_tint_background')}>
+                    <label className="inline-flex items-center gap-1.5 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={!!cc.tintBackground}
+                        onChange={e => update({ chartConfig: { ...cc, tintBackground: e.target.checked || undefined } })}
+                        className="h-3.5 w-3.5"
+                      />
+                      <span className="text-slate-500 dark:text-slate-400">{t('designer.kpi_tint_background')}</span>
+                    </label>
+                  </Field>
+
+                  {availableCols.length > 0 && (
+                    <>
+                      <Field label={t('designer.kpi_sparkline_field')}>
+                        <select
+                          value={cc.sparklineField as string || ''}
+                          onChange={e => update({ chartConfig: { ...cc, sparklineField: e.target.value || undefined } })}
+                          className="input text-sm"
+                        >
+                          <option value="">{t('common.none')}</option>
+                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Field>
+                      {!!cc.sparklineField && (
+                        <>
+                          <Field label={t('designer.kpi_sparkline_color_from_stops')}>
+                            <label className="inline-flex items-center gap-1.5 text-xs">
+                              <input
+                                type="checkbox"
+                                checked={!!cc.sparklineColorFromStops}
+                                onChange={e => update({ chartConfig: { ...cc, sparklineColorFromStops: e.target.checked || undefined } })}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className="text-slate-500 dark:text-slate-400">{t('designer.kpi_sparkline_color_from_stops')}</span>
+                            </label>
+                          </Field>
+                          {!cc.sparklineColorFromStops && (
+                            <Field label={t('designer.kpi_sparkline_color')}>
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="color"
+                                  value={cc.sparklineColor as string || '#3b82f6'}
+                                  onChange={e => update({ chartConfig: { ...cc, sparklineColor: e.target.value } })}
+                                  className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                                />
+                                <input
+                                  type="text"
+                                  value={cc.sparklineColor as string || ''}
+                                  onChange={e => update({ chartConfig: { ...cc, sparklineColor: e.target.value || undefined } })}
+                                  placeholder="#3b82f6"
+                                  className="input text-xs flex-1 font-mono"
+                                />
+                              </div>
+                            </Field>
+                          )}
+                        </>
+                      )}
+                      <Field label={t('designer.kpi_delta_column')}>
+                        <select
+                          value={cc.deltaColumn as string || ''}
+                          onChange={e => update({ chartConfig: { ...cc, deltaColumn: e.target.value || undefined } })}
+                          className="input text-sm"
+                        >
+                          <option value="">{t('common.none')}</option>
+                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Field>
+                    </>
+                  )}
                 </>
               )
             })()}
@@ -1116,6 +1494,7 @@ export default function PropertyPanel() {
             className="input text-sm h-32 resize-none font-mono"
             placeholder={t('designer.html_placeholder')}
           />
+          <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
         </Field>
       )}
 
@@ -1472,6 +1851,64 @@ function AddColorValueRow({
         className="text-brand-500 hover:text-brand-700 disabled:text-slate-300 disabled:cursor-not-allowed text-base leading-none"
         title={placeholder}
       >+</button>
+    </div>
+  )
+}
+
+/**
+ * Reusable editor for an array of color stops { at: number, color: hex }.
+ * Used by KPI cards (colorMode/colorStops), chart highlightLastPoint, and
+ * table heatmap formatters. Hex is editable both via native color picker and
+ * a free-form text input so users can paste exact brand colors.
+ */
+function ColorStopsEditor({ stops, onChange, addLabel }: {
+  stops: Array<{ at: number; color: string }>
+  onChange: (next: Array<{ at: number; color: string }>) => void
+  addLabel: string
+}) {
+  const updateStop = (idx: number, patch: Partial<{ at: number; color: string }>) => {
+    const next = [...stops]
+    next[idx] = { ...next[idx], ...patch }
+    onChange(next)
+  }
+  return (
+    <div className="space-y-1">
+      {stops.map((stop, idx) => (
+        <div key={idx} className="flex items-center gap-1.5 text-xs">
+          <input
+            type="number" step="any"
+            value={stop.at}
+            onChange={e => updateStop(idx, { at: Number(e.target.value) })}
+            className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+            placeholder="at"
+          />
+          <input
+            type="color"
+            value={stop.color}
+            onChange={e => updateStop(idx, { color: e.target.value })}
+            className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+          />
+          <input
+            type="text"
+            value={stop.color}
+            onChange={e => updateStop(idx, { color: e.target.value })}
+            className="w-16 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50 font-mono"
+            placeholder="#hex"
+          />
+          <button
+            onClick={() => onChange(stops.filter((_, i) => i !== idx))}
+            className="text-red-500 hover:text-red-700 p-0.5"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={() => onChange([...stops, { at: stops.length ? stops[stops.length - 1].at + 0.1 : 0, color: '#888888' }])}
+        className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5"
+      >
+        <Plus className="w-3 h-3" /> {addLabel}
+      </button>
     </div>
   )
 }
