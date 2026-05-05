@@ -251,17 +251,30 @@ export default function PropertyPanel() {
         </span>
       </div>
 
-      {/* Title - hidden for TEXT widgets because they repurpose widget.title
-          as the HTML content (see the Content (HTML) field below). Showing
-          both fields wired to the same store key was duplication that confused
-          users. */}
-      {widget.widgetType !== 'TEXT' && (
+      {/* Title. For TEXT widgets the title shown in canvas / dashboard headers
+          is stored in chartConfig.widgetName, not widget.title - the latter is
+          repurposed as the HTML body of the widget. Other widget types use
+          widget.title directly as the displayed heading. */}
+      {widget.widgetType !== 'TEXT' ? (
         <Field label={t('designer.widget_title')}>
           <input
             value={widget.title} onChange={e => update({ title: e.target.value })}
             className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
           />
           <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
+        </Field>
+      ) : (
+        <Field label={t('designer.widget_title')}>
+          <input
+            value={(widget.chartConfig as Record<string, unknown>).widgetName as string || ''}
+            onChange={e => update({
+              chartConfig: {
+                ...widget.chartConfig,
+                widgetName: e.target.value || undefined,
+              },
+            })}
+            className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
+          />
         </Field>
       )}
 
