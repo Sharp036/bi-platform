@@ -357,19 +357,18 @@ export default function MultiLayerChart({
         })
         const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0))
         if (chartType === 'pie') {
+          // ECharts shows pie labels by default - we have to explicitly hide
+          // them when showDataLabels is false, otherwise the toggle is a
+          // no-op visually (labels keep showing, only fontSize changes).
           series.push({
             name: col,
             type: 'pie',
             radius: buildPieRadius(!!config.donut),
             data: buildPieData(rows, categoryCol, col, config.colors as Record<string, string> | undefined),
-            ...(showDataLabels ? {
-              label: {
-                show: true,
-                position: 'outside',
-                fontSize: 10,
-                formatter: buildPieLabelFormatter(!!config.showPercentages),
-              },
-            } : {}),
+            label: showDataLabels
+              ? { show: true, position: 'outside', fontSize: 10, formatter: buildPieLabelFormatter(!!config.showPercentages) }
+              : { show: false },
+            labelLine: { show: showDataLabels },
           })
         } else {
           // Per-bar/point coloring via chartConfig.colorBy + colors.
