@@ -316,6 +316,12 @@ function buildOption(
         lineStyle: { color: seriesColor },
       } : {}),
       z: chartType === 'pie' ? undefined : 12,
+      // Pie labels are on by default in ECharts - explicitly disable when the
+      // checkbox is off, otherwise the toggle is a no-op for pie charts.
+      ...(chartType === 'pie' && !showDataLabels ? {
+        label: { show: false },
+        labelLine: { show: false },
+      } : {}),
       ...(showDataLabels ? {
         label: {
           show: true,

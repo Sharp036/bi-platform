@@ -7,6 +7,7 @@ import { queryApi } from '@/api/queries'
 import { buildDesignerParameterValues } from '@/utils/designerParameters'
 import EChartWidget from '@/components/charts/EChartWidget'
 import TableWidget from '@/components/charts/TableWidget'
+import KpiCard from '@/components/charts/KpiCard'
 import type { WidgetData } from '@/types'
 import clsx from 'clsx'
 import { useState, useCallback, useRef } from 'react'
@@ -425,7 +426,7 @@ function WidgetBlock({
   }
 
   const cc = widget.chartConfig as Record<string, unknown>
-  const chartConfigStr = (widget.widgetType === 'CHART' || widget.widgetType === 'TABLE') && previewData ? JSON.stringify(cc) : undefined
+  const chartConfigStr = (widget.widgetType === 'CHART' || widget.widgetType === 'TABLE' || widget.widgetType === 'KPI') && previewData ? JSON.stringify(cc) : undefined
   const noHeader = widget.widgetType === 'BUTTON' || widget.widgetType === 'SPACER' || widget.widgetType === 'DIVIDER'
 
   const tablePreviewData = widget.widgetType === 'TABLE' && previewData ? (() => {
@@ -436,33 +437,10 @@ function WidgetBlock({
     return { ...previewData, columns: cols }
   })() : null
 
-  const kpiPreview = widget.widgetType === 'KPI' && previewData ? (() => {
-    const valCol = (cc.valueColumn as string) || previewData.columns[0]
-    const rows = previewData.rows || []
-    if (rows.length === 0) return null
-    const agg = (cc.aggregation as string) || 'first'
-    const values = rows.map(r => Number(r[valCol]) || 0)
-    let value: number
-    switch (agg) {
-      case 'sum': value = values.reduce((a, b) => a + b, 0); break
-      case 'avg': value = values.reduce((a, b) => a + b, 0) / values.length; break
-      case 'min': value = Math.min(...values); break
-      case 'max': value = Math.max(...values); break
-      case 'count': value = rows.length; break
-      case 'last': value = values[values.length - 1]; break
-      default: value = values[0]
-    }
-    const fmt = cc.format as string || 'number'
-    let display: string
-    if (fmt === 'currency') display = value.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
-    else if (fmt === 'percent') display = (value * 100).toFixed(1) + '%'
-    else display = value.toLocaleString(undefined, { maximumFractionDigits: 2 })
-    const prefix = (cc.prefix as string) || ''
-    const suffix = (cc.suffix as string) || ''
-    const labelCol = cc.labelColumn as string | undefined
-    const label = labelCol && rows[0] ? String(rows[0][labelCol] ?? '') : undefined
-    return { display: `${prefix}${display}${suffix}`, label }
-  })() : null
+  // KPI preview now uses the actual KpiCard component (was a custom inline
+  // mini-renderer that ignored sparkline/delta/colorStops/format/decimals/etc,
+  // so designer preview diverged from runtime rendering).
+  const kpiPreview = widget.widgetType === 'KPI' && previewData ? previewData : null
 
   const filterPreview = widget.widgetType === 'FILTER' && previewData ? (() => {
     const filterCol = (cc.filterColumn as string) || previewData.columns[0]
@@ -491,7 +469,12 @@ function WidgetBlock({
             />
             <Icon className="w-3.5 h-3.5 text-brand-500" />
             <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
-              {widget.title || widget.widgetType}
+              {/* TEXT widgets repurpose .title as raw HTML, which looked ugly
+                  in the canvas header. Strip tags and trim to a short preview
+                  so the header shows readable text instead of raw markup. */}
+              {widget.widgetType === 'TEXT'
+                ? (widget.title?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) || t('widgets.type.text'))
+                : (widget.title || widget.widgetType)}
             </span>
             {hasDataSource && !previewData && (
               <button
@@ -521,9 +504,8 @@ function WidgetBlock({
               <TableWidget data={tablePreviewData} chartConfig={chartConfigStr} />
             </div>
           ) : kpiPreview ? (
-            <div className="text-center w-full">
-              <p className="text-2xl font-bold text-slate-800 dark:text-white truncate">{kpiPreview.display}</p>
-              {kpiPreview.label && <p className="text-xs text-slate-400 mt-0.5 truncate">{kpiPreview.label}</p>}
+            <div className="w-full h-full">
+              <KpiCard data={kpiPreview} title={widget.title} chartConfig={chartConfigStr} />
             </div>
           ) : filterPreview ? (
             <div className="w-full">

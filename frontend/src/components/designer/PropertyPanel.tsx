@@ -251,18 +251,23 @@ export default function PropertyPanel() {
         </span>
       </div>
 
-      {/* Title */}
-      <Field label={t('designer.widget_title')}>
-        <input
-          value={widget.title} onChange={e => update({ title: e.target.value })}
-          className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
-        />
-        <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
-      </Field>
+      {/* Title - hidden for TEXT widgets because they repurpose widget.title
+          as the HTML content (see the Content (HTML) field below). Showing
+          both fields wired to the same store key was duplication that confused
+          users. */}
+      {widget.widgetType !== 'TEXT' && (
+        <Field label={t('designer.widget_title')}>
+          <input
+            value={widget.title} onChange={e => update({ title: e.target.value })}
+            className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
+          />
+          <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
+        </Field>
+      )}
 
       {/* Description (rendered as a markdown tooltip on a small (i) icon
           next to the widget title in view mode). Empty -> no icon. */}
-      {!['SPACER', 'DIVIDER'].includes(widget.widgetType) && (
+      {!['SPACER', 'DIVIDER', 'TEXT'].includes(widget.widgetType) && (
         <Field label={t('designer.widget_description')}>
           <textarea
             value={(widget.chartConfig as Record<string, unknown>).description as string || ''}
@@ -325,8 +330,9 @@ export default function PropertyPanel() {
         />
       </Field>
 
-      {/* Data Binding */}
-      {!['TEXT', 'IMAGE', 'BUTTON', 'SPACER', 'DIVIDER', 'WEBPAGE'].includes(widget.widgetType) && (() => {
+      {/* Data Binding. TEXT widgets need a SQL source so {column:format}
+          placeholders in the HTML body interpolate from row[0]. */}
+      {!['IMAGE', 'BUTTON', 'SPACER', 'DIVIDER', 'WEBPAGE'].includes(widget.widgetType) && (() => {
         const cc = widget.chartConfig as Record<string, unknown>
         const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
