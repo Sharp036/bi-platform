@@ -260,6 +260,25 @@ export default function PropertyPanel() {
         <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
       </Field>
 
+      {/* Description (rendered as a markdown tooltip on a small (i) icon
+          next to the widget title in view mode). Empty -> no icon. */}
+      {!['SPACER', 'DIVIDER'].includes(widget.widgetType) && (
+        <Field label={t('designer.widget_description')}>
+          <textarea
+            value={(widget.chartConfig as Record<string, unknown>).description as string || ''}
+            onChange={e => update({
+              chartConfig: {
+                ...widget.chartConfig,
+                description: e.target.value || undefined,
+              },
+            })}
+            className="input text-sm h-20 resize-none"
+            placeholder={t('designer.widget_description_placeholder')}
+          />
+          <p className="text-[10px] text-slate-400 mt-1">{t('designer.widget_description_hint')}</p>
+        </Field>
+      )}
+
       {/* Position & Size */}
       <Field label={t('designer.layout')}>
         <div className="grid grid-cols-4 gap-2">
