@@ -9,6 +9,7 @@ import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/des
 import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import SqlCodeEditor from '@/components/common/SqlCodeEditor'
+import NumericInput from '@/components/common/NumericInput'
 import toast from 'react-hot-toast'
 
 const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
@@ -264,29 +265,33 @@ export default function PropertyPanel() {
         <div className="grid grid-cols-4 gap-2">
           <div>
             <label className="text-[10px] text-slate-400">X</label>
-            <input type="number" min={0} max={11}
-              value={widget.position.x} onChange={e => update({ position: { ...widget.position, x: Number(e.target.value) } })}
+            <NumericInput
+              value={widget.position.x}
+              onChange={v => update({ position: { ...widget.position, x: v ?? 0 } })}
               className="input text-sm py-1"
             />
           </div>
           <div>
             <label className="text-[10px] text-slate-400">Y</label>
-            <input type="number" min={0}
-              value={widget.position.y} onChange={e => update({ position: { ...widget.position, y: Number(e.target.value) } })}
+            <NumericInput
+              value={widget.position.y}
+              onChange={v => update({ position: { ...widget.position, y: v ?? 0 } })}
               className="input text-sm py-1"
             />
           </div>
           <div>
             <label className="text-[10px] text-slate-400">W</label>
-            <input type="number" min={1} max={12}
-              value={widget.position.w} onChange={e => update({ position: { ...widget.position, w: Number(e.target.value) } })}
+            <NumericInput
+              value={widget.position.w}
+              onChange={v => update({ position: { ...widget.position, w: v ?? 1 } })}
               className="input text-sm py-1"
             />
           </div>
           <div>
             <label className="text-[10px] text-slate-400">H</label>
-            <input type="number" min={1}
-              value={widget.position.h} onChange={e => update({ position: { ...widget.position, h: Number(e.target.value) } })}
+            <NumericInput
+              value={widget.position.h}
+              onChange={v => update({ position: { ...widget.position, h: v ?? 1 } })}
               className="input text-sm py-1"
             />
           </div>
@@ -294,10 +299,9 @@ export default function PropertyPanel() {
       </Field>
 
       <Field label="Layer (z-index)">
-        <input
-          type="number"
+        <NumericInput
           value={Number((widget.style as Record<string, unknown>).zIndex ?? 0)}
-          onChange={e => update({ style: { ...widget.style, zIndex: Number(e.target.value || 0) } })}
+          onChange={v => update({ style: { ...widget.style, zIndex: v ?? 0 } })}
           className="input text-sm"
         />
       </Field>
@@ -581,15 +585,9 @@ export default function PropertyPanel() {
 
                       {['plain', 'thousands', 'millions', 'billions', 'currency', 'percent'].includes((cc.yAxisFormat as string) || 'plain') && (
                         <Field label={t('designer.y_axis_decimals')}>
-                          <input
-                            type="number" min={0} max={6}
-                            value={cc.yAxisDecimals != null ? Number(cc.yAxisDecimals) : ''}
-                            onChange={e => update({
-                              chartConfig: {
-                                ...cc,
-                                yAxisDecimals: e.target.value === '' ? undefined : Number(e.target.value),
-                              },
-                            })}
+                          <NumericInput
+                            value={cc.yAxisDecimals != null ? Number(cc.yAxisDecimals) : undefined}
+                            onChange={v => update({ chartConfig: { ...cc, yAxisDecimals: v } })}
                             className="input text-sm"
                             placeholder="0"
                           />
@@ -666,10 +664,9 @@ export default function PropertyPanel() {
                           <option value="min_max">{t('designer.label_mode.min_max')}</option>
                         </select>
                         {(cc.dataLabelMode === 'first' || cc.dataLabelMode === 'last') && (
-                          <input
-                            type="number" min={1} max={100}
+                          <NumericInput
                             value={cc.dataLabelCount as number || 3}
-                            onChange={e => update({ chartConfig: { ...cc, dataLabelCount: Number(e.target.value) } })}
+                            onChange={v => update({ chartConfig: { ...cc, dataLabelCount: v ?? 3 } })}
                             className="input text-sm"
                             placeholder={t('designer.label_count_placeholder')}
                           />
@@ -683,10 +680,9 @@ export default function PropertyPanel() {
                           <option value="fixed">{t('designer.label_top_spacing_mode.fixed')}</option>
                         </select>
                         <div className="flex items-center gap-2">
-                          <input
-                            type="number" min={0} max={6}
+                          <NumericInput
                             value={cc.dataLabelDecimals != null ? Number(cc.dataLabelDecimals) : 1}
-                            onChange={e => update({ chartConfig: { ...cc, dataLabelDecimals: Number(e.target.value) } })}
+                            onChange={v => update({ chartConfig: { ...cc, dataLabelDecimals: v ?? 1 } })}
                             className="input text-sm w-16"
                           />
                           <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_decimals')}</span>
@@ -749,10 +745,9 @@ export default function PropertyPanel() {
                             {lines.map((ln, idx) => (
                               <div key={idx} className="space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded p-1.5">
                                 <div className="flex items-center gap-1.5 text-xs">
-                                  <input
-                                    type="number" step="any"
+                                  <NumericInput
                                     value={ln.value}
-                                    onChange={e => updateLine(idx, { value: Number(e.target.value) })}
+                                    onChange={v => updateLine(idx, { value: v ?? 0 })}
                                     className="w-20 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
                                     placeholder={t('designer.chart_threshold_value')}
                                   />
@@ -818,10 +813,9 @@ export default function PropertyPanel() {
                           <div className="space-y-1.5 pl-1 border-l-2 border-surface-200 dark:border-dark-surface-100">
                             <div className="flex items-center gap-2 text-xs">
                               <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.chart_highlight_size')}:</span>
-                              <input
-                                type="number" min={4} max={50}
+                              <NumericInput
                                 value={hl.size || 12}
-                                onChange={e => update({ chartConfig: { ...cc, highlightLastPoint: { ...hl, size: Number(e.target.value) || 12 } } })}
+                                onChange={v => update({ chartConfig: { ...cc, highlightLastPoint: { ...hl, size: v ?? 12 } } })}
                                 className="w-16 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
                               />
                             </div>
@@ -969,10 +963,9 @@ export default function PropertyPanel() {
                   </Field>
 
                   <Field label={t('designer.table_page_size')}>
-                    <input
-                      type="number" min={0} max={1000}
-                      value={cc.tablePageSize as number || ''}
-                      onChange={e => update({ chartConfig: { ...cc, tablePageSize: e.target.value ? Number(e.target.value) : undefined } })}
+                    <NumericInput
+                      value={cc.tablePageSize as number | undefined}
+                      onChange={v => update({ chartConfig: { ...cc, tablePageSize: v } })}
                       className="input text-sm"
                       placeholder={t('designer.table_page_size_auto')}
                     />
@@ -1202,9 +1195,10 @@ export default function PropertyPanel() {
                                     <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.table_formatter_max')}:</span>
                                     <input
                                       type="text"
+                                      inputMode="decimal"
                                       value={fmt.max === 'auto' || fmt.max === undefined ? 'auto' : String(fmt.max)}
                                       onChange={e => {
-                                        const v = e.target.value.trim()
+                                        const v = e.target.value.replace(/,/g, '.').trim()
                                         if (v === '' || v === 'auto') setFormatter(col, { ...fmt, max: 'auto' })
                                         else if (Number.isFinite(Number(v))) setFormatter(col, { ...fmt, max: Number(v) })
                                       }}
@@ -1568,7 +1562,12 @@ export default function PropertyPanel() {
             )}
             {bc.buttonType === 'NAVIGATE' && (
               <Field label={t('designer.button_target_report')}>
-                <input type="number" value={bc.targetReportId as number || ''} onChange={e => updateBtn({ targetReportId: Number(e.target.value) || undefined })} className="input text-sm" placeholder="Report ID" />
+                <NumericInput
+                  value={bc.targetReportId as number | undefined}
+                  onChange={v => updateBtn({ targetReportId: v })}
+                  className="input text-sm"
+                  placeholder="Report ID"
+                />
               </Field>
             )}
             {bc.buttonType === 'URL' && (
@@ -1875,10 +1874,9 @@ function ColorStopsEditor({ stops, onChange, addLabel }: {
     <div className="space-y-1">
       {stops.map((stop, idx) => (
         <div key={idx} className="flex items-center gap-1.5 text-xs">
-          <input
-            type="number" step="any"
+          <NumericInput
             value={stop.at}
-            onChange={e => updateStop(idx, { at: Number(e.target.value) })}
+            onChange={v => updateStop(idx, { at: v ?? 0 })}
             className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
             placeholder="at"
           />
