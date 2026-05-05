@@ -7,6 +7,16 @@ import { createCollisionFreeLayout, createInlineLabelLayout } from '@/components
 import type { LabelPlacement } from '@/components/charts/labelLayout'
 import InfoTooltip from '@/components/common/InfoTooltip'
 import { buildValueFormatter } from '@/utils/formatValue'
+import {
+  buildThresholdMarkLine,
+  buildMarkPointPatch,
+  applyBarConditionalColor,
+  buildDeltaGraphic,
+  buildCenterLabelGraphic,
+  buildPieRadius,
+  buildPieData,
+  buildPieLabelFormatter,
+} from '@/components/charts/chartFeatures'
 
 interface Props {
   data: WidgetData
@@ -204,57 +214,6 @@ function deepMerge(base: any, override: any): any {
   return out
 }
 
-// Step-mode: return the color of the first stop whose threshold is >= value,
-// else the last stop's color. Gradient-mode: linearly interpolate RGB between
-// the two stops that bracket the value. Used by KPI-like threshold coloring
-// and highlightLastPoint on line charts.
-function pickThresholdColor(
-  value: number,
-  stops: Array<{ at: number; color: string }>,
-  mode: 'step' | 'gradient',
-): string | undefined {
-  if (!stops.length || !Number.isFinite(value)) return undefined
-  const sorted = [...stops].sort((a, b) => a.at - b.at)
-
-  if (mode === 'step') {
-    for (const stop of sorted) {
-      if (value <= stop.at) return stop.color
-    }
-    return sorted[sorted.length - 1].color
-  }
-
-  if (value <= sorted[0].at) return sorted[0].color
-  if (value >= sorted[sorted.length - 1].at) return sorted[sorted.length - 1].color
-
-  for (let i = 0; i < sorted.length - 1; i++) {
-    const a = sorted[i], b = sorted[i + 1]
-    if (value >= a.at && value <= b.at) {
-      const t = (value - a.at) / (b.at - a.at || 1)
-      const parse = (hex: string): [number, number, number] | null => {
-        const h = hex.replace('#', '')
-        if (h.length !== 6 && h.length !== 3) return null
-        const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h
-        const r = parseInt(full.slice(0, 2), 16)
-        const g = parseInt(full.slice(2, 4), 16)
-        const bl = parseInt(full.slice(4, 6), 16)
-        if ([r, g, bl].some(Number.isNaN)) return null
-        return [r, g, bl]
-      }
-      const toHex = (r: number, g: number, bl: number) => '#' + [r, g, bl]
-        .map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0'))
-        .join('')
-      const av = parse(a.color), bv = parse(b.color)
-      if (!av || !bv) return a.color
-      return toHex(
-        av[0] + (bv[0] - av[0]) * t,
-        av[1] + (bv[1] - av[1]) * t,
-        av[2] + (bv[2] - av[2]) * t,
-      )
-    }
-  }
-  return undefined
-}
-
 function calcLinearRegression(values: number[]): number[] {
   const n = values.length
   if (n <= 1) return [...values]
@@ -349,7 +308,8 @@ function buildOption(
       }),
       smooth: chartType === 'line',
       ...(chartType === 'pie' ? {
-        data: rows.map(r => ({ name: String(r[categoryCol] ?? ''), value: r[col] ?? 0 })),
+        radius: buildPieRadius(!!config.donut),
+        data: buildPieData(rows, categoryCol, col, config.colors as Record<string, string> | undefined),
       } : {}),
       ...(chartType !== 'pie' ? {
         itemStyle: { color: seriesColor },
@@ -364,7 +324,7 @@ function buildOption(
           rotate: chartType === 'pie' ? undefined : (dataLabelRotation || undefined),
           fontSize: 10,
           formatter: chartType === 'pie'
-            ? undefined
+            ? buildPieLabelFormatter(!!config.showPercentages)
             : buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0), dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
           ...(dataLabelBoxed && chartType !== 'pie' ? {
             borderColor: seriesColor,
@@ -381,214 +341,21 @@ function buildOption(
     }
   })
 
-  // ── thresholdLines: horizontal reference lines on line/bar charts ──────────
-  // chartConfig.thresholdLines: Array<{ value, color?, label?, style? }>
-  // Rendered via ECharts markLine on the first series so tooltip hover works
-  // across the whole chart. Not applicable to pie/radar/etc.
-  const thresholdLines = Array.isArray(config.thresholdLines)
-    ? (config.thresholdLines as Array<Record<string, unknown>>)
-    : []
-  if (thresholdLines.length > 0 && chartType !== 'pie' && series.length > 0) {
-    const markLineData = thresholdLines.map(t => ({
-      yAxis: Number(t.value),
-      lineStyle: {
-        color: (t.color as string) || '#94a3b8',
-        type: (t.style as string) || 'dashed',
-        width: 1.5,
-      },
-      label: t.label ? {
-        show: true,
-        formatter: String(t.label),
-        position: 'insideEndTop',
-        fontSize: 10,
-        color: (t.color as string) || '#94a3b8',
-      } : { show: false },
-    }))
-    series[0] = {
-      ...series[0],
-      markLine: {
-        symbol: ['none', 'none'],
-        silent: true,
-        data: markLineData,
-      },
-    }
+  // Chart-feature decorations: thresholdLines (markLine), markMinMax +
+  // highlightLastPoint (combined into markPoint), barConditionalColor
+  // (per-bar coloring), deltaAnnotation (corner text), centerLabel (donut
+  // center). Logic lives in chartFeatures.ts so MultiLayerChart applies the
+  // same decorations identically at runtime.
+  if (series.length > 0) {
+    const ml = buildThresholdMarkLine(config, chartType)
+    if (ml) series[0] = { ...series[0], ...ml }
+    const mainCol = seriesCols[0]
+    const mp = buildMarkPointPatch(config, chartType, rows, mainCol, categories[categories.length - 1])
+    if (mp) series[0] = { ...series[0], ...mp }
+    applyBarConditionalColor(series, config, chartType, rows, seriesCols, nullHandling)
   }
-
-  // ── markMinMax: auto-annotate min/max points on line/bar charts ────────────
-  // chartConfig.markMinMax: boolean | { min?: boolean, max?: boolean }
-  // Adds ECharts markPoint entries for the extremes of the first series.
-  const markMinMax = config.markMinMax as boolean | { min?: boolean; max?: boolean } | undefined
-  if (markMinMax && (chartType === 'line' || chartType === 'bar') && series.length > 0) {
-    const flags = typeof markMinMax === 'boolean' ? { min: true, max: true } : markMinMax
-    const minMaxData: Array<Record<string, unknown>> = []
-    if (flags.max) minMaxData.push({ type: 'max', name: 'Max' })
-    if (flags.min) minMaxData.push({ type: 'min', name: 'Min' })
-    if (minMaxData.length > 0) {
-      const existingMarkPoint = (series[0].markPoint as Record<string, unknown> | undefined)
-      series[0] = {
-        ...series[0],
-        markPoint: {
-          symbol: 'pin',
-          symbolSize: 30,
-          label: { fontSize: 10 },
-          ...(existingMarkPoint || {}),
-          data: [
-            ...((existingMarkPoint?.data as Array<unknown>) || []),
-            ...minMaxData,
-          ],
-        },
-      }
-    }
-  }
-
-  // ── highlightLastPoint: emphasize the last data point on line charts ───────
-  // chartConfig.highlightLastPoint: { size?, colorStops?, colorMode? }
-  // When colorStops provided, the point's color depends on its value (same
-  // threshold logic as KpiCard). Without colorStops - just a larger marker
-  // in the series color.
-  const highlightLast = config.highlightLastPoint as
-    | { size?: number; colorMode?: 'step' | 'gradient'; colorStops?: Array<{ at: number; color: string }> }
-    | undefined
-  if (highlightLast && chartType === 'line' && series.length > 0 && rows.length > 0) {
-    const stops = Array.isArray(highlightLast.colorStops) ? highlightLast.colorStops : []
-    const mode: 'step' | 'gradient' = highlightLast.colorMode === 'gradient' ? 'gradient' : 'step'
-    const size = Number(highlightLast.size) > 0 ? Number(highlightLast.size) : 12
-    const mainSeriesCol = seriesCols[0]
-    if (mainSeriesCol) {
-      const lastValue = Number(rows[rows.length - 1][mainSeriesCol])
-      const color = stops.length > 0
-        ? pickThresholdColor(lastValue, stops, mode)
-        : undefined
-      series[0] = {
-        ...series[0],
-        markPoint: {
-          symbol: 'circle',
-          symbolSize: size,
-          data: [{
-            coord: [categories[categories.length - 1], lastValue],
-            itemStyle: color ? { color, borderColor: '#ffffff', borderWidth: 2 } : undefined,
-            label: { show: false },
-          }],
-        },
-      }
-    }
-  }
-
-  // ── barConditionalColor: color bars by value threshold ─────────────────────
-  // chartConfig.barConditionalColor: { series?: string, field?: string, threshold: number, colorAbove: string, colorBelow: string }
-  // Overrides the uniform series color with per-bar itemStyle based on a threshold.
-  // By default applied to the first series' value; use `field` to compare against
-  // a different column in the same row (for ratios etc).
-  const barCond = config.barConditionalColor as
-    | { series?: string; field?: string; threshold: number; colorAbove: string; colorBelow: string }
-    | undefined
-  if (barCond && chartType === 'bar' && series.length > 0) {
-    const targetCol = barCond.series && seriesCols.includes(barCond.series)
-      ? barCond.series
-      : seriesCols[0]
-    const compareField = barCond.field || targetCol
-    const threshold = Number(barCond.threshold)
-    const seriesIdx = seriesCols.indexOf(targetCol)
-    if (seriesIdx >= 0) {
-      const coloredData = rows.map((r, dataIndex) => {
-        const baseVal = r[targetCol]
-        const rawValue = (baseVal == null || baseVal === '')
-          ? (nullHandling === 'gap' ? '-' : 0)
-          : (Number(baseVal) || 0)
-        const compareVal = Number(r[compareField]) || 0
-        const color = compareVal >= threshold ? barCond.colorAbove : barCond.colorBelow
-        const existing = (series[seriesIdx].data || [])[dataIndex]
-        const base = typeof existing === 'object' && existing !== null ? existing : { value: rawValue }
-        return { ...base, itemStyle: { ...(base.itemStyle || {}), color } }
-      })
-      series[seriesIdx] = { ...series[seriesIdx], data: coloredData }
-    }
-  }
-
-  // ── deltaAnnotation: last-vs-prior point delta overlay for line charts ────
-  // chartConfig.deltaAnnotation: { valueField?, position?, format? }
-  // Shows a small text annotation in the top-right with "▲ +5.2%" or "▼ -3%"
-  // style based on last two values of the given series.
-  let deltaGraphic: any = undefined
-  const deltaAnn = config.deltaAnnotation as
-    | { valueField?: string; position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' }
-    | undefined
-  if (deltaAnn && chartType === 'line' && rows.length >= 2) {
-    const valField = deltaAnn.valueField && seriesCols.includes(deltaAnn.valueField)
-      ? deltaAnn.valueField
-      : seriesCols[0]
-    if (valField) {
-      const last = Number(rows[rows.length - 1][valField])
-      const prev = Number(rows[rows.length - 2][valField])
-      if (Number.isFinite(last) && Number.isFinite(prev) && prev !== 0) {
-        const deltaPct = ((last - prev) / Math.abs(prev)) * 100
-        const arrow = deltaPct > 0 ? '▲' : deltaPct < 0 ? '▼' : '→'
-        const color = deltaPct > 0 ? '#22c55e' : deltaPct < 0 ? '#ef4444' : '#94a3b8'
-        const sign = deltaPct > 0 ? '+' : ''
-        const text = `${arrow} ${sign}${deltaPct.toFixed(1)}%`
-        const position = deltaAnn.position || 'top-right'
-        const isRight = position.endsWith('right')
-        const isBottom = position.startsWith('bottom')
-        deltaGraphic = {
-          type: 'text',
-          [isRight ? 'right' : 'left']: 12,
-          [isBottom ? 'bottom' : 'top']: 8,
-          style: {
-            text,
-            fill: color,
-            font: 'bold 12px sans-serif',
-          },
-        }
-      }
-    }
-  }
-
-  // ── centerLabel: text in the middle of a donut chart ───────────────────────
-  // chartConfig.centerLabel: { text?, valueField?, fontSize?, color? }
-  // Shown via ECharts graphic element. Uses sum of valueField across rows when
-  // valueField is provided; otherwise displays `text` verbatim.
-  let centerGraphic: any = undefined
-  if (chartType === 'pie' && config.donut) {
-    const cl = config.centerLabel as
-      | { text?: string; valueField?: string; fontSize?: number; color?: string; subtext?: string }
-      | undefined
-    if (cl) {
-      let mainText = cl.text ?? ''
-      if (cl.valueField && cols.includes(cl.valueField)) {
-        const total = rows.reduce((acc, r) => acc + (Number(r[cl.valueField!]) || 0), 0)
-        mainText = total.toLocaleString()
-      }
-      centerGraphic = {
-        type: 'group',
-        left: 'center',
-        top: 'middle',
-        children: [
-          {
-            type: 'text',
-            left: 'center',
-            top: cl.subtext ? -10 : 'center',
-            style: {
-              text: mainText,
-              fill: cl.color || (isDark ? '#e2e8f0' : '#1e293b'),
-              font: `bold ${cl.fontSize || 20}px sans-serif`,
-              textAlign: 'center',
-            },
-          },
-          ...(cl.subtext ? [{
-            type: 'text',
-            left: 'center',
-            top: 14,
-            style: {
-              text: cl.subtext,
-              fill: isDark ? '#94a3b8' : '#64748b',
-              font: `11px sans-serif`,
-              textAlign: 'center',
-            },
-          }] : []),
-        ],
-      }
-    }
-  }
+  const deltaGraphic = buildDeltaGraphic(config, chartType, rows, seriesCols)
+  const centerGraphic = buildCenterLabelGraphic(config, chartType, rows, cols, isDark)
 
   if (chartType !== 'pie' && regressionFields.length > 0) {
     seriesCols.forEach(col => {

@@ -12,6 +12,16 @@ import { createCollisionFreeLayout, createInlineLabelLayout } from '@/components
 import type { LabelPlacement } from '@/components/charts/labelLayout'
 import InfoTooltip from '@/components/common/InfoTooltip'
 import { buildValueFormatter } from '@/utils/formatValue'
+import {
+  buildThresholdMarkLine,
+  buildMarkPointPatch,
+  applyBarConditionalColor,
+  buildDeltaGraphic,
+  buildCenterLabelGraphic,
+  buildPieRadius,
+  buildPieData,
+  buildPieLabelFormatter,
+} from '@/components/charts/chartFeatures'
 
 function buildLegendOption(seriesCount: number, legendPosition: string, selectorLabels?: { all: string; inv: string }) {
   if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
@@ -327,6 +337,11 @@ export default function MultiLayerChart({
 
     const labelBg = isDark ? 'rgba(30,30,46,0.85)' : 'rgba(255,255,255,0.85)'
 
+    // Delta/center-label graphics computed inside the non-layered branch (the
+    // only one with stable seriesCols/categoryCol semantics) and applied
+    // unconditionally further down via option.graphic.
+    const featureGraphics: { delta?: Record<string, unknown>; center?: Record<string, unknown> } = {}
+
     if (layersWithVisibility.length === 0) {
       // Use configured valueFields or fall back to all non-category columns
       const configuredValues = config.valueFields as string[] | undefined
@@ -343,8 +358,18 @@ export default function MultiLayerChart({
         const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0))
         if (chartType === 'pie') {
           series.push({
-            name: col, type: 'pie', radius: ['40%', '70%'],
-            data: rows.map(r => ({ name: String(r[categoryCol] ?? ''), value: r[col] ?? 0 })),
+            name: col,
+            type: 'pie',
+            radius: buildPieRadius(!!config.donut),
+            data: buildPieData(rows, categoryCol, col, config.colors as Record<string, string> | undefined),
+            ...(showDataLabels ? {
+              label: {
+                show: true,
+                position: 'outside',
+                fontSize: 10,
+                formatter: buildPieLabelFormatter(!!config.showPercentages),
+              },
+            } : {}),
           })
         } else {
           // Per-bar/point coloring via chartConfig.colorBy + colors.
@@ -413,6 +438,23 @@ export default function MultiLayerChart({
           })
         })
       }
+
+      // Chart-feature decorations: thresholdLines, markMinMax + highlightLastPoint
+      // (combined into series[0].markPoint), barConditionalColor (per-bar coloring),
+      // deltaAnnotation (corner overlay), centerLabel (donut center).
+      // Logic shared with EChartWidget via chartFeatures.ts so designer preview and
+      // runtime stay in sync.
+      if (series.length > 0) {
+        const ml = buildThresholdMarkLine(config, chartType)
+        if (ml) series[0] = { ...series[0], ...ml }
+        const mainCol = seriesCols[0]
+        const lastCategory = rows.length > 0 ? String(rows[rows.length - 1][categoryCol] ?? '') : undefined
+        const mp = buildMarkPointPatch(config, chartType, rows, mainCol, lastCategory)
+        if (mp) series[0] = { ...series[0], ...mp }
+        applyBarConditionalColor(series, config, chartType, rows, seriesCols, nullHandling)
+      }
+      featureGraphics.delta = buildDeltaGraphic(config, chartType, rows, seriesCols)
+      featureGraphics.center = buildCenterLabelGraphic(config, chartType, rows, cols, isDark)
     } else {
       // Layer-based series
       layersWithVisibility.forEach((layer) => {
@@ -567,6 +609,12 @@ export default function MultiLayerChart({
         labelLayout: isInlineLabels
           ? createInlineLabelLayout(getChartWidth, () => labelTopPad || 8)
           : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread),
+      } : {}),
+      ...((featureGraphics.delta || featureGraphics.center) ? {
+        graphic: [
+          ...(featureGraphics.delta ? [featureGraphics.delta] : []),
+          ...(featureGraphics.center ? [featureGraphics.center] : []),
+        ],
       } : {}),
       ...(emphasisConfig || {}),
       ...((config.option as object) || {}),
