@@ -3,6 +3,7 @@ import type { WidgetData } from '@/types'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import clsx from 'clsx'
 import InfoTooltip from '@/components/common/InfoTooltip'
+import { buildValueFormatter } from '@/utils/formatValue'
 
 interface Props { data: WidgetData; title?: string; chartConfig?: string }
 
@@ -15,6 +16,15 @@ interface KpiConfig {
   deltaColumn?: string
   prefix?: string
   suffix?: string
+  // Display format applied to the numeric value before prefix/suffix.
+  // 'number' is treated as a synonym of 'plain' (kept for backward compat
+  // with existing reports that wrote 'number' before this field was honored).
+  format?: 'number' | 'plain' | 'thousands' | 'millions' | 'billions' | 'currency' | 'percent'
+  // Override decimal places. When omitted, format-specific defaults apply
+  // (currency 0, percent/thousands/millions/billions 1, plain raw via toLocaleString).
+  decimals?: number
+  // ISO 4217 code used when format=currency. Defaults to 'USD'.
+  currency?: string
   colorMode?: ColorMode
   colorStops?: ColorStop[]
   // When true, the card background is tinted with the resolved color (low alpha).
@@ -175,11 +185,25 @@ export default function KpiCard({ data, title, chartConfig }: Props) {
   const primaryValue = sparklineField && primaryRow !== row
     ? primaryRow[valueCol]
     : value
+  // Coerce to number for formatter handling. ClickHouse returns Decimal types
+  // as strings (e.g. "18.4300") - Number() drops trailing zeros and gives a
+  // finite JS number we can format consistently with other widget types.
   const numericValue = typeof primaryValue === 'number' ? primaryValue : Number(primaryValue)
+  const hasNumeric = primaryValue != null && primaryValue !== '' && Number.isFinite(numericValue)
+  // 'number' is a legacy alias for 'plain' (older reports stored it before
+  // this field was honored). Treat them identically so existing configs
+  // keep their semantics after this change.
+  const fmtKey = config.format === 'number' ? 'plain' : (config.format || 'plain')
+  const formatter = hasNumeric
+    ? buildValueFormatter(fmtKey, config.currency || 'USD', config.decimals)
+    : undefined
 
-  const formatted = typeof primaryValue === 'number'
-    ? `${prefix}${primaryValue.toLocaleString()}${suffix}`
-    : `${prefix}${primaryValue ?? '—'}${suffix}`
+  const displayValue = formatter
+    ? formatter(numericValue)
+    : hasNumeric
+      ? numericValue.toLocaleString()
+      : String(primaryValue ?? '—')
+  const formatted = `${prefix}${displayValue}${suffix}`
 
   const colorMode: ColorMode = config.colorMode === 'gradient' ? 'gradient' : 'step'
   const statusColor = config.colorStops && config.colorStops.length > 0
