@@ -11,9 +11,21 @@ type ColorStop = { at: number; color: string }
 type ColorMode = 'step' | 'gradient'
 type SparklinePoint = { label: string; value: number }
 
+type Aggregation = 'first' | 'last' | 'sum' | 'avg' | 'min' | 'max' | 'count'
+
 interface KpiConfig {
   valueColumn?: string
   deltaColumn?: string
+  // Optional column whose value (from row[0]) is rendered as a small caption
+  // below the main number (e.g. the report week or as-of date).
+  labelColumn?: string
+  // How to compute the displayed value across rows of the SQL result.
+  // 'first' (default) takes row[0]; 'last' takes the last row; 'sum'/'avg'/
+  // 'min'/'max' aggregate the valueColumn numerically; 'count' returns the
+  // row count. When sparklineField is set with multi-row data and aggregation
+  // is not specified, defaults to 'last' so the KPI shows the most recent
+  // point - keeps the prior implicit behavior intact.
+  aggregation?: Aggregation
   prefix?: string
   suffix?: string
   // Display format applied to the numeric value before prefix/suffix.
@@ -142,12 +154,22 @@ function parseSparklinePoints(
   return []
 }
 
+// Vertical inset for sparkline drawing area: keeps the line stroke a few px
+// inside the SVG so min/max points (and the hover marker on them) are not
+// half-clipped at the top or bottom edges.
+const SPARK_PAD_Y = 3
+
+function sparkY(value: number, min: number, range: number, height: number): number {
+  const drawH = Math.max(1, height - 2 * SPARK_PAD_Y)
+  return SPARK_PAD_Y + drawH - ((value - min) / range) * drawH
+}
+
 function buildSparklinePath(points: SparklinePoint[], width: number, height: number, min: number, range: number): string {
   if (points.length === 0) return ''
   const step = points.length > 1 ? width / (points.length - 1) : 0
   return points.map((p, i) => {
     const x = i * step
-    const y = height - ((p.value - min) / range) * height
+    const y = sparkY(p.value, min, range, height)
     return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
   }).join(' ')
 }
@@ -176,15 +198,38 @@ export default function KpiCard({ data, title, chartConfig }: Props) {
   const sparklinePoints = sparklineField
     ? parseSparklinePoints(row[sparklineField], rows, sparklineField, labelField)
     : []
-  // When the sparkline spans multiple rows (priority 2 of parseSparklinePoints),
-  // the KPI's main value should be the LATEST point, not the first. SQL is expected
-  // to ORDER BY date ASC so the sparkline renders chronologically - last row = latest.
-  const primaryRow = sparklineField && rows.length > 1 && !Array.isArray(row[sparklineField])
-    ? rows[rows.length - 1]
-    : row
-  const primaryValue = sparklineField && primaryRow !== row
-    ? primaryRow[valueCol]
-    : value
+  // Resolve aggregation: explicit config wins; otherwise default to 'last'
+  // when there is a multi-row sparkline (preserves prior implicit behavior of
+  // showing the latest point), else 'first'.
+  const sparkSpansRows = !!sparklineField && rows.length > 1 && !Array.isArray(row[sparklineField])
+  const aggregation: Aggregation = (config.aggregation as Aggregation | undefined)
+    ?? (sparkSpansRows ? 'last' : 'first')
+
+  let primaryValue: unknown
+  if (rows.length === 0) {
+    primaryValue = value
+  } else if (aggregation === 'count') {
+    primaryValue = rows.length
+  } else if (aggregation === 'first') {
+    primaryValue = row[valueCol]
+  } else if (aggregation === 'last') {
+    primaryValue = rows[rows.length - 1][valueCol]
+  } else {
+    const nums = rows.map(r => Number(r[valueCol])).filter(Number.isFinite)
+    if (nums.length === 0) {
+      primaryValue = value
+    } else if (aggregation === 'sum') {
+      primaryValue = nums.reduce((a, b) => a + b, 0)
+    } else if (aggregation === 'avg') {
+      primaryValue = nums.reduce((a, b) => a + b, 0) / nums.length
+    } else if (aggregation === 'min') {
+      primaryValue = Math.min(...nums)
+    } else if (aggregation === 'max') {
+      primaryValue = Math.max(...nums)
+    } else {
+      primaryValue = value
+    }
+  }
   // Coerce to number for formatter handling. ClickHouse returns Decimal types
   // as strings (e.g. "18.4300") - Number() drops trailing zeros and gives a
   // finite JS number we can format consistently with other widget types.
@@ -246,7 +291,7 @@ export default function KpiCard({ data, title, chartConfig }: Props) {
     ? (hoverIdx / (sparklinePoints.length - 1)) * SVG_W
     : 0
   const hoverY = hoverPoint
-    ? SVG_H - ((hoverPoint.value - sparkMin) / sparkRange) * SVG_H
+    ? sparkY(hoverPoint.value, sparkMin, sparkRange, SVG_H)
     : 0
 
   return (
@@ -267,6 +312,11 @@ export default function KpiCard({ data, title, chartConfig }: Props) {
       >
         {formatted}
       </p>
+      {config.labelColumn && row[config.labelColumn] != null && row[config.labelColumn] !== '' && (
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+          {String(row[config.labelColumn])}
+        </p>
+      )}
       {delta !== undefined && (
         <div className={clsx(
           'flex items-center gap-1 mt-1 text-sm font-medium',
