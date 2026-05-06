@@ -521,7 +521,7 @@ function WidgetBlock({
             </div>
           ) : widget.widgetType === 'TEXT' ? (
             <div className="text-xs text-slate-500 dark:text-slate-400 overflow-hidden line-clamp-4 w-full"
-                 dangerouslySetInnerHTML={{ __html: widget.title || '<p>Text content</p>' }} />
+                 dangerouslySetInnerHTML={{ __html: widget.body || '<p>Text content</p>' }} />
           ) : widget.widgetType === 'IMAGE' && ((cc.src as string) || (cc.url as string)) ? (
             <img
               src={(cc.src as string) || (cc.url as string)}
