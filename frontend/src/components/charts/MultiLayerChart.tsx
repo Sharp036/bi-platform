@@ -650,12 +650,15 @@ export default function MultiLayerChart({
       ...(!isPie ? (() => {
         // Horizontal bar swaps the axis types: value goes on X, category on Y.
         // Inverse keeps natural top-to-bottom reading order matching SQL sort.
-        const categoryAxis = {
-          type: 'category' as const,
+        const categoryAxis: Record<string, unknown> = {
+          type: 'category',
           data: categories,
-          ...(horizontal ? { inverse: true } : {}),
-          axisLabel: xAxisRotation ? { rotate: xAxisRotation } : undefined,
         }
+        if (horizontal) categoryAxis.inverse = true
+        // Conditionally include axisLabel so ECharts defaults (show: true) win
+        // when no override is wanted - setting axisLabel: undefined was causing
+        // the category labels to disappear on horizontal_bar.
+        if (xAxisRotation) categoryAxis.axisLabel = { rotate: xAxisRotation }
         if (horizontal) {
           // Apply yAxis-style options (axisLabel formatter, etc.) onto the
           // X axis since X carries the values now.

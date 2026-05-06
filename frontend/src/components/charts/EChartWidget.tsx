@@ -494,20 +494,23 @@ function buildOption(
       containLabel: true,
     },
     ...(hasAxis ? (() => {
-      const valueAxis = {
-        type: 'value' as const,
+      const valueAxis: Record<string, unknown> = {
+        type: 'value',
         min: yAxisMin === 'auto' ? 'dataMin' : 0,
-        axisLabel: valueFormatter ? { formatter: valueFormatter } : undefined,
       }
-      const categoryAxis = {
-        type: 'category' as const,
+      if (valueFormatter) valueAxis.axisLabel = { formatter: valueFormatter }
+      const categoryAxis: Record<string, unknown> = {
+        type: 'category',
         data: categories,
-        // Horizontal bar reads top-to-bottom in the natural order of the
-        // underlying data, which matches how the SQL is sorted; ECharts
-        // would flip it without this.
-        ...(horizontal ? { inverse: true } : {}),
-        axisLabel: xAxisRotation ? { rotate: xAxisRotation } : undefined,
       }
+      // Horizontal bar reads top-to-bottom in the natural order of the
+      // underlying data, which matches how the SQL is sorted; ECharts
+      // would flip it without this.
+      if (horizontal) categoryAxis.inverse = true
+      // Conditionally include axisLabel so ECharts defaults (show: true) win
+      // when no override is wanted - setting axisLabel: undefined caused the
+      // category labels to disappear on horizontal_bar.
+      if (xAxisRotation) categoryAxis.axisLabel = { rotate: xAxisRotation }
       return horizontal
         ? { xAxis: valueAxis, yAxis: categoryAxis }
         : { xAxis: categoryAxis, yAxis: valueAxis }
