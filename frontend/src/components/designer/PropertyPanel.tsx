@@ -35,12 +35,12 @@ const CURRENCIES = [
 ]
 
 // Chart types that render with axes and therefore need axis-related UI
-// controls (xAxisRotation, threshold lines, etc.). Includes the custom
-// stacked/horizontal bar/area variants since they are still bar/area charts
-// underneath.
+// controls (xAxisRotation, threshold lines, etc.). Bar variants are
+// represented by the bare 'bar' value with chartConfig.orientation /
+// chartConfig.stacked toggling the variant - no more stacked_bar etc.
 const AXIS_CHART_TYPES = [
   'bar', 'line', 'area', 'scatter', 'waterfall', 'heatmap', 'boxplot',
-  'horizontal_bar', 'stacked_bar', 'stacked_area', 'candlestick',
+  'candlestick',
 ]
 
 export default function PropertyPanel() {
@@ -473,6 +473,47 @@ export default function PropertyPanel() {
                       ))}
                     </select>
                   </Field>
+
+                  {/* Orthogonal options for axis charts: stacked applies to
+                      bar/line/area; horizontal flips axes for bar only.
+                      Replaces the standalone stacked_bar/stacked_area/
+                      horizontal_bar chart types - any combination works. */}
+                  {(['bar', 'line', 'area'] as const).includes((cc.type as string || 'bar') as 'bar' | 'line' | 'area') && (
+                    <Field label={t('designer.chart_axis_options')}>
+                      <div className="space-y-1.5">
+                        {(cc.type === 'bar') && (
+                          <label className="inline-flex items-center gap-1.5 text-xs">
+                            <input
+                              type="checkbox"
+                              checked={cc.orientation === 'horizontal'}
+                              onChange={e => update({
+                                chartConfig: {
+                                  ...cc,
+                                  orientation: e.target.checked ? 'horizontal' : undefined,
+                                },
+                              })}
+                              className="h-3.5 w-3.5"
+                            />
+                            <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_orientation_horizontal')}</span>
+                          </label>
+                        )}
+                        <label className="inline-flex items-center gap-1.5 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={!!cc.stacked}
+                            onChange={e => update({
+                              chartConfig: {
+                                ...cc,
+                                stacked: e.target.checked || undefined,
+                              },
+                            })}
+                            className="h-3.5 w-3.5"
+                          />
+                          <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_stacked')}</span>
+                        </label>
+                      </div>
+                    </Field>
+                  )}
 
                   <Field label={t('designer.legend_position')}>
                     <select
