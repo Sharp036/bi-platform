@@ -8,6 +8,7 @@ import { buildDesignerParameterValues } from '@/utils/designerParameters'
 import EChartWidget from '@/components/charts/EChartWidget'
 import TableWidget from '@/components/charts/TableWidget'
 import KpiCard from '@/components/charts/KpiCard'
+import { RichTextWidget } from '@/components/interactive/DashboardObjects'
 import type { WidgetData } from '@/types'
 import clsx from 'clsx'
 import { useState, useCallback, useRef } from 'react'
@@ -520,8 +521,15 @@ function WidgetBlock({
               )}
             </div>
           ) : widget.widgetType === 'TEXT' ? (
-            <div className="text-xs text-slate-500 dark:text-slate-400 overflow-hidden line-clamp-4 w-full"
-                 dangerouslySetInnerHTML={{ __html: widget.body || '<p>Text content</p>' }} />
+            // Use the real RichTextWidget so {column:format} placeholders
+            // interpolate from previewData.rows[0] (matches view mode).
+            // Falls back to the raw body when preview data is not loaded yet.
+            previewData ? (
+              <RichTextWidget content={widget.body || ''} style={widget.style} data={previewData} />
+            ) : (
+              <div className="text-xs text-slate-500 dark:text-slate-400 overflow-hidden line-clamp-4 w-full"
+                   dangerouslySetInnerHTML={{ __html: widget.body || '<p>Text content</p>' }} />
+            )
           ) : widget.widgetType === 'IMAGE' && ((cc.src as string) || (cc.url as string)) ? (
             <img
               src={(cc.src as string) || (cc.url as string)}
