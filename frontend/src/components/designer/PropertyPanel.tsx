@@ -850,6 +850,18 @@ export default function PropertyPanel() {
                                     onChange={e => updateLine(idx, { color: e.target.value })}
                                     className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
                                   />
+                                  <input
+                                    type="text"
+                                    value={ln.color || ''}
+                                    onChange={e => {
+                                      const v = e.target.value.trim()
+                                      if (v === '') updateLine(idx, { color: undefined })
+                                      else if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) updateLine(idx, { color: v.toLowerCase() })
+                                    }}
+                                    placeholder="#hex"
+                                    maxLength={7}
+                                    className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+                                  />
                                   <select
                                     value={ln.style || 'dashed'}
                                     onChange={e => updateLine(idx, { style: e.target.value })}
@@ -2265,6 +2277,18 @@ function AddColorValueRow({
         value={color}
         onChange={e => setColor(e.target.value)}
         className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+      />
+      <input
+        type="text"
+        value={color}
+        onChange={e => {
+          const v = e.target.value.trim()
+          if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) setColor(v.toLowerCase())
+        }}
+        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit() } }}
+        placeholder="#hex"
+        maxLength={7}
+        className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
       />
       <button
         onClick={commit}
