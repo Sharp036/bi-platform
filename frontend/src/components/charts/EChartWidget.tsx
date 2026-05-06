@@ -17,6 +17,7 @@ import {
   buildPieData,
   buildPieLabelFormatter,
 } from '@/components/charts/chartFeatures'
+import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
 
 interface Props {
   data: WidgetData
@@ -248,6 +249,21 @@ function buildOption(
   const chartType = (config.type as string) || 'bar'
   const cols = data.columns || []
   const rows = data.rows || []
+
+  // Custom chart types (horizontal_bar, stacked_bar, stacked_area, radar,
+  // heatmap, treemap, funnel, gauge, sankey, boxplot, waterfall, candlestick)
+  // build a complete option themselves. Same fast-path that MultiLayerChart
+  // uses at runtime - keeps designer preview consistent with view mode.
+  if (isCustomChartType(chartType)) {
+    const custom = buildCustomChart(chartType, data, config as Record<string, any>)
+    if (custom) {
+      return {
+        tooltip: custom.tooltip ?? { trigger: 'item', confine: true },
+        ...custom,
+        ...((config.option as object) || {}),
+      }
+    }
+  }
 
   // Use configured fields or fall back to defaults
   const categoryCol = (config.categoryField as string) || cols[0]
