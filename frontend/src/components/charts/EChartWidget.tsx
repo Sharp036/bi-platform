@@ -267,15 +267,16 @@ function buildOption(
       }
       // Same anti-overlap adjustment as MultiLayerChart: when a bottom
       // legend is layered over a custom builder's tight grid (typical for
-      // horizontal_bar/stacked_bar/stacked_area), push grid.bottom down so
-      // the legend does not collide with the axis labels.
+      // horizontal_bar/stacked_bar/stacked_area), set grid.bottom to
+      // legendHeight + 10 so the axis labels stack tightly above the
+      // legend without wasted vertical space.
       const legendAtBottom = !!customLegend && (customLegendPosition === 'bottom' || customLegendPosition === 'auto')
       if (legendAtBottom && result.grid && (custom.xAxis || custom.yAxis)) {
         const legendH = estimateLegendHeight(
           custom.series.map((s: { name?: unknown }) => String(s.name ?? '')),
           customLegendPosition,
         )
-        result.grid = { ...(result.grid as Record<string, unknown>), bottom: legendH + 24 }
+        result.grid = { ...(result.grid as Record<string, unknown>), bottom: legendH + 10 }
       }
       return result
     }
