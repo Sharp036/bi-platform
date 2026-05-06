@@ -172,8 +172,14 @@ class ReportRenderService(
     }
 
     companion object {
+        // Widgets that never have a data source attached. TEXT used to be in
+        // this set but TEXT widgets can carry placeholder syntax in their
+        // body and need their bound query executed for {column:format}
+        // interpolation to work in view mode - so TEXT now goes through the
+        // normal render path; if it has no source, executeWidgetQuery
+        // returns null gracefully via its else branch.
         private val NON_DATA_WIDGETS = setOf(
-            WidgetType.TEXT, WidgetType.IMAGE, WidgetType.BUTTON,
+            WidgetType.IMAGE, WidgetType.BUTTON,
             WidgetType.WEBPAGE, WidgetType.SPACER, WidgetType.DIVIDER
         )
     }

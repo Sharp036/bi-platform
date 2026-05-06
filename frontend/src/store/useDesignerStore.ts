@@ -138,22 +138,34 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       const style = typeof w.style === 'string' ? JSON.parse(w.style as string) : (w.style || {})
       const pm = typeof w.paramMapping === 'string' ? JSON.parse(w.paramMapping as string) : (w.paramMapping || {})
       // Body is the new dedicated column for TEXT widget HTML. For widgets
-      // saved before V28 it might be missing on the API response - fall back
-      // to chartConfig.content (interim location) or widget.title (legacy
-      // location) so old widgets keep rendering during the rollout window.
-      const bodyFromApi = (w.body as string | null | undefined) ?? null
-      const bodyFromConfig = (chart as Record<string, unknown>).content
-      const legacyTitleAsBody = w.widgetType === 'TEXT' && typeof w.title === 'string' && /<[^>]+>/.test(w.title as string)
-        ? (w.title as string)
+      // saved before V28 it might be missing on the API response, so we fall
+      // back to chartConfig.content (interim location) or widget.title
+      // (legacy HTML-in-title) so old widgets keep rendering during rollout.
+      // Three code paths:
+      //   V28+: body comes from the API column, title is the display name.
+      //   Interim: body in chartConfig.content, name in chartConfig.widgetName.
+      //   Legacy: HTML body in widget.title, no name (we blank title so the
+      //   canvas header does not duplicate the body preview).
+      const titleFromApi = (w.title as string) || ''
+      const bodyFromApi = typeof w.body === 'string' ? (w.body as string) : ''
+      const ccBag = chart as Record<string, unknown>
+      const bodyFromConfig = typeof ccBag.content === 'string' ? (ccBag.content as string) : ''
+      const widgetNameInterim = typeof ccBag.widgetName === 'string' ? (ccBag.widgetName as string) : ''
+      const legacyTitleAsBody = w.widgetType === 'TEXT' && /<[^>]+>/.test(titleFromApi)
+        ? titleFromApi
         : ''
-      const resolvedBody = bodyFromApi
-        ?? (typeof bodyFromConfig === 'string' ? bodyFromConfig : '')
-        ?? legacyTitleAsBody
-      // When falling back to legacy title-as-body, blank out title so it does
-      // not double-render in the canvas header next to the body.
-      const resolvedTitle = (bodyFromApi || (typeof bodyFromConfig === 'string' && bodyFromConfig))
-        ? (w.title as string) || ''
-        : (legacyTitleAsBody ? '' : (w.title as string) || '')
+
+      let resolvedBody = ''
+      let resolvedTitle = titleFromApi
+      if (bodyFromApi) {
+        resolvedBody = bodyFromApi
+      } else if (bodyFromConfig) {
+        resolvedBody = bodyFromConfig
+        resolvedTitle = widgetNameInterim || titleFromApi
+      } else if (legacyTitleAsBody) {
+        resolvedBody = legacyTitleAsBody
+        resolvedTitle = ''
+      }
 
       return {
         id: genId(),
