@@ -620,6 +620,18 @@ export default function PropertyPanel() {
                                   title={t('designer.series_color', 'Цвет серии')}
                                   className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
                                 />
+                                <input
+                                  type="text"
+                                  value={currentColor}
+                                  onChange={e => {
+                                    const v = e.target.value.trim()
+                                    if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) setColor(v.toLowerCase())
+                                    else if (v === '') setColor('')
+                                  }}
+                                  placeholder="#hex"
+                                  maxLength={7}
+                                  className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+                                />
                               </div>
                             )
                           })}
