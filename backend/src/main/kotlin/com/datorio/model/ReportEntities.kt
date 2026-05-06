@@ -138,6 +138,13 @@ class ReportWidget(
     @Column(length = 300)
     var title: String? = null,
 
+    // TEXT widget HTML body. Lives in its own column (not in chart_config or
+    // title) so it is not capped at the title's VARCHAR(300) and is not mixed
+    // with chart styling JSON. Other widget types may use it later for
+    // long-form content; null/empty is fine for them.
+    @Column(name = "body", columnDefinition = "text")
+    var body: String? = null,
+
     @Column(name = "query_id")
     var queryId: Long? = null,
 

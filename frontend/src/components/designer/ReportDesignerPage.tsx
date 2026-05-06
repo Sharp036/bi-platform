@@ -210,6 +210,7 @@ export default function ReportDesignerPage() {
         return {
           widgetType: w.widgetType,
           title: w.title,
+          body: w.body || null,
           queryId: hasInlineSql ? null : w.queryId,
           datasourceId: w.datasourceId,
           rawSql: hasInlineSql ? w.rawSql : null,

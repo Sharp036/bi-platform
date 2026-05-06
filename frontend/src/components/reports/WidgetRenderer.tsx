@@ -121,15 +121,19 @@ export default function WidgetRenderer({
     />
   }
 
-  // TEXT widget: rendered whether or not a SQL query is attached. When data is
-  // present, {column:format} placeholders in the body are interpolated from
-  // row[0]. New convention: HTML body in chartConfig.content (no length limit
-  // since JSONB), display name in widget.title. Legacy widgets that still
-  // have HTML in widget.title fall back transparently here.
+  // TEXT widget: rendered whether or not a SQL query is attached. When data
+  // is present, {column:format} placeholders in the body are interpolated
+  // from row[0]. New convention: HTML body lives in widget.body (dedicated
+  // backend column, no length limit), display name in widget.title.
+  // Fallback chain handles widgets saved before V28 migration:
+  //   widget.body (V28+) > chartConfig.content (interim fix) > widget.title (legacy)
   if (widget.widgetType === 'TEXT') {
     const styleConfig = widget.style ? JSON.parse(widget.style) : {}
     const cfg = widget.chartConfig ? JSON.parse(widget.chartConfig) : {}
-    const body = (typeof cfg.content === 'string' ? cfg.content : undefined) ?? widget.title ?? ''
+    const body = widget.body
+      ?? (typeof cfg.content === 'string' ? cfg.content : undefined)
+      ?? widget.title
+      ?? ''
     return <RichTextWidget content={body} style={styleConfig} data={widget.data} />
   }
 

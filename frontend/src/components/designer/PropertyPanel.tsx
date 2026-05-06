@@ -59,24 +59,10 @@ export default function PropertyPanel() {
   // Auto-load columns when widget selection changes (for saved widgets with a data source)
   useEffect(() => { setAvailableCols([]); setPreviewRows([]) }, [selected])
 
-  // Legacy migration for TEXT widgets: the previous convention was to store
-  // the HTML body in widget.title (capped at VARCHAR(300) on save) and an
-  // intermediate fix put the display name in chartConfig.widgetName. We now
-  // standardize on widget.title=name and chartConfig.content=HTML body.
-  // On first render of a legacy TEXT widget (HTML in title, no content yet)
-  // move the body into chartConfig.content; reuse widgetName as the new title
-  // when present, else clear title so the user can type a fresh name.
-  useEffect(() => {
-    if (!widget || widget.widgetType !== 'TEXT') return
-    const cc = widget.chartConfig as Record<string, unknown>
-    const titleHasHtml = typeof widget.title === 'string' && /<[^>]+>/.test(widget.title)
-    const needsMigration = cc.content === undefined && titleHasHtml
-    if (!needsMigration) return
-    const widgetName = (cc.widgetName as string | undefined) || ''
-    const nextCc: Record<string, unknown> = { ...cc, content: widget.title }
-    delete nextCc.widgetName
-    updateWidget(widget.id, { title: widgetName, chartConfig: nextCc })
-  }, [widget?.id, widget?.widgetType])  // eslint-disable-line react-hooks/exhaustive-deps
+  // Legacy migration is handled centrally in useDesignerStore.loadReport
+  // (resolves widget.body from the dedicated API column, falling back to
+  // chartConfig.content or HTML-in-title for old reports). No per-component
+  // useEffect needed.
 
   useEffect(() => {
     if (!widget) return
@@ -1848,18 +1834,14 @@ export default function PropertyPanel() {
         )
       })()}
 
-      {/* Text content - stored in chartConfig.content (JSONB) so the body
-          is not capped at the VARCHAR(300) limit of widget.title. */}
+      {/* Text content - stored in widget.body (dedicated TEXT column on the
+          backend, no length limit). Title stays in widget.title for the
+          widget's display name, like every other widget type. */}
       {widget.widgetType === 'TEXT' && (
         <Field label={t('designer.content_html')}>
           <textarea
-            value={(widget.chartConfig as Record<string, unknown>).content as string || ''}
-            onChange={e => update({
-              chartConfig: {
-                ...widget.chartConfig,
-                content: e.target.value || undefined,
-              },
-            })}
+            value={widget.body || ''}
+            onChange={e => update({ body: e.target.value })}
             className="input text-sm h-32 resize-none font-mono"
             placeholder={t('designer.html_placeholder')}
           />

@@ -86,6 +86,7 @@ data class ReportParameterDto(
 data class CreateWidgetRequest(
     val widgetType: WidgetType,
     val title: String? = null,
+    val body: String? = null,
     val queryId: Long? = null,
     val datasourceId: Long? = null,
     val rawSql: String? = null,
@@ -100,6 +101,10 @@ data class CreateWidgetRequest(
 data class UpdateWidgetRequest(
     val widgetType: WidgetType? = null,
     val title: String? = null,
+    // Nullable<Nullable<String>> via @JsonInclude is unwieldy in Kotlin DTOs;
+    // use a simple String? and treat null as "no change". Callers that want
+    // to clear the body should send an empty string.
+    val body: String? = null,
     val queryId: Long? = null,
     val datasourceId: Long? = null,
     val rawSql: String? = null,
@@ -115,6 +120,7 @@ data class WidgetResponse(
     val id: Long,
     val widgetType: WidgetType,
     val title: String?,
+    val body: String?,
     val queryId: Long?,
     val datasourceId: Long?,
     val rawSql: String?,
@@ -148,6 +154,11 @@ data class RenderedWidget(
     val widgetId: Long,
     val widgetType: WidgetType,
     val title: String?,
+    // HTML body for TEXT widgets (and other future long-form widgets). Lives
+    // in its own column on the backend; passed through to the client as-is
+    // (the frontend RichTextWidget renders the markup with placeholder
+    // interpolation against `data.rows[0]`).
+    val body: String?,
     val chartConfig: String,
     val position: String,
     val style: String,
