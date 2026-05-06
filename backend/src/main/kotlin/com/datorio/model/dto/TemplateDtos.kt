@@ -71,6 +71,7 @@ data class ParameterExportConfig(
 data class WidgetExportConfig(
     val widgetType: WidgetType,
     val title: String?,
+    val body: String? = null,
     val rawSql: String?,
     val chartConfig: String,
     val position: String,
