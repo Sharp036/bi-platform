@@ -10,9 +10,14 @@ import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, 
 import { createPortal } from 'react-dom'
 import SqlCodeEditor from '@/components/common/SqlCodeEditor'
 import NumericInput from '@/components/common/NumericInput'
+import { CHART_TYPE_OPTIONS } from '@/components/charts/chartTypeBuilders'
 import toast from 'react-hot-toast'
 
-const CHART_TYPES = ['bar', 'line', 'pie', 'area', 'scatter', 'radar', 'funnel', 'heatmap', 'treemap', 'sankey', 'boxplot', 'gauge', 'waterfall']
+// Single source of truth for chart-type values comes from chartTypeBuilders;
+// this used to be a separate hand-maintained list that diverged - users could
+// not pick horizontal_bar / stacked_bar / stacked_area through the UI even
+// though the chart engine handled them.
+const CHART_TYPES = CHART_TYPE_OPTIONS.map(o => o.value)
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -29,7 +34,14 @@ const CURRENCIES = [
   { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
 ]
 
-const AXIS_CHART_TYPES = ['bar', 'line', 'area', 'scatter', 'waterfall', 'heatmap', 'boxplot']
+// Chart types that render with axes and therefore need axis-related UI
+// controls (xAxisRotation, threshold lines, etc.). Includes the custom
+// stacked/horizontal bar/area variants since they are still bar/area charts
+// underneath.
+const AXIS_CHART_TYPES = [
+  'bar', 'line', 'area', 'scatter', 'waterfall', 'heatmap', 'boxplot',
+  'horizontal_bar', 'stacked_bar', 'stacked_area', 'candlestick',
+]
 
 export default function PropertyPanel() {
   const { t } = useTranslation()
