@@ -257,11 +257,27 @@ function buildOption(
   if (isCustomChartType(chartType)) {
     const custom = buildCustomChart(chartType, data, config as Record<string, any>)
     if (custom) {
-      return {
+      const customLegendPosition = (config.legendPosition as string) || 'auto'
+      const customLegend = buildLegendOption(custom.series.length, customLegendPosition, selectorLabels)
+      const result: Record<string, unknown> = {
         tooltip: custom.tooltip ?? { trigger: 'item', confine: true },
+        legend: customLegend,
         ...custom,
         ...((config.option as object) || {}),
       }
+      // Same anti-overlap adjustment as MultiLayerChart: when a bottom
+      // legend is layered over a custom builder's tight grid (typical for
+      // horizontal_bar/stacked_bar/stacked_area), push grid.bottom down so
+      // the legend does not collide with the axis labels.
+      const legendAtBottom = !!customLegend && (customLegendPosition === 'bottom' || customLegendPosition === 'auto')
+      if (legendAtBottom && result.grid && (custom.xAxis || custom.yAxis)) {
+        const legendH = estimateLegendHeight(
+          custom.series.map((s: { name?: unknown }) => String(s.name ?? '')),
+          customLegendPosition,
+        )
+        result.grid = { ...(result.grid as Record<string, unknown>), bottom: legendH + 24 }
+      }
+      return result
     }
   }
 
