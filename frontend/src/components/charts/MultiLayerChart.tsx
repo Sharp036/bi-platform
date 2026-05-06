@@ -289,6 +289,20 @@ export default function MultiLayerChart({
           ...((config.option as object) || {}),
         }
 
+        // The custom builders (horizontal_bar, stacked_bar, stacked_area)
+        // ship their own grid with a small bottom (5%). When a bottom
+        // legend is layered on top, the legend overlaps the axis labels.
+        // Override grid.bottom to leave room for the legend plus axis
+        // labels. Skips charts without a grid (pie/treemap/sankey/etc).
+        const legendAtBottom = !!legend && (legendPosition === 'bottom' || legendPosition === 'auto')
+        if (legendAtBottom && result.grid && (custom.xAxis || custom.yAxis)) {
+          const legendH = estimateLegendHeight(
+            custom.series.map((s: { name?: unknown }) => String(s.name ?? '')),
+            legendPosition,
+          )
+          result.grid = { ...result.grid, bottom: legendH + 24 }
+        }
+
         if (annotations && annotations.length > 0) {
           result = mergeAnnotationsIntoOption(result, annotations)
         }
