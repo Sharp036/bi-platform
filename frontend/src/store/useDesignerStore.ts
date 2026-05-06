@@ -137,6 +137,23 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       const chart = typeof w.chartConfig === 'string' ? JSON.parse(w.chartConfig as string) : (w.chartConfig || {})
       const style = typeof w.style === 'string' ? JSON.parse(w.style as string) : (w.style || {})
       const pm = typeof w.paramMapping === 'string' ? JSON.parse(w.paramMapping as string) : (w.paramMapping || {})
+
+      // Legacy chart-type aliases. The bar/area variants used to be modelled
+      // as separate chart types (horizontal_bar / stacked_bar / stacked_area)
+      // which made combinations impossible (no horizontal+stacked) and grew
+      // combinatorially. Now they are orthogonal options on the base type.
+      // Translate on load so existing widgets keep rendering; on next save
+      // the report stores the new shape.
+      if (chart.type === 'horizontal_bar') {
+        chart.type = 'bar'
+        if (chart.orientation === undefined) chart.orientation = 'horizontal'
+      } else if (chart.type === 'stacked_bar') {
+        chart.type = 'bar'
+        if (chart.stacked === undefined) chart.stacked = true
+      } else if (chart.type === 'stacked_area') {
+        chart.type = 'area'
+        if (chart.stacked === undefined) chart.stacked = true
+      }
       // Body is the new dedicated column for TEXT widget HTML. For widgets
       // saved before V28 it might be missing on the API response, so we fall
       // back to chartConfig.content (interim location) or widget.title

@@ -24,7 +24,11 @@ import {
 } from '@/components/charts/chartFeatures'
 
 function buildLegendOption(seriesCount: number, legendPosition: string, selectorLabels?: { all: string; inv: string }) {
-  if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
+  // Show the legend for any non-empty chart unless the user explicitly chose
+  // "hidden" in the dropdown. Previously single-series charts had their
+  // legend silently suppressed which surprised users in designer preview;
+  // if they want it gone they can pick "Скрыта" in the position dropdown.
+  if (seriesCount <= 0 || legendPosition === 'hidden') return undefined
   const selector = selectorLabels ? [
     { type: 'all' as const, title: selectorLabels.all },
     { type: 'inverse' as const, title: selectorLabels.inv },
@@ -225,7 +229,26 @@ interface Props {
 
 function parseConfig(raw?: string): Record<string, unknown> {
   if (!raw) return {}
-  try { return JSON.parse(raw) } catch { return {} }
+  try {
+    const cfg = JSON.parse(raw) as Record<string, unknown>
+    // Legacy chart-type aliases. The bar/area variants used to be standalone
+    // chart types; they are now options on the base type. Translate at parse
+    // time so reports stored before the refactor keep rendering at runtime
+    // (the designer store does the same on load).
+    if (cfg.type === 'horizontal_bar') {
+      cfg.type = 'bar'
+      if (cfg.orientation === undefined) cfg.orientation = 'horizontal'
+    } else if (cfg.type === 'stacked_bar') {
+      cfg.type = 'bar'
+      if (cfg.stacked === undefined) cfg.stacked = true
+    } else if (cfg.type === 'stacked_area') {
+      cfg.type = 'area'
+      if (cfg.stacked === undefined) cfg.stacked = true
+    }
+    return cfg
+  } catch {
+    return {}
+  }
 }
 
 interface DragState {
@@ -358,6 +381,14 @@ export default function MultiLayerChart({
     // unconditionally further down via option.graphic.
     const featureGraphics: { delta?: Record<string, unknown>; center?: Record<string, unknown> } = {}
 
+    // Composable bar/line/area variants - same option-based model as
+    // EChartWidget. Replaces standalone stacked_bar/stacked_area/horizontal_bar
+    // chart types. Stacked applies stack:'total' on each series; horizontal
+    // swaps the axis types for bar charts only.
+    const stacked = !!config.stacked && (chartType === 'bar' || chartType === 'line' || chartType === 'area')
+    const horizontal = config.orientation === 'horizontal' && chartType === 'bar'
+    const isAreaType = chartType === 'area'
+
     if (layersWithVisibility.length === 0) {
       // Use configured valueFields or fall back to all non-category columns
       const configuredValues = config.valueFields as string[] | undefined
@@ -397,8 +428,12 @@ export default function MultiLayerChart({
           const colorMap = (config.colors as Record<string, string> | undefined) || undefined
 
           series.push({
-            name: col, type: chartType,
+            name: col,
+            // ECharts uses 'line' for area; areaStyle is what makes it shaded.
+            type: isAreaType ? 'line' : chartType,
             connectNulls: false,
+            ...(stacked ? { stack: 'total' } : {}),
+            ...(isAreaType ? { areaStyle: { opacity: 0.4 } } : {}),
             data: rows.map((r, dataIndex) => {
               const v = r[col]
               const rawValue = (v == null || v === '') ? (nullHandling === 'gap' ? '-' : 0) : (Number(v) || 0)
@@ -411,7 +446,7 @@ export default function MultiLayerChart({
                 ...(labelHidden ? { label: { show: false }, labelLine: { show: false } } : {}),
               }
             }),
-            smooth: chartType === 'line',
+            smooth: chartType === 'line' || isAreaType,
             itemStyle: { color: seriesColor },
             lineStyle: { color: seriesColor },
             z: 12,
@@ -612,13 +647,23 @@ export default function MultiLayerChart({
         bottom: gridBottom,
         containLabel: true,
       },
-      ...(!isPie ? {
-        xAxis: {
-          type: 'category', data: categories,
+      ...(!isPie ? (() => {
+        // Horizontal bar swaps the axis types: value goes on X, category on Y.
+        // Inverse keeps natural top-to-bottom reading order matching SQL sort.
+        const categoryAxis = {
+          type: 'category' as const,
+          data: categories,
+          ...(horizontal ? { inverse: true } : {}),
           axisLabel: xAxisRotation ? { rotate: xAxisRotation } : undefined,
-        },
-        yAxis,
-      } : {}),
+        }
+        if (horizontal) {
+          // Apply yAxis-style options (axisLabel formatter, etc.) onto the
+          // X axis since X carries the values now.
+          const valueAxis = { ...yAxis[0] }
+          return { xAxis: valueAxis, yAxis: categoryAxis }
+        }
+        return { xAxis: categoryAxis, yAxis }
+      })() : {}),
       series,
       ...(showDataLabels && !isPie ? {
         labelLayout: isInlineLabels
