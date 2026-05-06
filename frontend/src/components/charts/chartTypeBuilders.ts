@@ -457,10 +457,14 @@ export function buildStacked(data: WidgetData, config: ChartConfig, baseType: 'b
 //  Registry
 // ═══════════════════════════════════════════
 
+// Chart types whose option needs a fully custom builder (axes/series shape
+// differs significantly from the bar/line/area family). bar/line/area now
+// take their stacked/horizontal variants from chartConfig.stacked /
+// chartConfig.orientation rather than spawning extra type values, so they
+// stay out of this set and flow through the generic main path.
 const CUSTOM_CHART_TYPES = new Set([
   'radar', 'heatmap', 'treemap', 'funnel', 'gauge', 'sankey',
-  'boxplot', 'waterfall', 'candlestick', 'horizontal_bar',
-  'stacked_bar', 'stacked_area',
+  'boxplot', 'waterfall', 'candlestick',
 ])
 
 export function isCustomChartType(type: string): boolean {
@@ -478,9 +482,6 @@ export function buildCustomChart(type: string, data: WidgetData, config: ChartCo
     case 'boxplot': return buildBoxplot(data, config)
     case 'waterfall': return buildWaterfall(data, config)
     case 'candlestick': return buildCandlestick(data, config)
-    case 'horizontal_bar': return buildHorizontalBar(data, config)
-    case 'stacked_bar': return buildStacked(data, config, 'bar')
-    case 'stacked_area': return buildStacked(data, config, 'line')
     default: return null
   }
 }
@@ -492,9 +493,6 @@ export const CHART_TYPE_OPTIONS = [
   { value: 'area', i18nKey: 'charts.type.area', icon: '🏔️' },
   { value: 'pie', i18nKey: 'charts.type.pie', icon: '🥧' },
   { value: 'scatter', i18nKey: 'charts.type.scatter', icon: '🔵' },
-  { value: 'horizontal_bar', i18nKey: 'charts.type.horizontal_bar', icon: '📊' },
-  { value: 'stacked_bar', i18nKey: 'charts.type.stacked_bar', icon: '📊' },
-  { value: 'stacked_area', i18nKey: 'charts.type.stacked_area', icon: '🏔️' },
   { value: 'radar', i18nKey: 'charts.type.radar', icon: '🕸️' },
   { value: 'heatmap', i18nKey: 'charts.type.heatmap', icon: '🟥' },
   { value: 'treemap', i18nKey: 'charts.type.treemap', icon: '🟩' },

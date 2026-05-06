@@ -29,11 +29,31 @@ interface Props {
 
 function parseConfig(raw?: string): Record<string, unknown> {
   if (!raw) return {}
-  try { return JSON.parse(raw) } catch { return {} }
+  try {
+    const cfg = JSON.parse(raw) as Record<string, unknown>
+    // Legacy chart-type aliases - see comment in MultiLayerChart.parseConfig.
+    if (cfg.type === 'horizontal_bar') {
+      cfg.type = 'bar'
+      if (cfg.orientation === undefined) cfg.orientation = 'horizontal'
+    } else if (cfg.type === 'stacked_bar') {
+      cfg.type = 'bar'
+      if (cfg.stacked === undefined) cfg.stacked = true
+    } else if (cfg.type === 'stacked_area') {
+      cfg.type = 'area'
+      if (cfg.stacked === undefined) cfg.stacked = true
+    }
+    return cfg
+  } catch {
+    return {}
+  }
 }
 
 function buildLegendOption(seriesCount: number, legendPosition: string, selectorLabels?: { all: string; inv: string }) {
-  if (seriesCount <= 1 || legendPosition === 'hidden') return undefined
+  // Show the legend for any non-empty chart unless the user explicitly chose
+  // "hidden" in the dropdown. Previously single-series charts had their
+  // legend silently suppressed which surprised users in designer preview;
+  // if they want it gone they can pick "Скрыта" in the position dropdown.
+  if (seriesCount <= 0 || legendPosition === 'hidden') return undefined
   const selector = selectorLabels ? [
     { type: 'all' as const, title: selectorLabels.all },
     { type: 'inverse' as const, title: selectorLabels.inv },
@@ -267,15 +287,16 @@ function buildOption(
       }
       // Same anti-overlap adjustment as MultiLayerChart: when a bottom
       // legend is layered over a custom builder's tight grid (typical for
-      // horizontal_bar/stacked_bar/stacked_area), push grid.bottom down so
-      // the legend does not collide with the axis labels.
+      // horizontal_bar/stacked_bar/stacked_area), set grid.bottom to
+      // legendHeight + 10 so the axis labels stack tightly above the
+      // legend without wasted vertical space.
       const legendAtBottom = !!customLegend && (customLegendPosition === 'bottom' || customLegendPosition === 'auto')
       if (legendAtBottom && result.grid && (custom.xAxis || custom.yAxis)) {
         const legendH = estimateLegendHeight(
           custom.series.map((s: { name?: unknown }) => String(s.name ?? '')),
           customLegendPosition,
         )
-        result.grid = { ...(result.grid as Record<string, unknown>), bottom: legendH + 24 }
+        result.grid = { ...(result.grid as Record<string, unknown>), bottom: legendH + 10 }
       }
       return result
     }
@@ -287,6 +308,15 @@ function buildOption(
   const seriesCols = Array.isArray(configuredValues)
     ? configuredValues.filter(f => cols.includes(f))
     : cols.filter(c => c !== categoryCol)
+
+  // Composable bar/line/area variants. Stacked is a property of any
+  // bar/line/area chart; horizontal flips the axes for bar charts only.
+  // Replaces the older stacked_bar/stacked_area/horizontal_bar standalone
+  // chart types - covers all 4 combinations (vertical/horizontal x non-
+  // stacked/stacked) without combinatorial type explosion.
+  const stacked = !!config.stacked && (chartType === 'bar' || chartType === 'line' || chartType === 'area')
+  const horizontal = config.orientation === 'horizontal' && chartType === 'bar'
+  const isAreaType = chartType === 'area'
 
   // Display options
   const yAxisMin = (config.yAxisMin as string) || 'zero'
@@ -326,8 +356,12 @@ function buildOption(
     const isLabelVisible = buildLabelVisibility(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0))
     return {
       name: col,
-      type: chartType,
+      // ECharts expects 'line' for area charts (areaStyle is what makes them
+      // area-shaped). Map our 'area' type to 'line' here.
+      type: isAreaType ? 'line' : chartType,
       connectNulls: false,
+      ...(stacked ? { stack: 'total' } : {}),
+      ...(isAreaType ? { areaStyle: { opacity: 0.4 } } : {}),
       data: rows.map((r, dataIndex) => {
         const v = r[col]
         const rawValue = (v == null || v === '') ? (nullHandling === 'gap' ? '-' : 0) : (Number(v) || 0)
@@ -338,7 +372,7 @@ function buildOption(
           labelLine: { show: false },
         }
       }),
-      smooth: chartType === 'line',
+      smooth: chartType === 'line' || isAreaType,
       ...(chartType === 'pie' ? {
         radius: buildPieRadius(!!config.donut),
         data: buildPieData(rows, categoryCol, col, config.colors as Record<string, string> | undefined),
@@ -459,18 +493,28 @@ function buildOption(
       bottom: gridBottom,
       containLabel: true,
     },
-    ...(hasAxis ? {
-      xAxis: {
-        type: 'category',
-        data: categories,
-        axisLabel: xAxisRotation ? { rotate: xAxisRotation } : undefined,
-      },
-      yAxis: {
+    ...(hasAxis ? (() => {
+      const valueAxis: Record<string, unknown> = {
         type: 'value',
         min: yAxisMin === 'auto' ? 'dataMin' : 0,
-        axisLabel: valueFormatter ? { formatter: valueFormatter } : undefined,
-      },
-    } : {}),
+      }
+      if (valueFormatter) valueAxis.axisLabel = { formatter: valueFormatter }
+      const categoryAxis: Record<string, unknown> = {
+        type: 'category',
+        data: categories,
+      }
+      // Horizontal bar reads top-to-bottom in the natural order of the
+      // underlying data, which matches how the SQL is sorted; ECharts
+      // would flip it without this.
+      if (horizontal) categoryAxis.inverse = true
+      // Conditionally include axisLabel so ECharts defaults (show: true) win
+      // when no override is wanted - setting axisLabel: undefined caused the
+      // category labels to disappear on horizontal_bar.
+      if (xAxisRotation) categoryAxis.axisLabel = { rotate: xAxisRotation }
+      return horizontal
+        ? { xAxis: valueAxis, yAxis: categoryAxis }
+        : { xAxis: categoryAxis, yAxis: valueAxis }
+    })() : {}),
     series,
     ...(centerGraphic || deltaGraphic ? {
       graphic: deltaGraphic
