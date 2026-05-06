@@ -69,6 +69,10 @@ export interface RenderReportResponse {
 }
 export interface RenderedWidget {
   widgetId: number; widgetType: string; title?: string
+  // HTML body for TEXT widgets - dedicated column on the backend; the
+  // RichTextWidget renderer reads this directly with placeholder
+  // interpolation against data.rows[0].
+  body?: string
   chartConfig?: string; position?: string; style?: string
   data?: WidgetData; error?: string
 }

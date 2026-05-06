@@ -183,7 +183,8 @@ class ReportRenderService(
         if (widget.widgetType in NON_DATA_WIDGETS) {
             return RenderedWidget(
                 widgetId = widget.id, widgetType = widget.widgetType,
-                title = widget.title, chartConfig = widget.chartConfig,
+                title = widget.title, body = widget.body,
+                chartConfig = widget.chartConfig,
                 position = widget.position, style = widget.style,
                 data = null
             )
@@ -200,7 +201,8 @@ class ReportRenderService(
 
             RenderedWidget(
                 widgetId = widget.id, widgetType = widget.widgetType,
-                title = widget.title, chartConfig = widget.chartConfig,
+                title = widget.title, body = widget.body,
+                chartConfig = widget.chartConfig,
                 position = widget.position, style = widget.style,
                 data = data
             )
@@ -208,7 +210,8 @@ class ReportRenderService(
             log.warn("Widget {} (id={}) failed: {}", widget.title ?: widget.widgetType, widget.id, e.message)
             RenderedWidget(
                 widgetId = widget.id, widgetType = widget.widgetType,
-                title = widget.title, chartConfig = widget.chartConfig,
+                title = widget.title, body = widget.body,
+                chartConfig = widget.chartConfig,
                 position = widget.position, style = widget.style,
                 data = null, error = e.message
             )

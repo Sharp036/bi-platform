@@ -42,6 +42,7 @@ class ExportService(
                     widgetId = ws.widgetId,
                     widgetType = WidgetType.TABLE,
                     title = ws.title,
+                    body = null,
                     chartConfig = "",
                     position = "",
                     style = "",

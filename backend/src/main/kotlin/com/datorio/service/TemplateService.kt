@@ -110,7 +110,7 @@ class TemplateService(
             },
             widgets = report.widgets.sortedBy { it.sortOrder }.map { w ->
                 WidgetExportConfig(
-                    widgetType = w.widgetType, title = w.title,
+                    widgetType = w.widgetType, title = w.title, body = w.body,
                     rawSql = w.rawSql, chartConfig = w.chartConfig,
                     position = w.position, style = w.style,
                     paramMapping = w.paramMapping, sortOrder = w.sortOrder,
@@ -147,7 +147,7 @@ class TemplateService(
             },
             widgets = cfg.widgets.map { w ->
                 CreateWidgetRequest(
-                    widgetType = w.widgetType, title = w.title,
+                    widgetType = w.widgetType, title = w.title, body = w.body,
                     datasourceId = req.datasourceId,
                     rawSql = w.rawSql, chartConfig = w.chartConfig,
                     position = w.position, style = w.style,

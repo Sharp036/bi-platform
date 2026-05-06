@@ -6,6 +6,10 @@ export interface DesignerWidget {
   serverId?: number         // server ID after save
   widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE' | 'BUTTON' | 'WEBPAGE' | 'SPACER' | 'DIVIDER'
   title: string
+  // HTML body for TEXT widgets (and any future long-form widget). Lives in
+  // its own backend column, not in chartConfig or title - title is the
+  // display name, chartConfig is for chart-style settings.
+  body: string
   queryId: number | null
   datasourceId: number | null
   rawSql: string
@@ -133,11 +137,30 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       const chart = typeof w.chartConfig === 'string' ? JSON.parse(w.chartConfig as string) : (w.chartConfig || {})
       const style = typeof w.style === 'string' ? JSON.parse(w.style as string) : (w.style || {})
       const pm = typeof w.paramMapping === 'string' ? JSON.parse(w.paramMapping as string) : (w.paramMapping || {})
+      // Body is the new dedicated column for TEXT widget HTML. For widgets
+      // saved before V28 it might be missing on the API response - fall back
+      // to chartConfig.content (interim location) or widget.title (legacy
+      // location) so old widgets keep rendering during the rollout window.
+      const bodyFromApi = (w.body as string | null | undefined) ?? null
+      const bodyFromConfig = (chart as Record<string, unknown>).content
+      const legacyTitleAsBody = w.widgetType === 'TEXT' && typeof w.title === 'string' && /<[^>]+>/.test(w.title as string)
+        ? (w.title as string)
+        : ''
+      const resolvedBody = bodyFromApi
+        ?? (typeof bodyFromConfig === 'string' ? bodyFromConfig : '')
+        ?? legacyTitleAsBody
+      // When falling back to legacy title-as-body, blank out title so it does
+      // not double-render in the canvas header next to the body.
+      const resolvedTitle = (bodyFromApi || (typeof bodyFromConfig === 'string' && bodyFromConfig))
+        ? (w.title as string) || ''
+        : (legacyTitleAsBody ? '' : (w.title as string) || '')
+
       return {
         id: genId(),
         serverId: (w.widgetId as number | undefined) ?? (w.id as number | undefined),
         widgetType: w.widgetType as DesignerWidget['widgetType'],
-        title: (w.title as string) || '',
+        title: resolvedTitle,
+        body: resolvedBody || '',
         queryId: (w.queryId as number | undefined) ?? null,
         datasourceId: (w.datasourceId as number | undefined) ?? null,
         rawSql: (w.rawSql as string) || '',
@@ -186,6 +209,7 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       id: genId(),
       widgetType: type,
       title: i18n.t(`widgets.type.${type.toLowerCase()}`),
+      body: '',
       queryId: null,
       datasourceId: null,
       rawSql: '',

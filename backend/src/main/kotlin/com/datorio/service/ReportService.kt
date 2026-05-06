@@ -201,7 +201,7 @@ class ReportService(
             },
             widgets = source.widgets.map { w ->
                 CreateWidgetRequest(
-                    widgetType = w.widgetType, title = w.title,
+                    widgetType = w.widgetType, title = w.title, body = w.body,
                     queryId = w.queryId, datasourceId = w.datasourceId,
                     rawSql = w.rawSql, chartConfig = w.chartConfig,
                     position = w.position, style = w.style,
@@ -467,6 +467,7 @@ class ReportService(
             report = report,
             widgetType = request.widgetType,
             title = request.title,
+            body = request.body,
             queryId = request.queryId,
             datasourceId = request.datasourceId,
             rawSql = request.rawSql,
@@ -493,6 +494,7 @@ class ReportService(
 
         request.widgetType?.let { widget.widgetType = it }
         request.title?.let { widget.title = it }
+        request.body?.let { widget.body = it }
         request.queryId?.let { widget.queryId = it }
         request.datasourceId?.let { widget.datasourceId = it }
         request.rawSql?.let { widget.rawSql = it }
@@ -547,7 +549,7 @@ class ReportService(
     )
 
     private fun toWidgetResponse(w: ReportWidget) = WidgetResponse(
-        id = w.id, widgetType = w.widgetType, title = w.title,
+        id = w.id, widgetType = w.widgetType, title = w.title, body = w.body,
         queryId = w.queryId, datasourceId = w.datasourceId, rawSql = w.rawSql,
         chartConfig = w.chartConfig, position = w.position, style = w.style,
         paramMapping = w.paramMapping, sortOrder = w.sortOrder,
