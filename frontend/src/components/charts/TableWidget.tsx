@@ -86,7 +86,7 @@ function pickStopColor(value: number, stops: ColorStop[], mode: 'step' | 'gradie
 function renderCellStyle(
   fmt: ColumnFormatter | undefined,
   rawValue: unknown,
-  _colMax: number | undefined,
+  colMax: number | undefined,
   baseBg: string | undefined,
 ): CSSProperties | undefined {
   const style: CSSProperties = {}
@@ -100,6 +100,20 @@ function renderCellStyle(
         if (fmt.background) style.backgroundColor = color
         else style.color = color
       }
+    }
+  }
+  if (fmt?.type === 'bar') {
+    // Fill the cell background with a light pastel bar from left to value
+    // ratio (Superset-style). The number itself is rendered right-aligned
+    // by renderCellContent so it reads naturally over the bar.
+    const num = Number(rawValue)
+    const max = colMax && colMax > 0 ? colMax : 1
+    const ratio = Number.isFinite(num) ? Math.min(1, Math.abs(num) / max) : 0
+    if (ratio > 0) {
+      const rgb = hexToRgb(fmt.color || '#3b82f6')
+      const bg = rgb ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.25)` : 'rgba(59,130,246,0.25)'
+      style.backgroundImage = `linear-gradient(to right, ${bg} ${ratio * 100}%, transparent ${ratio * 100}%)`
+      style.textAlign = 'right'
     }
   }
   return Object.keys(style).length > 0 ? style : undefined
@@ -132,21 +146,13 @@ function renderCellContent(
   }
 
   if (fmt?.type === 'bar') {
+    // The bar itself is painted on the cell background via renderCellStyle
+    // (linear-gradient). Here we just emit the right-aligned number with
+    // tabular-nums so values line up cleanly across rows.
     const num = Number(rawValue)
-    const max = colMax && colMax > 0 ? colMax : 1
-    const ratio = Number.isFinite(num) ? Math.min(1, Math.abs(num) / max) : 0
-    const color = fmt.color || '#3b82f6'
     return (
-      <span className="inline-flex items-center gap-2 min-w-[80px]">
-        <span className="relative h-2 flex-1 bg-slate-200 dark:bg-slate-700 rounded overflow-hidden">
-          <span
-            className="absolute inset-y-0 left-0"
-            style={{ width: `${ratio * 100}%`, backgroundColor: color }}
-          />
-        </span>
-        <span className="tabular-nums text-xs">
-          {Number.isFinite(num) ? num.toLocaleString() : String(rawValue)}
-        </span>
+      <span className="tabular-nums">
+        {Number.isFinite(num) ? num.toLocaleString() : String(rawValue)}
       </span>
     )
   }
