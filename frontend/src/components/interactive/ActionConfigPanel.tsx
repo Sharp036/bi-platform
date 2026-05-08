@@ -11,6 +11,7 @@ import clsx from 'clsx'
 interface Props {
   reportId: number
   widgets: WidgetListItem[]
+  defaultSourceWidgetId?: number
 }
 
 const actionTypeIcons: Record<string, typeof Filter> = {
@@ -23,7 +24,7 @@ const actionTypeIcons: Record<string, typeof Filter> = {
 
 const triggerTypes = ['CLICK', 'HOVER', 'SELECT']
 
-export default function ActionConfigPanel({ reportId, widgets }: Props) {
+export default function ActionConfigPanel({ reportId, widgets, defaultSourceWidgetId }: Props) {
   const { t } = useTranslation()
 
   const actionTypeConfig = [
@@ -38,7 +39,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
   const [showAdd, setShowAdd] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState<Partial<DashboardActionRequest> & { paramName?: string }>({
-    reportId, actionType: 'FILTER', triggerType: 'CLICK',
+    reportId, actionType: 'FILTER', triggerType: 'CLICK', sourceWidgetId: defaultSourceWidgetId,
   })
   const [sourceCols, setSourceCols] = useState<string[]>([])
   const [targetCols, setTargetCols] = useState<string[]>([])
@@ -337,7 +338,7 @@ export default function ActionConfigPanel({ reportId, widgets }: Props) {
         <button onClick={() => {
           setShowAdd(!showAdd)
           setEditingId(null)
-          setForm({ reportId, actionType: 'FILTER', triggerType: 'CLICK' })
+          setForm({ reportId, actionType: 'FILTER', triggerType: 'CLICK', sourceWidgetId: defaultSourceWidgetId })
         }} className="btn-ghost p-1">
           <Plus className="w-4 h-4" />
         </button>
