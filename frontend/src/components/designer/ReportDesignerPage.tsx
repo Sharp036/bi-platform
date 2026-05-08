@@ -61,10 +61,14 @@ export default function ReportDesignerPage() {
 
   const {
     reportId, reportName, reportDescription, reportStatus,
-    widgets, parameters, dirty, previewMode,
+    widgets, parameters, dirty, previewMode, selectedWidgetId,
     setReportMeta, loadReport, togglePreview,
     undo, redo, canUndo, canRedo, reset, setDirty, setParameters,
   } = useDesignerStore()
+
+  const selectedWidgetServerId = selectedWidgetId
+    ? widgets.find(w => w.id === selectedWidgetId)?.serverId
+    : undefined
 
   const isPublished = reportStatus === 'PUBLISHED'
   const [loading, setLoading] = useState(!isNew)
@@ -654,6 +658,7 @@ export default function ReportDesignerPage() {
                       ? <div className="p-3"><ActionConfigPanel
                           reportId={reportId}
                           widgets={widgets.filter(w => w.serverId).map(w => ({ id: w.serverId!, title: w.title, widgetType: w.widgetType, datasourceId: w.datasourceId ?? undefined, rawSql: w.rawSql || undefined, queryId: w.queryId ?? undefined }))}
+                          defaultSourceWidgetId={selectedWidgetServerId}
                         /></div>
                       : <p className="p-3 text-xs text-slate-400">{t('interactive.action.save_first')}</p>
                     }
