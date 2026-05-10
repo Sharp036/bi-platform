@@ -439,8 +439,8 @@ export default function MultiLayerChart({
               const rawValue = (v == null || v === '') ? (nullHandling === 'gap' ? '-' : 0) : (Number(v) || 0)
               const perItemColor = colorBy && colorMap ? colorMap[String(r[colorBy] ?? '')] : undefined
               const labelHidden = showDataLabels && !isLabelVisible(dataIndex)
-              if (!perItemColor && !labelHidden) return rawValue
               return {
+                ...r,
                 value: rawValue,
                 ...(perItemColor ? { itemStyle: { color: perItemColor } } : {}),
                 ...(labelHidden ? { label: { show: false }, labelLine: { show: false } } : {}),
@@ -525,7 +525,7 @@ export default function MultiLayerChart({
         const s: any = {
           name: layer.label || layer.name,
           type: layer.chartType || chartType,
-          data: lRows.map(r => r[valField || ''] ?? 0),
+          data: lRows.map(r => ({ ...r, value: r[valField || ''] ?? 0 })),
           smooth: layer.chartType === 'line',
           yAxisIndex: layer.axis === 'right' ? 1 : 0,
           ...seriesOverrides,

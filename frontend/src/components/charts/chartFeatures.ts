@@ -337,7 +337,7 @@ export function buildPieData(
     const name = String(r[categoryCol] ?? '')
     const value = r[valueCol] ?? 0
     const color = colorsMap?.[name]
-    return color ? { name, value, itemStyle: { color } } : { name, value }
+    return color ? { ...r, name, value, itemStyle: { color } } : { ...r, name, value }
   })
 }
 
