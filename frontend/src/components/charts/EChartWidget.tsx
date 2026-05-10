@@ -365,11 +365,11 @@ function buildOption(
       data: rows.map((r, dataIndex) => {
         const v = r[col]
         const rawValue = (v == null || v === '') ? (nullHandling === 'gap' ? '-' : 0) : (Number(v) || 0)
-        if (!showDataLabels || chartType === 'pie' || isLabelVisible(dataIndex)) return rawValue
+        const hideLabel = showDataLabels && chartType !== 'pie' && !isLabelVisible(dataIndex)
         return {
+          ...r,
           value: rawValue,
-          label: { show: false },
-          labelLine: { show: false },
+          ...(hideLabel ? { label: { show: false }, labelLine: { show: false } } : {}),
         }
       }),
       smooth: chartType === 'line' || isAreaType,
@@ -671,7 +671,14 @@ export default function EChartWidget({ data, chartConfig, title, onChartClick, c
 
   const onEvents = onChartClick ? {
     click: (params: Record<string, unknown>) => {
-      if (!dragState.current) onChartClick(params)
+      if (dragState.current) return
+      // Spread fields from data point object so action handlers can read
+      // source columns (e.g. data["Группа"]) without going through params.data.
+      const inner = params.data
+      const flat = inner && typeof inner === 'object' && !Array.isArray(inner)
+        ? { ...params, ...(inner as Record<string, unknown>) }
+        : params
+      onChartClick(flat)
     },
   } : undefined
 
