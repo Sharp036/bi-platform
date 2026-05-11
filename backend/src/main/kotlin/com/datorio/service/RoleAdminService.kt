@@ -84,9 +84,11 @@ class RoleAdminService(
             changes["description"] = it
         }
         request.permissionIds?.let { permIds ->
-            val newPerms = permissionRepository.findAllById(permIds).toMutableSet()
-            role.permissions.clear()
-            role.permissions.addAll(newPerms)
+            val newPerms = permissionRepository.findAllById(permIds).toSet()
+            val newIds = newPerms.map { it.id }.toSet()
+            val existingIds = role.permissions.map { it.id }.toSet()
+            role.permissions.removeIf { it.id !in newIds }
+            newPerms.filter { it.id !in existingIds }.forEach { role.permissions.add(it) }
             changes["permissions"] = newPerms.map { it.code }
         }
 
