@@ -5,7 +5,7 @@ import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "dl_role")
-data class Role(
+class Role(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
@@ -29,4 +29,14 @@ data class Role(
 
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: OffsetDateTime = OffsetDateTime.now()
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Role) return false
+        return id != 0L && id == other.id
+    }
+
+    override fun hashCode(): Int = javaClass.hashCode()
+
+    override fun toString(): String = "Role(id=$id, name=$name)"
+}

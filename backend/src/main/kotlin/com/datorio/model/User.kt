@@ -5,7 +5,7 @@ import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "dl_user")
-data class User(
+class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
@@ -41,4 +41,14 @@ data class User(
 
     @Column(name = "updated_at", nullable = false)
     var updatedAt: OffsetDateTime = OffsetDateTime.now()
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is User) return false
+        return id != 0L && id == other.id
+    }
+
+    override fun hashCode(): Int = javaClass.hashCode()
+
+    override fun toString(): String = "User(id=$id, username=$username)"
+}
