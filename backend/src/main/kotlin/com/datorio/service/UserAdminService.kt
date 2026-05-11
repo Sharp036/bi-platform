@@ -90,9 +90,11 @@ class UserAdminService(
             changes["isActive"] = it
         }
         request.roleIds?.let { roleIds ->
-            val newRoles = roleRepository.findAllById(roleIds).toMutableSet()
-            user.roles.clear()
-            user.roles.addAll(newRoles)
+            val newRoles = roleRepository.findAllById(roleIds).toSet()
+            val newIds = newRoles.map { it.id }.toSet()
+            val existingIds = user.roles.map { it.id }.toSet()
+            user.roles.removeIf { it.id !in newIds }
+            newRoles.filter { it.id !in existingIds }.forEach { user.roles.add(it) }
             changes["roles"] = newRoles.map { it.name }
         }
 
