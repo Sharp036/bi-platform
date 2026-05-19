@@ -46,7 +46,7 @@ data class ContainerExportConfig(
 )
 
 data class ReportExportConfig(
-    val formatVersion: Int = 1,
+    val formatVersion: Int = 2,
     val name: String,
     val description: String?,
     val reportType: ReportType,
@@ -55,7 +55,8 @@ data class ReportExportConfig(
     val category: String?,
     val parameters: List<ParameterExportConfig>,
     val widgets: List<WidgetExportConfig>,
-    val containers: List<ContainerExportConfig> = emptyList()
+    val containers: List<ContainerExportConfig> = emptyList(),
+    val parameterControls: List<ParameterControlExportConfig> = emptyList()
 )
 
 data class ParameterExportConfig(
@@ -66,6 +67,18 @@ data class ParameterExportConfig(
     val isRequired: Boolean,
     val sortOrder: Int,
     val config: String
+)
+
+data class ParameterControlExportConfig(
+    val parameterName: String,
+    val controlType: String,
+    val datasourceId: Long?,
+    val optionsQuery: String?,
+    val sliderMin: Double?,
+    val sliderMax: Double?,
+    val sliderStep: Double?,
+    val config: String,
+    val sortOrder: Int
 )
 
 data class WidgetExportConfig(
