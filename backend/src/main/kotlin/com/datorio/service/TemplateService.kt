@@ -4,6 +4,8 @@ import com.datorio.model.*
 import com.datorio.model.dto.*
 import com.datorio.repository.ReportRepository
 import com.datorio.model.dto.ContainerRequest
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -14,7 +16,9 @@ import java.time.Instant
 class TemplateService(
     private val reportRepo: ReportRepository,
     private val reportService: ReportService,
-    private val vizService: VisualizationService
+    private val vizService: VisualizationService,
+    private val controlService: ControlService,
+    private val objectMapper: ObjectMapper
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -117,7 +121,20 @@ class TemplateService(
                     isVisible = w.isVisible
                 )
             },
-            containers = containers
+            containers = containers,
+            parameterControls = controlService.getParameterControls(reportId).map { c ->
+                ParameterControlExportConfig(
+                    parameterName = c.parameterName,
+                    controlType = c.controlType,
+                    datasourceId = c.datasourceId,
+                    optionsQuery = c.optionsQuery,
+                    sliderMin = c.sliderMin,
+                    sliderMax = c.sliderMax,
+                    sliderStep = c.sliderStep,
+                    config = objectMapper.writeValueAsString(c.config),
+                    sortOrder = c.sortOrder
+                )
+            }
         )
     }
 
@@ -178,6 +195,30 @@ class TemplateService(
             }
         }
 
+        // Recreate parameter controls. If the import request overrides datasourceId,
+        // apply it to all controls (matches the widget override behaviour). Controls
+        // that don't query a datasource (SLIDER/INPUT/DATE_PICKER) ignore the field.
+        cfg.parameterControls.forEach { c ->
+            val effectiveDatasourceId = req.datasourceId ?: c.datasourceId
+            val configMap: Map<String, Any?> = try {
+                objectMapper.readValue(c.config)
+            } catch (_: Exception) { emptyMap() }
+            controlService.saveParameterControl(
+                ParameterControlRequest(
+                    reportId = created.id,
+                    parameterName = c.parameterName,
+                    controlType = c.controlType,
+                    datasourceId = effectiveDatasourceId,
+                    optionsQuery = c.optionsQuery,
+                    sliderMin = c.sliderMin,
+                    sliderMax = c.sliderMax,
+                    sliderStep = c.sliderStep,
+                    config = configMap,
+                    sortOrder = c.sortOrder
+                )
+            )
+        }
+
         // Set category if importing as template
         if (req.asTemplate && cfg.category != null) {
             val report = reportRepo.findById(created.id).orElse(null)
@@ -187,8 +228,9 @@ class TemplateService(
             }
         }
 
-        log.info("Imported report '{}' (id={}, widgets={}, params={})",
-            reportName, created.id, created.widgets.size, created.parameters.size)
+        log.info("Imported report '{}' (id={}, widgets={}, params={}, controls={})",
+            reportName, created.id, created.widgets.size, created.parameters.size,
+            cfg.parameterControls.size)
 
         return ImportResult(
             reportId = created.id,

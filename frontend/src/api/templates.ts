@@ -14,11 +14,19 @@ export interface ReportExportConfig {
   formatVersion: number; name: string; description: string | null
   reportType: string; layout: string; settings: string; category: string | null
   parameters: ParameterExportConfig[]; widgets: WidgetExportConfig[]
+  parameterControls?: ParameterControlExportConfig[]
 }
 
 export interface ParameterExportConfig {
   name: string; label: string | null; paramType: string
   defaultValue: string | null; isRequired: boolean; sortOrder: number; config: string
+}
+
+export interface ParameterControlExportConfig {
+  parameterName: string; controlType: string
+  datasourceId: number | null; optionsQuery: string | null
+  sliderMin: number | null; sliderMax: number | null; sliderStep: number | null
+  config: string; sortOrder: number
 }
 
 export interface WidgetExportConfig {
