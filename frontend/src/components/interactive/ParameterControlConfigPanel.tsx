@@ -30,7 +30,8 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
   const { t } = useTranslation()
   const [controls, setControls] = useState<ParameterControlConfig[]>([])
   const [datasources, setDatasources] = useState<DataSource[]>([])
-  // Default value picker state: { paramName, options, hasMore, columnName, loading, open, query }
+  // Default value picker state. `multi` switches the modal to checkbox mode
+  // for MULTI_CHECKBOX controls; selected values are persisted as a CSV string.
   const [picker, setPicker] = useState<{
     paramName: string
     options: string[]
@@ -39,6 +40,8 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
     loading: boolean
     open: boolean
     query: string
+    multi: boolean
+    selected: string[]
   } | null>(null)
   const pickerDebounceRef = useRef<ReturnType<typeof setTimeout>>()
   const [sqlEditor, setSqlEditor] = useState<{ paramName: string; sql: string; datasourceId: number } | null>(null)
@@ -82,8 +85,15 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
     }
   }
 
-  const openPicker = async (paramName: string) => {
-    setPicker({ paramName, options: [], hasMore: false, columnName: '', loading: true, open: true, query: '' })
+  const openPicker = async (paramName: string, multi: boolean) => {
+    const param = parameters.find(pp => pp.name === paramName)
+    const initialSelected = multi
+      ? (param?.defaultValue || '').split(',').map(s => s.trim()).filter(Boolean)
+      : []
+    setPicker({
+      paramName, options: [], hasMore: false, columnName: '',
+      loading: true, open: true, query: '', multi, selected: initialSelected,
+    })
     try {
       // Pass default values of ALL other parameters so any :param in SQL gets substituted
       const parentValues: Record<string, string> = {}
@@ -103,6 +113,27 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
       setPicker(null)
       toast.error(t('common.operation_failed'))
     }
+  }
+
+  const togglePickerSelection = (value: string) => {
+    setPicker(prev => {
+      if (!prev) return prev
+      const next = prev.selected.includes(value)
+        ? prev.selected.filter(v => v !== value)
+        : [...prev.selected, value]
+      return { ...prev, selected: next }
+    })
+  }
+
+  const applyPickerSelection = () => {
+    if (!picker) return
+    // Preserve the order in which options were originally loaded, so the
+    // saved CSV matches what users see in the option list.
+    const ordered = picker.options.filter(o => picker.selected.includes(o))
+    // Include any extras the user had pre-set that aren't in the current option
+    // list (e.g. SQL changed) at the tail so we don't silently drop them.
+    const extras = picker.selected.filter(s => !picker.options.includes(s))
+    selectDefault(picker.paramName, [...ordered, ...extras].join(','))
   }
 
   const pickerSearch = useCallback((q: string) => {
@@ -245,7 +276,7 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
                     {ctrl?.optionsQuery && ctrl?.datasourceId && (
                       <div className="flex items-end">
                         <button
-                          onClick={() => openPicker(p.name)}
+                          onClick={() => openPicker(p.name, ctrl?.controlType === 'MULTI_CHECKBOX')}
                           className="btn-secondary text-xs py-1 px-2"
                         >
                           {t('interactive.control.pick_default')}
@@ -285,6 +316,22 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
                 </div>
               ) : pickerVisible.length === 0 ? (
                 <p className="text-xs text-slate-400 p-2">{t('common.no_results')}</p>
+              ) : picker.multi ? (
+                pickerVisible.map(opt => {
+                  const checked = picker.selected.includes(opt)
+                  return (
+                    <label key={opt}
+                      className="flex items-center gap-2 w-full text-left px-2 py-1.5 text-sm rounded hover:bg-surface-50 dark:hover:bg-dark-surface-100 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => togglePickerSelection(opt)}
+                        className="h-3.5 w-3.5"
+                      />
+                      <span className="truncate">{opt}</span>
+                    </label>
+                  )
+                })
               ) : (
                 pickerVisible.map(opt => (
                   <button key={opt} onClick={() => selectDefault(picker.paramName, opt)}
@@ -294,10 +341,18 @@ export default function ParameterControlConfigPanel({ reportId, parameters, onPa
                 ))
               )}
             </div>
-            <button onClick={() => setPicker(null)}
-              className="mt-2 text-xs text-slate-400 hover:text-slate-600 self-end">
-              {t('common.cancel')}
-            </button>
+            <div className="flex items-center justify-end gap-2 mt-2">
+              <button onClick={() => setPicker(null)}
+                className="text-xs text-slate-400 hover:text-slate-600">
+                {t('common.cancel')}
+              </button>
+              {picker.multi && (
+                <button onClick={applyPickerSelection}
+                  className="btn-primary text-xs py-1 px-3">
+                  {t('common.apply')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
