@@ -68,6 +68,7 @@ class ReportService(
                 report = saved,
                 widgetType = widgetDto.widgetType,
                 title = widgetDto.title,
+                body = widgetDto.body,
                 queryId = widgetDto.queryId,
                 datasourceId = widgetDto.datasourceId,
                 rawSql = widgetDto.rawSql,
