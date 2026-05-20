@@ -82,15 +82,17 @@ function wrapLegendText(value: string, lineLen: number, maxLines: number): strin
 }
 
 
-function estimateLegendHeight(seriesNames: string[], legendPosition: string): number {
-  if (legendPosition !== 'bottom' && legendPosition !== 'auto') return 0
+function estimateLegendHeight(seriesNames: string[], legendPosition: string, hasSelector: boolean = false): number {
+  if (legendPosition !== 'bottom' && legendPosition !== 'auto' && legendPosition !== 'top') return 0
   const maxLines = seriesNames.reduce((m, name) => {
     const lines = wrapLegendText(name, 22, 3).split('\n').length
     return Math.max(m, lines)
   }, 1)
   const lineHeight = 12
   const legendLineBlock = Math.max(10, maxLines * lineHeight)
-  return legendLineBlock + 14
+  // Selector buttons (Все/Инв) add ~6px of vertical padding on the same row.
+  const selectorPad = hasSelector ? 6 : 0
+  return legendLineBlock + 14 + selectorPad
 }
 
 function estimateDataLabelTopPadding(
@@ -613,7 +615,12 @@ export default function MultiLayerChart({
     const inlineLabelTopPad = showDataLabels && !isPie ? 24 : 0
     const labelTopPad = isInlineLabels ? inlineLabelTopPad
       : dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
-    const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition) : 0
+    // buildLegendOption always emits a selector (Все/Инв buttons), so the legend
+    // row carries the selector-button padding regardless of series count.
+    const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition, true) : 0
+    // Reserve space below a top legend: legendHeight + 4px gap so callouts
+    // never tuck under the legend row.
+    const topLegendReserve = legendIsTop ? legendHeight + 4 : 0
     // containLabel: true already accounts for x-axis label height, so gridBottom
     // only needs space for the legend (when at bottom) plus a small gap.
     const gridBottom = !isPie
@@ -642,7 +649,7 @@ export default function MultiLayerChart({
         left: legendIsLeft ? legendSidePad : '3%',
         right: legendIsRight ? (hasRightAxis ? legendSidePad + 36 : legendSidePad) : (hasRightAxis ? '8%' : '4%'),
         top: !isPie
-          ? (legendIsTop ? Math.max(36, labelTopPad + 24) : (labelTopPad || undefined))
+          ? (legendIsTop ? Math.max(36, labelTopPad + topLegendReserve) : (labelTopPad || undefined))
           : undefined,
         bottom: gridBottom,
         containLabel: true,
@@ -671,7 +678,7 @@ export default function MultiLayerChart({
       ...(showDataLabels && !isPie ? {
         labelLayout: isInlineLabels
           ? createInlineLabelLayout(getChartWidth, () => labelTopPad || 8)
-          : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread),
+          : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread, () => legendIsTop ? topLegendReserve : 8),
       } : {}),
       ...((featureGraphics.delta || featureGraphics.center) ? {
         graphic: [
