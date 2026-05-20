@@ -109,7 +109,7 @@ function estimateDataLabelTopPadding(
   const totalVisible = Math.max(1, visiblePerSeries * seriesCount)
   const rows = Math.ceil(totalVisible / 4)
   const top = 18 + rows * 18
-  return Math.max(52, Math.min(220, top))
+  return Math.max(20, Math.min(220, top))
 }
 
 function ensureXAxisLabelsVisible(option: any) {
@@ -642,7 +642,7 @@ export default function MultiLayerChart({
         left: legendIsLeft ? legendSidePad : '3%',
         right: legendIsRight ? (hasRightAxis ? legendSidePad + 36 : legendSidePad) : (hasRightAxis ? '8%' : '4%'),
         top: !isPie
-          ? (legendIsTop ? Math.max(56, labelTopPad + 42) : (labelTopPad || undefined))
+          ? (legendIsTop ? Math.max(36, labelTopPad + 24) : (labelTopPad || undefined))
           : undefined,
         bottom: gridBottom,
         containLabel: true,
