@@ -125,10 +125,43 @@ interface RichTextWidgetProps {
   //   {col:percent1}      — (v*100).toFixed(1) + '%'
   //   {col:millions}      — (v/1_000_000).toFixed(2) + ' млн'
   // Missing columns render as em-dash.
+  //
+  // Conditional blocks: {{#if colName}}...{{/if}} keeps the inner HTML iff
+  // row[colName] is truthy (non-null, non-zero, non-empty, non-'false').
+  // Nested blocks are supported; falsy blocks are dropped before placeholder
+  // substitution so their inner tokens never need to resolve.
   data?: WidgetData
 }
 
 const PLACEHOLDER_RE = /\{([A-Za-zА-Яа-я0-9_\-.,% ]+?)(?::([a-zA-Z0-9]+))?\}/g
+// Conditional block: {{#if colName}}...{{/if}} renders the body iff
+// row[colName] is truthy. Falsy values: null, undefined, false, 0, '0', '',
+// 'false'. The loop handles nested blocks by replacing inside-out until
+// the string stabilises.
+const CONDITIONAL_RE = /\{\{#if\s+([A-Za-zА-Яа-я0-9_]+)\s*\}\}([\s\S]*?)\{\{\/if\}\}/g
+
+function isTruthyForBlock(value: unknown): boolean {
+  if (value === null || value === undefined) return false
+  if (value === false || value === 0) return false
+  if (typeof value === 'string') {
+    const trimmed = value.trim().toLowerCase()
+    if (trimmed === '' || trimmed === '0' || trimmed === 'false') return false
+  }
+  return true
+}
+
+function processConditionals(content: string, row: Record<string, unknown>): string {
+  let result = content
+  let prev: string
+  do {
+    prev = result
+    result = result.replace(CONDITIONAL_RE, (_match, colName, body) => {
+      const value = row[String(colName).trim()]
+      return isTruthyForBlock(value) ? body : ''
+    })
+  } while (result !== prev)
+  return result
+}
 
 function formatPlaceholderValue(value: unknown, format?: string): string {
   if (value == null) return '—'
@@ -160,7 +193,10 @@ function formatPlaceholderValue(value: unknown, format?: string): string {
 function interpolateContent(content: string, data?: WidgetData): string {
   if (!data || !data.rows || data.rows.length === 0) return content
   const row = data.rows[0]
-  return content.replace(PLACEHOLDER_RE, (match, colName, format) => {
+  // Conditional blocks first so falsy ones drop the surrounding HTML before
+  // the placeholder pass tries to substitute their inner tokens.
+  const withConditionals = processConditionals(content, row)
+  return withConditionals.replace(PLACEHOLDER_RE, (match, colName, format) => {
     const trimmed = String(colName).trim()
     if (!(trimmed in row)) return match  // leave unknown placeholders as-is
     return formatPlaceholderValue(row[trimmed], format)
