@@ -34,6 +34,7 @@ export function createCollisionFreeLayout(
   manualPositions?: Map<string, { x: number; y: number }>,
   placementsRef?: { current: Map<string, LabelPlacement> },
   spreadHorizontally?: boolean,
+  getMinLabelY?: () => number,
 ) {
   const placed: (LabelPlacement & { key: string })[] = []
   let lastTs = 0
@@ -139,7 +140,7 @@ export function createCollisionFreeLayout(
       // the next row. Results in fewer rows used but labels may shift away
       // from their anchor X.
       for (let row = 0; row < 20; row++) {
-        const baseY = 8 + row * ROW_H
+        const baseY = (getMinLabelY?.() ?? 8) + row * ROW_H
         for (const dx of offsetSteps) {
           // At offset=0 clamp to chart bounds; for other offsets skip if out of bounds
           let cx = anchorX + dx
@@ -173,7 +174,7 @@ export function createCollisionFreeLayout(
           if (chartW > 0 && cx + lw / 2 > chartW) continue
         }
         for (let row = 0; row < 20; row++) {
-          const baseY = 8 + row * ROW_H
+          const baseY = (getMinLabelY?.() ?? 8) + row * ROW_H
           const result = tryPlace(cx, baseY, lw, lh, key, anchorX, anchorY)
           if (result) return result
         }
@@ -181,7 +182,7 @@ export function createCollisionFreeLayout(
     }
 
     // ── Fallback ─────────────────────────────────────────────────────────────
-    const y = 8 + placed.length * ROW_H
+    const y = (getMinLabelY?.() ?? 8) + placed.length * ROW_H
     const clampedX =
       chartW > 0 ? Math.max(lw / 2, Math.min(anchorX, chartW - lw / 2)) : anchorX
     const fallback: LabelPlacement & { key: string } = {
