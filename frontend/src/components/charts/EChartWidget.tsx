@@ -16,6 +16,7 @@ import {
   buildPieRadius,
   buildPieData,
   buildPieLabelFormatter,
+  type PieLabelContent,
 } from '@/components/charts/chartFeatures'
 import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
 
@@ -337,6 +338,9 @@ function buildOption(
   const dataLabelBoxed = !!config.dataLabelBoxed
   const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
   const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
+  const dataLabelFontSize = Number.isFinite(Number(config.dataLabelFontSize))
+    ? Math.max(8, Math.min(48, Number(config.dataLabelFontSize)))
+    : 10
   const nullHandling = (config.nullHandling as string) || 'zero'
   const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
   const legendPosition = (config.legendPosition as string) || 'auto'
@@ -396,9 +400,15 @@ function buildOption(
           position: chartType === 'pie' ? 'outside' : 'top',
           distance: isInlineLabels ? 6 : 8,
           rotate: chartType === 'pie' ? undefined : (dataLabelRotation || undefined),
-          fontSize: 10,
+          fontSize: dataLabelFontSize,
           formatter: chartType === 'pie'
-            ? buildPieLabelFormatter(!!config.showPercentages)
+            ? buildPieLabelFormatter({
+                content: config.pieLabelContent as PieLabelContent | undefined,
+                decimals: dataLabelDecimals,
+                thousandsSep: dataLabelThousandsSep,
+                valueFormatter,
+                showPercentages: !!config.showPercentages,
+              })
             : buildLabelFormatter(dataLabelMode, dataLabelCount, rows.length, colValues.map(v => v ?? 0), dataLabelDecimals, dataLabelThousandsSep, valueFormatter),
           ...(dataLabelBoxed && chartType !== 'pie' ? {
             borderColor: seriesColor,
