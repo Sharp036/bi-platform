@@ -341,14 +341,54 @@ export function buildPieData(
   })
 }
 
+export type PieLabelContent = 'name' | 'value' | 'percent' | 'name-value' | 'name-percent'
+
 /**
- * Pie label formatter:
- *   showPercentages=true  -> "Снизить: 42.3%"
- *   showPercentages=false -> ECharts default ("Снизить" via name)
- * Returns undefined when no override is needed (lets ECharts pick its default).
+ * Pie label formatter. Returns a callback compatible with ECharts label.formatter
+ * for pie series (which provides `name`, `value`, and auto-computed `percent`).
+ *
+ * Reuses the shared number-formatting plumbing (decimals, thousands separator,
+ * value formatter from yAxisFormat) so a pie behaves the same as line/bar
+ * regarding decimals and units. The pie-only knob is `content`, which picks
+ * what to show: name, value, percent or a combination.
+ *
+ * Backwards compatibility: if opts.content is undefined and opts.showPercentages
+ * is true, behaves as 'name-percent'. Older dashboards using the legacy boolean
+ * keep working without migration.
+ *
+ * Returns undefined when no override is needed -> ECharts default (name only).
  */
-export function buildPieLabelFormatter(
-  showPercentages: boolean | undefined,
-): string | undefined {
-  return showPercentages ? '{b}: {d}%' : undefined
+export function buildPieLabelFormatter(opts: {
+  content?: PieLabelContent
+  decimals?: number
+  thousandsSep?: boolean
+  valueFormatter?: (v: number) => string
+  showPercentages?: boolean
+}): ((p: { name: string; value: number; percent: number }) => string) | undefined {
+  const content: PieLabelContent | undefined = opts.content
+    ?? (opts.showPercentages ? 'name-percent' : undefined)
+  if (!content || content === 'name') return undefined
+
+  const decimals = Math.max(0, Math.min(6, Number.isFinite(Number(opts.decimals)) ? Number(opts.decimals) : 0))
+  const fmtNumber = (n: number): string => {
+    if (!Number.isFinite(n)) return String(n)
+    if (opts.thousandsSep) {
+      return n.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    }
+    return n.toFixed(decimals)
+  }
+  const fmtValue = (n: number): string => {
+    if (opts.valueFormatter && Number.isFinite(n)) return opts.valueFormatter(n)
+    return fmtNumber(n)
+  }
+
+  return (p: { name: string; value: number; percent: number }) => {
+    switch (content) {
+      case 'percent':       return `${fmtNumber(p.percent)}%`
+      case 'value':         return fmtValue(p.value)
+      case 'name-percent':  return `${p.name}: ${fmtNumber(p.percent)}%`
+      case 'name-value':    return `${p.name}: ${fmtValue(p.value)}`
+      default:              return p.name
+    }
+  }
 }
