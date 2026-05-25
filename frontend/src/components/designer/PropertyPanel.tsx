@@ -780,6 +780,14 @@ export default function PropertyPanel() {
                           />
                           <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_decimals')}</span>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <NumericInput
+                            value={cc.dataLabelFontSize != null ? Number(cc.dataLabelFontSize) : 10}
+                            onChange={v => update({ chartConfig: { ...cc, dataLabelFontSize: v ?? undefined } })}
+                            className="input text-sm w-16"
+                          />
+                          <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_font_size')}</span>
+                        </div>
                         <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
                           <input
                             type="checkbox"
@@ -1099,16 +1107,22 @@ export default function PropertyPanel() {
                           </label>
                         </Field>
 
-                        <Field label={t('designer.chart_pie_show_percent')}>
-                          <label className="inline-flex items-center gap-1.5 text-xs">
-                            <input
-                              type="checkbox"
-                              checked={!!cc.showPercentages}
-                              onChange={e => update({ chartConfig: { ...cc, showPercentages: e.target.checked || undefined } })}
-                              className="h-3.5 w-3.5"
-                            />
-                            <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_pie_show_percent_hint')}</span>
-                          </label>
+                        <Field label={t('designer.chart_pie_label_content')}>
+                          <select
+                            value={(cc.pieLabelContent as string) || (cc.showPercentages ? 'name-percent' : 'name')}
+                            onChange={e => {
+                              const v = e.target.value
+                              update({ chartConfig: { ...cc, pieLabelContent: v === 'name' ? undefined : v, showPercentages: undefined } })
+                            }}
+                            className="input text-sm"
+                          >
+                            <option value="name">{t('designer.chart_pie_label_content_name')}</option>
+                            <option value="value">{t('designer.chart_pie_label_content_value')}</option>
+                            <option value="percent">{t('designer.chart_pie_label_content_percent')}</option>
+                            <option value="name-value">{t('designer.chart_pie_label_content_name_value')}</option>
+                            <option value="name-percent">{t('designer.chart_pie_label_content_name_percent')}</option>
+                          </select>
+                          <p className="text-[10px] text-slate-400 mt-1">{t('designer.chart_pie_label_content_hint')}</p>
                         </Field>
 
                         <Field label={t('designer.chart_pie_segment_colors')}>

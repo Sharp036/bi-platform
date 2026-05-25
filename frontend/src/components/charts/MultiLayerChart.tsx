@@ -21,6 +21,7 @@ import {
   buildPieRadius,
   buildPieData,
   buildPieLabelFormatter,
+  type PieLabelContent,
 } from '@/components/charts/chartFeatures'
 
 function buildLegendOption(seriesCount: number, legendPosition: string, selectorLabels?: { all: string; inv: string }) {
@@ -368,6 +369,9 @@ export default function MultiLayerChart({
     const dataLabelBoxed = !!config.dataLabelBoxed
     const dataLabelDecimals = config.dataLabelDecimals != null ? Number(config.dataLabelDecimals) : 1
     const dataLabelThousandsSep = config.dataLabelThousandsSep !== false
+    const dataLabelFontSize = Number.isFinite(Number(config.dataLabelFontSize))
+      ? Math.max(8, Math.min(48, Number(config.dataLabelFontSize)))
+      : 10
     const nullHandling = (config.nullHandling as string) || 'zero'
     const regressionFields = Array.isArray(config.regressionFields) ? (config.regressionFields as string[]) : []
     const valueFormatter = buildValueFormatter(yAxisFormat, yAxisCurrency, yAxisDecimals)
@@ -415,7 +419,18 @@ export default function MultiLayerChart({
             radius: buildPieRadius(!!config.donut),
             data: buildPieData(rows, categoryCol, col, config.colors as Record<string, string> | undefined),
             label: showDataLabels
-              ? { show: true, position: 'outside', fontSize: 10, formatter: buildPieLabelFormatter(!!config.showPercentages) }
+              ? {
+                  show: true,
+                  position: 'outside',
+                  fontSize: dataLabelFontSize,
+                  formatter: buildPieLabelFormatter({
+                    content: config.pieLabelContent as PieLabelContent | undefined,
+                    decimals: dataLabelDecimals,
+                    thousandsSep: dataLabelThousandsSep,
+                    valueFormatter,
+                    showPercentages: !!config.showPercentages,
+                  }),
+                }
               : { show: false },
             labelLine: { show: showDataLabels },
           })
