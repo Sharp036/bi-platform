@@ -499,7 +499,7 @@ function WidgetBlock({
         >
           {widget.widgetType === 'CHART' && previewData ? (
             <div className="w-full h-full">
-              <MultiLayerChart data={previewData} chartConfig={chartConfigStr} layers={layers} />
+              <MultiLayerChart data={previewData} chartConfig={chartConfigStr} layers={layers} isDesigner />
             </div>
           ) : tablePreviewData ? (
             <div className="w-full h-full overflow-hidden">
