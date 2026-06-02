@@ -16,6 +16,7 @@ import {
   buildPieRadius,
   buildPieData,
   buildPieLabelFormatter,
+  buildAutoYAxisMin,
   type PieLabelContent,
 } from '@/components/charts/chartFeatures'
 import { isCustomChartType, buildCustomChart } from '@/components/charts/chartTypeBuilders'
@@ -511,10 +512,9 @@ function buildOption(
       containLabel: true,
     },
     ...(hasAxis ? (() => {
-      const valueAxis: Record<string, unknown> = {
-        type: 'value',
-        min: yAxisMin === 'auto' ? 'dataMin' : 0,
-      }
+      const valueAxis: Record<string, unknown> = yAxisMin === 'auto'
+        ? { type: 'value', min: buildAutoYAxisMin() }
+        : { type: 'value', min: 0 }
       if (valueFormatter) valueAxis.axisLabel = { formatter: valueFormatter }
       const categoryAxis: Record<string, unknown> = {
         type: 'category',
