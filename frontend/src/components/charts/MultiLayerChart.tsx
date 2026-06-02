@@ -849,13 +849,6 @@ export default function MultiLayerChart({
           )}
           <InfoTooltip description={config.description as string | undefined} />
         </div>
-        {layersWithVisibility.length > 0 && (
-          <LayerTogglePanel
-            layers={layersWithVisibility}
-            onToggle={handleToggle}
-            compact
-          />
-        )}
       </div>
 
       {/* Chart */}
