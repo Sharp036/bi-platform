@@ -367,6 +367,7 @@ function WidgetBlock({
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
   const [layers, setLayers] = useState<ChartLayerItem[]>([])
+  const setWidgetLayers = useDesignerStore(s => s.setWidgetLayers)
 
   const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
@@ -400,6 +401,7 @@ function WidgetBlock({
       if (widget.widgetType === 'CHART' && widget.serverId) {
         const fetchedLayers = await interactiveApi.getLayersForWidget(widget.serverId)
         setLayers(fetchedLayers)
+        setWidgetLayers(widget.id, fetchedLayers)
       }
     } catch {
       setPreviewError(t('designer.preview_failed'))
