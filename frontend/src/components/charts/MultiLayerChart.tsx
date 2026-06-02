@@ -299,7 +299,8 @@ export default function MultiLayerChart({
   )
 
   const option = useMemo(() => {
-    const chartType = (config.type as string) || 'bar'
+    const rawType = (config.type as string) || 'bar'
+    const chartType = rawType === 'mixed' ? 'bar' : rawType
     const legendPosition = (config.legendPosition as string) || 'auto'
     // Custom chart types (radar, heatmap, treemap, funnel, gauge, sankey, etc.)
     if (isCustomChartType(chartType)) {
