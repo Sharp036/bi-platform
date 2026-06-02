@@ -228,6 +228,7 @@ interface Props {
   highlightValue?: unknown
   annotations?: AnnotationItem[]
   tooltipConfig?: TooltipConfigItem
+  isDesigner?: boolean
 }
 
 
@@ -266,7 +267,7 @@ interface DragState {
 export default function MultiLayerChart({
   data, chartConfig, title, layers = [], layerData = {},
   onChartClick, highlightField, highlightValue,
-  annotations, tooltipConfig
+  annotations, tooltipConfig, isDesigner = false
 }: Props) {
   const isDark = useThemeStore(s => s.isDark)
   const { t } = useTranslation()
@@ -842,7 +843,7 @@ export default function MultiLayerChart({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header: title + layer toggles */}
+      {/* Header: title + layer toggles (designer only) */}
       <div className="flex items-start justify-between mb-1 px-1">
         <div className="flex items-center gap-1 min-w-0">
           {title && (
@@ -852,6 +853,13 @@ export default function MultiLayerChart({
           )}
           <InfoTooltip description={config.description as string | undefined} />
         </div>
+        {isDesigner && layersWithVisibility.length > 0 && (
+          <LayerTogglePanel
+            layers={layersWithVisibility}
+            onToggle={handleToggle}
+            compact
+          />
+        )}
       </div>
 
       {/* Chart */}
