@@ -18,6 +18,7 @@ class TemplateService(
     private val reportService: ReportService,
     private val vizService: VisualizationService,
     private val controlService: ControlService,
+    private val interactiveService: InteractiveDashboardService,
     private val objectMapper: ObjectMapper
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -112,14 +113,27 @@ class TemplateService(
                     sortOrder = p.sortOrder, config = p.config
                 )
             },
-            widgets = report.widgets.sortedBy { it.sortOrder }.map { w ->
-                WidgetExportConfig(
-                    widgetType = w.widgetType, title = w.title, body = w.body,
-                    rawSql = w.rawSql, chartConfig = w.chartConfig,
-                    position = w.position, style = w.style,
-                    paramMapping = w.paramMapping, sortOrder = w.sortOrder,
-                    isVisible = w.isVisible
-                )
+            widgets = report.widgets.sortedBy { it.sortOrder }.let { sortedWidgets ->
+                val layersByWidget = interactiveService.getLayersForWidgets(sortedWidgets.map { it.id })
+                sortedWidgets.map { w ->
+                    val layers = (layersByWidget[w.id] ?: emptyList()).map { layer ->
+                        ChartLayerExportConfig(
+                            name = layer.name, label = layer.label, rawSql = layer.rawSql,
+                            chartType = layer.chartType, axis = layer.axis, color = layer.color,
+                            opacity = layer.opacity, isVisible = layer.isVisible, sortOrder = layer.sortOrder,
+                            seriesConfig = objectMapper.writeValueAsString(layer.seriesConfig),
+                            categoryField = layer.categoryField, valueField = layer.valueField,
+                            paramMapping = objectMapper.writeValueAsString(layer.paramMapping)
+                        )
+                    }
+                    WidgetExportConfig(
+                        widgetType = w.widgetType, title = w.title, body = w.body,
+                        rawSql = w.rawSql, chartConfig = w.chartConfig,
+                        position = w.position, style = w.style,
+                        paramMapping = w.paramMapping, sortOrder = w.sortOrder,
+                        isVisible = w.isVisible, layers = layers
+                    )
+                }
             },
             containers = containers,
             parameterControls = controlService.getParameterControls(reportId).map { c ->
@@ -228,9 +242,35 @@ class TemplateService(
             }
         }
 
-        log.info("Imported report '{}' (id={}, widgets={}, params={}, controls={})",
+        // Create layers for widgets that have them
+        var totalLayers = 0
+        cfg.widgets.forEach { wCfg ->
+            if (wCfg.layers.isEmpty()) return@forEach
+            val newWidgetId = sortOrderToWidgetId[wCfg.sortOrder] ?: return@forEach
+            wCfg.layers.forEach { lCfg ->
+                val seriesConfigMap: Map<String, Any?> = try {
+                    objectMapper.readValue(lCfg.seriesConfig)
+                } catch (_: Exception) { emptyMap() }
+                val paramMappingMap: Map<String, Any?> = try {
+                    objectMapper.readValue(lCfg.paramMapping)
+                } catch (_: Exception) { emptyMap() }
+                interactiveService.createLayer(ChartLayerRequest(
+                    widgetId = newWidgetId, name = lCfg.name, label = lCfg.label,
+                    datasourceId = req.datasourceId,
+                    rawSql = lCfg.rawSql,
+                    chartType = lCfg.chartType, axis = lCfg.axis, color = lCfg.color,
+                    opacity = lCfg.opacity, isVisible = lCfg.isVisible, sortOrder = lCfg.sortOrder,
+                    seriesConfig = seriesConfigMap,
+                    categoryField = lCfg.categoryField, valueField = lCfg.valueField,
+                    paramMapping = paramMappingMap
+                ))
+                totalLayers++
+            }
+        }
+
+        log.info("Imported report '{}' (id={}, widgets={}, params={}, controls={}, layers={})",
             reportName, created.id, created.widgets.size, created.parameters.size,
-            cfg.parameterControls.size)
+            cfg.parameterControls.size, totalLayers)
 
         return ImportResult(
             reportId = created.id,

@@ -81,6 +81,22 @@ data class ParameterControlExportConfig(
     val sortOrder: Int
 )
 
+data class ChartLayerExportConfig(
+    val name: String,
+    val label: String? = null,
+    val rawSql: String? = null,
+    val chartType: String = "line",
+    val axis: String = "left",
+    val color: String? = null,
+    val opacity: Double = 1.0,
+    val isVisible: Boolean = true,
+    val sortOrder: Int = 0,
+    val seriesConfig: String = "{}",
+    val categoryField: String? = null,
+    val valueField: String? = null,
+    val paramMapping: String = "{}"
+)
+
 data class WidgetExportConfig(
     val widgetType: WidgetType,
     val title: String?,
@@ -91,7 +107,8 @@ data class WidgetExportConfig(
     val style: String,
     val paramMapping: String,
     val sortOrder: Int,
-    val isVisible: Boolean
+    val isVisible: Boolean,
+    val layers: List<ChartLayerExportConfig> = emptyList()
 )
 
 data class ImportReportRequest(
