@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import i18n from 'i18next'
+import type { ChartLayerItem } from '@/types'
 
 export interface DesignerWidget {
   id: string                // temp client ID (negative or uuid)
@@ -46,6 +47,11 @@ interface DesignerState {
   // Mode
   previewMode: boolean
   dirty: boolean
+
+  // Chart layers (loaded on demand in designer, keyed by widget.id)
+  widgetLayers: Record<string, ChartLayerItem[]>
+  setWidgetLayers: (widgetId: string, layers: ChartLayerItem[]) => void
+  updateWidgetLayer: (widgetId: string, layerId: number, patch: Partial<ChartLayerItem>) => void
 
   // Actions
   setReportMeta: (name: string, description: string) => void
@@ -127,6 +133,20 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
   historyIndex: 0,
   previewMode: false,
   dirty: false,
+  widgetLayers: {},
+
+  setWidgetLayers: (widgetId, layers) =>
+    set(s => ({ widgetLayers: { ...s.widgetLayers, [widgetId]: layers } })),
+
+  updateWidgetLayer: (widgetId, layerId, patch) =>
+    set(s => ({
+      widgetLayers: {
+        ...s.widgetLayers,
+        [widgetId]: (s.widgetLayers[widgetId] || []).map(l =>
+          l.id === layerId ? { ...l, ...patch } : l
+        ),
+      },
+    })),
 
   setReportMeta: (name, description) =>
     set({ reportName: name, reportDescription: description, dirty: true }),
