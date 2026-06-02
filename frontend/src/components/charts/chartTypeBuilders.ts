@@ -491,6 +491,7 @@ export const CHART_TYPE_OPTIONS = [
   { value: 'bar', i18nKey: 'charts.type.bar', icon: '📊' },
   { value: 'line', i18nKey: 'charts.type.line', icon: '📈' },
   { value: 'area', i18nKey: 'charts.type.area', icon: '🏔️' },
+  { value: 'mixed', i18nKey: 'charts.type.mixed', icon: '🔀' },
   { value: 'pie', i18nKey: 'charts.type.pie', icon: '🥧' },
   { value: 'scatter', i18nKey: 'charts.type.scatter', icon: '🔵' },
   { value: 'radar', i18nKey: 'charts.type.radar', icon: '🕸️' },
