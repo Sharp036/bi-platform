@@ -55,10 +55,6 @@ export default function LayerTogglePanel({ layers, onToggle, compact = false }: 
             {layer.label || layer.name}
           </span>
 
-          {/* Chart type badge */}
-          <span className="text-[10px] text-slate-400 uppercase">
-            {layer.chartType}
-          </span>
         </button>
       ))}
     </div>
