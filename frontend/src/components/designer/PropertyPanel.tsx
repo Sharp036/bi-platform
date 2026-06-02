@@ -472,13 +472,6 @@ export default function PropertyPanel() {
 
               return (
                 <>
-                  {hasLayers ? (
-                    <Field label={t('charts.select_type')}>
-                      <div className="input text-sm text-slate-400 dark:text-slate-500 bg-surface-50 dark:bg-dark-surface-50 cursor-default select-none">
-                        {t('designer.chart_type_combined', 'Комбинированная (управляется слоями)')}
-                      </div>
-                    </Field>
-                  ) : (
                   <Field label={t('charts.select_type')}>
                     <select
                       value={cc.type as string || 'bar'}
@@ -489,8 +482,12 @@ export default function PropertyPanel() {
                         <option key={ct} value={ct}>{t(`charts.type.${ct}`, ct.charAt(0).toUpperCase() + ct.slice(1))}</option>
                       ))}
                     </select>
+                    {hasLayers && (
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {t('designer.chart_type_combined')}
+                      </p>
+                    )}
                   </Field>
-                  )}
 
                   {/* Orthogonal options + value fields + regression — hidden when layers control the chart */}
                   {!hasLayers && (['bar', 'line', 'area'] as const).includes((cc.type as string || 'bar') as 'bar' | 'line' | 'area') && (
@@ -634,7 +631,7 @@ export default function PropertyPanel() {
                                   type="color"
                                   value={currentColor || '#5470c6'}
                                   onChange={e => setColor(e.target.value)}
-                                  title={t('designer.series_color', 'Цвет серии')}
+                                  title={t('designer.series_color')}
                                   className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
                                 />
                                 <input
@@ -698,7 +695,7 @@ export default function PropertyPanel() {
                     return (
                       <div className="space-y-1 mb-1">
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
-                          {t('designer.layers', 'Слои')}
+                          {t('designer.layers')}
                         </p>
                         {layers.map((layer: ChartLayerItem) => {
                           const expanded = expandedLayerIds.has(layer.id)
@@ -730,7 +727,7 @@ export default function PropertyPanel() {
 
                                   {/* Color */}
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.series_color', 'Цвет')}</span>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.series_color')}</span>
                                     <input type="color" value={layer.color || '#5470c6'}
                                       onChange={e => patchLayer(layer, { color: e.target.value })}
                                       className="w-6 h-6 border-0 rounded cursor-pointer bg-transparent" />
@@ -742,30 +739,30 @@ export default function PropertyPanel() {
 
                                   {/* Chart type */}
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.chart_type', 'Тип')}</span>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.chart_type')}</span>
                                     <select value={layer.chartType}
                                       onChange={e => patchLayer(layer, { chartType: e.target.value })}
                                       className="input text-xs flex-1">
-                                      <option value="bar">{t('designer.layer_type.bar', 'Столбики')}</option>
-                                      <option value="line">{t('designer.layer_type.line', 'Линия')}</option>
-                                      <option value="area">{t('designer.layer_type.area', 'Область')}</option>
+                                      <option value="bar">{t('designer.layer_type.bar')}</option>
+                                      <option value="line">{t('designer.layer_type.line')}</option>
+                                      <option value="area">{t('designer.layer_type.area')}</option>
                                     </select>
                                   </div>
 
                                   {/* Axis */}
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.y_axis', 'Ось Y')}</span>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.y_axis')}</span>
                                     <select value={layer.axis}
                                       onChange={e => patchLayer(layer, { axis: e.target.value })}
                                       className="input text-xs flex-1">
-                                      <option value="left">{t('designer.layer_axis.left', 'Левая')}</option>
-                                      <option value="right">{t('designer.layer_axis.right', 'Правая')}</option>
+                                      <option value="left">{t('designer.layer_axis.left')}</option>
+                                      <option value="right">{t('designer.layer_axis.right')}</option>
                                     </select>
                                   </div>
 
                                   {/* Opacity */}
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.opacity', 'Прозрачность')}</span>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.opacity')}</span>
                                     <input type="range" min={0} max={1} step={0.05}
                                       value={layer.opacity ?? 1}
                                       onChange={e => patchLayer(layer, { opacity: Number(e.target.value) })}
@@ -776,13 +773,13 @@ export default function PropertyPanel() {
                                   {/* Smoothing (line/area only) */}
                                   {(layer.chartType === 'line' || layer.chartType === 'area') && (
                                     <div className="flex items-center gap-2">
-                                      <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.smooth', 'Сглаживание')}</span>
+                                      <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.smooth')}</span>
                                       <label className="flex items-center gap-1.5 cursor-pointer">
                                         <input type="checkbox"
                                           checked={sc.smooth !== false}
                                           onChange={e => patchSeriesConfig(layer, { smooth: e.target.checked })}
                                           className="rounded border-slate-300" />
-                                        <span className="text-xs text-slate-600 dark:text-slate-300">{t('designer.enabled', 'Вкл')}</span>
+                                        <span className="text-xs text-slate-600 dark:text-slate-300">{t('designer.enabled')}</span>
                                       </label>
                                     </div>
                                   )}
@@ -790,7 +787,7 @@ export default function PropertyPanel() {
                                   {/* Y-axis format (per-axis, shown with axis label) */}
                                   <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
                                     <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">
-                                      {t('designer.y_axis_settings', 'Ось Y')} ({layer.axis === 'right' ? t('designer.layer_axis.right', 'Правая') : t('designer.layer_axis.left', 'Левая')})
+                                      {t('designer.y_axis_settings')} ({layer.axis === 'right' ? t('designer.layer_axis.right') : t('designer.layer_axis.left')})
                                     </p>
                                     <div className="space-y-1.5">
                                       <select value={axFmt}
@@ -829,12 +826,12 @@ export default function PropertyPanel() {
 
                                   {/* Data labels per layer */}
                                   <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">{t('designer.data_labels', 'Подписи данных')}</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">{t('designer.data_labels')}</p>
                                     <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer mb-1.5">
                                       <input type="checkbox" checked={labelShow}
                                         onChange={e => patchSeriesConfig(layer, { label: { ...(sc.label as object || {}), show: e.target.checked } })}
                                         className="rounded border-slate-300" />
-                                      {t('designer.show_data_labels', 'Показывать')}
+                                      {t('designer.show_data_labels')}
                                     </label>
                                     {labelShow && (
                                       <div className="space-y-1.5">
@@ -842,7 +839,7 @@ export default function PropertyPanel() {
                                           onChange={e => patchSeriesConfig(layer, { label: { ...(sc.label as object || {}), show: true, position: e.target.value } })}
                                           className="input text-xs w-full">
                                           <option value="top">{t('designer.data_label_position.top')}</option>
-                                          <option value="inside">{t('designer.data_label_position.inline', 'Внутри')}</option>
+                                          <option value="inside">{t('designer.data_label_position.inline')}</option>
                                         </select>
                                       </div>
                                     )}
