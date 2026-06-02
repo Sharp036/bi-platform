@@ -8,7 +8,7 @@ import { datasourceApi } from '@/api/datasources'
 import { interactiveApi } from '@/api/interactive'
 import type { ChartLayerItem } from '@/types'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
-import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play } from 'lucide-react'
+import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play, ChevronDown } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import SqlCodeEditor from '@/components/common/SqlCodeEditor'
 import NumericInput from '@/components/common/NumericInput'
@@ -55,6 +55,10 @@ export default function PropertyPanel() {
   const duplicateWidget = useDesignerStore(s => s.duplicateWidget)
   const widgetLayersMap = useDesignerStore(s => s.widgetLayers)
   const updateWidgetLayer = useDesignerStore(s => s.updateWidgetLayer)
+
+  const [expandedLayerIds, setExpandedLayerIds] = useState<Set<number>>(new Set())
+  const toggleLayerExpand = (id: number) =>
+    setExpandedLayerIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
 
   const [queries, setQueries] = useState<SavedQuery[]>([])
   const [datasources, setDatasources] = useState<DataSource[]>([])
@@ -662,56 +666,187 @@ export default function PropertyPanel() {
                     </>
                   )}
 
-                  {/* Layer settings — shown when the widget has server-side layers */}
-                  {(widgetLayersMap[widget.id] || []).length > 0 && (
-                    <Field label={t('designer.layers', 'Слои')}>
-                      <div className="space-y-2">
-                        {(widgetLayersMap[widget.id] || []).map((layer: ChartLayerItem) => (
-                          <div key={layer.id} className="flex items-center gap-2 text-xs p-1.5 rounded border border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-50">
-                            <input
-                              type="color"
-                              value={layer.color || '#5470c6'}
-                              onChange={async e => {
-                                const patch = { color: e.target.value }
-                                try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
-                                updateWidgetLayer(widget.id, layer.id, patch)
-                              }}
-                              title={t('designer.series_color', 'Цвет')}
-                              className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent flex-shrink-0"
-                            />
-                            <span className="truncate flex-1 text-slate-600 dark:text-slate-300" title={layer.label || layer.name}>
-                              {layer.label || layer.name}
-                            </span>
-                            <select
-                              value={layer.chartType}
-                              onChange={async e => {
-                                const patch = { chartType: e.target.value }
-                                try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
-                                updateWidgetLayer(widget.id, layer.id, patch)
-                              }}
-                              className="input text-xs py-0.5 px-1 w-20 flex-shrink-0"
-                            >
-                              <option value="bar">{t('designer.layer_type.bar', 'Столбики')}</option>
-                              <option value="line">{t('designer.layer_type.line', 'Линия')}</option>
-                              <option value="area">{t('designer.layer_type.area', 'Область')}</option>
-                            </select>
-                            <select
-                              value={layer.axis}
-                              onChange={async e => {
-                                const patch = { axis: e.target.value }
-                                try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
-                                updateWidgetLayer(widget.id, layer.id, patch)
-                              }}
-                              className="input text-xs py-0.5 px-1 w-16 flex-shrink-0"
-                            >
-                              <option value="left">{t('designer.layer_axis.left', 'Лево')}</option>
-                              <option value="right">{t('designer.layer_axis.right', 'Право')}</option>
-                            </select>
-                          </div>
-                        ))}
+                  {/* Layer settings accordion — full per-layer config */}
+                  {(widgetLayersMap[widget.id] || []).length > 0 && (() => {
+                    const layers = widgetLayersMap[widget.id] || []
+                    // Helpers: axis-specific chartConfig keys (left = base key, right = key + "Right")
+                    const axisKey = (axis: string, suffix: string) =>
+                      axis === 'right' ? `yAxis${suffix}Right` : `yAxis${suffix}`
+                    const getAxisVal = (axis: string, suffix: string, def: unknown) =>
+                      (cc[axisKey(axis, suffix)] ?? def)
+                    const setAxisVal = (axis: string, suffix: string, val: unknown) =>
+                      update({ chartConfig: { ...cc, [axisKey(axis, suffix)]: val } })
+
+                    const patchLayer = async (layer: ChartLayerItem, patch: Partial<ChartLayerItem>) => {
+                      try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
+                      updateWidgetLayer(widget.id, layer.id, patch)
+                    }
+                    const patchSeriesConfig = async (layer: ChartLayerItem, patch: Record<string, unknown>) => {
+                      const sc = { ...(layer.seriesConfig as Record<string, unknown> || {}), ...patch }
+                      await patchLayer(layer, { seriesConfig: sc })
+                    }
+
+                    return (
+                      <div className="space-y-1 mb-1">
+                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+                          {t('designer.layers', 'Слои')}
+                        </p>
+                        {layers.map((layer: ChartLayerItem) => {
+                          const expanded = expandedLayerIds.has(layer.id)
+                          const sc = layer.seriesConfig as Record<string, unknown> || {}
+                          const labelShow = !!(sc.label as Record<string, unknown> | undefined)?.show
+                          const labelPos = ((sc.label as Record<string, unknown> | undefined)?.position as string) || 'top'
+                          const axFmt = getAxisVal(layer.axis, 'Format', 'plain') as string
+                          const axMin = getAxisVal(layer.axis, 'Min', 'zero') as string
+                          const axDec = getAxisVal(layer.axis, 'Decimals', undefined) as number | undefined
+                          const axCur = getAxisVal(layer.axis, 'Currency', 'USD') as string
+
+                          return (
+                            <div key={layer.id} className="border border-surface-200 dark:border-dark-surface-100 rounded-lg overflow-hidden">
+                              {/* Accordion header */}
+                              <button
+                                type="button"
+                                onClick={() => toggleLayerExpand(layer.id)}
+                                className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-surface-50 dark:hover:bg-dark-surface-50 text-left"
+                              >
+                                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: layer.color || '#5470c6' }} />
+                                <span className="text-xs flex-1 truncate text-slate-700 dark:text-slate-300">{layer.label || layer.name}</span>
+                                <span className="text-[10px] text-slate-400">{layer.chartType} / {layer.axis}</span>
+                                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                              </button>
+
+                              {/* Accordion body */}
+                              {expanded && (
+                                <div className="px-2 pb-2 pt-1 space-y-2 border-t border-surface-200 dark:border-dark-surface-100 bg-surface-50/50 dark:bg-dark-surface-50/50">
+
+                                  {/* Color */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.series_color', 'Цвет')}</span>
+                                    <input type="color" value={layer.color || '#5470c6'}
+                                      onChange={e => patchLayer(layer, { color: e.target.value })}
+                                      className="w-6 h-6 border-0 rounded cursor-pointer bg-transparent" />
+                                    <input type="text" value={layer.color || ''}
+                                      onChange={e => { if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(e.target.value)) patchLayer(layer, { color: e.target.value.toLowerCase() }) }}
+                                      placeholder="#hex" maxLength={7}
+                                      className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50" />
+                                  </div>
+
+                                  {/* Chart type */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.chart_type', 'Тип')}</span>
+                                    <select value={layer.chartType}
+                                      onChange={e => patchLayer(layer, { chartType: e.target.value })}
+                                      className="input text-xs flex-1">
+                                      <option value="bar">{t('designer.layer_type.bar', 'Столбики')}</option>
+                                      <option value="line">{t('designer.layer_type.line', 'Линия')}</option>
+                                      <option value="area">{t('designer.layer_type.area', 'Область')}</option>
+                                    </select>
+                                  </div>
+
+                                  {/* Axis */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.y_axis', 'Ось Y')}</span>
+                                    <select value={layer.axis}
+                                      onChange={e => patchLayer(layer, { axis: e.target.value })}
+                                      className="input text-xs flex-1">
+                                      <option value="left">{t('designer.layer_axis.left', 'Левая')}</option>
+                                      <option value="right">{t('designer.layer_axis.right', 'Правая')}</option>
+                                    </select>
+                                  </div>
+
+                                  {/* Opacity */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.opacity', 'Прозрачность')}</span>
+                                    <input type="range" min={0} max={1} step={0.05}
+                                      value={layer.opacity ?? 1}
+                                      onChange={e => patchLayer(layer, { opacity: Number(e.target.value) })}
+                                      className="flex-1" />
+                                    <span className="text-[10px] text-slate-400 w-8 text-right">{Math.round((layer.opacity ?? 1) * 100)}%</span>
+                                  </div>
+
+                                  {/* Smoothing (line/area only) */}
+                                  {(layer.chartType === 'line' || layer.chartType === 'area') && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.smooth', 'Сглаживание')}</span>
+                                      <label className="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox"
+                                          checked={sc.smooth !== false}
+                                          onChange={e => patchSeriesConfig(layer, { smooth: e.target.checked })}
+                                          className="rounded border-slate-300" />
+                                        <span className="text-xs text-slate-600 dark:text-slate-300">{t('designer.enabled', 'Вкл')}</span>
+                                      </label>
+                                    </div>
+                                  )}
+
+                                  {/* Y-axis format (per-axis, shown with axis label) */}
+                                  <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">
+                                      {t('designer.y_axis_settings', 'Ось Y')} ({layer.axis === 'right' ? t('designer.layer_axis.right', 'Правая') : t('designer.layer_axis.left', 'Левая')})
+                                    </p>
+                                    <div className="space-y-1.5">
+                                      <select value={axFmt}
+                                        onChange={e => setAxisVal(layer.axis, 'Format', e.target.value)}
+                                        className="input text-xs w-full">
+                                        <option value="plain">{t('designer.axis_format.plain')}</option>
+                                        <option value="thousands">{t('designer.axis_format.thousands')}</option>
+                                        <option value="millions">{t('designer.axis_format.millions')}</option>
+                                        <option value="billions">{t('designer.axis_format.billions')}</option>
+                                        <option value="currency">{t('designer.axis_format.currency')}</option>
+                                        <option value="percent">{t('designer.axis_format.percent')}</option>
+                                      </select>
+                                      {axFmt === 'currency' && (
+                                        <select value={axCur}
+                                          onChange={e => setAxisVal(layer.axis, 'Currency', e.target.value)}
+                                          className="input text-xs w-full">
+                                          {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
+                                        </select>
+                                      )}
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[10px] text-slate-400 flex-shrink-0">{t('designer.y_axis_min')}</span>
+                                        <select value={axMin}
+                                          onChange={e => setAxisVal(layer.axis, 'Min', e.target.value)}
+                                          className="input text-xs flex-1">
+                                          <option value="zero">{t('designer.y_axis_min.zero')}</option>
+                                          <option value="auto">{t('designer.y_axis_min.auto')}</option>
+                                        </select>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[10px] text-slate-400 flex-shrink-0">{t('designer.y_axis_decimals')}</span>
+                                        <NumericInput value={axDec} onChange={v => setAxisVal(layer.axis, 'Decimals', v)}
+                                          className="input text-xs flex-1" placeholder="0" />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Data labels per layer */}
+                                  <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">{t('designer.data_labels', 'Подписи данных')}</p>
+                                    <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer mb-1.5">
+                                      <input type="checkbox" checked={labelShow}
+                                        onChange={e => patchSeriesConfig(layer, { label: { ...(sc.label as object || {}), show: e.target.checked } })}
+                                        className="rounded border-slate-300" />
+                                      {t('designer.show_data_labels', 'Показывать')}
+                                    </label>
+                                    {labelShow && (
+                                      <div className="space-y-1.5">
+                                        <select value={labelPos}
+                                          onChange={e => patchSeriesConfig(layer, { label: { ...(sc.label as object || {}), show: true, position: e.target.value } })}
+                                          className="input text-xs w-full">
+                                          <option value="top">{t('designer.data_label_position.top')}</option>
+                                          <option value="inside">{t('designer.data_label_position.inline', 'Внутри')}</option>
+                                        </select>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
                       </div>
-                    </Field>
-                  )}
+                    )
+                  })()}
 
                   {/* Chart Display Options */}
                   {AXIS_CHART_TYPES.includes(cc.type as string || 'bar') && (
