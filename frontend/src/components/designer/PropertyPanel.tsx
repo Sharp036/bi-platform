@@ -468,8 +468,17 @@ export default function PropertyPanel() {
                 update({ chartConfig: { ...cc, regressionFields: next } })
               }
 
+              const hasLayers = (widgetLayersMap[widget.id] || []).length > 0
+
               return (
                 <>
+                  {hasLayers ? (
+                    <Field label={t('charts.select_type')}>
+                      <div className="input text-sm text-slate-400 dark:text-slate-500 bg-surface-50 dark:bg-dark-surface-50 cursor-default select-none">
+                        {t('designer.chart_type_combined', 'Комбинированная (управляется слоями)')}
+                      </div>
+                    </Field>
+                  ) : (
                   <Field label={t('charts.select_type')}>
                     <select
                       value={cc.type as string || 'bar'}
@@ -481,12 +490,10 @@ export default function PropertyPanel() {
                       ))}
                     </select>
                   </Field>
+                  )}
 
-                  {/* Orthogonal options for axis charts: stacked applies to
-                      bar/line/area; horizontal flips axes for bar only.
-                      Replaces the standalone stacked_bar/stacked_area/
-                      horizontal_bar chart types - any combination works. */}
-                  {(['bar', 'line', 'area'] as const).includes((cc.type as string || 'bar') as 'bar' | 'line' | 'area') && (
+                  {/* Orthogonal options + value fields + regression — hidden when layers control the chart */}
+                  {!hasLayers && (['bar', 'line', 'area'] as const).includes((cc.type as string || 'bar') as 'bar' | 'line' | 'area') && (
                     <Field label={t('designer.chart_axis_options')}>
                       <div className="space-y-1.5">
                         {(cc.type === 'bar') && (
@@ -550,8 +557,7 @@ export default function PropertyPanel() {
                   </Field>
 
                   {availableCols.length > 0 && (
-                    <>
-                      <Field label={t('designer.category_field')}>
+                    <Field label={t('designer.category_field')}>
                         <select
                           value={catField}
                           onChange={e => {
@@ -564,7 +570,10 @@ export default function PropertyPanel() {
                           {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                       </Field>
+                  )}
 
+                  {!hasLayers && availableCols.length > 0 && (
+                    <>
                       <Field label={t('designer.value_fields')}>
                         <div className="flex items-center gap-1 mb-1">
                           <button
@@ -848,8 +857,8 @@ export default function PropertyPanel() {
                     )
                   })()}
 
-                  {/* Chart Display Options */}
-                  {AXIS_CHART_TYPES.includes(cc.type as string || 'bar') && (
+                  {/* Chart Display Options — hidden when layers handle per-axis config */}
+                  {!hasLayers && AXIS_CHART_TYPES.includes(cc.type as string || 'bar') && (
                     <>
                       <Field label={t('designer.y_axis_format')}>
                         <select
@@ -916,7 +925,7 @@ export default function PropertyPanel() {
                     </>
                   )}
 
-                  <Field label={t('designer.data_labels')}>
+                  {!hasLayers && <Field label={t('designer.data_labels')}>
                     <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
                       <input
                         type="checkbox"
@@ -1017,7 +1026,7 @@ export default function PropertyPanel() {
                         </select>
                       </div>
                     )}
-                  </Field>
+                  </Field>}
 
                   {AXIS_CHART_TYPES.includes((cc.type as string) || 'bar') && (
                     <Field label={t('designer.chart_threshold_lines')}>
