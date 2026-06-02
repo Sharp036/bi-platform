@@ -4,12 +4,13 @@ import type { DesignerContainer } from './ContainerDesigner'
 import { useTranslation } from 'react-i18next'
 import { BarChart3, Table, Hash, Type, Filter, ImageIcon, GripVertical, EyeOff, Play, ChevronDown, ChevronRight, Eye, Layers } from 'lucide-react'
 import { queryApi } from '@/api/queries'
+import { interactiveApi } from '@/api/interactive'
 import { buildDesignerParameterValues } from '@/utils/designerParameters'
-import EChartWidget from '@/components/charts/EChartWidget'
+import MultiLayerChart from '@/components/charts/MultiLayerChart'
 import TableWidget from '@/components/charts/TableWidget'
 import KpiCard from '@/components/charts/KpiCard'
 import { RichTextWidget } from '@/components/interactive/DashboardObjects'
-import type { WidgetData } from '@/types'
+import type { WidgetData, ChartLayerItem } from '@/types'
 import clsx from 'clsx'
 import { useState, useCallback, useRef } from 'react'
 
@@ -365,6 +366,7 @@ function WidgetBlock({
   const [previewData, setPreviewData] = useState<WidgetData | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
+  const [layers, setLayers] = useState<ChartLayerItem[]>([])
 
   const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
@@ -395,12 +397,16 @@ function WidgetBlock({
           executionMs: res.executionTimeMs || 0,
         })
       }
+      if (widget.widgetType === 'CHART' && widget.serverId) {
+        const fetchedLayers = await interactiveApi.getLayersForWidget(widget.serverId)
+        setLayers(fetchedLayers)
+      }
     } catch {
       setPreviewError(t('designer.preview_failed'))
     } finally {
       setPreviewLoading(false)
     }
-  }, [widget.queryId, widget.datasourceId, widget.rawSql, hasDataSource, parameters, t])
+  }, [widget.queryId, widget.datasourceId, widget.rawSql, widget.widgetType, widget.serverId, hasDataSource, parameters, t])
 
   const dp = dragPos || widget.position
   const zIdx = Number((widget.style as Record<string, unknown>)?.zIndex ?? (isSelected ? 10 : 1))
@@ -493,7 +499,7 @@ function WidgetBlock({
         >
           {widget.widgetType === 'CHART' && previewData ? (
             <div className="w-full h-full">
-              <EChartWidget data={previewData} chartConfig={chartConfigStr} />
+              <MultiLayerChart data={previewData} chartConfig={chartConfigStr} layers={layers} />
             </div>
           ) : tablePreviewData ? (
             <div className="w-full h-full overflow-hidden">

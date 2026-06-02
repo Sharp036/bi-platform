@@ -21,6 +21,7 @@ import {
   buildPieRadius,
   buildPieData,
   buildPieLabelFormatter,
+  buildAutoYAxisMin,
   type PieLabelContent,
 } from '@/components/charts/chartFeatures'
 
@@ -593,7 +594,9 @@ export default function MultiLayerChart({
     }
 
     // Build yAxis
-    const yAxis: any[] = [{ type: 'value', min: yAxisMin === 'auto' ? 'dataMin' : 0 }]
+    const yAxis: any[] = [yAxisMin === 'auto'
+      ? { type: 'value', min: buildAutoYAxisMin() }
+      : { type: 'value', min: 0 }]
     if (hasRightAxis) {
       yAxis.push({
         type: 'value',
