@@ -219,7 +219,8 @@ class InteractiveDashboardService(
         chartType = l.chartType, axis = l.axis, color = l.color,
         opacity = l.opacity, isVisible = l.isVisible, sortOrder = l.sortOrder,
         seriesConfig = parseJson(l.seriesConfig), categoryField = l.categoryField,
-        valueField = l.valueField, createdAt = l.createdAt
+        valueField = l.valueField, paramMapping = parseJson(l.paramMapping),
+        createdAt = l.createdAt
     )
 
     private fun toActionResponse(a: DashboardAction) = DashboardActionResponse(

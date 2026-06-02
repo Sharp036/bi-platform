@@ -42,6 +42,7 @@ data class ChartLayerResponse(
     val seriesConfig: Map<String, Any?>,
     val categoryField: String?,
     val valueField: String?,
+    val paramMapping: Map<String, Any?>,
     val createdAt: Instant
 )
 
