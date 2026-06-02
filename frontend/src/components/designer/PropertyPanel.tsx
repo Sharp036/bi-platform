@@ -842,6 +842,44 @@ export default function PropertyPanel() {
                                           <option value="top">{t('designer.data_label_position.top')}</option>
                                           <option value="inside">{t('designer.data_label_position.inline')}</option>
                                         </select>
+                                        <select
+                                          value={(sc.dataLabelMode as string) || 'all'}
+                                          onChange={e => patchSeriesConfig(layer, { dataLabelMode: e.target.value })}
+                                          className="input text-xs w-full">
+                                          <option value="all">{t('designer.label_mode.all')}</option>
+                                          <option value="first">{t('designer.label_mode.first_n')}</option>
+                                          <option value="last">{t('designer.label_mode.last_n')}</option>
+                                          <option value="min_max">{t('designer.label_mode.min_max')}</option>
+                                        </select>
+                                        {((sc.dataLabelMode as string) === 'first' || (sc.dataLabelMode as string) === 'last') && (
+                                          <NumericInput
+                                            value={(sc.dataLabelCount as number) || 3}
+                                            onChange={v => patchSeriesConfig(layer, { dataLabelCount: v ?? 3 })}
+                                            className="input text-xs w-full"
+                                            placeholder={t('designer.label_count_placeholder')}
+                                          />
+                                        )}
+                                        <div className="flex items-center gap-2">
+                                          <NumericInput
+                                            value={(sc.dataLabelDecimals as number) ?? 0}
+                                            onChange={v => patchSeriesConfig(layer, { dataLabelDecimals: v ?? 0 })}
+                                            className="input text-xs w-20"
+                                          />
+                                          <span className="text-[10px] text-slate-400">{t('designer.y_axis_decimals')}</span>
+                                          <NumericInput
+                                            value={(sc.dataLabelFontSize as number) ?? 10}
+                                            onChange={v => patchSeriesConfig(layer, { dataLabelFontSize: v ?? 10 })}
+                                            className="input text-xs w-16"
+                                          />
+                                          <span className="text-[10px] text-slate-400">px</span>
+                                        </div>
+                                        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                          <input type="checkbox"
+                                            checked={(sc.dataLabelBoxed as boolean) || false}
+                                            onChange={e => patchSeriesConfig(layer, { dataLabelBoxed: e.target.checked })}
+                                            className="rounded border-slate-300" />
+                                          {t('designer.data_label_boxed')}
+                                        </label>
                                       </div>
                                     )}
                                   </div>
@@ -909,18 +947,22 @@ export default function PropertyPanel() {
                         </select>
                       </Field>
 
-                      <Field label={t('designer.x_axis_rotation')}>
-                        <select
-                          value={String(cc.xAxisRotation || 0)}
-                          onChange={e => update({ chartConfig: { ...cc, xAxisRotation: Number(e.target.value) } })}
-                          className="input text-sm"
-                        >
-                          <option value="0">{t('designer.rotation.horizontal')}</option>
-                          <option value="45">{t('designer.rotation.angled')}</option>
-                          <option value="90">{t('designer.rotation.vertical')}</option>
-                        </select>
-                      </Field>
                     </>
+                  )}
+
+                  {/* X-axis rotation is always global — applies to all layers */}
+                  {AXIS_CHART_TYPES.includes(cc.type as string || 'bar') && (
+                    <Field label={t('designer.x_axis_rotation')}>
+                      <select
+                        value={String(cc.xAxisRotation || 0)}
+                        onChange={e => update({ chartConfig: { ...cc, xAxisRotation: Number(e.target.value) } })}
+                        className="input text-sm"
+                      >
+                        <option value="0">{t('designer.rotation.horizontal')}</option>
+                        <option value="45">{t('designer.rotation.angled')}</option>
+                        <option value="90">{t('designer.rotation.vertical')}</option>
+                      </select>
+                    </Field>
                   )}
 
                   {!hasLayers && <Field label={t('designer.data_labels')}>

@@ -571,6 +571,15 @@ export default function MultiLayerChart({
           s.areaStyle = s.areaStyle || { opacity: 0.3 }
         }
 
+        // Add labelLine for callout style when label is shown and not inline
+        const layerLabel = (seriesOverrides.label as Record<string, unknown> | undefined)
+        if (layerLabel?.show && layerLabel?.position !== 'inside') {
+          s.labelLine = {
+            show: true,
+            lineStyle: { color: layer.color || undefined, width: 1.5, opacity: 0.95 },
+          }
+        }
+
         series.push(s)
       })
       if (regressionFields.length > 0) {
@@ -702,11 +711,27 @@ export default function MultiLayerChart({
         return { xAxis: categoryAxis, yAxis }
       })() : {}),
       series,
-      ...(showDataLabels && !isPie ? {
-        labelLayout: isInlineLabels
-          ? createInlineLabelLayout(getChartWidth, () => labelTopPad || 8)
-          : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread, () => legendIsTop ? topLegendReserve : 8),
-      } : {}),
+      ...((() => {
+        // Non-layers path: use chartConfig showDataLabels flag
+        if (layersWithVisibility.length === 0 && showDataLabels && !isPie) {
+          return {
+            labelLayout: isInlineLabels
+              ? createInlineLabelLayout(getChartWidth, () => labelTopPad || 8)
+              : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread, () => legendIsTop ? topLegendReserve : 8),
+          }
+        }
+        // Layers path: apply collision-free layout if any layer has non-inline labels
+        const hasCalloutLabels = layersWithVisibility.some(l => {
+          const lbl = (l.seriesConfig as Record<string, unknown> | undefined)?.label as Record<string, unknown> | undefined
+          return lbl?.show === true && lbl?.position !== 'inside'
+        })
+        if (hasCalloutLabels && !isPie) {
+          return {
+            labelLayout: createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, false, () => legendIsTop ? topLegendReserve : 8),
+          }
+        }
+        return {}
+      })()),
       ...((featureGraphics.delta || featureGraphics.center) ? {
         graphic: [
           ...(featureGraphics.delta ? [featureGraphics.delta] : []),
