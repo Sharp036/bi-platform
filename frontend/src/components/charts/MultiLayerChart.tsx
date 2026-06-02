@@ -594,16 +594,23 @@ export default function MultiLayerChart({
       }
     }
 
+    // Right axis settings (per-axis overrides stored in chartConfig with "Right" suffix)
+    const yAxisMinRight = (config.yAxisMinRight as string) || 'zero'
+    const yAxisFormatRight = (config.yAxisFormatRight as string) || 'plain'
+    const yAxisCurrencyRight = (config.yAxisCurrencyRight as string) || 'USD'
+    const yAxisDecimalsRight = config.yAxisDecimalsRight != null ? Number(config.yAxisDecimalsRight) : undefined
+    const valueFormatterRight = buildValueFormatter(yAxisFormatRight, yAxisCurrencyRight, yAxisDecimalsRight)
+
     // Build yAxis
     const yAxis: any[] = [yAxisMin === 'auto'
       ? { type: 'value', min: buildAutoYAxisMin() }
       : { type: 'value', min: 0 }]
     if (hasRightAxis) {
-      yAxis.push({
-        type: 'value',
-        position: 'right',
-        splitLine: { show: false },
-      })
+      const rightAxis: any = yAxisMinRight === 'auto'
+        ? { type: 'value', position: 'right', splitLine: { show: false }, min: buildAutoYAxisMin() }
+        : { type: 'value', position: 'right', splitLine: { show: false }, min: 0 }
+      if (valueFormatterRight) rightAxis.axisLabel = { formatter: valueFormatterRight }
+      yAxis.push(rightAxis)
     }
 
     // Highlight
