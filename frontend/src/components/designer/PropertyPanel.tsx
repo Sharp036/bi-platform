@@ -5,6 +5,8 @@ import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
+import { interactiveApi } from '@/api/interactive'
+import type { ChartLayerItem } from '@/types'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
 import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play } from 'lucide-react'
 import { createPortal } from 'react-dom'
@@ -51,6 +53,8 @@ export default function PropertyPanel() {
   const updateWidget = useDesignerStore(s => s.updateWidget)
   const removeWidget = useDesignerStore(s => s.removeWidget)
   const duplicateWidget = useDesignerStore(s => s.duplicateWidget)
+  const widgetLayersMap = useDesignerStore(s => s.widgetLayers)
+  const updateWidgetLayer = useDesignerStore(s => s.updateWidgetLayer)
 
   const [queries, setQueries] = useState<SavedQuery[]>([])
   const [datasources, setDatasources] = useState<DataSource[]>([])
@@ -656,6 +660,57 @@ export default function PropertyPanel() {
                         <p className="text-[10px] text-slate-400 mt-1">{t('designer.regression_lines_hint')}</p>
                       </Field>
                     </>
+                  )}
+
+                  {/* Layer settings — shown when the widget has server-side layers */}
+                  {(widgetLayersMap[widget.id] || []).length > 0 && (
+                    <Field label={t('designer.layers', 'Слои')}>
+                      <div className="space-y-2">
+                        {(widgetLayersMap[widget.id] || []).map((layer: ChartLayerItem) => (
+                          <div key={layer.id} className="flex items-center gap-2 text-xs p-1.5 rounded border border-surface-200 dark:border-dark-surface-100 bg-surface-50 dark:bg-dark-surface-50">
+                            <input
+                              type="color"
+                              value={layer.color || '#5470c6'}
+                              onChange={async e => {
+                                const patch = { color: e.target.value }
+                                try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
+                                updateWidgetLayer(widget.id, layer.id, patch)
+                              }}
+                              title={t('designer.series_color', 'Цвет')}
+                              className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent flex-shrink-0"
+                            />
+                            <span className="truncate flex-1 text-slate-600 dark:text-slate-300" title={layer.label || layer.name}>
+                              {layer.label || layer.name}
+                            </span>
+                            <select
+                              value={layer.chartType}
+                              onChange={async e => {
+                                const patch = { chartType: e.target.value }
+                                try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
+                                updateWidgetLayer(widget.id, layer.id, patch)
+                              }}
+                              className="input text-xs py-0.5 px-1 w-20 flex-shrink-0"
+                            >
+                              <option value="bar">{t('designer.layer_type.bar', 'Столбики')}</option>
+                              <option value="line">{t('designer.layer_type.line', 'Линия')}</option>
+                              <option value="area">{t('designer.layer_type.area', 'Область')}</option>
+                            </select>
+                            <select
+                              value={layer.axis}
+                              onChange={async e => {
+                                const patch = { axis: e.target.value }
+                                try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
+                                updateWidgetLayer(widget.id, layer.id, patch)
+                              }}
+                              className="input text-xs py-0.5 px-1 w-16 flex-shrink-0"
+                            >
+                              <option value="left">{t('designer.layer_axis.left', 'Лево')}</option>
+                              <option value="right">{t('designer.layer_axis.right', 'Право')}</option>
+                            </select>
+                          </div>
+                        ))}
+                      </div>
+                    </Field>
                   )}
 
                   {/* Chart Display Options */}
