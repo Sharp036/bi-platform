@@ -468,7 +468,8 @@ export default function PropertyPanel() {
                 update({ chartConfig: { ...cc, regressionFields: next } })
               }
 
-              const hasLayers = (widgetLayersMap[widget.id] || []).length > 0
+              const isMixed = cc.type === 'mixed'
+              const hasLayers = (widgetLayersMap[widget.id] || []).length > 0 || isMixed
 
               return (
                 <>
@@ -672,8 +673,8 @@ export default function PropertyPanel() {
                     </>
                   )}
 
-                  {/* Layer settings accordion — full per-layer config */}
-                  {(widgetLayersMap[widget.id] || []).length > 0 && (() => {
+                  {/* Layer settings accordion — shown for mixed type or when layers exist */}
+                  {hasLayers && (() => {
                     const layers = widgetLayersMap[widget.id] || []
                     // Helpers: axis-specific chartConfig keys (left = base key, right = key + "Right")
                     const axisKey = (axis: string, suffix: string) =>
