@@ -537,10 +537,34 @@ export default function MultiLayerChart({
         const valField = layer.valueField || (lData.columns?.[1])
 
         // Parse seriesConfig overrides
-        let seriesOverrides: Record<string, any> = {}
-        if (layer.seriesConfig && typeof layer.seriesConfig === 'object') {
-          seriesOverrides = layer.seriesConfig as Record<string, any>
-        }
+        const seriesOverrides: Record<string, any> = (layer.seriesConfig && typeof layer.seriesConfig === 'object')
+          ? { ...(layer.seriesConfig as Record<string, any>) }
+          : {}
+
+        // Per-layer data-label options live in seriesConfig (set by the designer
+        // accordion). Build an explicit ECharts label config the same way the
+        // non-layer path does, so designer preview and viewer render identically
+        // and the mode/decimals/fontSize/boxed options actually take effect.
+        const lblCfg = (seriesOverrides.label as Record<string, unknown> | undefined) || {}
+        const lblShow = lblCfg.show === true
+        const lblPosition = (lblCfg.position as string) || 'top'
+        const lblIsInline = lblPosition === 'inside'
+        const lblMode = (seriesOverrides.dataLabelMode as string) || 'all'
+        const lblCount = Number(seriesOverrides.dataLabelCount) || 3
+        const lblDecimals = seriesOverrides.dataLabelDecimals != null ? Number(seriesOverrides.dataLabelDecimals) : 0
+        const lblFontSize = Number.isFinite(Number(seriesOverrides.dataLabelFontSize))
+          ? Math.max(8, Math.min(48, Number(seriesOverrides.dataLabelFontSize))) : 10
+        const lblBoxed = seriesOverrides.dataLabelBoxed === true
+        const lColValues = lRows.map(r => Number(r[valField || '']) || 0)
+
+        // seriesOverrides may carry non-ECharts custom keys (dataLabel*) — strip
+        // them so they are not spread onto the ECharts series.
+        delete seriesOverrides.label
+        delete seriesOverrides.dataLabelMode
+        delete seriesOverrides.dataLabelCount
+        delete seriesOverrides.dataLabelDecimals
+        delete seriesOverrides.dataLabelFontSize
+        delete seriesOverrides.dataLabelBoxed
 
         const s: any = {
           name: layer.label || layer.name,
@@ -571,12 +595,24 @@ export default function MultiLayerChart({
           s.areaStyle = s.areaStyle || { opacity: 0.3 }
         }
 
-        // Add labelLine for callout style when label is shown and not inline
-        const layerLabel = (seriesOverrides.label as Record<string, unknown> | undefined)
-        if (layerLabel?.show && layerLabel?.position !== 'inside') {
-          s.labelLine = {
+        // Explicit label config (mirrors non-layer path)
+        if (lblShow) {
+          s.label = {
             show: true,
-            lineStyle: { color: layer.color || undefined, width: 1.5, opacity: 0.95 },
+            position: lblIsInline ? 'inside' : 'top',
+            distance: lblIsInline ? 6 : 8,
+            fontSize: lblFontSize,
+            formatter: buildLabelFormatter(lblMode, lblCount, lRows.length, lColValues, lblDecimals, true, valueFormatter),
+            ...(lblBoxed ? {
+              borderColor: layer.color || '#5470c6',
+              borderWidth: 1,
+              borderRadius: 3,
+              padding: [2, 6],
+              backgroundColor: labelBg,
+            } : {}),
+          }
+          if (!lblIsInline) {
+            s.labelLine = { show: true, lineStyle: { color: layer.color || undefined, width: 1.5, opacity: 0.95 } }
           }
         }
 
