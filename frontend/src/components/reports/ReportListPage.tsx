@@ -10,6 +10,7 @@ import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
 import FavoriteButton from '@/components/workspace/FavoriteButton'
+import MoveToFolderMenu from '@/components/workspace/MoveToFolderMenu'
 import TagManager from '@/components/tags/TagManager'
 import { useAuthStore } from '@/store/authStore'
 
@@ -74,6 +75,7 @@ export default function ReportListPage() {
         <Link to={`/reports/${r.slug}/edit`} className="btn-ghost p-1.5 text-xs" title={t('common.edit')}><Pencil className="w-3.5 h-3.5" /></Link>
       )}
       <Link to={`/reports/${r.slug}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
+      <MoveToFolderMenu objectType="REPORT" objectId={r.id} />
       {canEdit && (<>
         <button onClick={async () => {
           const suffix = t('reports.copy_suffix', 'copy')
