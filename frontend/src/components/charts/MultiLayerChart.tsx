@@ -15,6 +15,7 @@ import { buildValueFormatter } from '@/utils/formatValue'
 import {
   buildThresholdMarkLine,
   buildMarkPointPatch,
+  buildMarkMinMaxData,
   applyBarConditionalColor,
   buildDeltaGraphic,
   buildCenterLabelGraphic,
@@ -577,6 +578,8 @@ export default function MultiLayerChart({
         const lblFontSize = Number.isFinite(Number(seriesOverrides.dataLabelFontSize))
           ? Math.max(8, Math.min(48, Number(seriesOverrides.dataLabelFontSize))) : 10
         const lblBoxed = seriesOverrides.dataLabelBoxed === true
+        const lblThousandsSep = seriesOverrides.dataLabelThousandsSep !== false
+        const lblRotation = Number(seriesOverrides.dataLabelRotation) || 0
         const lColValues = lRows.map(r => Number(r[valField || '']) || 0)
 
         // seriesOverrides may carry non-ECharts custom keys (dataLabel*) — strip
@@ -587,6 +590,14 @@ export default function MultiLayerChart({
         delete seriesOverrides.dataLabelDecimals
         delete seriesOverrides.dataLabelFontSize
         delete seriesOverrides.dataLabelBoxed
+        delete seriesOverrides.dataLabelThousandsSep
+        delete seriesOverrides.dataLabelRotation
+        delete seriesOverrides.dataLabelTopSpacingMode
+        delete seriesOverrides.dataLabelSpread
+        const lblMarkMinMax = seriesOverrides.markMinMax
+        delete seriesOverrides.markMinMax
+        const lblThresholds = Array.isArray(seriesOverrides.thresholdLines) ? (seriesOverrides.thresholdLines as Record<string, unknown>[]) : []
+        delete seriesOverrides.thresholdLines
 
         // Per-data-point label visibility (first/last/min_max). Hidden points
         // get label+labelLine show:false so no stray callout stubs are drawn -
@@ -640,7 +651,8 @@ export default function MultiLayerChart({
             position: 'top',
             distance: lblIsInline ? 6 : 8,
             fontSize: lblFontSize,
-            formatter: buildLabelFormatter(lblMode, lblCount, lRows.length, lColValues, lblDecimals, true, undefined),
+            rotate: lblRotation || undefined,
+            formatter: buildLabelFormatter(lblMode, lblCount, lRows.length, lColValues, lblDecimals, lblThousandsSep, undefined),
             ...(lblBoxed ? {
               borderColor: layer.color || '#5470c6',
               borderWidth: 1,
@@ -654,6 +666,31 @@ export default function MultiLayerChart({
           } else {
             s.labelLine = { show: true, lineStyle: { color: layer.color || undefined, width: 1.5, opacity: 0.95 } }
             calloutSeriesIdx.add(series.length)
+          }
+        }
+
+        // Min/Max markers (per layer). ECharts markPoint type:'min'/'max' finds
+        // the extremum of this series automatically.
+        if (lblMarkMinMax) {
+          const mm = buildMarkMinMaxData({ markMinMax: lblMarkMinMax }, layer.chartType === 'area' ? 'line' : layer.chartType)
+          if (mm.length > 0) {
+            s.markPoint = { symbol: 'pin', symbolSize: 30, label: { fontSize: 10 }, data: mm }
+          }
+        }
+
+        // Threshold lines (per layer). markLine attached to this series renders
+        // on the layer's own axis (yAxisIndex), so no axis selector is needed.
+        if (lblThresholds.length > 0) {
+          s.markLine = {
+            symbol: ['none', 'none'],
+            silent: true,
+            data: lblThresholds.map((thr: Record<string, unknown>) => ({
+              yAxis: Number(thr.value),
+              lineStyle: { color: (thr.color as string) || '#94a3b8', type: (thr.style as string) || 'dashed', width: 1.5 },
+              label: thr.label
+                ? { show: true, formatter: String(thr.label), position: 'insideEndTop', fontSize: 10, color: (thr.color as string) || '#94a3b8' }
+                : { show: false },
+            })),
           }
         }
 
@@ -716,18 +753,38 @@ export default function MultiLayerChart({
     const legendIsLeft = showLegend && legendPosition === 'left'
     const legendIsRight = showLegend && legendPosition === 'right'
     const legendSidePad = (legendIsLeft || legendIsRight) ? 170 : 0
+    // Effective label-layout flags. For layer charts the config-level
+    // showDataLabels/dataLabelTopSpacingMode/dataLabelSpread/isInlineLabels do
+    // not apply (labels live per-layer in seriesConfig), so derive them from the
+    // layers: any callout layer enables top padding; any layer requesting fixed
+    // spacing / horizontal spread turns those on; inline-only => inline padding.
+    const hasLayers2 = layersWithVisibility.length > 0
+    const layerSc = (l: ChartLayerItem) => (l.seriesConfig as Record<string, unknown> | undefined) || {}
+    const layerLabelShown = (l: ChartLayerItem) => !!(layerSc(l).label as Record<string, unknown> | undefined)?.show
+    const effShowLabels = hasLayers2
+      ? (calloutSeriesIdx.size > 0 || inlineSeriesIdx.size > 0)
+      : showDataLabels
+    const effInline = hasLayers2
+      ? (inlineSeriesIdx.size > 0 && calloutSeriesIdx.size === 0)
+      : isInlineLabels
+    const effTopSpacingFixed = hasLayers2
+      ? layersWithVisibility.some(l => layerLabelShown(l) && layerSc(l).dataLabelTopSpacingMode === 'fixed')
+      : dataLabelTopSpacingMode === 'fixed'
+    const effSpread = hasLayers2
+      ? layersWithVisibility.some(l => layerLabelShown(l) && layerSc(l).dataLabelSpread === true)
+      : dataLabelSpread
     const dynamicLabelTopPad = estimateDataLabelTopPadding(
-      showDataLabels,
+      effShowLabels,
       !isPie,
       rows.length,
       Math.max(1, series.filter(s => s?.type !== 'line' || !String(s?.name || '').startsWith(`${regressionLabel} (`)).length),
       dataLabelMode,
       dataLabelCount
     )
-    const fixedLabelTopPad = showDataLabels && !isPie ? 120 : 0
-    const inlineLabelTopPad = showDataLabels && !isPie ? 24 : 0
-    const labelTopPad = isInlineLabels ? inlineLabelTopPad
-      : dataLabelTopSpacingMode === 'fixed' ? fixedLabelTopPad : dynamicLabelTopPad
+    const fixedLabelTopPad = effShowLabels && !isPie ? 120 : 0
+    const inlineLabelTopPad = effShowLabels && !isPie ? 24 : 0
+    const labelTopPad = effInline ? inlineLabelTopPad
+      : effTopSpacingFixed ? fixedLabelTopPad : dynamicLabelTopPad
     // buildLegendOption always emits a selector (Все/Инв buttons), so the legend
     // row carries the selector-button padding regardless of series count.
     const legendHeight = showLegend ? estimateLegendHeight(series.map(s => String(s.name ?? '')), legendPosition, true) : 0
@@ -826,7 +883,7 @@ export default function MultiLayerChart({
         // series, inline lift for 'inline' series, nothing for the rest. Mirrors
         // the non-layer path's two layout modes, applied selectively per layer.
         if ((calloutSeriesIdx.size > 0 || inlineSeriesIdx.size > 0) && !isPie) {
-          const calloutBase = createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, false, () => legendIsTop ? topLegendReserve : 8)
+          const calloutBase = createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, effSpread, () => legendIsTop ? topLegendReserve : 8)
           const inlineBase = createInlineLabelLayout(getChartWidth, () => legendIsTop ? topLegendReserve : 8)
           return {
             labelLayout: (params: { seriesIndex: number } & Record<string, unknown>) => {
