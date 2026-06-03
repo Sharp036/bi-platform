@@ -640,7 +640,7 @@ export default function MultiLayerChart({
             position: 'top',
             distance: lblIsInline ? 6 : 8,
             fontSize: lblFontSize,
-            formatter: buildLabelFormatter(lblMode, lblCount, lRows.length, lColValues, lblDecimals, true, valueFormatter),
+            formatter: buildLabelFormatter(lblMode, lblCount, lRows.length, lColValues, lblDecimals, true, undefined),
             ...(lblBoxed ? {
               borderColor: layer.color || '#5470c6',
               borderWidth: 1,
