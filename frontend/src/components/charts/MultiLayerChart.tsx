@@ -749,12 +749,36 @@ export default function MultiLayerChart({
       yAxis[0] = { ...yAxis[0], axisLabel: { formatter: valueFormatter } }
     }
 
+    // Per-series tooltip formatting: series on the right axis use the right-axis
+    // formatter (its own decimals), left-axis series use the left formatter.
+    // A single tooltip.valueFormatter can't tell series apart, so for dual-axis
+    // charts use a formatter callback; otherwise keep the simple valueFormatter.
+    const rightAxisSeriesIdx = new Set<number>()
+    series.forEach((s: any, i: number) => { if (s?.yAxisIndex === 1) rightAxisSeriesIdx.add(i) })
+    const tooltipSeriesValue = (p: any): string => {
+      const dv = (p?.data && typeof p.data === 'object' && 'value' in p.data) ? (p.data as { value: unknown }).value : p?.value
+      const num = Number(dv)
+      if (!Number.isFinite(num)) return String(dv ?? '')
+      const fmt = rightAxisSeriesIdx.has(p.seriesIndex) ? valueFormatterRight : valueFormatter
+      return fmt ? fmt(num) : formatLabelValue(num, dataLabelDecimals, dataLabelThousandsSep)
+    }
+
     let result = {
       ...tooltipOpts,
       ...(!isPie ? {
         tooltip: {
           ...((tooltipOpts as any).tooltip || {}),
-          valueFormatter: (v: unknown) => formatTooltipValue(v, valueFormatter, dataLabelDecimals, dataLabelThousandsSep),
+          ...(rightAxisSeriesIdx.size > 0 && !tooltipConfig ? {
+            formatter: (params: unknown) => {
+              const arr = Array.isArray(params) ? params : [params]
+              if (arr.length === 0) return ''
+              const head = (arr[0] as any).axisValueLabel ?? (arr[0] as any).name ?? ''
+              const rows = arr.map((p: any) => `${p.marker ?? ''}${p.seriesName}: <b>${tooltipSeriesValue(p)}</b>`)
+              return [head, ...rows].join('<br/>')
+            },
+          } : {
+            valueFormatter: (v: unknown) => formatTooltipValue(v, valueFormatter, dataLabelDecimals, dataLabelThousandsSep),
+          }),
         },
       } : {}),
       legend,
