@@ -840,7 +840,7 @@ export default function PropertyPanel() {
                                           onChange={e => patchSeriesConfig(layer, { label: { ...(sc.label as object || {}), show: true, position: e.target.value } })}
                                           className="input text-xs w-full">
                                           <option value="top">{t('designer.data_label_position.top')}</option>
-                                          <option value="inside">{t('designer.data_label_position.inline')}</option>
+                                          <option value="inline">{t('designer.data_label_position.inline')}</option>
                                         </select>
                                         <select
                                           value={(sc.dataLabelMode as string) || 'all'}

@@ -368,6 +368,11 @@ export default function MultiLayerChart({
     // lifted by the collision-free labelLayout. Layers set to 'inside' are kept
     // out so the top-level labelLayout does not lift their on-point labels.
     const calloutSeriesIdx = new Set<number>()
+    // Series indexes whose labels use the inline layout (lifted just above the
+    // bar/point, no long callout line) - position 'inline', mirroring the
+    // non-layer path. Kept separate from calloutSeriesIdx so the top-level
+    // labelLayout can dispatch the right layout per series.
+    const inlineSeriesIdx = new Set<number>()
 
     // Display options from chartConfig (match EChartWidget behavior)
     const yAxisMin = (config.yAxisMin as string) || 'zero'
@@ -562,7 +567,10 @@ export default function MultiLayerChart({
         const lblCfg = (seriesOverrides.label as Record<string, unknown> | undefined) || {}
         const lblShow = lblCfg.show === true
         const lblPosition = (lblCfg.position as string) || 'top'
-        const lblIsInline = lblPosition === 'inside'
+        // 'inline' = lifted just above the bar/point (createInlineLabelLayout);
+        // anything else ('top' and legacy 'inside') = collision-free callouts.
+        // Mirrors the non-layer path's isInlineLabels = position === 'inline'.
+        const lblIsInline = lblPosition === 'inline'
         const lblMode = (seriesOverrides.dataLabelMode as string) || 'all'
         const lblCount = Number(seriesOverrides.dataLabelCount) || 3
         const lblDecimals = seriesOverrides.dataLabelDecimals != null ? Number(seriesOverrides.dataLabelDecimals) : 0
@@ -622,11 +630,14 @@ export default function MultiLayerChart({
           s.areaStyle = s.areaStyle || { opacity: 0.3 }
         }
 
-        // Explicit label config (mirrors non-layer path)
+        // Explicit label config (mirrors non-layer path). Position is always
+        // 'top' (ECharts puts the label at the bar tip / above the point); the
+        // labelLayout below lifts it - collision-free for callouts, inline for
+        // 'inline'. Never use ECharts 'inside' (that centers it in the bar).
         if (lblShow) {
           s.label = {
             show: true,
-            position: lblIsInline ? 'inside' : 'top',
+            position: 'top',
             distance: lblIsInline ? 6 : 8,
             fontSize: lblFontSize,
             formatter: buildLabelFormatter(lblMode, lblCount, lRows.length, lColValues, lblDecimals, true, valueFormatter),
@@ -638,7 +649,9 @@ export default function MultiLayerChart({
               backgroundColor: labelBg,
             } : {}),
           }
-          if (!lblIsInline) {
+          if (lblIsInline) {
+            inlineSeriesIdx.add(series.length)
+          } else {
             s.labelLine = { show: true, lineStyle: { color: layer.color || undefined, width: 1.5, opacity: 0.95 } }
             calloutSeriesIdx.add(series.length)
           }
@@ -784,14 +797,19 @@ export default function MultiLayerChart({
               : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread, () => legendIsTop ? topLegendReserve : 8),
           }
         }
-        // Layers path: lift only callout-style ('top') series. Series set to
-        // 'inside' keep their ECharts on-bar position - the labelLayout callback
-        // is top-level and applies to every series, so skip non-callout ones.
-        if (calloutSeriesIdx.size > 0 && !isPie) {
-          const base = createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, false, () => legendIsTop ? topLegendReserve : 8)
+        // Layers path: the labelLayout callback is top-level and fires for every
+        // series, so dispatch per series - collision-free callouts for 'top'
+        // series, inline lift for 'inline' series, nothing for the rest. Mirrors
+        // the non-layer path's two layout modes, applied selectively per layer.
+        if ((calloutSeriesIdx.size > 0 || inlineSeriesIdx.size > 0) && !isPie) {
+          const calloutBase = createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, false, () => legendIsTop ? topLegendReserve : 8)
+          const inlineBase = createInlineLabelLayout(getChartWidth, () => legendIsTop ? topLegendReserve : 8)
           return {
-            labelLayout: (params: { seriesIndex: number } & Record<string, unknown>) =>
-              calloutSeriesIdx.has(params.seriesIndex) ? base(params as never) : {},
+            labelLayout: (params: { seriesIndex: number } & Record<string, unknown>) => {
+              if (calloutSeriesIdx.has(params.seriesIndex)) return calloutBase(params as never)
+              if (inlineSeriesIdx.has(params.seriesIndex)) return inlineBase(params as never)
+              return {}
+            },
           }
         }
         return {}
