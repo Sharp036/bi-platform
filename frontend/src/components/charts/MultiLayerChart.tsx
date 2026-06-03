@@ -773,13 +773,32 @@ export default function MultiLayerChart({
     const effSpread = hasLayers2
       ? layersWithVisibility.some(l => layerLabelShown(l) && layerSc(l).dataLabelSpread === true)
       : dataLabelSpread
+    // Top-band padding must reflect how many labels are actually banded at the
+    // top - i.e. only callout layers, using THEIR mode/count, not the global
+    // config (which for a mixed chart defaults to 'all' and over-reserves the
+    // whole plot). Inline layers sit by their points and don't widen the band.
+    const calloutLayers = hasLayers2
+      ? layersWithVisibility.filter(l => {
+          const lbl = layerSc(l).label as Record<string, unknown> | undefined
+          return lbl?.show === true && lbl?.position !== 'inline'
+        })
+      : []
+    const effLabelMode = hasLayers2
+      ? (calloutLayers.some(l => ((layerSc(l).dataLabelMode as string) || 'all') === 'all') ? 'all' : 'last')
+      : dataLabelMode
+    const effLabelCount = hasLayers2
+      ? Math.max(1, ...calloutLayers.map(l => Number(layerSc(l).dataLabelCount) || 3))
+      : dataLabelCount
+    const effLabelSeriesCount = hasLayers2
+      ? Math.max(1, calloutLayers.length)
+      : Math.max(1, series.filter(s => s?.type !== 'line' || !String(s?.name || '').startsWith(`${regressionLabel} (`)).length)
     const dynamicLabelTopPad = estimateDataLabelTopPadding(
       effShowLabels,
       !isPie,
       rows.length,
-      Math.max(1, series.filter(s => s?.type !== 'line' || !String(s?.name || '').startsWith(`${regressionLabel} (`)).length),
-      dataLabelMode,
-      dataLabelCount
+      effLabelSeriesCount,
+      effLabelMode,
+      effLabelCount
     )
     const fixedLabelTopPad = effShowLabels && !isPie ? 120 : 0
     const inlineLabelTopPad = effShowLabels && !isPie ? 24 : 0
