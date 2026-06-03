@@ -21,6 +21,9 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 const ROW_HEIGHT = 70   // px per grid row unit
 const COLS = 12
+// Stable empty-array reference so widgets without layers don't get a fresh []
+// each render (which would thrash the chart's layer-change effect).
+const EMPTY_LAYERS: ChartLayerItem[] = []
 
 interface DesignerCanvasProps {
   containers?: DesignerContainer[]
@@ -366,8 +369,10 @@ function WidgetBlock({
   const [previewData, setPreviewData] = useState<WidgetData | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
-  const [layers, setLayers] = useState<ChartLayerItem[]>([])
   const setWidgetLayers = useDesignerStore(s => s.setWidgetLayers)
+  // Read layers from the store (single source of truth) so per-layer edits made
+  // in PropertyPanel reflect on the chart immediately, without a page reload.
+  const layers = useDesignerStore(s => s.widgetLayers[widget.id]) ?? EMPTY_LAYERS
 
   const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
@@ -400,7 +405,6 @@ function WidgetBlock({
       }
       if (widget.widgetType === 'CHART' && widget.serverId) {
         const fetchedLayers = await interactiveApi.getLayersForWidget(widget.serverId)
-        setLayers(fetchedLayers)
         setWidgetLayers(widget.id, fetchedLayers)
       }
     } catch {
