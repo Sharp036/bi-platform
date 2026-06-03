@@ -328,11 +328,21 @@ export function buildCenterLabelGraphic(
 // order of magnitude of the maximum value:
 //   max = 12 000  → step = 1 000  → min(6 450) = 6 000
 //   max = 167 000 → step = 10 000 → min(164 671) = 160 000
+// Guarantees a visible gap below the minimum: first pad the minimum down by
+// ~10% of the data range, then round that padded value down to the step. Tying
+// the padding to the data range (not the step) keeps a consistent gap and
+// avoids over-padding when the range is small relative to the step - e.g. a min
+// that sits on a step boundary (0.6 with step 0.1) no longer hugs the axis
+// line, while a tight series (164 671..167 000, step 10 000) still floors to
+// 160 000 instead of dropping a whole extra step.
 export function buildAutoYAxisMin() {
   return (value: { min: number; max: number }): number => {
     if (value.max <= 0) return 0
     const step = Math.pow(10, Math.floor(Math.log10(value.max)) - 1)
-    return Math.floor(value.min / step) * step
+    const range = value.max - value.min
+    const padded = value.min - (range > 0 ? range * 0.1 : step)
+    const m = Math.floor(padded / step) * step
+    return m < 0 ? 0 : m
   }
 }
 
