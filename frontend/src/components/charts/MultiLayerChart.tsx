@@ -364,6 +364,10 @@ export default function MultiLayerChart({
 
     // Build base series from widget data (if no layers, use old logic)
     const series: any[] = []
+    // Series indexes whose labels are callout-style (position 'top') and must be
+    // lifted by the collision-free labelLayout. Layers set to 'inside' are kept
+    // out so the top-level labelLayout does not lift their on-point labels.
+    const calloutSeriesIdx = new Set<number>()
 
     // Display options from chartConfig (match EChartWidget behavior)
     const yAxisMin = (config.yAxisMin as string) || 'zero'
@@ -636,6 +640,7 @@ export default function MultiLayerChart({
           }
           if (!lblIsInline) {
             s.labelLine = { show: true, lineStyle: { color: layer.color || undefined, width: 1.5, opacity: 0.95 } }
+            calloutSeriesIdx.add(series.length)
           }
         }
 
@@ -779,14 +784,14 @@ export default function MultiLayerChart({
               : createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, dataLabelSpread, () => legendIsTop ? topLegendReserve : 8),
           }
         }
-        // Layers path: apply collision-free layout if any layer has non-inline labels
-        const hasCalloutLabels = layersWithVisibility.some(l => {
-          const lbl = (l.seriesConfig as Record<string, unknown> | undefined)?.label as Record<string, unknown> | undefined
-          return lbl?.show === true && lbl?.position !== 'inside'
-        })
-        if (hasCalloutLabels && !isPie) {
+        // Layers path: lift only callout-style ('top') series. Series set to
+        // 'inside' keep their ECharts on-bar position - the labelLayout callback
+        // is top-level and applies to every series, so skip non-callout ones.
+        if (calloutSeriesIdx.size > 0 && !isPie) {
+          const base = createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, false, () => legendIsTop ? topLegendReserve : 8)
           return {
-            labelLayout: createCollisionFreeLayout(getChartWidth, manualLabelPositions.current, labelPlacements, false, () => legendIsTop ? topLegendReserve : 8),
+            labelLayout: (params: { seriesIndex: number } & Record<string, unknown>) =>
+              calloutSeriesIdx.has(params.seriesIndex) ? base(params as never) : {},
           }
         }
         return {}
