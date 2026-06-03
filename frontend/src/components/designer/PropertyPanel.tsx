@@ -880,9 +880,111 @@ export default function PropertyPanel() {
                                             className="rounded border-slate-300" />
                                           {t('designer.data_label_boxed')}
                                         </label>
+                                        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                          <input type="checkbox"
+                                            checked={(sc.dataLabelThousandsSep as boolean | undefined) !== false}
+                                            onChange={e => patchSeriesConfig(layer, { dataLabelThousandsSep: e.target.checked })}
+                                            className="rounded border-slate-300" />
+                                          {t('designer.data_label_thousands_sep')}
+                                        </label>
+                                        {labelPos !== 'inline' && (
+                                          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                            <input type="checkbox"
+                                              checked={(sc.dataLabelSpread as boolean) || false}
+                                              onChange={e => patchSeriesConfig(layer, { dataLabelSpread: e.target.checked })}
+                                              className="rounded border-slate-300" />
+                                            {t('designer.data_label_spread')}
+                                          </label>
+                                        )}
+                                        {labelPos !== 'inline' && (
+                                          <select
+                                            value={(sc.dataLabelTopSpacingMode as string) || 'dynamic'}
+                                            onChange={e => patchSeriesConfig(layer, { dataLabelTopSpacingMode: e.target.value })}
+                                            className="input text-xs w-full">
+                                            <option value="dynamic">{t('designer.label_top_spacing_mode.dynamic')}</option>
+                                            <option value="fixed">{t('designer.label_top_spacing_mode.fixed')}</option>
+                                          </select>
+                                        )}
+                                        <select
+                                          value={String((sc.dataLabelRotation as number) || 0)}
+                                          onChange={e => patchSeriesConfig(layer, { dataLabelRotation: Number(e.target.value) })}
+                                          className="input text-xs w-full">
+                                          <option value="0">{t('designer.label_rotation.horizontal')}</option>
+                                          <option value="-45">{t('designer.label_rotation.angled_up')}</option>
+                                          <option value="45">{t('designer.label_rotation.angled_down')}</option>
+                                          <option value="-90">{t('designer.label_rotation.vertical')}</option>
+                                        </select>
                                       </div>
                                     )}
                                   </div>
+
+                                  {/* Min/Max markers + linear regression (per layer) */}
+                                  <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100 space-y-1.5">
+                                    <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
+                                      <input type="checkbox"
+                                        checked={!!sc.markMinMax}
+                                        onChange={e => patchSeriesConfig(layer, { markMinMax: e.target.checked ? true : undefined })}
+                                        className="rounded border-slate-300" />
+                                      {t('designer.chart_mark_minmax')}
+                                    </label>
+                                    <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
+                                      <input type="checkbox"
+                                        checked={Array.isArray(cc.regressionFields) && (cc.regressionFields as string[]).includes(layer.label || layer.name)}
+                                        onChange={e => {
+                                          const seriesName = layer.label || layer.name
+                                          const current = Array.isArray(cc.regressionFields) ? [...(cc.regressionFields as string[])] : []
+                                          const next = e.target.checked
+                                            ? [...current.filter(n => n !== seriesName), seriesName]
+                                            : current.filter(n => n !== seriesName)
+                                          update({ chartConfig: { ...cc, regressionFields: next.length ? next : undefined } })
+                                        }}
+                                        className="rounded border-slate-300" />
+                                      {t('designer.regression_lines')}
+                                    </label>
+                                  </div>
+
+                                  {/* Threshold lines (per layer) - bound to this layer's axis */}
+                                  {(() => {
+                                    type ThrLine = { value: number; color?: string; label?: string; style?: string }
+                                    const thr = Array.isArray(sc.thresholdLines) ? (sc.thresholdLines as ThrLine[]) : []
+                                    const setThr = (next: ThrLine[]) => patchSeriesConfig(layer, { thresholdLines: next.length ? next : undefined })
+                                    const updThr = (i: number, patch: Partial<ThrLine>) => { const n = [...thr]; n[i] = { ...n[i], ...patch }; setThr(n) }
+                                    return (
+                                      <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
+                                        <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">{t('designer.chart_threshold_lines')}</p>
+                                        <div className="space-y-1">
+                                          {thr.map((ln, i) => (
+                                            <div key={i} className="space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded p-1.5">
+                                              <div className="flex items-center gap-1.5">
+                                                <NumericInput value={ln.value} onChange={v => updThr(i, { value: v ?? 0 })}
+                                                  className="w-20 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
+                                                  placeholder={t('designer.chart_threshold_value')} />
+                                                <input type="color" value={ln.color || '#94a3b8'}
+                                                  onChange={e => updThr(i, { color: e.target.value })}
+                                                  className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent" />
+                                                <select value={ln.style || 'dashed'} onChange={e => updThr(i, { style: e.target.value })}
+                                                  className="input text-xs flex-1 py-0.5">
+                                                  <option value="solid">{t('designer.chart_threshold_style.solid')}</option>
+                                                  <option value="dashed">{t('designer.chart_threshold_style.dashed')}</option>
+                                                  <option value="dotted">{t('designer.chart_threshold_style.dotted')}</option>
+                                                </select>
+                                                <button onClick={() => setThr(thr.filter((_, j) => j !== i))}
+                                                  className="text-red-500 hover:text-red-700 p-0.5"><X className="w-3 h-3" /></button>
+                                              </div>
+                                              <input type="text" value={ln.label || ''}
+                                                onChange={e => updThr(i, { label: e.target.value || undefined })}
+                                                placeholder={t('designer.chart_threshold_label')}
+                                                className="w-full text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50" />
+                                            </div>
+                                          ))}
+                                          <button onClick={() => setThr([...thr, { value: 0, color: '#94a3b8', style: 'dashed' }])}
+                                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5">
+                                            <Plus className="w-3 h-3" /> {t('designer.chart_add_threshold')}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )
+                                  })()}
 
                                 </div>
                               )}
