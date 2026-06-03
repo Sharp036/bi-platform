@@ -566,10 +566,23 @@ export default function MultiLayerChart({
         delete seriesOverrides.dataLabelFontSize
         delete seriesOverrides.dataLabelBoxed
 
+        // Per-data-point label visibility (first/last/min_max). Hidden points
+        // get label+labelLine show:false so no stray callout stubs are drawn -
+        // same approach as the non-layer path (relying on a '' formatter alone
+        // leaves labelLine stubs that render as white dashes on the bars).
+        const lIsLabelVisible = buildLabelVisibility(lblMode, lblCount, lRows.length, lColValues)
+
         const s: any = {
           name: layer.label || layer.name,
           type: layer.chartType || chartType,
-          data: lRows.map(r => ({ ...r, value: r[valField || ''] ?? 0 })),
+          data: lRows.map((r, dataIndex) => {
+            const labelHidden = lblShow && !lIsLabelVisible(dataIndex)
+            return {
+              ...r,
+              value: r[valField || ''] ?? 0,
+              ...(labelHidden ? { label: { show: false }, labelLine: { show: false } } : {}),
+            }
+          }),
           smooth: layer.chartType === 'line',
           yAxisIndex: layer.axis === 'right' ? 1 : 0,
           ...seriesOverrides,
