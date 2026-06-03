@@ -298,6 +298,16 @@ export default function MultiLayerChart({
     [layers, visibilityMap]
   )
 
+  // The collision-free label layout needs a second render pass with measured
+  // label rects to lift labels above the bars (callouts). The viewer gets that
+  // pass for free from async meta loading; the designer renders once and would
+  // leave labels stuck on the bars. Force one extra render after data/layers
+  // settle so both render identically. Deps exclude labelVersion to avoid a loop.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => forceUpdate(n => n + 1))
+    return () => cancelAnimationFrame(id)
+  }, [data, layersWithVisibility])
+
   const option = useMemo(() => {
     const rawType = (config.type as string) || 'bar'
     const chartType = rawType === 'mixed' ? 'bar' : rawType
