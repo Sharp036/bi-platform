@@ -204,6 +204,7 @@
   "designer.layout": "Disposition (grille : 12 colonnes)",
   "designer.section_general": "Général",
   "designer.section_layout": "Disposition",
+  "designer.section_source": "Source de données",
   "designer.zindex": "Calque (z-index)",
   "designer.search_options": "Rechercher des options",
   "designer.no_options_found": "Aucune option trouvée",

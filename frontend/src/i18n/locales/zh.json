@@ -204,6 +204,7 @@
   "designer.layout": "布局（网格：12列）",
   "designer.section_general": "常规",
   "designer.section_layout": "布局",
+  "designer.section_source": "数据源",
   "designer.zindex": "图层 (z-index)",
   "designer.search_options": "搜索选项",
   "designer.no_options_found": "未找到选项",

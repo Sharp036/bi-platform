@@ -22,8 +22,8 @@ export interface SelectOpt {
 
 // One configurable option. Simple options declare an editor + get/set; complex
 // ones (value fields, layers, thresholds...) supply a custom render(). Both
-// carry category + nameKey so sections and search work uniformly - the Grafana
-// options-registry model.
+// carry category + nameKey so a single registry drives both the collapsible
+// sections and the option search.
 export interface OptionDef {
   id: string
   category: string

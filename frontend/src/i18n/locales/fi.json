@@ -204,6 +204,7 @@
   "designer.layout": "Asettelu (ruudukko: 12 saraketta)",
   "designer.section_general": "Yleiset",
   "designer.section_layout": "Asettelu",
+  "designer.section_source": "Tietolähde",
   "designer.zindex": "Taso (z-index)",
   "designer.search_options": "Hae asetuksia",
   "designer.no_options_found": "Asetuksia ei löytynyt",

@@ -221,6 +221,7 @@
   "designer.layout": "Layout (grid: 12 columns)",
   "designer.section_general": "General",
   "designer.section_layout": "Layout",
+  "designer.section_source": "Data source",
   "designer.zindex": "Layer (z-index)",
   "designer.search_options": "Search options",
   "designer.no_options_found": "No options found",

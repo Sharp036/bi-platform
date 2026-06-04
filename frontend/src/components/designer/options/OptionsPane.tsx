@@ -5,15 +5,18 @@ import clsx from 'clsx'
 import NumericInput from '@/components/common/NumericInput'
 import type { OptionCtx, OptionDef, OptionCategoryDef } from './types'
 
-const LS_KEY = 'designer_options_collapsed'
+const LS_KEY = 'designer_options_expanded'
 
-function loadCollapsed(): Record<string, boolean> {
+// Persisted map of category id -> expanded. A category with no entry is
+// collapsed by default (cleaner first impression); the user expands what they
+// need and the choice is remembered.
+function loadExpanded(): Record<string, boolean> {
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} }
 }
 
-// Grafana-style options renderer: collapsible categories + a search box that
-// flattens and filters options by name. Driven entirely by the OptionDef[]
-// registry, so adding an option requires no layout work here.
+// Options renderer: collapsible categories + a search box that flattens and
+// filters options by name. Driven entirely by the OptionDef[] registry, so
+// adding an option requires no layout work here.
 export default function OptionsPane({ options, categories, ctx }: {
   options: OptionDef[]
   categories: OptionCategoryDef[]
@@ -21,9 +24,9 @@ export default function OptionsPane({ options, categories, ctx }: {
 }) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(loadCollapsed)
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(loadExpanded)
 
-  const toggle = (id: string) => setCollapsed(prev => {
+  const toggle = (id: string) => setExpanded(prev => {
     const next = { ...prev, [id]: !prev[id] }
     try { localStorage.setItem(LS_KEY, JSON.stringify(next)) } catch { /* ignore */ }
     return next
@@ -87,8 +90,9 @@ export default function OptionsPane({ options, categories, ctx }: {
 
   const field = (o: OptionDef) => (
     <div key={o.id}>
-      {/* Checkbox editors render their own inline label. */}
-      {o.editor !== 'checkbox' && (
+      {/* Checkbox editors render their own inline label; an empty nameKey means
+          the custom render supplies its own heading (e.g. param mapping). */}
+      {o.editor !== 'checkbox' && o.nameKey && (
         <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t(o.nameKey)}</label>
       )}
       {editor(o)}
@@ -125,7 +129,7 @@ export default function OptionsPane({ options, categories, ctx }: {
       {categories.map(cat => {
         const opts = matched.filter(o => o.category === cat.id)
         if (opts.length === 0) return null
-        const isCollapsed = !!collapsed[cat.id]
+        const isCollapsed = !expanded[cat.id]
         return (
           <div key={cat.id} className="border-b border-surface-200 dark:border-dark-surface-100 last:border-0">
             <button
