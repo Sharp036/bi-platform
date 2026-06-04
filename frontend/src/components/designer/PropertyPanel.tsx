@@ -58,6 +58,7 @@ export default function PropertyPanel() {
   const duplicateWidget = useDesignerStore(s => s.duplicateWidget)
   const widgetLayersMap = useDesignerStore(s => s.widgetLayers)
   const updateWidgetLayer = useDesignerStore(s => s.updateWidgetLayer)
+  const setWidgetLayers = useDesignerStore(s => s.setWidgetLayers)
 
   const [expandedLayerIds, setExpandedLayerIds] = useState<Set<number>>(new Set())
   const toggleLayerExpand = (id: number) =>
@@ -91,6 +92,17 @@ export default function PropertyPanel() {
     if (!widget) return
     const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
     if (hasDataSource) loadColumns()
+  }, [selected]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load chart layers when a saved CHART widget is selected, so the Layers
+  // section is populated immediately - previously layers only appeared after
+  // the canvas preview ran (which is what seeded the store).
+  useEffect(() => {
+    if (!widget || widget.widgetType !== 'CHART' || !widget.serverId) return
+    if (widgetLayersMap[widget.id]) return
+    interactiveApi.getLayersForWidget(widget.serverId)
+      .then(layers => setWidgetLayers(widget.id, layers))
+      .catch(() => {})
   }, [selected]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-match SQL :params to report parameters and filter widget filterColumns
@@ -338,10 +350,246 @@ export default function PropertyPanel() {
     },
   ] : []
 
-  const registryOptions = [...COMMON_OPTIONS, ...dataSourceOptions]
+  // Chart-specific section. cc/chartHasLayers close over component scope.
+  const isChart = widget.widgetType === 'CHART'
+  const chartCc = widget.chartConfig as Record<string, unknown>
+  const chartHasLayers = (widgetLayersMap[widget.id] || []).length > 0 || chartCc.type === 'mixed'
+  // Value-fields / regression locals (lifted from the chart config block so the
+  // value-fields render option can use them). Only meaningful for charts.
+  const chartCatField = (chartCc.categoryField as string) || ''
+  const chartValFields = (chartCc.valueFields as string[]) || []
+  const chartRegFields = (chartCc.regressionFields as string[]) || []
+  const chartAllNonCat = availableCols.filter(c => c !== (chartCatField || availableCols[0]))
+  const chartAllSelected = !Array.isArray(chartCc.valueFields)
+  const chartEffFields = chartAllSelected ? chartAllNonCat : chartValFields
+  const toggleValueField = (col: string) => {
+    const current = chartAllSelected ? [...chartAllNonCat] : [...chartValFields]
+    const next = current.includes(col) ? current.filter(c => c !== col) : [...current, col]
+    if (next.length === chartAllNonCat.length) {
+      const { valueFields: _drop, ...rest } = chartCc
+      update({ chartConfig: rest })
+    } else {
+      update({ chartConfig: { ...chartCc, valueFields: next } })
+    }
+  }
+  const toggleRegressionField = (col: string) => {
+    const current = Array.isArray(chartRegFields) ? [...chartRegFields] : []
+    const next = current.includes(col) ? current.filter(c => c !== col) : [...current, col]
+    update({ chartConfig: { ...chartCc, regressionFields: next } })
+  }
+  const chartOptions: OptionDef[] = isChart ? [
+    {
+      id: 'chart_type', category: 'chart', nameKey: 'charts.select_type',
+      render: () => (
+        <>
+          <select
+            value={chartCc.type as string || 'bar'}
+            onChange={e => update({ chartConfig: { ...chartCc, type: e.target.value } })}
+            className="input text-sm"
+          >
+            {CHART_TYPES.map(ct => (
+              <option key={ct} value={ct}>{t(`charts.type.${ct}`, ct.charAt(0).toUpperCase() + ct.slice(1))}</option>
+            ))}
+          </select>
+          {chartHasLayers && (
+            <p className="text-[10px] text-slate-400 mt-1">{t('designer.chart_type_combined')}</p>
+          )}
+        </>
+      ),
+    },
+    {
+      id: 'legend_position', category: 'chart', nameKey: 'designer.legend_position', editor: 'select',
+      get: c => (c.cc.legendPosition as string) || 'auto',
+      set: (c, v) => c.update({ chartConfig: { ...c.cc, legendPosition: v as string } }),
+      selectOptions: () => [
+        { value: 'auto', nameKey: 'designer.legend_position.auto' },
+        { value: 'top', nameKey: 'designer.legend_position.top' },
+        { value: 'bottom', nameKey: 'designer.legend_position.bottom' },
+        { value: 'left', nameKey: 'designer.legend_position.left' },
+        { value: 'right', nameKey: 'designer.legend_position.right' },
+        { value: 'hidden', nameKey: 'designer.legend_position.hidden' },
+      ],
+    },
+    {
+      id: 'null_handling', category: 'chart', nameKey: 'designer.null_handling', editor: 'select',
+      get: c => (c.cc.nullHandling as string) || 'zero',
+      set: (c, v) => c.update({ chartConfig: { ...c.cc, nullHandling: v as string } }),
+      selectOptions: () => [
+        { value: 'zero', nameKey: 'designer.null_handling.zero' },
+        { value: 'gap', nameKey: 'designer.null_handling.gap' },
+      ],
+    },
+    {
+      id: 'category_field', category: 'data', nameKey: 'designer.category_field',
+      showIf: () => availableCols.length > 0,
+      render: () => (
+        <select
+          value={(chartCc.categoryField as string) || ''}
+          onChange={e => {
+            const { valueFields: _drop, ...rest } = chartCc
+            update({ chartConfig: { ...rest, categoryField: e.target.value || undefined } })
+          }}
+          className="input text-sm"
+        >
+          <option value="">{t('designer.auto_first_column')}</option>
+          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      ),
+    },
+    {
+      id: 'value_fields', category: 'data', nameKey: 'designer.value_fields',
+      hintKey: 'designer.value_fields_hint',
+      showIf: () => !chartHasLayers && availableCols.length > 0,
+      render: () => (
+        <>
+          <div className="flex items-center gap-1 mb-1">
+            <button onClick={() => { const { valueFields: _d, ...rest } = chartCc; update({ chartConfig: rest }) }}
+              className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.select_all')}>
+              <CheckSquare className="w-3 h-3" /> {t('designer.select_all')}
+            </button>
+            <button onClick={() => update({ chartConfig: { ...chartCc, valueFields: [] } })}
+              className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.deselect_all')}>
+              <Square className="w-3 h-3" /> {t('designer.deselect_all')}
+            </button>
+            <button onClick={() => {
+              const inverted = chartAllNonCat.filter(c => !chartEffFields.includes(c))
+              if (inverted.length === chartAllNonCat.length) { const { valueFields: _d, ...rest } = chartCc; update({ chartConfig: rest }) }
+              else update({ chartConfig: { ...chartCc, valueFields: inverted } })
+            }} className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.invert')}>
+              <ToggleLeft className="w-3 h-3" /> {t('designer.invert')}
+            </button>
+          </div>
+          <div className="space-y-1 max-h-36 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+            {chartAllNonCat.map((col, idx) => {
+              const optColors = (chartCc.option as Record<string, unknown> | undefined)?.color
+              const currentColor = Array.isArray(optColors) && typeof optColors[idx] === 'string' ? (optColors[idx] as string) : ''
+              const setColor = (hex: string) => {
+                const option = (chartCc.option as Record<string, unknown> | undefined) || {}
+                const arr = Array.isArray(option.color) ? [...(option.color as unknown[])] : []
+                while (arr.length <= idx) arr.push('')
+                arr[idx] = hex
+                update({ chartConfig: { ...chartCc, option: { ...option, color: arr } } })
+              }
+              return (
+                <div key={col} className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white flex-1">
+                    <input type="checkbox" checked={chartAllSelected || chartValFields.includes(col)}
+                      onChange={() => toggleValueField(col)} className="rounded border-slate-300" />
+                    {col}
+                  </label>
+                  <input type="color" value={currentColor || '#5470c6'} onChange={e => setColor(e.target.value)}
+                    title={t('designer.series_color')} className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent" />
+                  <input type="text" value={currentColor}
+                    onChange={e => { const v = e.target.value.trim(); if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) setColor(v.toLowerCase()); else if (v === '') setColor('') }}
+                    placeholder="#hex" maxLength={7}
+                    className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50" />
+                </div>
+              )
+            })}
+          </div>
+        </>
+      ),
+    },
+    {
+      id: 'regression_lines', category: 'data', nameKey: 'designer.regression_lines',
+      hintKey: 'designer.regression_lines_hint',
+      showIf: () => !chartHasLayers && availableCols.length > 0,
+      render: () => (
+        <div className="space-y-1 max-h-28 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
+          {chartEffFields.map(col => (
+            <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
+              <input type="checkbox" checked={Array.isArray(chartRegFields) && chartRegFields.includes(col)}
+                onChange={() => toggleRegressionField(col)} className="rounded border-slate-300" />
+              {col}
+            </label>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: 'axis_options', category: 'axis', nameKey: 'designer.chart_axis_options',
+      showIf: () => !chartHasLayers && ['bar', 'line', 'area'].includes((chartCc.type as string) || 'bar'),
+      render: () => (
+        <div className="space-y-1.5">
+          {chartCc.type === 'bar' && (
+            <label className="inline-flex items-center gap-1.5 text-xs">
+              <input type="checkbox" checked={chartCc.orientation === 'horizontal'}
+                onChange={e => update({ chartConfig: { ...chartCc, orientation: e.target.checked ? 'horizontal' : undefined } })}
+                className="h-3.5 w-3.5" />
+              <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_orientation_horizontal')}</span>
+            </label>
+          )}
+          <label className="inline-flex items-center gap-1.5 text-xs">
+            <input type="checkbox" checked={!!chartCc.stacked}
+              onChange={e => update({ chartConfig: { ...chartCc, stacked: e.target.checked || undefined } })}
+              className="h-3.5 w-3.5" />
+            <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_stacked')}</span>
+          </label>
+        </div>
+      ),
+    },
+    {
+      id: 'y_axis_format', category: 'axis', nameKey: 'designer.y_axis_format', editor: 'select',
+      showIf: () => !chartHasLayers && AXIS_CHART_TYPES.includes((chartCc.type as string) || 'bar'),
+      get: c => (c.cc.yAxisFormat as string) || 'plain',
+      set: (c, v) => c.update({ chartConfig: { ...c.cc, yAxisFormat: v as string } }),
+      selectOptions: () => [
+        { value: 'plain', nameKey: 'designer.axis_format.plain' },
+        { value: 'thousands', nameKey: 'designer.axis_format.thousands' },
+        { value: 'millions', nameKey: 'designer.axis_format.millions' },
+        { value: 'billions', nameKey: 'designer.axis_format.billions' },
+        { value: 'currency', nameKey: 'designer.axis_format.currency' },
+        { value: 'percent', nameKey: 'designer.axis_format.percent' },
+      ],
+    },
+    {
+      id: 'y_axis_decimals', category: 'axis', nameKey: 'designer.y_axis_decimals', editor: 'number',
+      showIf: () => !chartHasLayers && AXIS_CHART_TYPES.includes((chartCc.type as string) || 'bar')
+        && ['plain', 'thousands', 'millions', 'billions', 'currency', 'percent'].includes((chartCc.yAxisFormat as string) || 'plain'),
+      get: c => c.cc.yAxisDecimals != null ? Number(c.cc.yAxisDecimals) : undefined,
+      set: (c, v) => c.update({ chartConfig: { ...c.cc, yAxisDecimals: v } }),
+    },
+    {
+      id: 'y_axis_currency', category: 'axis', nameKey: 'designer.currency',
+      showIf: () => !chartHasLayers && chartCc.yAxisFormat === 'currency',
+      render: () => (
+        <select value={chartCc.yAxisCurrency as string || 'USD'}
+          onChange={e => update({ chartConfig: { ...chartCc, yAxisCurrency: e.target.value } })}
+          className="input text-sm">
+          {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code} — {c.name}</option>)}
+        </select>
+      ),
+    },
+    {
+      id: 'y_axis_min', category: 'axis', nameKey: 'designer.y_axis_min', editor: 'select',
+      showIf: () => !chartHasLayers && AXIS_CHART_TYPES.includes((chartCc.type as string) || 'bar'),
+      get: c => (c.cc.yAxisMin as string) || 'zero',
+      set: (c, v) => c.update({ chartConfig: { ...c.cc, yAxisMin: v as string } }),
+      selectOptions: () => [
+        { value: 'zero', nameKey: 'designer.y_axis_min.zero' },
+        { value: 'auto', nameKey: 'designer.y_axis_min.auto' },
+      ],
+    },
+    {
+      id: 'x_axis_rotation', category: 'axis', nameKey: 'designer.x_axis_rotation', editor: 'select',
+      showIf: () => AXIS_CHART_TYPES.includes((chartCc.type as string) || 'bar'),
+      get: c => String((c.cc.xAxisRotation as number) || 0),
+      set: (c, v) => c.update({ chartConfig: { ...c.cc, xAxisRotation: Number(v) } }),
+      selectOptions: () => [
+        { value: '0', nameKey: 'designer.rotation.horizontal' },
+        { value: '45', nameKey: 'designer.rotation.angled' },
+        { value: '90', nameKey: 'designer.rotation.vertical' },
+      ],
+    },
+  ] : []
+
+  const registryOptions = [...COMMON_OPTIONS, ...dataSourceOptions, ...chartOptions]
   const registryCategories = [
     ...COMMON_CATEGORIES,
     ...(isDataBound ? [{ id: 'source', nameKey: 'designer.section_source' }] : []),
+    ...(isChart ? [{ id: 'chart', nameKey: 'designer.section_chart' }] : []),
+    ...(isChart ? [{ id: 'data', nameKey: 'designer.section_data' }] : []),
+    ...(isChart ? [{ id: 'axis', nameKey: 'designer.section_axis' }] : []),
   ]
 
   return (
@@ -391,238 +639,11 @@ export default function PropertyPanel() {
           <>
             {/* ── CHART Config ── */}
             {widget.widgetType === 'CHART' && (() => {
-              const catField = cc.categoryField as string || ''
-              const valFields = cc.valueFields as string[] || []
-              const regressionFields = cc.regressionFields as string[] || []
-              const allNonCat = availableCols.filter(c => c !== (catField || availableCols[0]))
-              const isAllSelected = !Array.isArray(cc.valueFields)
-              const effectiveFields = isAllSelected ? allNonCat : valFields
-
-              const handleToggleValue = (col: string) => {
-                const current = isAllSelected ? [...allNonCat] : [...valFields]
-                const next = current.includes(col)
-                  ? current.filter(c => c !== col)
-                  : [...current, col]
-                if (next.length === allNonCat.length) {
-                  const { valueFields: _, ...rest } = cc
-                  update({ chartConfig: rest })
-                } else {
-                  update({ chartConfig: { ...cc, valueFields: next } })
-                }
-              }
-
-              const handleToggleRegression = (col: string) => {
-                const current = Array.isArray(regressionFields) ? [...regressionFields] : []
-                const next = current.includes(col)
-                  ? current.filter(c => c !== col)
-                  : [...current, col]
-                update({ chartConfig: { ...cc, regressionFields: next } })
-              }
-
               const isMixed = cc.type === 'mixed'
               const hasLayers = (widgetLayersMap[widget.id] || []).length > 0 || isMixed
 
               return (
                 <>
-                  <Field label={t('charts.select_type')}>
-                    <select
-                      value={cc.type as string || 'bar'}
-                      onChange={e => update({ chartConfig: { ...cc, type: e.target.value } })}
-                      className="input text-sm"
-                    >
-                      {CHART_TYPES.map(ct => (
-                        <option key={ct} value={ct}>{t(`charts.type.${ct}`, ct.charAt(0).toUpperCase() + ct.slice(1))}</option>
-                      ))}
-                    </select>
-                    {hasLayers && (
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        {t('designer.chart_type_combined')}
-                      </p>
-                    )}
-                  </Field>
-
-                  {/* Orthogonal options + value fields + regression — hidden when layers control the chart */}
-                  {!hasLayers && (['bar', 'line', 'area'] as const).includes((cc.type as string || 'bar') as 'bar' | 'line' | 'area') && (
-                    <Field label={t('designer.chart_axis_options')}>
-                      <div className="space-y-1.5">
-                        {(cc.type === 'bar') && (
-                          <label className="inline-flex items-center gap-1.5 text-xs">
-                            <input
-                              type="checkbox"
-                              checked={cc.orientation === 'horizontal'}
-                              onChange={e => update({
-                                chartConfig: {
-                                  ...cc,
-                                  orientation: e.target.checked ? 'horizontal' : undefined,
-                                },
-                              })}
-                              className="h-3.5 w-3.5"
-                            />
-                            <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_orientation_horizontal')}</span>
-                          </label>
-                        )}
-                        <label className="inline-flex items-center gap-1.5 text-xs">
-                          <input
-                            type="checkbox"
-                            checked={!!cc.stacked}
-                            onChange={e => update({
-                              chartConfig: {
-                                ...cc,
-                                stacked: e.target.checked || undefined,
-                              },
-                            })}
-                            className="h-3.5 w-3.5"
-                          />
-                          <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_stacked')}</span>
-                        </label>
-                      </div>
-                    </Field>
-                  )}
-
-                  <Field label={t('designer.legend_position')}>
-                    <select
-                      value={cc.legendPosition as string || 'auto'}
-                      onChange={e => update({ chartConfig: { ...cc, legendPosition: e.target.value } })}
-                      className="input text-sm"
-                    >
-                      <option value="auto">{t('designer.legend_position.auto')}</option>
-                      <option value="top">{t('designer.legend_position.top')}</option>
-                      <option value="bottom">{t('designer.legend_position.bottom')}</option>
-                      <option value="left">{t('designer.legend_position.left')}</option>
-                      <option value="right">{t('designer.legend_position.right')}</option>
-                      <option value="hidden">{t('designer.legend_position.hidden')}</option>
-                    </select>
-                  </Field>
-
-                  <Field label={t('designer.null_handling')}>
-                    <select
-                      value={cc.nullHandling as string || 'zero'}
-                      onChange={e => update({ chartConfig: { ...cc, nullHandling: e.target.value } })}
-                      className="input text-sm"
-                    >
-                      <option value="zero">{t('designer.null_handling.zero')}</option>
-                      <option value="gap">{t('designer.null_handling.gap')}</option>
-                    </select>
-                  </Field>
-
-                  {availableCols.length > 0 && (
-                    <Field label={t('designer.category_field')}>
-                        <select
-                          value={catField}
-                          onChange={e => {
-                            const { valueFields: _, ...rest } = cc
-                            update({ chartConfig: { ...rest, categoryField: e.target.value || undefined } })
-                          }}
-                          className="input text-sm"
-                        >
-                          <option value="">{t('designer.auto_first_column')}</option>
-                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </Field>
-                  )}
-
-                  {!hasLayers && availableCols.length > 0 && (
-                    <>
-                      <Field label={t('designer.value_fields')}>
-                        <div className="flex items-center gap-1 mb-1">
-                          <button
-                            onClick={() => { const { valueFields: _, ...rest } = cc; update({ chartConfig: rest }) }}
-                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.select_all')}
-                          >
-                            <CheckSquare className="w-3 h-3" /> {t('designer.select_all')}
-                          </button>
-                          <button
-                            onClick={() => update({ chartConfig: { ...cc, valueFields: [] } })}
-                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.deselect_all')}
-                          >
-                            <Square className="w-3 h-3" /> {t('designer.deselect_all')}
-                          </button>
-                          <button
-                            onClick={() => {
-                              const inverted = allNonCat.filter(c => !effectiveFields.includes(c))
-                              if (inverted.length === allNonCat.length) {
-                                const { valueFields: _, ...rest } = cc
-                                update({ chartConfig: rest })
-                              } else {
-                                update({ chartConfig: { ...cc, valueFields: inverted } })
-                              }
-                            }}
-                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5" title={t('designer.invert')}
-                          >
-                            <ToggleLeft className="w-3 h-3" /> {t('designer.invert')}
-                          </button>
-                        </div>
-                        <div className="space-y-1 max-h-36 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                          {allNonCat.map((col, idx) => {
-                            // Read per-series colour from chartConfig.option.color
-                            // (positional array). Falls back to chart's default
-                            // palette when not set.
-                            const optColors = (cc.option as Record<string, unknown> | undefined)?.color
-                            const currentColor = Array.isArray(optColors) && typeof optColors[idx] === 'string'
-                              ? (optColors[idx] as string)
-                              : ''
-                            const setColor = (hex: string) => {
-                              const option = (cc.option as Record<string, unknown> | undefined) || {}
-                              const arr = Array.isArray(option.color) ? [...(option.color as unknown[])] : []
-                              while (arr.length <= idx) arr.push('')
-                              arr[idx] = hex
-                              update({ chartConfig: { ...cc, option: { ...option, color: arr } } })
-                            }
-                            return (
-                              <div key={col} className="flex items-center gap-2">
-                                <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white flex-1">
-                                  <input
-                                    type="checkbox"
-                                    checked={isAllSelected || valFields.includes(col)}
-                                    onChange={() => handleToggleValue(col)}
-                                    className="rounded border-slate-300"
-                                  />
-                                  {col}
-                                </label>
-                                <input
-                                  type="color"
-                                  value={currentColor || '#5470c6'}
-                                  onChange={e => setColor(e.target.value)}
-                                  title={t('designer.series_color')}
-                                  className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                                />
-                                <input
-                                  type="text"
-                                  value={currentColor}
-                                  onChange={e => {
-                                    const v = e.target.value.trim()
-                                    if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) setColor(v.toLowerCase())
-                                    else if (v === '') setColor('')
-                                  }}
-                                  placeholder="#hex"
-                                  maxLength={7}
-                                  className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                />
-                              </div>
-                            )
-                          })}
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">{t('designer.value_fields_hint')}</p>
-                      </Field>
-
-                      <Field label={t('designer.regression_lines')}>
-                        <div className="space-y-1 max-h-28 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                          {effectiveFields.map(col => (
-                            <label key={col} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:text-slate-800 dark:hover:text-white">
-                              <input
-                                type="checkbox"
-                                checked={Array.isArray(regressionFields) && regressionFields.includes(col)}
-                                onChange={() => handleToggleRegression(col)}
-                                className="rounded border-slate-300"
-                              />
-                              {col}
-                            </label>
-                          ))}
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">{t('designer.regression_lines_hint')}</p>
-                      </Field>
-                    </>
-                  )}
 
                   {/* Layer settings accordion — shown for mixed type or when layers exist */}
                   {hasLayers && (() => {
@@ -945,78 +966,6 @@ export default function PropertyPanel() {
                       </div>
                     )
                   })()}
-
-                  {/* Chart Display Options — hidden when layers handle per-axis config */}
-                  {!hasLayers && AXIS_CHART_TYPES.includes(cc.type as string || 'bar') && (
-                    <>
-                      <Field label={t('designer.y_axis_format')}>
-                        <select
-                          value={cc.yAxisFormat as string || 'plain'}
-                          onChange={e => update({ chartConfig: { ...cc, yAxisFormat: e.target.value } })}
-                          className="input text-sm"
-                        >
-                          <option value="plain">{t('designer.axis_format.plain')}</option>
-                          <option value="thousands">{t('designer.axis_format.thousands')}</option>
-                          <option value="millions">{t('designer.axis_format.millions')}</option>
-                          <option value="billions">{t('designer.axis_format.billions')}</option>
-                          <option value="currency">{t('designer.axis_format.currency')}</option>
-                          <option value="percent">{t('designer.axis_format.percent')}</option>
-                        </select>
-                      </Field>
-
-                      {['plain', 'thousands', 'millions', 'billions', 'currency', 'percent'].includes((cc.yAxisFormat as string) || 'plain') && (
-                        <Field label={t('designer.y_axis_decimals')}>
-                          <NumericInput
-                            value={cc.yAxisDecimals != null ? Number(cc.yAxisDecimals) : undefined}
-                            onChange={v => update({ chartConfig: { ...cc, yAxisDecimals: v } })}
-                            className="input text-sm"
-                            placeholder="0"
-                          />
-                        </Field>
-                      )}
-
-                      {cc.yAxisFormat === 'currency' && (
-                        <Field label={t('designer.currency')}>
-                          <select
-                            value={cc.yAxisCurrency as string || 'USD'}
-                            onChange={e => update({ chartConfig: { ...cc, yAxisCurrency: e.target.value } })}
-                            className="input text-sm"
-                          >
-                            {CURRENCIES.map(c => (
-                              <option key={c.code} value={c.code}>{c.symbol} {c.code} — {c.name}</option>
-                            ))}
-                          </select>
-                        </Field>
-                      )}
-
-                      <Field label={t('designer.y_axis_min')}>
-                        <select
-                          value={cc.yAxisMin as string || 'zero'}
-                          onChange={e => update({ chartConfig: { ...cc, yAxisMin: e.target.value } })}
-                          className="input text-sm"
-                        >
-                          <option value="zero">{t('designer.y_axis_min.zero')}</option>
-                          <option value="auto">{t('designer.y_axis_min.auto')}</option>
-                        </select>
-                      </Field>
-
-                    </>
-                  )}
-
-                  {/* X-axis rotation is always global — applies to all layers */}
-                  {AXIS_CHART_TYPES.includes(cc.type as string || 'bar') && (
-                    <Field label={t('designer.x_axis_rotation')}>
-                      <select
-                        value={String(cc.xAxisRotation || 0)}
-                        onChange={e => update({ chartConfig: { ...cc, xAxisRotation: Number(e.target.value) } })}
-                        className="input text-sm"
-                      >
-                        <option value="0">{t('designer.rotation.horizontal')}</option>
-                        <option value="45">{t('designer.rotation.angled')}</option>
-                        <option value="90">{t('designer.rotation.vertical')}</option>
-                      </select>
-                    </Field>
-                  )}
 
                   {!hasLayers && <Field label={t('designer.data_labels')}>
                     <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
