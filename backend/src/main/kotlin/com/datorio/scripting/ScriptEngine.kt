@@ -16,6 +16,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -60,7 +61,8 @@ class ScriptEngine(
     @SpringValue("\${datorio.scripting.max-statements:100000}") private val maxStatements: Long,
     @SpringValue("\${datorio.scripting.max-memory-mb:64}") private val maxMemoryMb: Long,
     @SpringValue("\${datorio.scripting.max-output-bytes:5242880}") private val maxOutputBytes: Long,
-    @SpringValue("\${datorio.scripting.max-script-length:100000}") private val maxScriptLength: Int
+    @SpringValue("\${datorio.scripting.max-script-length:100000}") private val maxScriptLength: Int,
+    @SpringValue("\${datorio.scripting.max-concurrent:4}") private val maxConcurrent: Int
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
     private val mapper = ObjectMapper()
@@ -100,6 +102,11 @@ class ScriptEngine(
     private val executor: ExecutorService = Executors.newCachedThreadPool { r ->
         Thread(r, "script-exec").apply { isDaemon = true }
     }
+
+    // Caps how many scripts run concurrently. Each run can consume up to timeoutMs of CPU on a
+    // worker thread; without this, a burst of requests would grow the pool without bound and
+    // starve the host. Excess requests are rejected fast rather than queued.
+    private val concurrencyLimiter = Semaphore(maxConcurrent.coerceAtLeast(1))
 
     init {
         if (memoryLimitSupported) {
@@ -156,6 +163,28 @@ class ScriptEngine(
             )
         }
 
+        // Reject (don't queue) when too many scripts are already running - bounds CPU usage.
+        if (!concurrencyLimiter.tryAcquire()) {
+            log.warn("Script execution rejected: concurrency limit {} reached (user={})", maxConcurrent, username)
+            return failure(
+                "Server is busy: too many concurrent script executions, try again shortly",
+                System.currentTimeMillis() - startMs
+            )
+        }
+        return try {
+            doExecute(code, input, libraryCode, username, startMs)
+        } finally {
+            concurrencyLimiter.release()
+        }
+    }
+
+    private fun doExecute(
+        code: String,
+        input: DataInput?,
+        libraryCode: String?,
+        username: String?,
+        startMs: Long
+    ): ExecutionResult {
         val fullScript = buildScript(code, input, libraryCode)
 
         // Serialise the input to an inert JSON string. It is handed to the guest as a string
