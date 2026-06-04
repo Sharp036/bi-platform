@@ -147,6 +147,87 @@ Both the nginx limit and the Spring Boot limit must be large enough for the file
 
 ---
 
+## Security: JavaScript Scripting Sandbox (required reading)
+
+Datorio runs user-supplied JavaScript on the server to transform chart data
+(`ScriptEngine`, GraalJS). All such scripts are treated as hostile. The engine
+already denies host access (no Java types, filesystem, network, processes,
+threads, environment, or other polyglot languages), creates a fresh context per
+execution, enforces a wall-clock timeout that forcibly cancels runaway loops, and
+caps statement count, input script length, and output size.
+
+### Residual risk: no hard memory limit on Community GraalVM
+
+Per-context heap limits (`sandbox.MaxHeapMemory`) and the strong `SandboxPolicy`
+levels require **Oracle GraalVM** plus the `truffle-enterprise` runtime. The
+current build uses the **Community** polyglot artifacts on a stock JDK, so those
+memory limits are **not enforceable in-process**. A determined allocation bomb
+(for example a doubling string) can exhaust the JVM heap in very few statements,
+before the statement limit or timeout fires. The statement limit, timeout,
+script-length cap, and output cap are compensating controls only.
+
+`ScriptEngine` logs a WARN at startup stating which mode is active. If you see the
+Community warning, the controls below are mandatory.
+
+### Mandatory containment (run the BI process locked down)
+
+Until the platform runs on Oracle GraalVM, the scripting endpoint must not be
+exposed to untrusted users without OS-level containment. Add the following to the
+`datorio` service in `docker-compose.prod.yml`:
+
+```yaml
+  datorio:
+    # ... existing image/ports/environment ...
+    mem_limit: 2g                 # hard cgroup memory cap (compose v2: deploy.resources.limits.memory)
+    memswap_limit: 2g             # forbid swap escape
+    pids_limit: 512               # cap thread/process explosion
+    read_only: true               # read-only root filesystem
+    user: "1000:1000"             # non-root
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp                      # writable scratch only where the app needs it
+```
+
+Network egress: the script sandbox already blocks sockets, but as defense in
+depth the container should have **no outbound network access** except to its
+PostgreSQL and analytical data sources. Put `datorio` on an internal Docker
+network and allow only the required egress, or enforce egress rules at the host
+firewall.
+
+A memory bomb then OOM-kills only the capped container (which `restart:
+unless-stopped` brings back), instead of taking down the host or starving other
+services.
+
+### Scripting limits (application config)
+
+Configured in `backend/src/main/resources/application.yml` under
+`datorio.scripting`; override per environment as needed:
+
+```yaml
+datorio:
+  scripting:
+    timeout-ms: 5000           # wall-clock kill via forced context cancellation
+    max-statements: 100000     # statement-count guard
+    max-memory-mb: 64          # per-context heap cap; enforced ONLY on Oracle GraalVM
+    max-output-bytes: 5242880  # 5 MB cap on a script's JSON result
+    max-script-length: 100000  # max characters of user code + libraries combined
+```
+
+Also restrict, via RBAC, who may call `POST /scripts/execute` (ad-hoc code), and
+consider a rate limit: timeout multiplied by concurrency is the CPU a hostile
+caller can burn.
+
+### Closing the gap permanently
+
+Switch the runtime to Oracle GraalVM and add the `truffle-enterprise` dependency.
+`ScriptEngine` probes for this at startup and automatically applies the
+`max-memory-mb` heap cap when present.
+
+---
+
 ## CI/CD
 
 GitLab CI builds the Docker image on every push to `main` and deploys it to the server.
