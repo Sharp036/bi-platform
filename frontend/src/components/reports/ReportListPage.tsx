@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import type { ReportListItem } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2, Trash2, LayoutGrid, List } from 'lucide-react'
+import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2, Trash2, LayoutGrid, List, Folder, FolderOpen, ChevronRight, ChevronDown } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
@@ -14,7 +14,10 @@ import MoveToFolderMenu from '@/components/workspace/MoveToFolderMenu'
 import TagManager from '@/components/tags/TagManager'
 import { useAuthStore } from '@/store/authStore'
 import { workspaceApi, FolderDto } from '@/api/workspace'
-import { FolderOpen } from 'lucide-react'
+
+// Synthetic folder id for the "no folder" group (real folder ids are positive).
+const UNCATEGORIZED = -1
+const COLLAPSED_KEY = 'reports_collapsed_folders'
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -25,17 +28,29 @@ const statusBadge = (status: string) => {
   return map[status] || map.DRAFT
 }
 
+// Depth-first flatten of the folder tree (every folder at any nesting level).
+function flattenFolders(tree: FolderDto[]): FolderDto[] {
+  const out: FolderDto[] = []
+  const walk = (f: FolderDto) => { out.push(f); (f.children || []).forEach(walk) }
+  tree.forEach(walk)
+  return out
+}
+
 export default function ReportListPage() {
   const { t } = useTranslation()
   const [reports, setReports] = useState<ReportListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('')
-  const [filterFolder, setFilterFolder] = useState<string>('')
   const [folders, setFolders] = useState<FolderDto[]>([])
-  // reportId -> folder names it belongs to (chip); folderId -> set of reportIds (filter).
-  const [reportFolders, setReportFolders] = useState<Record<number, string[]>>({})
+  // folderId -> set of reportIds it contains (from dl_folder_item, so it matches
+  // the move-to-folder actions). A report may be in several folders.
   const [folderReportIds, setFolderReportIds] = useState<Record<number, Set<number>>>({})
+  // Folders are expanded by default; we persist only the COLLAPSED ones, so a
+  // fresh visit shows everything (the empty set means all-expanded).
+  const [collapsed, setCollapsed] = useState<Set<number>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]')) } catch { return new Set() }
+  })
   const [shareReport, setShareReport] = useState<ReportListItem | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>(() =>
     (localStorage.getItem('reports_view_mode') as 'grid' | 'table') ?? 'grid'
@@ -51,6 +66,15 @@ export default function ReportListPage() {
     localStorage.setItem('reports_view_mode', mode)
   }
 
+  const toggleFolder = (id: number) => setCollapsed(prev => {
+    const next = new Set(prev)
+    next.has(id) ? next.delete(id) : next.add(id)
+    try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next])) } catch { /* ignore */ }
+    return next
+  })
+  // While searching every group is forced open so matches are never hidden.
+  const isExpanded = (id: number) => !!search || !collapsed.has(id)
+
   const load = () => {
     setLoading(true)
     const params: Record<string, unknown> = { size: 50 }
@@ -62,28 +86,24 @@ export default function ReportListPage() {
 
   useEffect(load, [filterStatus])
 
-  // Folder membership comes from the dl_folder_item mapping (same as the home
-  // page), not the report.folderId column, so it stays consistent with the
-  // move-to-folder actions. Build both lookup maps from folder contents.
+  // Build folderId -> reportIds for every folder in the tree (all depths).
   const loadFolders = async () => {
     try {
       const tree = await workspaceApi.getFolderTree()
       setFolders(tree)
-      const contents = await Promise.all(tree.map(f =>
+      const all = flattenFolders(tree)
+      const contents = await Promise.all(all.map(f =>
         workspaceApi.getFolderContents(f.id).then(items => ({ folder: f, items })).catch(() => ({ folder: f, items: [] }))
       ))
-      const byReport: Record<number, string[]> = {}
       const byFolder: Record<number, Set<number>> = {}
       for (const { folder, items } of contents) {
         const ids = new Set<number>()
         for (const it of items) {
           if (it.objectType !== 'REPORT') continue
           ids.add(it.objectId)
-          ;(byReport[it.objectId] ||= []).push(folder.name)
         }
         byFolder[folder.id] = ids
       }
-      setReportFolders(byReport)
       setFolderReportIds(byFolder)
     } catch {
       // folder data is optional - the list still works without it
@@ -92,12 +112,19 @@ export default function ReportListPage() {
 
   useEffect(() => { loadFolders() }, [])
 
-  const filtered = reports.filter(r => {
-    if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false
-    if (filterFolder === 'none') return !reportFolders[r.id]
-    if (filterFolder) return folderReportIds[Number(filterFolder)]?.has(r.id) ?? false
-    return true
-  })
+  const filtered = reports.filter(r =>
+    !search || r.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  // A report belongs to a folder if any folder set contains it.
+  const reportsOfFolder = (fid: number) => filtered.filter(r => folderReportIds[fid]?.has(r.id))
+  const inAnyFolder = (id: number) => Object.values(folderReportIds).some(set => set.has(id))
+  const uncategorized = filtered.filter(r => !inAnyFolder(r.id))
+  // A folder is worth showing if it (or any descendant) holds a matching report.
+  // Without a search every folder is shown so empty folders stay visible.
+  const folderHasMatches = (folder: FolderDto): boolean =>
+    reportsOfFolder(folder.id).length > 0 || (folder.children || []).some(folderHasMatches)
+  const showFolder = (folder: FolderDto) => !search || folderHasMatches(folder)
 
   const statusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -156,6 +183,122 @@ export default function ReportListPage() {
     </div>
   )
 
+  // ── Folder header row (shared by both view modes) ──
+  const folderHeader = (id: number, name: string, count: number, depth: number) => {
+    const open = isExpanded(id)
+    return (
+      <button
+        type="button"
+        onClick={() => toggleFolder(id)}
+        style={{ paddingLeft: 12 + depth * 18 }}
+        className="w-full flex items-center gap-2 py-2 pr-3 text-left hover:bg-surface-50 dark:hover:bg-dark-surface-50 border-b border-surface-100 dark:border-dark-surface-100"
+      >
+        {open
+          ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
+        {open
+          ? <FolderOpen className="w-4 h-4 text-brand-500 flex-shrink-0" />
+          : <Folder className="w-4 h-4 text-brand-500 flex-shrink-0" />}
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{name}</span>
+        <span className="text-xs text-slate-400">({count})</span>
+      </button>
+    )
+  }
+
+  // ── Table-mode report row (Grafana-style flat row, indented under its folder) ──
+  const reportRow = (r: ReportListItem, depth: number) => (
+    <div
+      key={`${depth}-${r.id}`}
+      className="grid grid-cols-[1fr_7rem_5rem_5rem_6rem_auto] items-center gap-2 pr-3 py-2 border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-50 group"
+    >
+      <div className="min-w-0 flex items-center gap-2" style={{ paddingLeft: 12 + depth * 18 }}>
+        <span className="text-xs text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">#{r.id}</span>
+        <div className="min-w-0">
+          <Link to={`/reports/${r.slug}`} className="font-medium text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
+            {r.name}
+          </Link>
+          {r.description && <p className="text-xs text-slate-400 truncate">{r.description}</p>}
+        </div>
+      </div>
+      <div>
+        <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium', statusBadge(r.status))}>
+          {statusLabel(r.status)}
+        </span>
+      </div>
+      <div className="text-right text-slate-500 dark:text-slate-400 text-sm">{r.widgetCount ?? 0}</div>
+      <div className="text-right text-slate-500 dark:text-slate-400 text-sm">{r.parameterCount ?? 0}</div>
+      <div className="text-slate-500 dark:text-slate-400 text-xs">{new Date(r.updatedAt).toLocaleDateString()}</div>
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity">{rowActions(r)}</div>
+    </div>
+  )
+
+  // ── Grid-mode report card ──
+  const reportCard = (r: ReportListItem) => (
+    <div key={r.id} className="card p-4 hover:shadow-md transition-shadow group">
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">#{r.id}</span>
+            <Link to={`/reports/${r.slug}`} className="text-base font-semibold text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
+              {r.name}
+            </Link>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{r.description || t('reports.no_description')}</p>
+        </div>
+        <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium ml-2 flex-shrink-0', statusBadge(r.status))}>
+          {statusLabel(r.status)}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mb-3">
+        <span>{t('reports.widgets_count', { count: r.widgetCount ?? 0 })}</span>
+        <span>·</span>
+        <span>{t('reports.params_count', { count: r.parameterCount ?? 0 })}</span>
+        <span>·</span>
+        <span>{new Date(r.updatedAt).toLocaleDateString()}</span>
+      </div>
+      <div className="mb-2">
+        <TagManager objectType="REPORT" objectId={r.id} compact />
+      </div>
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity">{rowActions(r)}</div>
+    </div>
+  )
+
+  // ── Recursive folder renderers (one per view mode) ──
+  const renderFolderRows = (folder: FolderDto, depth: number) => {
+    if (!showFolder(folder)) return null
+    return (
+      <Fragment key={`f-${folder.id}`}>
+        {folderHeader(folder.id, folder.name, reportsOfFolder(folder.id).length, depth)}
+        {isExpanded(folder.id) && (
+          <>
+            {(folder.children || []).map(c => renderFolderRows(c, depth + 1))}
+            {reportsOfFolder(folder.id).map(r => reportRow(r, depth + 1))}
+          </>
+        )}
+      </Fragment>
+    )
+  }
+
+  const renderFolderCards = (folder: FolderDto, depth: number) => {
+    if (!showFolder(folder)) return null
+    const reps = reportsOfFolder(folder.id)
+    return (
+      <div key={`f-${folder.id}`}>
+        {folderHeader(folder.id, folder.name, reps.length, depth)}
+        {isExpanded(folder.id) && (
+          <div style={{ paddingLeft: depth * 18 }} className="py-3 space-y-3">
+            {(folder.children || []).map(c => renderFolderCards(c, depth + 1))}
+            {reps.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {reps.map(reportCard)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
@@ -178,13 +321,6 @@ export default function ReportListPage() {
           <option value="PUBLISHED">{t('common.status.published')}</option>
           <option value="ARCHIVED">{t('common.status.archived')}</option>
         </select>
-        {folders.length > 0 && (
-          <select value={filterFolder} onChange={e => setFilterFolder(e.target.value)} className="input w-44">
-            <option value="">{t('reports.all_folders')}</option>
-            <option value="none">{t('reports.no_folder')}</option>
-            {folders.map(f => <option key={f.id} value={String(f.id)}>{f.name}</option>)}
-          </select>
-        )}
         <div className="flex items-center rounded-lg border border-surface-200 dark:border-dark-surface-200 overflow-hidden">
           <button
             onClick={() => setView('grid')}
@@ -216,101 +352,36 @@ export default function ReportListPage() {
         />
       ) : viewMode === 'table' ? (
         <div className="card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-200 dark:border-dark-surface-200 bg-surface-50 dark:bg-dark-surface-50">
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-16">ID</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">{t('common.name')}</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-32">{t('common.status')}</th>
-                <th className="text-right px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-24">{t('reports.col_widgets')}</th>
-                <th className="text-right px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-24">{t('reports.col_params')}</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400 w-32">{t('common.updated')}</th>
-                <th className="px-4 py-3 w-48"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(r => (
-                <tr key={r.id} className="border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-50 group">
-                  <td className="px-4 py-3 text-slate-400 dark:text-slate-500 font-mono text-xs">#{r.id}</td>
-                  <td className="px-4 py-3">
-                    <Link to={`/reports/${r.slug}`} className="font-medium text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400">
-                      {r.name}
-                    </Link>
-                    {r.description && <p className="text-xs text-slate-400 truncate max-w-xs">{r.description}</p>}
-                    {reportFolders[r.id]?.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1 mt-0.5">
-                        {reportFolders[r.id].map(name => (
-                          <span key={name} className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-surface-100 dark:bg-dark-surface-100 text-slate-500 dark:text-slate-400">
-                            <FolderOpen className="w-3 h-3" /> {name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium', statusBadge(r.status))}>
-                      {statusLabel(r.status)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400">{r.widgetCount ?? 0}</td>
-                  <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400">{r.parameterCount ?? 0}</td>
-                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">{new Date(r.updatedAt).toLocaleDateString()}</td>
-                  <td className="px-4 py-3">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      {rowActions(r)}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Column header */}
+          <div className="grid grid-cols-[1fr_7rem_5rem_5rem_6rem_auto] items-center gap-2 pr-3 py-2 bg-surface-50 dark:bg-dark-surface-50 border-b border-surface-200 dark:border-dark-surface-200 text-xs font-medium text-slate-600 dark:text-slate-400">
+            <span className="pl-3">{t('common.name')}</span>
+            <span>{t('common.status')}</span>
+            <span className="text-right">{t('reports.col_widgets')}</span>
+            <span className="text-right">{t('reports.col_params')}</span>
+            <span>{t('common.updated')}</span>
+            <span className="w-44" />
+          </div>
+          {folders.map(f => renderFolderRows(f, 0))}
+          {uncategorized.length > 0 && (
+            <>
+              {folderHeader(UNCATEGORIZED, t('reports.no_folder'), uncategorized.length, 0)}
+              {isExpanded(UNCATEGORIZED) && uncategorized.map(r => reportRow(r, 1))}
+            </>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map(r => (
-            <div key={r.id} className="card p-4 hover:shadow-md transition-shadow group">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">#{r.id}</span>
-                    <Link to={`/reports/${r.slug}`} className="text-base font-semibold text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
-                      {r.name}
-                    </Link>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{r.description || t('reports.no_description')}</p>
-                </div>
-                <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium ml-2 flex-shrink-0', statusBadge(r.status))}>
-                  {statusLabel(r.status)}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mb-3">
-                <span>{t('reports.widgets_count', { count: r.widgetCount ?? 0 })}</span>
-                <span>·</span>
-                <span>{t('reports.params_count', { count: r.parameterCount ?? 0 })}</span>
-                <span>·</span>
-                <span>{new Date(r.updatedAt).toLocaleDateString()}</span>
-              </div>
-
-              {reportFolders[r.id]?.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1 mb-2">
-                  {reportFolders[r.id].map(name => (
-                    <span key={name} className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-surface-100 dark:bg-dark-surface-100 text-slate-500 dark:text-slate-400">
-                      <FolderOpen className="w-3 h-3" /> {name}
-                    </span>
-                  ))}
+        <div className="space-y-2">
+          {folders.map(f => renderFolderCards(f, 0))}
+          {uncategorized.length > 0 && (
+            <div>
+              {folderHeader(UNCATEGORIZED, t('reports.no_folder'), uncategorized.length, 0)}
+              {isExpanded(UNCATEGORIZED) && (
+                <div className="py-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {uncategorized.map(reportCard)}
                 </div>
               )}
-
-              <div className="mb-2">
-                <TagManager objectType="REPORT" objectId={r.id} compact />
-              </div>
-
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                {rowActions(r)}
-              </div>
             </div>
-          ))}
+          )}
         </div>
       )}
       {shareReport && (
