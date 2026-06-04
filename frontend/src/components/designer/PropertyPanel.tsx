@@ -13,6 +13,9 @@ import { createPortal } from 'react-dom'
 import SqlCodeEditor from '@/components/common/SqlCodeEditor'
 import NumericInput from '@/components/common/NumericInput'
 import { CHART_TYPE_OPTIONS } from '@/components/charts/chartTypeBuilders'
+import OptionsPane from '@/components/designer/options/OptionsPane'
+import { COMMON_OPTIONS, COMMON_CATEGORIES } from '@/components/designer/options/commonOptions'
+import type { OptionCtx } from '@/components/designer/options/types'
 import toast from 'react-hot-toast'
 
 // Single source of truth for chart-type values comes from chartTypeBuilders;
@@ -246,6 +249,15 @@ export default function PropertyPanel() {
 
   const update = (updates: Partial<DesignerWidget>) => updateWidget(widget.id, updates)
 
+  // Context for the options registry (Phase A: common header fields). Extended
+  // with availableCols/layers/etc. as more sections migrate.
+  const optionsCtx: OptionCtx = {
+    widget,
+    cc: widget.chartConfig as Record<string, unknown>,
+    update,
+    t,
+  }
+
   return (
     <>
     <div className="p-3 space-y-4 overflow-y-auto">
@@ -276,82 +288,12 @@ export default function PropertyPanel() {
         </span>
       </div>
 
-      {/* Title is uniformly bound to widget.title across all widget types.
-          For TEXT widgets the HTML body lives in chartConfig.content (a JSONB
-          field with no length limit) - the legacy convention of storing the
-          body in widget.title was hitting the VARCHAR(300) cap on save. */}
-      <Field label={t('designer.widget_title')}>
-        <input
-          value={widget.title} onChange={e => update({ title: e.target.value })}
-          className="input text-sm" placeholder={t('designer.widget_title_placeholder')}
-        />
-        <p className="text-[10px] text-slate-400 mt-1">{t('designer.title_interpolation_hint')}</p>
-      </Field>
-
-      {/* Description (rendered as a markdown tooltip on a small (i) icon
-          next to the widget title in view mode). Empty -> no icon. */}
-      {!['SPACER', 'DIVIDER', 'TEXT'].includes(widget.widgetType) && (
-        <Field label={t('designer.widget_description')}>
-          <textarea
-            value={(widget.chartConfig as Record<string, unknown>).description as string || ''}
-            onChange={e => update({
-              chartConfig: {
-                ...widget.chartConfig,
-                description: e.target.value || undefined,
-              },
-            })}
-            className="input text-sm h-20 resize-none"
-            placeholder={t('designer.widget_description_placeholder')}
-          />
-          <p className="text-[10px] text-slate-400 mt-1">{t('designer.widget_description_hint')}</p>
-        </Field>
-      )}
-
-      {/* Position & Size */}
-      <Field label={t('designer.layout')}>
-        <div className="grid grid-cols-4 gap-2">
-          <div>
-            <label className="text-[10px] text-slate-400">X</label>
-            <NumericInput
-              value={widget.position.x}
-              onChange={v => update({ position: { ...widget.position, x: v ?? 0 } })}
-              className="input text-sm py-1"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] text-slate-400">Y</label>
-            <NumericInput
-              value={widget.position.y}
-              onChange={v => update({ position: { ...widget.position, y: v ?? 0 } })}
-              className="input text-sm py-1"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] text-slate-400">W</label>
-            <NumericInput
-              value={widget.position.w}
-              onChange={v => update({ position: { ...widget.position, w: v ?? 1 } })}
-              className="input text-sm py-1"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] text-slate-400">H</label>
-            <NumericInput
-              value={widget.position.h}
-              onChange={v => update({ position: { ...widget.position, h: v ?? 1 } })}
-              className="input text-sm py-1"
-            />
-          </div>
-        </div>
-      </Field>
-
-      <Field label="Layer (z-index)">
-        <NumericInput
-          value={Number((widget.style as Record<string, unknown>).zIndex ?? 0)}
-          onChange={v => update({ style: { ...widget.style, zIndex: v ?? 0 } })}
-          className="input text-sm"
-        />
-      </Field>
+      {/* Common header fields (title, description, layout, z-index) are driven
+          by the options registry - collapsible sections + search (Grafana-style).
+          Widget-type-specific config below is migrated to the registry in later
+          phases. Title binds to widget.title for all types; for TEXT widgets the
+          HTML body lives in chartConfig.content (JSONB, no length cap). */}
+      <OptionsPane options={COMMON_OPTIONS} categories={COMMON_CATEGORIES} ctx={optionsCtx} />
 
       {/* Data Binding. TEXT widgets need a SQL source so {column:format}
           placeholders in the HTML body interpolate from row[0]. */}
