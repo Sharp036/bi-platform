@@ -5,7 +5,7 @@ import { reportApi } from '@/api/reports'
 import type { ReportListItem } from '@/types'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
-import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2, Trash2, LayoutGrid, List, Folder, FolderOpen, ChevronRight, ChevronDown } from 'lucide-react'
+import { FileBarChart, Plus, Eye, Copy, Archive, Search, Pencil, Share2, Trash2, LayoutGrid, List, Folder, FolderOpen, FolderPlus, ChevronRight, ChevronDown, GripVertical } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
@@ -52,6 +52,14 @@ export default function ReportListPage() {
     try { return new Set(JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]')) } catch { return new Set() }
   })
   const [shareReport, setShareReport] = useState<ReportListItem | null>(null)
+  // Drag-and-drop move: the dragged report and the folder it was dragged FROM
+  // (null = the "no folder" group). Dropping on another folder moves it there.
+  const [dragReportId, setDragReportId] = useState<number | null>(null)
+  const [dragSrcFolder, setDragSrcFolder] = useState<number | null>(null)
+  const [dragOverFolder, setDragOverFolder] = useState<number | null>(null)
+  // Inline folder creation: { parentId } where null means a root folder.
+  const [newFolder, setNewFolder] = useState<{ parentId: number | null } | null>(null)
+  const [newFolderName, setNewFolderName] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'table'>(() =>
     (localStorage.getItem('reports_view_mode') as 'grid' | 'table') ?? 'grid'
   )
@@ -74,6 +82,56 @@ export default function ReportListPage() {
   })
   // While searching every group is forced open so matches are never hidden.
   const isExpanded = (id: number) => !!search || !collapsed.has(id)
+  const expandFolder = (id: number) => setCollapsed(prev => {
+    if (!prev.has(id)) return prev
+    const next = new Set(prev); next.delete(id)
+    try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next])) } catch { /* ignore */ }
+    return next
+  })
+
+  // ── Drag-and-drop move between folders ──
+  const startDrag = (reportId: number, srcFolder: number | null) => {
+    setDragReportId(reportId)
+    setDragSrcFolder(srcFolder)
+  }
+  const endDrag = () => { setDragReportId(null); setDragSrcFolder(null); setDragOverFolder(null) }
+  const handleDrop = async (target: number) => {
+    const rid = dragReportId
+    const src = dragSrcFolder
+    endDrag()
+    if (rid == null) return
+    try {
+      if (target === UNCATEGORIZED) {
+        if (src == null) return // already outside any folder
+        await workspaceApi.removeFromFolder(src, 'REPORT', rid)
+        toast.success(t('reports.removed_from_folder'))
+      } else {
+        if (src === target) return // dropped on its own folder
+        await workspaceApi.addToFolder(target, 'REPORT', rid)
+        if (src != null) await workspaceApi.removeFromFolder(src, 'REPORT', rid)
+        toast.success(t('reports.moved_to_folder'))
+      }
+      loadFolders()
+    } catch {
+      toast.error(t('common.error'))
+    }
+  }
+
+  // ── Inline folder creation ──
+  const folderNameById = (id: number) => flattenFolders(folders).find(f => f.id === id)?.name ?? ''
+  const submitNewFolder = async () => {
+    const name = newFolderName.trim()
+    if (!name) return
+    try {
+      await workspaceApi.createFolder({ name, parentId: newFolder?.parentId ?? undefined })
+      toast.success(t('reports.folder_created'))
+      setNewFolder(null)
+      setNewFolderName('')
+      loadFolders()
+    } catch {
+      toast.error(t('common.error'))
+    }
+  }
 
   const load = () => {
     setLoading(true)
@@ -183,15 +241,25 @@ export default function ReportListPage() {
     </div>
   )
 
-  // ── Folder header row (shared by both view modes) ──
-  const folderHeader = (id: number, name: string, count: number, depth: number) => {
+  // ── Folder header row (shared by both view modes). Doubles as a drop target;
+  // real folders also offer an "add subfolder" action on hover. ──
+  const folderHeader = (id: number, name: string, count: number, depth: number, canAddSub: boolean) => {
     const open = isExpanded(id)
+    const over = dragOverFolder === id
     return (
-      <button
-        type="button"
+      <div
+        role="button"
         onClick={() => toggleFolder(id)}
+        onDragOver={e => { if (dragReportId != null) { e.preventDefault(); setDragOverFolder(id) } }}
+        onDragLeave={() => setDragOverFolder(prev => (prev === id ? null : prev))}
+        onDrop={e => { e.preventDefault(); handleDrop(id) }}
         style={{ paddingLeft: 12 + depth * 18 }}
-        className="w-full flex items-center gap-2 py-2 pr-3 text-left hover:bg-surface-50 dark:hover:bg-dark-surface-50 border-b border-surface-100 dark:border-dark-surface-100"
+        className={clsx(
+          'group w-full flex items-center gap-2 py-2 pr-3 text-left cursor-pointer border-b border-surface-100 dark:border-dark-surface-100',
+          over
+            ? 'bg-brand-50 dark:bg-brand-900/20 ring-2 ring-inset ring-brand-400'
+            : 'hover:bg-surface-50 dark:hover:bg-dark-surface-50',
+        )}
       >
         {open
           ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -201,17 +269,34 @@ export default function ReportListPage() {
           : <Folder className="w-4 h-4 text-brand-500 flex-shrink-0" />}
         <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{name}</span>
         <span className="text-xs text-slate-400">({count})</span>
-      </button>
+        {canAddSub && canCreate && (
+          <button
+            type="button"
+            onClick={e => { e.stopPropagation(); expandFolder(id); setNewFolder({ parentId: id }); setNewFolderName('') }}
+            className="ml-auto opacity-0 group-hover:opacity-100 p-1 rounded text-slate-400 hover:text-brand-600 hover:bg-surface-100 dark:hover:bg-dark-surface-200 transition"
+            title={t('reports.add_subfolder')}
+          >
+            <FolderPlus className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
     )
   }
 
-  // ── Table-mode report row (Grafana-style flat row, indented under its folder) ──
-  const reportRow = (r: ReportListItem, depth: number) => (
+  // ── Table-mode report row (flat row, indented under its folder, draggable) ──
+  const reportRow = (r: ReportListItem, depth: number, srcFolder: number | null) => (
     <div
       key={`${depth}-${r.id}`}
-      className="grid grid-cols-[1fr_7rem_5rem_5rem_6rem_auto] items-center gap-2 pr-3 py-2 border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-50 group"
+      draggable
+      onDragStart={() => startDrag(r.id, srcFolder)}
+      onDragEnd={endDrag}
+      className={clsx(
+        'grid grid-cols-[1fr_7rem_5rem_5rem_6rem_auto] items-center gap-2 pr-3 py-2 border-b border-surface-100 dark:border-dark-surface-100 hover:bg-surface-50 dark:hover:bg-dark-surface-50 group',
+        dragReportId === r.id && 'opacity-50',
+      )}
     >
       <div className="min-w-0 flex items-center gap-2" style={{ paddingLeft: 12 + depth * 18 }}>
+        <GripVertical className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 flex-shrink-0 opacity-0 group-hover:opacity-100 cursor-grab" />
         <span className="text-xs text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">#{r.id}</span>
         <div className="min-w-0">
           <Link to={`/reports/${r.slug}`} className="font-medium text-slate-800 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 truncate block">
@@ -232,9 +317,15 @@ export default function ReportListPage() {
     </div>
   )
 
-  // ── Grid-mode report card ──
-  const reportCard = (r: ReportListItem) => (
-    <div key={r.id} className="card p-4 hover:shadow-md transition-shadow group">
+  // ── Grid-mode report card (draggable) ──
+  const reportCard = (r: ReportListItem, srcFolder: number | null) => (
+    <div
+      key={r.id}
+      draggable
+      onDragStart={() => startDrag(r.id, srcFolder)}
+      onDragEnd={endDrag}
+      className={clsx('card p-4 hover:shadow-md transition-shadow group cursor-grab', dragReportId === r.id && 'opacity-50')}
+    >
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
@@ -268,11 +359,11 @@ export default function ReportListPage() {
     if (!showFolder(folder)) return null
     return (
       <Fragment key={`f-${folder.id}`}>
-        {folderHeader(folder.id, folder.name, reportsOfFolder(folder.id).length, depth)}
+        {folderHeader(folder.id, folder.name, reportsOfFolder(folder.id).length, depth, true)}
         {isExpanded(folder.id) && (
           <>
             {(folder.children || []).map(c => renderFolderRows(c, depth + 1))}
-            {reportsOfFolder(folder.id).map(r => reportRow(r, depth + 1))}
+            {reportsOfFolder(folder.id).map(r => reportRow(r, depth + 1, folder.id))}
           </>
         )}
       </Fragment>
@@ -284,13 +375,13 @@ export default function ReportListPage() {
     const reps = reportsOfFolder(folder.id)
     return (
       <div key={`f-${folder.id}`}>
-        {folderHeader(folder.id, folder.name, reps.length, depth)}
+        {folderHeader(folder.id, folder.name, reps.length, depth, true)}
         {isExpanded(folder.id) && (
           <div style={{ paddingLeft: depth * 18 }} className="py-3 space-y-3">
             {(folder.children || []).map(c => renderFolderCards(c, depth + 1))}
             {reps.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {reps.map(reportCard)}
+                {reps.map(r => reportCard(r, folder.id))}
               </div>
             )}
           </div>
@@ -303,8 +394,35 @@ export default function ReportListPage() {
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('reports.title')}</h1>
-        {canCreate && <Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.new_report')}</Link>}
+        <div className="flex items-center gap-2">
+          {canCreate && (
+            <button onClick={() => { setNewFolder({ parentId: null }); setNewFolderName('') }} className="btn-secondary">
+              <FolderPlus className="w-4 h-4" /> {t('reports.new_folder')}
+            </button>
+          )}
+          {canCreate && <Link to="/reports/new" className="btn-primary"><Plus className="w-4 h-4" /> {t('reports.new_report')}</Link>}
+        </div>
       </div>
+
+      {/* Inline folder creation bar */}
+      {newFolder && (
+        <div className="flex items-center gap-2 mb-4 p-2 card">
+          <Folder className="w-4 h-4 text-brand-500 flex-shrink-0" />
+          {newFolder.parentId != null && (
+            <span className="text-xs text-slate-400 whitespace-nowrap">{t('reports.in_folder')}: {folderNameById(newFolder.parentId)}</span>
+          )}
+          <input
+            autoFocus
+            value={newFolderName}
+            onChange={e => setNewFolderName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') submitNewFolder(); if (e.key === 'Escape') { setNewFolder(null); setNewFolderName('') } }}
+            placeholder={t('reports.folder_name_placeholder')}
+            className="input flex-1 max-w-xs"
+          />
+          <button onClick={submitNewFolder} disabled={!newFolderName.trim()} className="btn-primary disabled:opacity-50">{t('common.create')}</button>
+          <button onClick={() => { setNewFolder(null); setNewFolderName('') }} className="btn-ghost">{t('common.cancel')}</button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">
@@ -364,8 +482,8 @@ export default function ReportListPage() {
           {folders.map(f => renderFolderRows(f, 0))}
           {uncategorized.length > 0 && (
             <>
-              {folderHeader(UNCATEGORIZED, t('reports.no_folder'), uncategorized.length, 0)}
-              {isExpanded(UNCATEGORIZED) && uncategorized.map(r => reportRow(r, 1))}
+              {folderHeader(UNCATEGORIZED, t('reports.no_folder'), uncategorized.length, 0, false)}
+              {isExpanded(UNCATEGORIZED) && uncategorized.map(r => reportRow(r, 1, null))}
             </>
           )}
         </div>
@@ -374,10 +492,10 @@ export default function ReportListPage() {
           {folders.map(f => renderFolderCards(f, 0))}
           {uncategorized.length > 0 && (
             <div>
-              {folderHeader(UNCATEGORIZED, t('reports.no_folder'), uncategorized.length, 0)}
+              {folderHeader(UNCATEGORIZED, t('reports.no_folder'), uncategorized.length, 0, false)}
               {isExpanded(UNCATEGORIZED) && (
                 <div className="py-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {uncategorized.map(reportCard)}
+                  {uncategorized.map(r => reportCard(r, null))}
                 </div>
               )}
             </div>
