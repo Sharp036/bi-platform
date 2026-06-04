@@ -1,4 +1,4 @@
-# Phase 13 — Interactive Dashboard (Tableau-like)
+# Phase 13 — Interactive Dashboard
 
 ## Overview
 
