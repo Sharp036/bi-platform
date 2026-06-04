@@ -64,6 +64,7 @@ datorio:
     max-memory-mb: 64          # per-context heap cap; enforced ONLY on Oracle GraalVM + truffle-enterprise
     max-output-bytes: 5242880  # 5 MB cap on the JSON result returned by a script
     max-script-length: 100000  # max characters of user code + libraries combined
+    max-concurrent: 4          # max scripts running at once; excess requests rejected, not queued
   
   cache:
       enabled: true
