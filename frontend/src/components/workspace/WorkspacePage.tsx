@@ -5,10 +5,11 @@ import { workspaceApi, WorkspaceOverview, FolderDto, FolderItemDto } from '@/api
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   Star, Clock, FolderOpen, FileBarChart, Database, LayoutDashboard,
-  Plus, ChevronRight, Trash2, Edit3, MoreHorizontal
+  Plus, ChevronRight, Trash2, Edit3, MoreHorizontal, X
 } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
+import MoveToFolderMenu from '@/components/workspace/MoveToFolderMenu'
 
 const typeIcon: Record<string, typeof FileBarChart> = {
   REPORT: FileBarChart,
@@ -34,6 +35,37 @@ export default function WorkspacePage() {
   const [folderItems, setFolderItems] = useState<FolderItemDto[]>([])
   const [newFolderName, setNewFolderName] = useState('')
   const [showNewFolder, setShowNewFolder] = useState(false)
+
+  // Drag-and-drop: dragged object and the folder currently hovered as a target.
+  const [dragItem, setDragItem] = useState<{ objectType: string; objectId: number } | null>(null)
+  const [dragOverFolder, setDragOverFolder] = useState<number | null>(null)
+
+  const startDrag = (e: React.DragEvent, objectType: string, objectId: number) => {
+    setDragItem({ objectType, objectId })
+    e.dataTransfer.effectAllowed = 'copy'
+    e.dataTransfer.setData('text/plain', `${objectType}:${objectId}`)
+  }
+
+  const dropOnFolder = async (e: React.DragEvent, folderId: number) => {
+    e.preventDefault()
+    setDragOverFolder(null)
+    let payload = dragItem
+    if (!payload) {
+      const raw = e.dataTransfer.getData('text/plain')
+      const [objectType, idStr] = raw.split(':')
+      if (objectType && idStr) payload = { objectType, objectId: Number(idStr) }
+    }
+    setDragItem(null)
+    if (!payload) return
+    try {
+      await workspaceApi.addToFolder(folderId, payload.objectType, payload.objectId)
+      toast.success(t('workspace.moved_to_folder'))
+      if (openFolder === folderId) loadFolder(folderId)
+      load()
+    } catch {
+      toast.error(t('workspace.failed_move_to_folder'))
+    }
+  }
 
   const load = () => {
     setLoading(true)
@@ -68,6 +100,18 @@ export default function WorkspacePage() {
     }
   }
 
+  const removeFromFolder = async (objectType: string, objectId: number) => {
+    if (!openFolder) return
+    try {
+      await workspaceApi.removeFromFolder(openFolder, objectType, objectId)
+      loadFolder(openFolder)
+      load()
+      toast.success(t('workspace.removed_from_folder'))
+    } catch {
+      toast.error(t('common.failed_to_delete'))
+    }
+  }
+
   const deleteFolder = async (id: number) => {
     if (!confirm(t('workspace.delete_folder_confirm'))) return
     try {
@@ -99,7 +143,10 @@ export default function WorkspacePage() {
                 <Link
                   key={`${fav.objectType}-${fav.objectId}`}
                   to={typeLink(fav.objectType, fav.objectId)}
-                  className="card p-3 flex items-center gap-3 hover:shadow-md transition-shadow"
+                  draggable
+                  onDragStart={e => startDrag(e, fav.objectType, fav.objectId)}
+                  onDragEnd={() => { setDragItem(null); setDragOverFolder(null) }}
+                  className="card p-3 flex items-center gap-3 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
                 >
                   <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
                     <Icon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -125,17 +172,34 @@ export default function WorkspacePage() {
             {data.recentItems.map(item => {
               const Icon = typeIcon[item.objectType] || FileBarChart
               return (
-                <Link
+                <div
                   key={`${item.objectType}-${item.objectId}`}
-                  to={typeLink(item.objectType, item.objectId)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100 dark:hover:bg-dark-surface-100 transition-colors"
+                  draggable
+                  onDragStart={e => startDrag(e, item.objectType, item.objectId)}
+                  onDragEnd={() => { setDragItem(null); setDragOverFolder(null) }}
+                  className={clsx(
+                    'flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100 dark:hover:bg-dark-surface-100 transition-colors group cursor-grab active:cursor-grabbing',
+                    dragItem?.objectType === item.objectType && dragItem?.objectId === item.objectId && 'opacity-50'
+                  )}
                 >
-                  <Icon className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                  <span className="text-sm text-slate-700 dark:text-slate-200 flex-1 truncate">{item.objectName}</span>
-                  {item.isFavorite && <Star className="w-3.5 h-3.5 text-amber-400" fill="currentColor" />}
-                  <span className="text-xs text-slate-400">{new Date(item.viewedAt).toLocaleDateString()}</span>
-                  <span className="text-xs text-slate-300 dark:text-slate-600">{item.viewCount}×</span>
-                </Link>
+                  <Link draggable={false} to={typeLink(item.objectType, item.objectId)} className="flex items-center gap-3 flex-1 min-w-0">
+                    <Icon className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <span className="text-sm text-slate-700 dark:text-slate-200 flex-1 truncate">{item.objectName}</span>
+                    {item.isFavorite && <Star className="w-3.5 h-3.5 text-amber-400" fill="currentColor" />}
+                    <span className="text-xs text-slate-400">{new Date(item.viewedAt).toLocaleDateString()}</span>
+                    <span className="text-xs text-slate-300 dark:text-slate-600">{item.viewCount}×</span>
+                  </Link>
+                  {item.objectType === 'REPORT' && (
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                      <MoveToFolderMenu
+                        objectType={item.objectType}
+                        objectId={item.objectId}
+                        className="p-1 rounded text-slate-400 hover:text-brand-500"
+                        onMoved={() => { if (openFolder) loadFolder(openFolder); load() }}
+                      />
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>
@@ -176,9 +240,13 @@ export default function WorkspacePage() {
               key={folder.id}
               className={clsx(
                 'card p-3 cursor-pointer hover:shadow-md transition-shadow group',
-                openFolder === folder.id && 'ring-2 ring-brand-500'
+                openFolder === folder.id && 'ring-2 ring-brand-500',
+                dragOverFolder === folder.id && 'ring-2 ring-brand-400 bg-brand-50/60 dark:bg-brand-900/20'
               )}
               onClick={() => loadFolder(folder.id)}
+              onDragOver={e => { if (dragItem) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setDragOverFolder(folder.id) } }}
+              onDragLeave={() => setDragOverFolder(prev => prev === folder.id ? null : prev)}
+              onDrop={e => dropOnFolder(e, folder.id)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
@@ -217,15 +285,23 @@ export default function WorkspacePage() {
                 {folderItems.map(item => {
                   const Icon = typeIcon[item.objectType] || FileBarChart
                   return (
-                    <Link
+                    <div
                       key={item.id}
-                      to={typeLink(item.objectType, item.objectId)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100 dark:hover:bg-dark-surface-100"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100 dark:hover:bg-dark-surface-100 group"
                     >
-                      <Icon className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-700 dark:text-slate-200 flex-1 truncate">{item.objectName}</span>
-                      <span className="text-xs text-slate-400">{item.objectType}</span>
-                    </Link>
+                      <Link to={typeLink(item.objectType, item.objectId)} className="flex items-center gap-3 flex-1 min-w-0">
+                        <Icon className="w-4 h-4 text-slate-400" />
+                        <span className="text-sm text-slate-700 dark:text-slate-200 flex-1 truncate">{item.objectName}</span>
+                        <span className="text-xs text-slate-400">{item.objectType}</span>
+                      </Link>
+                      <button
+                        onClick={() => removeFromFolder(item.objectType, item.objectId)}
+                        title={t('workspace.remove_from_folder')}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-slate-400 hover:text-red-500 flex-shrink-0"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   )
                 })}
               </div>

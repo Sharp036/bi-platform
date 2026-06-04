@@ -10,8 +10,11 @@ import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import ShareDialog from '@/components/sharing/ShareDialog'
 import FavoriteButton from '@/components/workspace/FavoriteButton'
+import MoveToFolderMenu from '@/components/workspace/MoveToFolderMenu'
 import TagManager from '@/components/tags/TagManager'
 import { useAuthStore } from '@/store/authStore'
+import { workspaceApi, FolderDto } from '@/api/workspace'
+import { FolderOpen } from 'lucide-react'
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -28,6 +31,11 @@ export default function ReportListPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('')
+  const [filterFolder, setFilterFolder] = useState<string>('')
+  const [folders, setFolders] = useState<FolderDto[]>([])
+  // reportId -> folder names it belongs to (chip); folderId -> set of reportIds (filter).
+  const [reportFolders, setReportFolders] = useState<Record<number, string[]>>({})
+  const [folderReportIds, setFolderReportIds] = useState<Record<number, Set<number>>>({})
   const [shareReport, setShareReport] = useState<ReportListItem | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>(() =>
     (localStorage.getItem('reports_view_mode') as 'grid' | 'table') ?? 'grid'
@@ -54,9 +62,42 @@ export default function ReportListPage() {
 
   useEffect(load, [filterStatus])
 
-  const filtered = search
-    ? reports.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
-    : reports
+  // Folder membership comes from the dl_folder_item mapping (same as the home
+  // page), not the report.folderId column, so it stays consistent with the
+  // move-to-folder actions. Build both lookup maps from folder contents.
+  const loadFolders = async () => {
+    try {
+      const tree = await workspaceApi.getFolderTree()
+      setFolders(tree)
+      const contents = await Promise.all(tree.map(f =>
+        workspaceApi.getFolderContents(f.id).then(items => ({ folder: f, items })).catch(() => ({ folder: f, items: [] }))
+      ))
+      const byReport: Record<number, string[]> = {}
+      const byFolder: Record<number, Set<number>> = {}
+      for (const { folder, items } of contents) {
+        const ids = new Set<number>()
+        for (const it of items) {
+          if (it.objectType !== 'REPORT') continue
+          ids.add(it.objectId)
+          ;(byReport[it.objectId] ||= []).push(folder.name)
+        }
+        byFolder[folder.id] = ids
+      }
+      setReportFolders(byReport)
+      setFolderReportIds(byFolder)
+    } catch {
+      // folder data is optional - the list still works without it
+    }
+  }
+
+  useEffect(() => { loadFolders() }, [])
+
+  const filtered = reports.filter(r => {
+    if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false
+    if (filterFolder === 'none') return !reportFolders[r.id]
+    if (filterFolder) return folderReportIds[Number(filterFolder)]?.has(r.id) ?? false
+    return true
+  })
 
   const statusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -74,6 +115,7 @@ export default function ReportListPage() {
         <Link to={`/reports/${r.slug}/edit`} className="btn-ghost p-1.5 text-xs" title={t('common.edit')}><Pencil className="w-3.5 h-3.5" /></Link>
       )}
       <Link to={`/reports/${r.slug}`} className="btn-ghost p-1.5 text-xs" title={t('common.view')}><Eye className="w-3.5 h-3.5" /></Link>
+      <MoveToFolderMenu objectType="REPORT" objectId={r.id} onMoved={() => loadFolders()} />
       {canEdit && (<>
         <button onClick={async () => {
           const suffix = t('reports.copy_suffix', 'copy')
@@ -136,6 +178,13 @@ export default function ReportListPage() {
           <option value="PUBLISHED">{t('common.status.published')}</option>
           <option value="ARCHIVED">{t('common.status.archived')}</option>
         </select>
+        {folders.length > 0 && (
+          <select value={filterFolder} onChange={e => setFilterFolder(e.target.value)} className="input w-44">
+            <option value="">{t('reports.all_folders')}</option>
+            <option value="none">{t('reports.no_folder')}</option>
+            {folders.map(f => <option key={f.id} value={String(f.id)}>{f.name}</option>)}
+          </select>
+        )}
         <div className="flex items-center rounded-lg border border-surface-200 dark:border-dark-surface-200 overflow-hidden">
           <button
             onClick={() => setView('grid')}
@@ -188,6 +237,15 @@ export default function ReportListPage() {
                       {r.name}
                     </Link>
                     {r.description && <p className="text-xs text-slate-400 truncate max-w-xs">{r.description}</p>}
+                    {reportFolders[r.id]?.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                        {reportFolders[r.id].map(name => (
+                          <span key={name} className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-surface-100 dark:bg-dark-surface-100 text-slate-500 dark:text-slate-400">
+                            <FolderOpen className="w-3 h-3" /> {name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium', statusBadge(r.status))}>
@@ -233,6 +291,16 @@ export default function ReportListPage() {
                 <span>·</span>
                 <span>{new Date(r.updatedAt).toLocaleDateString()}</span>
               </div>
+
+              {reportFolders[r.id]?.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1 mb-2">
+                  {reportFolders[r.id].map(name => (
+                    <span key={name} className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-surface-100 dark:bg-dark-surface-100 text-slate-500 dark:text-slate-400">
+                      <FolderOpen className="w-3 h-3" /> {name}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <div className="mb-2">
                 <TagManager objectType="REPORT" objectId={r.id} compact />
