@@ -126,6 +126,8 @@
   "reports.new_report": "Uusi raportti",
   "reports.search_placeholder": "Hae raportteja...",
   "reports.all_statuses": "Kaikki tilat",
+  "reports.all_folders": "Kaikki kansiot",
+  "reports.no_folder": "Ei kansiota",
   "reports.no_reports": "Ei raportteja vielä",
   "reports.create_first": "Luo ensimmäinen raporttisi tietojen visualisointiin",
   "reports.create_report": "Luo raportti",

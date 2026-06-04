@@ -126,6 +126,8 @@
   "reports.new_report": "Νέα αναφορά",
   "reports.search_placeholder": "Αναζήτηση αναφορών...",
   "reports.all_statuses": "Όλες οι καταστάσεις",
+  "reports.all_folders": "Όλοι οι φάκελοι",
+  "reports.no_folder": "Χωρίς φάκελο",
   "reports.no_reports": "Δεν υπάρχουν αναφορές ακόμα",
   "reports.create_first": "Δημιουργήστε την πρώτη σας αναφορά για οπτικοποίηση δεδομένων",
   "reports.create_report": "Δημιουργία αναφοράς",

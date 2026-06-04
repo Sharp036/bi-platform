@@ -126,6 +126,8 @@
   "reports.new_report": "Nová sestava",
   "reports.search_placeholder": "Hledat sestavy...",
   "reports.all_statuses": "Všechny stavy",
+  "reports.all_folders": "Všechny složky",
+  "reports.no_folder": "Bez složky",
   "reports.no_reports": "Zatím žádné sestavy",
   "reports.create_first": "Vytvořte první sestavu pro vizualizaci dat",
   "reports.create_report": "Vytvořit sestavu",

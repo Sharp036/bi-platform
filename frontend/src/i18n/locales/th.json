@@ -126,6 +126,8 @@
   "reports.new_report": "รายงานใหม่",
   "reports.search_placeholder": "ค้นหารายงาน...",
   "reports.all_statuses": "ทุกสถานะ",
+  "reports.all_folders": "ทุกโฟลเดอร์",
+  "reports.no_folder": "ไม่มีโฟลเดอร์",
   "reports.no_reports": "ยังไม่มีรายงาน",
   "reports.create_first": "สร้างรายงานแรกของคุณเพื่อแสดงข้อมูลเป็นภาพ",
   "reports.create_report": "สร้างรายงาน",

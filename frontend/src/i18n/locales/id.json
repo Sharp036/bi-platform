@@ -126,6 +126,8 @@
   "reports.new_report": "Laporan Baru",
   "reports.search_placeholder": "Cari laporan...",
   "reports.all_statuses": "Semua status",
+  "reports.all_folders": "Semua folder",
+  "reports.no_folder": "Tanpa folder",
   "reports.no_reports": "Belum ada laporan",
   "reports.create_first": "Buat laporan pertama Anda untuk memvisualisasikan data",
   "reports.create_report": "Buat Laporan",

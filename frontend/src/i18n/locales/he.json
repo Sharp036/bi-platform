@@ -126,6 +126,8 @@
   "reports.new_report": "דוח חדש",
   "reports.search_placeholder": "חפש דוחות...",
   "reports.all_statuses": "כל הסטטוסים",
+  "reports.all_folders": "כל התיקיות",
+  "reports.no_folder": "ללא תיקייה",
   "reports.no_reports": "אין דוחות עדיין",
   "reports.create_first": "צור את הדוח הראשון שלך כדי להציג נתונים",
   "reports.create_report": "צור דוח",

@@ -126,6 +126,8 @@
   "reports.new_report": "Novo Relatório",
   "reports.search_placeholder": "Pesquisar relatórios...",
   "reports.all_statuses": "Todos os status",
+  "reports.all_folders": "Todas as pastas",
+  "reports.no_folder": "Sem pasta",
   "reports.no_reports": "Nenhum relatório ainda",
   "reports.create_first": "Crie seu primeiro relatório para visualizar dados",
   "reports.create_report": "Criar Relatório",

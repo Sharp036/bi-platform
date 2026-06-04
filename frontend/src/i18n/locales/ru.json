@@ -138,6 +138,8 @@
   "reports.new_report": "Новый отчёт",
   "reports.search_placeholder": "Поиск отчётов...",
   "reports.all_statuses": "Все статусы",
+  "reports.all_folders": "Все папки",
+  "reports.no_folder": "Без папки",
   "reports.no_reports": "Отчётов пока нет",
   "reports.create_first": "Создайте свой первый отчёт для визуализации данных",
   "reports.create_report": "Создать отчёт",
