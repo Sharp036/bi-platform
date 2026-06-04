@@ -126,6 +126,8 @@
   "reports.new_report": "Új jelentés",
   "reports.search_placeholder": "Jelentések keresése...",
   "reports.all_statuses": "Minden állapot",
+  "reports.all_folders": "Minden mappa",
+  "reports.no_folder": "Mappa nélkül",
   "reports.no_reports": "Még nincsenek jelentések",
   "reports.create_first": "Hozza létre első jelentését az adatok megjelenítéséhez",
   "reports.create_report": "Jelentés létrehozása",

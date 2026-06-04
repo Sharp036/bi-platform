@@ -126,6 +126,8 @@
   "reports.new_report": "تقرير جديد",
   "reports.search_placeholder": "البحث في التقارير...",
   "reports.all_statuses": "جميع الحالات",
+  "reports.all_folders": "كل المجلدات",
+  "reports.no_folder": "بدون مجلد",
   "reports.no_reports": "لا توجد تقارير بعد",
   "reports.create_first": "أنشئ أول تقرير لعرض البيانات بصريًا",
   "reports.create_report": "إنشاء تقرير",

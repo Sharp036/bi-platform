@@ -126,6 +126,8 @@
   "reports.new_report": "नई रिपोर्ट",
   "reports.search_placeholder": "रिपोर्ट खोजें...",
   "reports.all_statuses": "सभी स्थितियां",
+  "reports.all_folders": "सभी फ़ोल्डर",
+  "reports.no_folder": "कोई फ़ोल्डर नहीं",
   "reports.no_reports": "अभी तक कोई रिपोर्ट नहीं",
   "reports.create_first": "डेटा को विज़ुअलाइज़ करने के लिए अपनी पहली रिपोर्ट बनाएं",
   "reports.create_report": "रिपोर्ट बनाएं",

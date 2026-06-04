@@ -143,6 +143,8 @@
   "reports.new_report": "New Report",
   "reports.search_placeholder": "Search reports...",
   "reports.all_statuses": "All statuses",
+  "reports.all_folders": "All folders",
+  "reports.no_folder": "No folder",
   "reports.no_reports": "No reports yet",
   "reports.create_first": "Create your first report to visualize data",
   "reports.create_report": "Create Report",

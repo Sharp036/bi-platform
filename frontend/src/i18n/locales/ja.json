@@ -126,6 +126,8 @@
   "reports.new_report": "新規レポート",
   "reports.search_placeholder": "レポートを検索...",
   "reports.all_statuses": "すべてのステータス",
+  "reports.all_folders": "すべてのフォルダ",
+  "reports.no_folder": "フォルダなし",
   "reports.no_reports": "レポートはまだありません",
   "reports.create_first": "最初のレポートを作成してデータを可視化しましょう",
   "reports.create_report": "レポートを作成",

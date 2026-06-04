@@ -126,6 +126,8 @@
   "reports.new_report": "新建报表",
   "reports.search_placeholder": "搜索报表...",
   "reports.all_statuses": "所有状态",
+  "reports.all_folders": "所有文件夹",
+  "reports.no_folder": "无文件夹",
   "reports.no_reports": "暂无报表",
   "reports.create_first": "创建您的第一个报表来可视化数据",
   "reports.create_report": "创建报表",

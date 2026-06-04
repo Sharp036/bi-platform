@@ -126,6 +126,8 @@
   "reports.new_report": "Новий звіт",
   "reports.search_placeholder": "Пошук звітів...",
   "reports.all_statuses": "Всі статуси",
+  "reports.all_folders": "Усі папки",
+  "reports.no_folder": "Без папки",
   "reports.no_reports": "Звітів поки немає",
   "reports.create_first": "Створіть свій перший звіт для візуалізації даних",
   "reports.create_report": "Створити звіт",

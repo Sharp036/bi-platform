@@ -126,6 +126,8 @@
   "reports.new_report": "Ny rapport",
   "reports.search_placeholder": "Sök rapporter...",
   "reports.all_statuses": "Alla statusar",
+  "reports.all_folders": "Alla mappar",
+  "reports.no_folder": "Utan mapp",
   "reports.no_reports": "Inga rapporter ännu",
   "reports.create_first": "Skapa din första rapport för att visualisera data",
   "reports.create_report": "Skapa rapport",

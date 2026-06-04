@@ -126,6 +126,8 @@
   "reports.new_report": "Nuevo informe",
   "reports.search_placeholder": "Buscar informes...",
   "reports.all_statuses": "Todos los estados",
+  "reports.all_folders": "Todas las carpetas",
+  "reports.no_folder": "Sin carpeta",
   "reports.no_reports": "Aún no hay informes",
   "reports.create_first": "Cree su primer informe para visualizar datos",
   "reports.create_report": "Crear informe",

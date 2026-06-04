@@ -126,6 +126,8 @@
   "reports.new_report": "Yeni Rapor",
   "reports.search_placeholder": "Rapor ara...",
   "reports.all_statuses": "Tüm durumlar",
+  "reports.all_folders": "Tüm klasörler",
+  "reports.no_folder": "Klasörsüz",
   "reports.no_reports": "Henüz rapor yok",
   "reports.create_first": "Verileri görselleştirmek için ilk raporunuzu oluşturun",
   "reports.create_report": "Rapor Oluştur",
