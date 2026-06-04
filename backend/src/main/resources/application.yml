@@ -57,11 +57,13 @@ datorio:
     password: ${ADMIN_PASSWORD:admin}
     email: ${ADMIN_EMAIL:admin@datorio.local}
 
-  # ── Scripting Engine Limits ──
+  # ── Scripting Engine Limits (sandbox for untrusted user JS) ──
   scripting:
-    timeout-ms: 5000
-    max-memory-mb: 64
-    max-statements: 100000
+    timeout-ms: 5000           # wall-clock kill via Context.close(true)
+    max-statements: 100000     # ResourceLimits statement guard (Community GraalVM)
+    max-memory-mb: 64          # per-context heap cap; enforced ONLY on Oracle GraalVM + truffle-enterprise
+    max-output-bytes: 5242880  # 5 MB cap on the JSON result returned by a script
+    max-script-length: 100000  # max characters of user code + libraries combined
   
   cache:
       enabled: true

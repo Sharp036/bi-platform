@@ -147,14 +147,14 @@ class ScriptService(
         }
 
         // Execute
-        val result = scriptEngine.execute(code, dataInput, libraryCode)
+        val result = scriptEngine.execute(code, dataInput, libraryCode, username)
 
         // Log execution
         val execution = ScriptExecution(
             scriptId = scriptId,
             scriptName = scriptName,
             contextType = "ADHOC",
-            status = if (result.success) ScriptExecStatus.SUCCESS else ScriptExecStatus.ERROR,
+            status = execStatus(result),
             executionMs = result.executionMs,
             inputRows = request.input?.rows?.size,
             outputRows = result.rows?.size,
@@ -169,8 +169,14 @@ class ScriptService(
             rows = result.rows,
             logs = result.logs,
             executionMs = result.executionMs,
-            status = if (result.success) ScriptExecStatus.SUCCESS else ScriptExecStatus.ERROR
+            status = execStatus(result)
         )
+    }
+
+    private fun execStatus(result: ScriptEngine.ExecutionResult): ScriptExecStatus = when {
+        result.success -> ScriptExecStatus.SUCCESS
+        result.timedOut -> ScriptExecStatus.TIMEOUT
+        else -> ScriptExecStatus.ERROR
     }
 
     /**
@@ -192,14 +198,14 @@ class ScriptService(
         }
 
         val input = ScriptEngine.DataInput(columns, rows, parameters)
-        val result = scriptEngine.execute(script.code, input)
+        val result = scriptEngine.execute(script.code, input, username = username)
 
         // Log
         val execution = ScriptExecution(
             scriptId = script.id,
             scriptName = script.name,
             contextType = "WIDGET",
-            status = if (result.success) ScriptExecStatus.SUCCESS else ScriptExecStatus.ERROR,
+            status = execStatus(result),
             executionMs = result.executionMs,
             inputRows = rows.size,
             outputRows = result.rows?.size,
