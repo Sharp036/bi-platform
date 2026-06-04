@@ -216,6 +216,7 @@
   "designer.layout": "Макет (сетка: 12 столбцов)",
   "designer.section_general": "Общие",
   "designer.section_layout": "Макет",
+  "designer.section_source": "Источник данных",
   "designer.zindex": "Слой (z-index)",
   "designer.search_options": "Поиск опций",
   "designer.no_options_found": "Опции не найдены",

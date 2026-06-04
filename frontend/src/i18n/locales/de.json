@@ -204,6 +204,7 @@
   "designer.layout": "Layout (Raster: 12 Spalten)",
   "designer.section_general": "Allgemein",
   "designer.section_layout": "Layout",
+  "designer.section_source": "Datenquelle",
   "designer.zindex": "Ebene (z-index)",
   "designer.search_options": "Optionen suchen",
   "designer.no_options_found": "Keine Optionen gefunden",

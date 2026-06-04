@@ -204,6 +204,7 @@
   "designer.layout": "레이아웃 (그리드: 12열)",
   "designer.section_general": "일반",
   "designer.section_layout": "레이아웃",
+  "designer.section_source": "데이터 소스",
   "designer.zindex": "레이어 (z-index)",
   "designer.search_options": "옵션 검색",
   "designer.no_options_found": "옵션 없음",

@@ -103,9 +103,9 @@ function renderCellStyle(
     }
   }
   if (fmt?.type === 'bar') {
-    // Fill the cell background with a light pastel bar from left to value
-    // ratio (Superset-style). The number itself is rendered right-aligned
-    // by renderCellContent so it reads naturally over the bar.
+    // Fill the cell background with a light pastel bar from left to the
+    // value ratio (in-cell bar formatter). The number itself is rendered
+    // right-aligned by renderCellContent so it reads naturally over the bar.
     const num = Number(rawValue)
     const max = colMax && colMax > 0 ? colMax : 1
     const ratio = Number.isFinite(num) ? Math.min(1, Math.abs(num) / max) : 0

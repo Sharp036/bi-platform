@@ -204,6 +204,7 @@
   "designer.layout": "Layout (griglia: 12 colonne)",
   "designer.section_general": "Generale",
   "designer.section_layout": "Layout",
+  "designer.section_source": "Origine dati",
   "designer.zindex": "Livello (z-index)",
   "designer.search_options": "Cerca opzioni",
   "designer.no_options_found": "Nessuna opzione trovata",
