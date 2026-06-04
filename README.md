@@ -69,7 +69,7 @@ docker-compose up -d postgres clickhouse
 cd backend
 ../gradlew bootRun
 
-# Run frontend (after Phase 6)
+# Run frontend
 cd frontend
 npm install && npm run dev
 ```
@@ -134,7 +134,7 @@ datorio/
 │       ├── repository/      # Spring Data repositories
 │       ├── security/        # JWT auth filter & provider
 │       └── service/         # Business logic
-├── frontend/                # React app (Phase 6+)
+├── frontend/                # React + TypeScript SPA
 ├── docker/                  # Docker init scripts
 ├── Dockerfile               # Multi-stage build
 ├── docker-compose.yml       # Full stack orchestration
@@ -145,22 +145,35 @@ datorio/
 
 ## Development Roadmap
 
-See [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md) for the full 12-phase plan.
+The original plan was 12 phases; the project has since grown to 23. All phases
+below are implemented. See [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md) for the
+detailed plan and the per-phase `PHASE*_GUIDE.md` files for integration notes.
 
 | Phase | Status | Description |
 |-------|--------|-------------|
 | 1 | ✅ | Project skeleton, Docker, CI/CD |
 | 2 | ✅ | Data source connections (PG + CH) |
 | 3 | ✅ | Authentication & RBAC |
-| 4 | 🔲 | Query builder & metadata |
-| 5 | 🔲 | Report engine (core) |
-| 6 | 🔲 | Frontend: Dashboard & viewer |
-| 7 | 🔲 | JavaScript scripting engine |
-| 8 | 🔲 | Drill-down reports |
-| 9 | 🔲 | Visual report designer |
-| 10 | 🔲 | Export & distribution |
-| 11 | 🔲 | Advanced features |
-| 12 | 🔲 | Performance & scale |
+| 4 | ✅ | Query builder & metadata |
+| 5 | ✅ | Report engine (core) |
+| 6 | ✅ | Frontend: dashboard & viewer |
+| 7 | ✅ | JavaScript scripting engine |
+| 8 | ✅ | Drill-down reports |
+| 9 | ✅ | Visual report designer |
+| 10 | ✅ | Export & distribution (CSV/Excel/PDF, email, embed) |
+| 11 | ✅ | Advanced features (calculated fields, alerts, bookmarks) |
+| 12 | ✅ | Performance & scale (caching, monitoring, query advisor) |
+| 13 | ✅ | Interactive dashboards (chart layers, cross-filter, dynamic zones, overlays) |
+| 14 | ✅ | User management & admin panel |
+| 15 | ✅ | Object-level permissions & sharing |
+| 16 | ✅ | Favorites, recent items & folders |
+| 17 | ✅ | Tags & global search |
+| 18 | ✅ | Button widgets, parameter controls, global filters |
+| 19 | ✅ | Enhanced tooltips, annotations, containers, dashboard objects |
+| 20 | ✅ | Extended chart types |
+| 21 | ✅ | Data modeling layer (semantic model, auto-JOIN, Explore) |
+| 22 | ✅ | Dashboard templates & marketplace (JSON export/import) |
+| 23 | ✅ | Real-time & streaming (Server-Sent Events) |
 
 ## License
 
