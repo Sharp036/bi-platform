@@ -15,7 +15,7 @@ import NumericInput from '@/components/common/NumericInput'
 import { CHART_TYPE_OPTIONS } from '@/components/charts/chartTypeBuilders'
 import OptionsPane from '@/components/designer/options/OptionsPane'
 import { COMMON_OPTIONS, COMMON_CATEGORIES } from '@/components/designer/options/commonOptions'
-import type { OptionCtx } from '@/components/designer/options/types'
+import type { OptionCtx, OptionDef } from '@/components/designer/options/types'
 import toast from 'react-hot-toast'
 
 // Single source of truth for chart-type values comes from chartTypeBuilders;
@@ -249,14 +249,100 @@ export default function PropertyPanel() {
 
   const update = (updates: Partial<DesignerWidget>) => updateWidget(widget.id, updates)
 
-  // Context for the options registry (Phase A: common header fields). Extended
-  // with availableCols/layers/etc. as more sections migrate.
+  // Context for the options registry. Common options read from this; section
+  // options defined below close over component locals directly.
   const optionsCtx: OptionCtx = {
     widget,
     cc: widget.chartConfig as Record<string, unknown>,
     update,
     t,
   }
+
+  const isDataBound = !['IMAGE', 'BUTTON', 'SPACER', 'DIVIDER', 'WEBPAGE'].includes(widget.widgetType)
+  const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
+
+  // Data-source section (saved query, inline SQL, columns, param mapping).
+  // Render closures capture component state directly - no ctx threading needed.
+  const dataSourceOptions: OptionDef[] = isDataBound ? [
+    {
+      id: 'ds_query', category: 'source', nameKey: 'designer.data_source',
+      render: () => (
+        <select
+          value={widget.queryId || ''}
+          onChange={e => {
+            const qId = e.target.value ? Number(e.target.value) : null
+            const q = queries.find(q => q.id === qId)
+            update({ queryId: qId, datasourceId: q?.datasourceId || widget.datasourceId, rawSql: qId ? '' : widget.rawSql })
+          }}
+          className="input text-sm"
+        >
+          <option value="">{t('designer.select_query')}</option>
+          {queries.map(q => <option key={q.id} value={q.id}>{q.name} ({q.datasourceName})</option>)}
+        </select>
+      ),
+    },
+    {
+      id: 'ds_sql', category: 'source', nameKey: 'designer.inline_sql',
+      render: () => (
+        <>
+          <select
+            value={widget.datasourceId || ''}
+            onChange={e => update({ datasourceId: e.target.value ? Number(e.target.value) : null, queryId: null })}
+            className="input text-sm mb-2"
+          >
+            <option value="">{t('designer.select_datasource')}</option>
+            {datasources.map(ds => <option key={ds.id} value={ds.id}>{ds.name} ({ds.type})</option>)}
+          </select>
+          <div className="relative">
+            <textarea
+              value={widget.rawSql}
+              onChange={e => update({ rawSql: e.target.value, queryId: null })}
+              placeholder={widget.datasourceId ? t('designer.sql_placeholder') : t('designer.select_datasource_first')}
+              className="input text-xs font-mono h-20 resize-none pr-8"
+              disabled={!widget.datasourceId}
+            />
+            <button
+              onClick={() => setSqlEditorOpen(true)}
+              disabled={!widget.datasourceId}
+              className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600 disabled:opacity-30"
+              title={t('designer.open_sql_editor')}
+            >
+              <MoreVertical className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </>
+      ),
+    },
+    {
+      id: 'ds_columns', category: 'source', nameKey: 'designer.columns',
+      render: () => (
+        <>
+          <button onClick={loadColumns} disabled={loadingCols || !hasDataSource} className="btn-secondary text-xs w-full gap-1">
+            <RefreshCw className={`w-3.5 h-3.5 ${loadingCols ? 'animate-spin' : ''}`} />
+            {loadingCols ? t('designer.loading_columns') : t('designer.load_columns')}
+          </button>
+          {!hasDataSource && <p className="text-[10px] text-slate-400 mt-1">{t('designer.no_data_source_hint')}</p>}
+        </>
+      ),
+    },
+    {
+      id: 'ds_params', category: 'source', nameKey: '',
+      render: () => (
+        <ParamMappingEditor
+          mapping={widget.paramMapping}
+          onChange={(pm) => update({ paramMapping: pm })}
+          parameters={parameters}
+          widgets={widgets}
+        />
+      ),
+    },
+  ] : []
+
+  const registryOptions = [...COMMON_OPTIONS, ...dataSourceOptions]
+  const registryCategories = [
+    ...COMMON_CATEGORIES,
+    ...(isDataBound ? [{ id: 'source', nameKey: 'designer.section_source' }] : []),
+  ]
 
   return (
     <>
@@ -289,97 +375,20 @@ export default function PropertyPanel() {
       </div>
 
       {/* Common header fields (title, description, layout, z-index) are driven
-          by the options registry - collapsible sections + search (Grafana-style).
+          by the options registry - collapsible sections + an option search.
           Widget-type-specific config below is migrated to the registry in later
           phases. Title binds to widget.title for all types; for TEXT widgets the
           HTML body lives in chartConfig.content (JSONB, no length cap). */}
-      <OptionsPane options={COMMON_OPTIONS} categories={COMMON_CATEGORIES} ctx={optionsCtx} />
+      <OptionsPane options={registryOptions} categories={registryCategories} ctx={optionsCtx} />
 
-      {/* Data Binding. TEXT widgets need a SQL source so {column:format}
-          placeholders in the HTML body interpolate from row[0]. */}
+      {/* Widget-type config. The data source and param mapping fields live in
+          the options registry above (Источник данных section); this block holds
+          the per-type config (CHART/TABLE/KPI/FILTER). */}
       {!['IMAGE', 'BUTTON', 'SPACER', 'DIVIDER', 'WEBPAGE'].includes(widget.widgetType) && (() => {
         const cc = widget.chartConfig as Record<string, unknown>
-        const hasDataSource = !!(widget.queryId || (widget.datasourceId && widget.rawSql?.trim()))
 
         return (
           <>
-            <Field label={t('designer.data_source')}>
-              <select
-                value={widget.queryId || ''}
-                onChange={e => {
-                  const qId = e.target.value ? Number(e.target.value) : null
-                  const q = queries.find(q => q.id === qId)
-                  update({
-                    queryId: qId,
-                    datasourceId: q?.datasourceId || widget.datasourceId,
-                    rawSql: qId ? '' : widget.rawSql,
-                  })
-                }}
-                className="input text-sm"
-              >
-                <option value="">{t('designer.select_query')}</option>
-                {queries.map(q => (
-                  <option key={q.id} value={q.id}>{q.name} ({q.datasourceName})</option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label={t('designer.inline_sql')}>
-              <select
-                value={widget.datasourceId || ''}
-                onChange={e => update({
-                  datasourceId: e.target.value ? Number(e.target.value) : null,
-                  queryId: null,
-                })}
-                className="input text-sm mb-2"
-              >
-                <option value="">{t('designer.select_datasource')}</option>
-                {datasources.map(ds => (
-                  <option key={ds.id} value={ds.id}>{ds.name} ({ds.type})</option>
-                ))}
-              </select>
-              <div className="relative">
-                <textarea
-                  value={widget.rawSql}
-                  onChange={e => update({ rawSql: e.target.value, queryId: null })}
-                  placeholder={widget.datasourceId ? t('designer.sql_placeholder') : t('designer.select_datasource_first')}
-                  className="input text-xs font-mono h-20 resize-none pr-8"
-                  disabled={!widget.datasourceId}
-                />
-                <button
-                  onClick={() => setSqlEditorOpen(true)}
-                  disabled={!widget.datasourceId}
-                  className="absolute top-1 right-1 p-1 rounded hover:bg-surface-200 dark:hover:bg-dark-surface-100 text-slate-400 hover:text-slate-600 disabled:opacity-30"
-                  title={t('designer.open_sql_editor')}
-                >
-                  <MoreVertical className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </Field>
-
-            {/* Load Columns — shared for all data-bound types */}
-            <Field label={t('designer.columns')}>
-              <button
-                onClick={loadColumns}
-                disabled={loadingCols || !hasDataSource}
-                className="btn-secondary text-xs w-full gap-1"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loadingCols ? 'animate-spin' : ''}`} />
-                {loadingCols ? t('designer.loading_columns') : t('designer.load_columns')}
-              </button>
-              {!hasDataSource && (
-                <p className="text-[10px] text-slate-400 mt-1">{t('designer.no_data_source_hint')}</p>
-              )}
-            </Field>
-
-            {/* ── Param Mapping ── */}
-            <ParamMappingEditor
-              mapping={widget.paramMapping}
-              onChange={(pm) => update({ paramMapping: pm })}
-              parameters={parameters}
-              widgets={widgets}
-            />
-
             {/* ── CHART Config ── */}
             {widget.widgetType === 'CHART' && (() => {
               const catField = cc.categoryField as string || ''

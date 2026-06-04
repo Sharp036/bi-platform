@@ -204,6 +204,7 @@
   "designer.layout": "เลย์เอาต์ (กริด: 12 คอลัมน์)",
   "designer.section_general": "ทั่วไป",
   "designer.section_layout": "เลย์เอาต์",
+  "designer.section_source": "แหล่งข้อมูล",
   "designer.zindex": "เลเยอร์ (z-index)",
   "designer.search_options": "ค้นหาตัวเลือก",
   "designer.no_options_found": "ไม่พบตัวเลือก",
