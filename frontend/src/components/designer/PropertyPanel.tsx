@@ -6,15 +6,20 @@ import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
 import { interactiveApi } from '@/api/interactive'
-import type { ChartLayerItem } from '@/types'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
-import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, ArrowUp, ArrowDown, Plus, X, MoreVertical, Play, ChevronDown } from 'lucide-react'
+import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, Plus, X, MoreVertical, Play } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import SqlCodeEditor from '@/components/common/SqlCodeEditor'
 import NumericInput from '@/components/common/NumericInput'
 import { CHART_TYPE_OPTIONS } from '@/components/charts/chartTypeBuilders'
 import OptionsPane from '@/components/designer/options/OptionsPane'
 import { COMMON_OPTIONS, COMMON_CATEGORIES } from '@/components/designer/options/commonOptions'
+import LayerSettingsAccordion from '@/components/designer/options/LayerSettingsAccordion'
+import ChartMarkerOptions from '@/components/designer/options/ChartMarkerOptions'
+import ChartPieOptions from '@/components/designer/options/ChartPieOptions'
+import TableConfigOptions from '@/components/designer/options/TableConfigOptions'
+import KpiConfigOptions from '@/components/designer/options/KpiConfigOptions'
+import FilterConfigOptions from '@/components/designer/options/FilterConfigOptions'
 import type { OptionCtx, OptionDef } from '@/components/designer/options/types'
 import toast from 'react-hot-toast'
 
@@ -24,7 +29,7 @@ import toast from 'react-hot-toast'
 // though the chart engine handled them.
 const CHART_TYPES = CHART_TYPE_OPTIONS.map(o => o.value)
 
-const CURRENCIES = [
+export const CURRENCIES = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
   { code: 'GBP', symbol: '£', name: 'British Pound' },
@@ -57,12 +62,7 @@ export default function PropertyPanel() {
   const removeWidget = useDesignerStore(s => s.removeWidget)
   const duplicateWidget = useDesignerStore(s => s.duplicateWidget)
   const widgetLayersMap = useDesignerStore(s => s.widgetLayers)
-  const updateWidgetLayer = useDesignerStore(s => s.updateWidgetLayer)
   const setWidgetLayers = useDesignerStore(s => s.setWidgetLayers)
-
-  const [expandedLayerIds, setExpandedLayerIds] = useState<Set<number>>(new Set())
-  const toggleLayerExpand = (id: number) =>
-    setExpandedLayerIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
 
   const [queries, setQueries] = useState<SavedQuery[]>([])
   const [datasources, setDatasources] = useState<DataSource[]>([])
@@ -581,15 +581,146 @@ export default function PropertyPanel() {
         { value: '90', nameKey: 'designer.rotation.vertical' },
       ],
     },
+    {
+      id: 'data_labels', category: 'labels', nameKey: '',
+      showIf: () => !chartHasLayers,
+      render: () => (
+        <>
+          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+            <input type="checkbox" checked={!!chartCc.showDataLabels}
+              onChange={e => update({ chartConfig: { ...chartCc, showDataLabels: e.target.checked } })}
+              className="rounded border-slate-300" />
+            {t('designer.show_data_labels')}
+          </label>
+          {!!chartCc.showDataLabels && (
+            <div className="mt-2 space-y-2">
+              <select value={chartCc.dataLabelPosition as string || 'top'}
+                onChange={e => update({ chartConfig: { ...chartCc, dataLabelPosition: e.target.value } })}
+                className="input text-sm">
+                <option value="top">{t('designer.data_label_position.top')}</option>
+                <option value="inline">{t('designer.data_label_position.inline')}</option>
+              </select>
+              <select value={chartCc.dataLabelMode as string || 'all'}
+                onChange={e => update({ chartConfig: { ...chartCc, dataLabelMode: e.target.value } })}
+                className="input text-sm">
+                <option value="all">{t('designer.label_mode.all')}</option>
+                <option value="first">{t('designer.label_mode.first_n')}</option>
+                <option value="last">{t('designer.label_mode.last_n')}</option>
+                <option value="min_max">{t('designer.label_mode.min_max')}</option>
+              </select>
+              {(chartCc.dataLabelMode === 'first' || chartCc.dataLabelMode === 'last') && (
+                <NumericInput value={chartCc.dataLabelCount as number || 3}
+                  onChange={v => update({ chartConfig: { ...chartCc, dataLabelCount: v ?? 3 } })}
+                  className="input text-sm" placeholder={t('designer.label_count_placeholder')} />
+              )}
+              <select value={chartCc.dataLabelTopSpacingMode as string || 'dynamic'}
+                onChange={e => update({ chartConfig: { ...chartCc, dataLabelTopSpacingMode: e.target.value } })}
+                className="input text-sm">
+                <option value="dynamic">{t('designer.label_top_spacing_mode.dynamic')}</option>
+                <option value="fixed">{t('designer.label_top_spacing_mode.fixed')}</option>
+              </select>
+              <div className="flex items-center gap-2">
+                <NumericInput value={chartCc.dataLabelDecimals != null ? Number(chartCc.dataLabelDecimals) : 1}
+                  onChange={v => update({ chartConfig: { ...chartCc, dataLabelDecimals: v ?? 1 } })}
+                  className="input text-sm w-16" />
+                <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_decimals')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <NumericInput value={chartCc.dataLabelFontSize != null ? Number(chartCc.dataLabelFontSize) : 10}
+                  onChange={v => update({ chartConfig: { ...chartCc, dataLabelFontSize: v ?? undefined } })}
+                  className="input text-sm w-16" />
+                <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_font_size')}</span>
+              </div>
+              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={chartCc.dataLabelThousandsSep !== false}
+                  onChange={e => update({ chartConfig: { ...chartCc, dataLabelThousandsSep: e.target.checked } })}
+                  className="rounded border-slate-300" />
+                {t('designer.data_label_thousands_sep')}
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={!!chartCc.dataLabelBoxed}
+                  onChange={e => update({ chartConfig: { ...chartCc, dataLabelBoxed: e.target.checked } })}
+                  className="rounded border-slate-300" />
+                {t('designer.data_label_boxed')}
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={!!chartCc.dataLabelSpread}
+                  onChange={e => update({ chartConfig: { ...chartCc, dataLabelSpread: e.target.checked } })}
+                  className="rounded border-slate-300" />
+                {t('designer.data_label_spread')}
+              </label>
+              <select value={String(chartCc.dataLabelRotation || 0)}
+                onChange={e => update({ chartConfig: { ...chartCc, dataLabelRotation: Number(e.target.value) } })}
+                className="input text-sm">
+                <option value="0">{t('designer.label_rotation.horizontal')}</option>
+                <option value="-45">{t('designer.label_rotation.angled_up')}</option>
+                <option value="45">{t('designer.label_rotation.angled_down')}</option>
+                <option value="-90">{t('designer.label_rotation.vertical')}</option>
+              </select>
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      // Per-layer accordion (mixed / multi-series charts). Each layer carries
+      // its own color/type/axis/labels/markers; the section is hidden when the
+      // chart has no layers.
+      id: 'layers', category: 'layers', nameKey: '',
+      showIf: () => (widgetLayersMap[widget.id] || []).length > 0,
+      render: () => <LayerSettingsAccordion widget={widget} cc={chartCc} update={update} />,
+    },
+    {
+      // Threshold lines / min-max markers / conditional color / delta / last-
+      // point highlight. Each control self-gates on chart type; the section is
+      // shown for axis-based (non-pie, non-mixed) charts.
+      id: 'markers', category: 'markers', nameKey: '',
+      showIf: () => AXIS_CHART_TYPES.includes((chartCc.type as string) || 'bar'),
+      render: () => <ChartMarkerOptions cc={chartCc} update={update} availableCols={availableCols} />,
+    },
+    {
+      id: 'pie', category: 'pie', nameKey: '',
+      showIf: () => ((chartCc.type as string) || 'bar') === 'pie',
+      render: () => <ChartPieOptions cc={chartCc} update={update} availableCols={availableCols} previewRows={previewRows} />,
+    },
   ] : []
 
-  const registryOptions = [...COMMON_OPTIONS, ...dataSourceOptions, ...chartOptions]
+  // Widget-type specific config (TABLE/KPI/FILTER/TEXT) lives in its own
+  // registry group so each type contributes one collapsible section.
+  const isTable = widget.widgetType === 'TABLE'
+  const isKpi = widget.widgetType === 'KPI'
+  const isFilter = widget.widgetType === 'FILTER'
+  const widgetTypeOptions: OptionDef[] = [
+    ...(isTable ? [{
+      id: 'table_config', category: 'table', nameKey: '',
+      showIf: () => availableCols.length > 0,
+      render: () => <TableConfigOptions widget={widget} cc={chartCc} update={update} availableCols={availableCols} previewRows={previewRows} />,
+    }] : []),
+    ...(isKpi ? [{
+      id: 'kpi_config', category: 'kpi', nameKey: '',
+      render: () => <KpiConfigOptions cc={chartCc} update={update} availableCols={availableCols} />,
+    }] : []),
+    ...(isFilter ? [{
+      id: 'filter_config', category: 'filter', nameKey: '',
+      showIf: () => availableCols.length > 0,
+      render: () => <FilterConfigOptions cc={chartCc} update={update} availableCols={availableCols} />,
+    }] : []),
+  ]
+
+  const registryOptions = [...COMMON_OPTIONS, ...dataSourceOptions, ...chartOptions, ...widgetTypeOptions]
   const registryCategories = [
     ...COMMON_CATEGORIES,
     ...(isDataBound ? [{ id: 'source', nameKey: 'designer.section_source' }] : []),
     ...(isChart ? [{ id: 'chart', nameKey: 'designer.section_chart' }] : []),
+    ...(isChart ? [{ id: 'layers', nameKey: 'designer.section_layers' }] : []),
     ...(isChart ? [{ id: 'data', nameKey: 'designer.section_data' }] : []),
     ...(isChart ? [{ id: 'axis', nameKey: 'designer.section_axis' }] : []),
+    ...(isChart ? [{ id: 'labels', nameKey: 'designer.section_labels' }] : []),
+    ...(isChart ? [{ id: 'markers', nameKey: 'designer.section_markers' }] : []),
+    ...(isChart ? [{ id: 'pie', nameKey: 'designer.section_pie' }] : []),
+    ...(isTable ? [{ id: 'table', nameKey: 'designer.section_table' }] : []),
+    ...(isKpi ? [{ id: 'kpi', nameKey: 'designer.section_kpi' }] : []),
+    ...(isFilter ? [{ id: 'filter', nameKey: 'designer.section_filter' }] : []),
   ]
 
   return (
@@ -629,1542 +760,9 @@ export default function PropertyPanel() {
           HTML body lives in chartConfig.content (JSONB, no length cap). */}
       <OptionsPane options={registryOptions} categories={registryCategories} ctx={optionsCtx} />
 
-      {/* Widget-type config. The data source and param mapping fields live in
-          the options registry above (Источник данных section); this block holds
-          the per-type config (CHART/TABLE/KPI/FILTER). */}
-      {!['IMAGE', 'BUTTON', 'SPACER', 'DIVIDER', 'WEBPAGE'].includes(widget.widgetType) && (() => {
-        const cc = widget.chartConfig as Record<string, unknown>
-
-        return (
-          <>
-            {/* ── CHART Config ── */}
-            {widget.widgetType === 'CHART' && (() => {
-              const isMixed = cc.type === 'mixed'
-              const hasLayers = (widgetLayersMap[widget.id] || []).length > 0 || isMixed
-
-              return (
-                <>
-
-                  {/* Layer settings accordion — shown for mixed type or when layers exist */}
-                  {hasLayers && (() => {
-                    const layers = widgetLayersMap[widget.id] || []
-                    // Helpers: axis-specific chartConfig keys (left = base key, right = key + "Right")
-                    const axisKey = (axis: string, suffix: string) =>
-                      axis === 'right' ? `yAxis${suffix}Right` : `yAxis${suffix}`
-                    const getAxisVal = (axis: string, suffix: string, def: unknown) =>
-                      (cc[axisKey(axis, suffix)] ?? def)
-                    const setAxisVal = (axis: string, suffix: string, val: unknown) =>
-                      update({ chartConfig: { ...cc, [axisKey(axis, suffix)]: val } })
-
-                    const patchLayer = async (layer: ChartLayerItem, patch: Partial<ChartLayerItem>) => {
-                      try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
-                      updateWidgetLayer(widget.id, layer.id, patch)
-                    }
-                    const patchSeriesConfig = async (layer: ChartLayerItem, patch: Record<string, unknown>) => {
-                      const sc = { ...(layer.seriesConfig as Record<string, unknown> || {}), ...patch }
-                      await patchLayer(layer, { seriesConfig: sc })
-                    }
-
-                    return (
-                      <div className="space-y-1 mb-1">
-                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
-                          {t('designer.layers')}
-                        </p>
-                        {layers.map((layer: ChartLayerItem) => {
-                          const expanded = expandedLayerIds.has(layer.id)
-                          const sc = layer.seriesConfig as Record<string, unknown> || {}
-                          const labelShow = !!(sc.label as Record<string, unknown> | undefined)?.show
-                          const labelPos = ((sc.label as Record<string, unknown> | undefined)?.position as string) || 'top'
-                          const axFmt = getAxisVal(layer.axis, 'Format', 'plain') as string
-                          const axMin = getAxisVal(layer.axis, 'Min', 'zero') as string
-                          const axDec = getAxisVal(layer.axis, 'Decimals', undefined) as number | undefined
-                          const axCur = getAxisVal(layer.axis, 'Currency', 'USD') as string
-
-                          return (
-                            <div key={layer.id} className="border border-surface-200 dark:border-dark-surface-100 rounded-lg overflow-hidden">
-                              {/* Accordion header */}
-                              <button
-                                type="button"
-                                onClick={() => toggleLayerExpand(layer.id)}
-                                className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-surface-50 dark:hover:bg-dark-surface-50 text-left"
-                              >
-                                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: layer.color || '#5470c6' }} />
-                                <span className="text-xs flex-1 truncate text-slate-700 dark:text-slate-300">{layer.label || layer.name}</span>
-                                <span className="text-[10px] text-slate-400">{layer.chartType} / {layer.axis}</span>
-                                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-                              </button>
-
-                              {/* Accordion body */}
-                              {expanded && (
-                                <div className="px-2 pb-2 pt-1 space-y-2 border-t border-surface-200 dark:border-dark-surface-100 bg-surface-50/50 dark:bg-dark-surface-50/50">
-
-                                  {/* Color */}
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.series_color')}</span>
-                                    <input type="color" value={layer.color || '#5470c6'}
-                                      onChange={e => patchLayer(layer, { color: e.target.value })}
-                                      className="w-6 h-6 border-0 rounded cursor-pointer bg-transparent" />
-                                    <input type="text" value={layer.color || ''}
-                                      onChange={e => { if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(e.target.value)) patchLayer(layer, { color: e.target.value.toLowerCase() }) }}
-                                      placeholder="#hex" maxLength={7}
-                                      className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50" />
-                                  </div>
-
-                                  {/* Chart type */}
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.chart_type')}</span>
-                                    <select value={layer.chartType}
-                                      onChange={e => patchLayer(layer, { chartType: e.target.value })}
-                                      className="input text-xs flex-1">
-                                      <option value="bar">{t('designer.layer_type.bar')}</option>
-                                      <option value="line">{t('designer.layer_type.line')}</option>
-                                      <option value="area">{t('designer.layer_type.area')}</option>
-                                    </select>
-                                  </div>
-
-                                  {/* Axis */}
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.y_axis')}</span>
-                                    <select value={layer.axis}
-                                      onChange={e => patchLayer(layer, { axis: e.target.value })}
-                                      className="input text-xs flex-1">
-                                      <option value="left">{t('designer.layer_axis.left')}</option>
-                                      <option value="right">{t('designer.layer_axis.right')}</option>
-                                    </select>
-                                  </div>
-
-                                  {/* Opacity */}
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.opacity')}</span>
-                                    <input type="range" min={0} max={1} step={0.05}
-                                      value={layer.opacity ?? 1}
-                                      onChange={e => patchLayer(layer, { opacity: Number(e.target.value) })}
-                                      className="flex-1" />
-                                    <span className="text-[10px] text-slate-400 w-8 text-right">{Math.round((layer.opacity ?? 1) * 100)}%</span>
-                                  </div>
-
-                                  {/* Smoothing (line/area only) */}
-                                  {(layer.chartType === 'line' || layer.chartType === 'area') && (
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.smooth')}</span>
-                                      <label className="flex items-center gap-1.5 cursor-pointer">
-                                        <input type="checkbox"
-                                          checked={sc.smooth !== false}
-                                          onChange={e => patchSeriesConfig(layer, { smooth: e.target.checked })}
-                                          className="rounded border-slate-300" />
-                                        <span className="text-xs text-slate-600 dark:text-slate-300">{t('designer.enabled')}</span>
-                                      </label>
-                                    </div>
-                                  )}
-
-                                  {/* Y-axis format (per-axis, shown with axis label) */}
-                                  <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">
-                                      {t('designer.y_axis_settings')} ({layer.axis === 'right' ? t('designer.layer_axis.right') : t('designer.layer_axis.left')})
-                                    </p>
-                                    <div className="space-y-1.5">
-                                      <select value={axFmt}
-                                        onChange={e => setAxisVal(layer.axis, 'Format', e.target.value)}
-                                        className="input text-xs w-full">
-                                        <option value="plain">{t('designer.axis_format.plain')}</option>
-                                        <option value="thousands">{t('designer.axis_format.thousands')}</option>
-                                        <option value="millions">{t('designer.axis_format.millions')}</option>
-                                        <option value="billions">{t('designer.axis_format.billions')}</option>
-                                        <option value="currency">{t('designer.axis_format.currency')}</option>
-                                        <option value="percent">{t('designer.axis_format.percent')}</option>
-                                      </select>
-                                      {axFmt === 'currency' && (
-                                        <select value={axCur}
-                                          onChange={e => setAxisVal(layer.axis, 'Currency', e.target.value)}
-                                          className="input text-xs w-full">
-                                          {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
-                                        </select>
-                                      )}
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-[10px] text-slate-400 flex-shrink-0">{t('designer.y_axis_min')}</span>
-                                        <select value={axMin}
-                                          onChange={e => setAxisVal(layer.axis, 'Min', e.target.value)}
-                                          className="input text-xs flex-1">
-                                          <option value="zero">{t('designer.y_axis_min.zero')}</option>
-                                          <option value="auto">{t('designer.y_axis_min.auto')}</option>
-                                        </select>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-[10px] text-slate-400 flex-shrink-0">{t('designer.y_axis_decimals')}</span>
-                                        <NumericInput value={axDec} onChange={v => setAxisVal(layer.axis, 'Decimals', v)}
-                                          className="input text-xs flex-1" placeholder="0" />
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Data labels per layer */}
-                                  <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">{t('designer.data_labels')}</p>
-                                    <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer mb-1.5">
-                                      <input type="checkbox" checked={labelShow}
-                                        onChange={e => patchSeriesConfig(layer, { label: { ...(sc.label as object || {}), show: e.target.checked } })}
-                                        className="rounded border-slate-300" />
-                                      {t('designer.show_data_labels')}
-                                    </label>
-                                    {labelShow && (
-                                      <div className="space-y-1.5">
-                                        <select value={labelPos}
-                                          onChange={e => patchSeriesConfig(layer, { label: { ...(sc.label as object || {}), show: true, position: e.target.value } })}
-                                          className="input text-xs w-full">
-                                          <option value="top">{t('designer.data_label_position.top')}</option>
-                                          <option value="inline">{t('designer.data_label_position.inline')}</option>
-                                        </select>
-                                        <select
-                                          value={(sc.dataLabelMode as string) || 'all'}
-                                          onChange={e => patchSeriesConfig(layer, { dataLabelMode: e.target.value })}
-                                          className="input text-xs w-full">
-                                          <option value="all">{t('designer.label_mode.all')}</option>
-                                          <option value="first">{t('designer.label_mode.first_n')}</option>
-                                          <option value="last">{t('designer.label_mode.last_n')}</option>
-                                          <option value="min_max">{t('designer.label_mode.min_max')}</option>
-                                        </select>
-                                        {((sc.dataLabelMode as string) === 'first' || (sc.dataLabelMode as string) === 'last') && (
-                                          <NumericInput
-                                            value={(sc.dataLabelCount as number) || 3}
-                                            onChange={v => patchSeriesConfig(layer, { dataLabelCount: v ?? 3 })}
-                                            className="input text-xs w-full"
-                                            placeholder={t('designer.label_count_placeholder')}
-                                          />
-                                        )}
-                                        <div className="flex items-center gap-2">
-                                          <NumericInput
-                                            value={(sc.dataLabelDecimals as number) ?? 0}
-                                            onChange={v => patchSeriesConfig(layer, { dataLabelDecimals: v ?? 0 })}
-                                            className="input text-xs w-20"
-                                          />
-                                          <span className="text-[10px] text-slate-400">{t('designer.y_axis_decimals')}</span>
-                                          <NumericInput
-                                            value={(sc.dataLabelFontSize as number) ?? 10}
-                                            onChange={v => patchSeriesConfig(layer, { dataLabelFontSize: v ?? 10 })}
-                                            className="input text-xs w-16"
-                                          />
-                                          <span className="text-[10px] text-slate-400">px</span>
-                                        </div>
-                                        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                                          <input type="checkbox"
-                                            checked={(sc.dataLabelBoxed as boolean) || false}
-                                            onChange={e => patchSeriesConfig(layer, { dataLabelBoxed: e.target.checked })}
-                                            className="rounded border-slate-300" />
-                                          {t('designer.data_label_boxed')}
-                                        </label>
-                                        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                                          <input type="checkbox"
-                                            checked={(sc.dataLabelThousandsSep as boolean | undefined) !== false}
-                                            onChange={e => patchSeriesConfig(layer, { dataLabelThousandsSep: e.target.checked })}
-                                            className="rounded border-slate-300" />
-                                          {t('designer.data_label_thousands_sep')}
-                                        </label>
-                                        {labelPos !== 'inline' && (
-                                          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                                            <input type="checkbox"
-                                              checked={(sc.dataLabelSpread as boolean) || false}
-                                              onChange={e => patchSeriesConfig(layer, { dataLabelSpread: e.target.checked })}
-                                              className="rounded border-slate-300" />
-                                            {t('designer.data_label_spread')}
-                                          </label>
-                                        )}
-                                        {labelPos !== 'inline' && (
-                                          <select
-                                            value={(sc.dataLabelTopSpacingMode as string) || 'dynamic'}
-                                            onChange={e => patchSeriesConfig(layer, { dataLabelTopSpacingMode: e.target.value })}
-                                            className="input text-xs w-full">
-                                            <option value="dynamic">{t('designer.label_top_spacing_mode.dynamic')}</option>
-                                            <option value="fixed">{t('designer.label_top_spacing_mode.fixed')}</option>
-                                          </select>
-                                        )}
-                                        <select
-                                          value={String((sc.dataLabelRotation as number) || 0)}
-                                          onChange={e => patchSeriesConfig(layer, { dataLabelRotation: Number(e.target.value) })}
-                                          className="input text-xs w-full">
-                                          <option value="0">{t('designer.label_rotation.horizontal')}</option>
-                                          <option value="-45">{t('designer.label_rotation.angled_up')}</option>
-                                          <option value="45">{t('designer.label_rotation.angled_down')}</option>
-                                          <option value="-90">{t('designer.label_rotation.vertical')}</option>
-                                        </select>
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* Min/Max markers + linear regression (per layer) */}
-                                  <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100 space-y-1.5">
-                                    <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
-                                      <input type="checkbox"
-                                        checked={!!sc.markMinMax}
-                                        onChange={e => patchSeriesConfig(layer, { markMinMax: e.target.checked ? true : undefined })}
-                                        className="rounded border-slate-300" />
-                                      {t('designer.chart_mark_minmax')}
-                                    </label>
-                                    <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
-                                      <input type="checkbox"
-                                        checked={Array.isArray(cc.regressionFields) && (cc.regressionFields as string[]).includes(layer.label || layer.name)}
-                                        onChange={e => {
-                                          const seriesName = layer.label || layer.name
-                                          const current = Array.isArray(cc.regressionFields) ? [...(cc.regressionFields as string[])] : []
-                                          const next = e.target.checked
-                                            ? [...current.filter(n => n !== seriesName), seriesName]
-                                            : current.filter(n => n !== seriesName)
-                                          update({ chartConfig: { ...cc, regressionFields: next.length ? next : undefined } })
-                                        }}
-                                        className="rounded border-slate-300" />
-                                      {t('designer.regression_lines')}
-                                    </label>
-                                  </div>
-
-                                  {/* Threshold lines (per layer) - bound to this layer's axis */}
-                                  {(() => {
-                                    type ThrLine = { value: number; color?: string; label?: string; style?: string }
-                                    const thr = Array.isArray(sc.thresholdLines) ? (sc.thresholdLines as ThrLine[]) : []
-                                    const setThr = (next: ThrLine[]) => patchSeriesConfig(layer, { thresholdLines: next.length ? next : undefined })
-                                    const updThr = (i: number, patch: Partial<ThrLine>) => { const n = [...thr]; n[i] = { ...n[i], ...patch }; setThr(n) }
-                                    return (
-                                      <div className="pt-1 border-t border-surface-200 dark:border-dark-surface-100">
-                                        <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1.5">{t('designer.chart_threshold_lines')}</p>
-                                        <div className="space-y-1">
-                                          {thr.map((ln, i) => (
-                                            <div key={i} className="space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded p-1.5">
-                                              <div className="flex items-center gap-1.5">
-                                                <NumericInput value={ln.value} onChange={v => updThr(i, { value: v ?? 0 })}
-                                                  className="w-20 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                                  placeholder={t('designer.chart_threshold_value')} />
-                                                <input type="color" value={ln.color || '#94a3b8'}
-                                                  onChange={e => updThr(i, { color: e.target.value })}
-                                                  className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent" />
-                                                <select value={ln.style || 'dashed'} onChange={e => updThr(i, { style: e.target.value })}
-                                                  className="input text-xs flex-1 py-0.5">
-                                                  <option value="solid">{t('designer.chart_threshold_style.solid')}</option>
-                                                  <option value="dashed">{t('designer.chart_threshold_style.dashed')}</option>
-                                                  <option value="dotted">{t('designer.chart_threshold_style.dotted')}</option>
-                                                </select>
-                                                <button onClick={() => setThr(thr.filter((_, j) => j !== i))}
-                                                  className="text-red-500 hover:text-red-700 p-0.5"><X className="w-3 h-3" /></button>
-                                              </div>
-                                              <input type="text" value={ln.label || ''}
-                                                onChange={e => updThr(i, { label: e.target.value || undefined })}
-                                                placeholder={t('designer.chart_threshold_label')}
-                                                className="w-full text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50" />
-                                            </div>
-                                          ))}
-                                          <button onClick={() => setThr([...thr, { value: 0, color: '#94a3b8', style: 'dashed' }])}
-                                            className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5">
-                                            <Plus className="w-3 h-3" /> {t('designer.chart_add_threshold')}
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )
-                                  })()}
-
-                                </div>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )
-                  })()}
-
-                  {!hasLayers && <Field label={t('designer.data_labels')}>
-                    <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!!cc.showDataLabels}
-                        onChange={e => update({ chartConfig: { ...cc, showDataLabels: e.target.checked } })}
-                        className="rounded border-slate-300"
-                      />
-                      {t('designer.show_data_labels')}
-                    </label>
-                    {!!cc.showDataLabels && (
-                      <div className="mt-2 space-y-2">
-                        <select
-                          value={cc.dataLabelPosition as string || 'top'}
-                          onChange={e => update({ chartConfig: { ...cc, dataLabelPosition: e.target.value } })}
-                          className="input text-sm"
-                        >
-                          <option value="top">{t('designer.data_label_position.top')}</option>
-                          <option value="inline">{t('designer.data_label_position.inline')}</option>
-                        </select>
-                        <select
-                          value={cc.dataLabelMode as string || 'all'}
-                          onChange={e => update({ chartConfig: { ...cc, dataLabelMode: e.target.value } })}
-                          className="input text-sm"
-                        >
-                          <option value="all">{t('designer.label_mode.all')}</option>
-                          <option value="first">{t('designer.label_mode.first_n')}</option>
-                          <option value="last">{t('designer.label_mode.last_n')}</option>
-                          <option value="min_max">{t('designer.label_mode.min_max')}</option>
-                        </select>
-                        {(cc.dataLabelMode === 'first' || cc.dataLabelMode === 'last') && (
-                          <NumericInput
-                            value={cc.dataLabelCount as number || 3}
-                            onChange={v => update({ chartConfig: { ...cc, dataLabelCount: v ?? 3 } })}
-                            className="input text-sm"
-                            placeholder={t('designer.label_count_placeholder')}
-                          />
-                        )}
-                        <select
-                          value={cc.dataLabelTopSpacingMode as string || 'dynamic'}
-                          onChange={e => update({ chartConfig: { ...cc, dataLabelTopSpacingMode: e.target.value } })}
-                          className="input text-sm"
-                        >
-                          <option value="dynamic">{t('designer.label_top_spacing_mode.dynamic')}</option>
-                          <option value="fixed">{t('designer.label_top_spacing_mode.fixed')}</option>
-                        </select>
-                        <div className="flex items-center gap-2">
-                          <NumericInput
-                            value={cc.dataLabelDecimals != null ? Number(cc.dataLabelDecimals) : 1}
-                            onChange={v => update({ chartConfig: { ...cc, dataLabelDecimals: v ?? 1 } })}
-                            className="input text-sm w-16"
-                          />
-                          <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_decimals')}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <NumericInput
-                            value={cc.dataLabelFontSize != null ? Number(cc.dataLabelFontSize) : 10}
-                            onChange={v => update({ chartConfig: { ...cc, dataLabelFontSize: v ?? undefined } })}
-                            className="input text-sm w-16"
-                          />
-                          <span className="text-xs text-slate-500 dark:text-slate-400">{t('designer.data_label_font_size')}</span>
-                        </div>
-                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={cc.dataLabelThousandsSep !== false}
-                            onChange={e => update({ chartConfig: { ...cc, dataLabelThousandsSep: e.target.checked } })}
-                            className="rounded border-slate-300"
-                          />
-                          {t('designer.data_label_thousands_sep')}
-                        </label>
-                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={!!cc.dataLabelBoxed}
-                            onChange={e => update({ chartConfig: { ...cc, dataLabelBoxed: e.target.checked } })}
-                            className="rounded border-slate-300"
-                          />
-                          {t('designer.data_label_boxed')}
-                        </label>
-                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={!!cc.dataLabelSpread}
-                            onChange={e => update({ chartConfig: { ...cc, dataLabelSpread: e.target.checked } })}
-                            className="rounded border-slate-300"
-                          />
-                          {t('designer.data_label_spread')}
-                        </label>
-                        <select
-                          value={String(cc.dataLabelRotation || 0)}
-                          onChange={e => update({ chartConfig: { ...cc, dataLabelRotation: Number(e.target.value) } })}
-                          className="input text-sm"
-                        >
-                          <option value="0">{t('designer.label_rotation.horizontal')}</option>
-                          <option value="-45">{t('designer.label_rotation.angled_up')}</option>
-                          <option value="45">{t('designer.label_rotation.angled_down')}</option>
-                          <option value="-90">{t('designer.label_rotation.vertical')}</option>
-                        </select>
-                      </div>
-                    )}
-                  </Field>}
-
-                  {AXIS_CHART_TYPES.includes((cc.type as string) || 'bar') && (
-                    <Field label={t('designer.chart_threshold_lines')}>
-                      {(() => {
-                        type ThresholdLine = { value: number; color?: string; label?: string; style?: string }
-                        const lines = (cc.thresholdLines as ThresholdLine[]) || []
-                        const setLines = (next: ThresholdLine[]) =>
-                          update({ chartConfig: { ...cc, thresholdLines: next.length ? next : undefined } })
-                        const updateLine = (idx: number, patch: Partial<ThresholdLine>) => {
-                          const next = [...lines]
-                          next[idx] = { ...next[idx], ...patch }
-                          setLines(next)
-                        }
-                        return (
-                          <div className="space-y-1">
-                            {lines.map((ln, idx) => (
-                              <div key={idx} className="space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded p-1.5">
-                                <div className="flex items-center gap-1.5 text-xs">
-                                  <NumericInput
-                                    value={ln.value}
-                                    onChange={v => updateLine(idx, { value: v ?? 0 })}
-                                    className="w-20 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                    placeholder={t('designer.chart_threshold_value')}
-                                  />
-                                  <input
-                                    type="color"
-                                    value={ln.color || '#94a3b8'}
-                                    onChange={e => updateLine(idx, { color: e.target.value })}
-                                    className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={ln.color || ''}
-                                    onChange={e => {
-                                      const v = e.target.value.trim()
-                                      if (v === '') updateLine(idx, { color: undefined })
-                                      else if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) updateLine(idx, { color: v.toLowerCase() })
-                                    }}
-                                    placeholder="#hex"
-                                    maxLength={7}
-                                    className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                  />
-                                  <select
-                                    value={ln.style || 'dashed'}
-                                    onChange={e => updateLine(idx, { style: e.target.value })}
-                                    className="input text-xs flex-1 py-0.5"
-                                  >
-                                    <option value="solid">{t('designer.chart_threshold_style.solid')}</option>
-                                    <option value="dashed">{t('designer.chart_threshold_style.dashed')}</option>
-                                    <option value="dotted">{t('designer.chart_threshold_style.dotted')}</option>
-                                  </select>
-                                  <button
-                                    onClick={() => setLines(lines.filter((_, i) => i !== idx))}
-                                    className="text-red-500 hover:text-red-700 p-0.5"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </div>
-                                <input
-                                  type="text"
-                                  value={ln.label || ''}
-                                  onChange={e => updateLine(idx, { label: e.target.value || undefined })}
-                                  placeholder={t('designer.chart_threshold_label')}
-                                  className="w-full text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                />
-                              </div>
-                            ))}
-                            <button
-                              onClick={() => setLines([...lines, { value: 0, color: '#94a3b8', style: 'dashed' }])}
-                              className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5"
-                            >
-                              <Plus className="w-3 h-3" /> {t('designer.chart_add_threshold')}
-                            </button>
-                          </div>
-                        )
-                      })()}
-                    </Field>
-                  )}
-
-                  {(['line', 'bar'].includes((cc.type as string) || 'bar')) && (() => {
-                    const mm = cc.markMinMax as boolean | { min?: boolean; max?: boolean } | undefined
-                    const enabled = !!mm
-                    const flags = typeof mm === 'object' && mm !== null ? mm : (mm ? { min: true, max: true } : { min: false, max: false })
-                    return (
-                      <Field label={t('designer.chart_mark_minmax')}>
-                        <label className="inline-flex items-center gap-1.5 text-xs mb-1">
-                          <input
-                            type="checkbox"
-                            checked={enabled}
-                            onChange={e => update({ chartConfig: { ...cc, markMinMax: e.target.checked ? { min: true, max: true } : undefined } })}
-                            className="h-3.5 w-3.5"
-                          />
-                          <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_mark_minmax_enable')}</span>
-                        </label>
-                        {enabled && (
-                          <div className="flex items-center gap-3 pl-1 text-xs border-l-2 border-surface-200 dark:border-dark-surface-100">
-                            <label className="inline-flex items-center gap-1.5">
-                              <input
-                                type="checkbox"
-                                checked={flags.max !== false}
-                                onChange={e => update({ chartConfig: { ...cc, markMinMax: { ...flags, max: e.target.checked } } })}
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_mark_max')}</span>
-                            </label>
-                            <label className="inline-flex items-center gap-1.5">
-                              <input
-                                type="checkbox"
-                                checked={flags.min !== false}
-                                onChange={e => update({ chartConfig: { ...cc, markMinMax: { ...flags, min: e.target.checked } } })}
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_mark_min')}</span>
-                            </label>
-                          </div>
-                        )}
-                      </Field>
-                    )
-                  })()}
-
-                  {((cc.type as string) || 'bar') === 'bar' && availableCols.length > 0 && (() => {
-                    type BarCondConfig = { series?: string; field?: string; threshold: number; colorAbove: string; colorBelow: string }
-                    const bc = cc.barConditionalColor as BarCondConfig | undefined
-                    const enabled = !!bc
-                    return (
-                      <Field label={t('designer.chart_bar_conditional')}>
-                        <label className="inline-flex items-center gap-1.5 text-xs mb-1">
-                          <input
-                            type="checkbox"
-                            checked={enabled}
-                            onChange={e => update({ chartConfig: {
-                              ...cc,
-                              barConditionalColor: e.target.checked
-                                ? { threshold: 0, colorAbove: '#22c55e', colorBelow: '#ef4444' }
-                                : undefined,
-                            } })}
-                            className="h-3.5 w-3.5"
-                          />
-                          <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_bar_conditional_enable')}</span>
-                        </label>
-                        {enabled && bc && (
-                          <div className="space-y-1.5 pl-1 border-l-2 border-surface-200 dark:border-dark-surface-100 text-xs">
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-500 dark:text-slate-400 w-24">{t('designer.chart_bar_threshold')}:</span>
-                              <NumericInput
-                                value={bc.threshold}
-                                onChange={v => update({ chartConfig: { ...cc, barConditionalColor: { ...bc, threshold: v ?? 0 } } })}
-                                className="w-24 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-500 dark:text-slate-400 w-24">{t('designer.chart_bar_above')}:</span>
-                              <input
-                                type="color"
-                                value={bc.colorAbove}
-                                onChange={e => update({ chartConfig: { ...cc, barConditionalColor: { ...bc, colorAbove: e.target.value } } })}
-                                className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                              />
-                              <input
-                                type="text"
-                                value={bc.colorAbove}
-                                onChange={e => update({ chartConfig: { ...cc, barConditionalColor: { ...bc, colorAbove: e.target.value } } })}
-                                className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50 font-mono"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-500 dark:text-slate-400 w-24">{t('designer.chart_bar_below')}:</span>
-                              <input
-                                type="color"
-                                value={bc.colorBelow}
-                                onChange={e => update({ chartConfig: { ...cc, barConditionalColor: { ...bc, colorBelow: e.target.value } } })}
-                                className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                              />
-                              <input
-                                type="text"
-                                value={bc.colorBelow}
-                                onChange={e => update({ chartConfig: { ...cc, barConditionalColor: { ...bc, colorBelow: e.target.value } } })}
-                                className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50 font-mono"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-500 dark:text-slate-400 w-24">{t('designer.chart_bar_field')}:</span>
-                              <select
-                                value={bc.field || ''}
-                                onChange={e => update({ chartConfig: { ...cc, barConditionalColor: { ...bc, field: e.target.value || undefined } } })}
-                                className="input text-xs flex-1 py-0.5"
-                              >
-                                <option value="">{t('designer.chart_bar_field_self')}</option>
-                                {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                              </select>
-                            </div>
-                          </div>
-                        )}
-                      </Field>
-                    )
-                  })()}
-
-                  {((cc.type as string) || 'bar') === 'line' && availableCols.length > 0 && (() => {
-                    type DeltaAnnConfig = { valueField?: string; position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' }
-                    const da = cc.deltaAnnotation as DeltaAnnConfig | undefined
-                    const enabled = !!da
-                    return (
-                      <Field label={t('designer.chart_delta_annotation')}>
-                        <label className="inline-flex items-center gap-1.5 text-xs mb-1">
-                          <input
-                            type="checkbox"
-                            checked={enabled}
-                            onChange={e => update({ chartConfig: { ...cc, deltaAnnotation: e.target.checked ? {} : undefined } })}
-                            className="h-3.5 w-3.5"
-                          />
-                          <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_delta_annotation_enable')}</span>
-                        </label>
-                        {enabled && da && (
-                          <div className="space-y-1.5 pl-1 border-l-2 border-surface-200 dark:border-dark-surface-100 text-xs">
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.chart_delta_field')}:</span>
-                              <select
-                                value={da.valueField || ''}
-                                onChange={e => update({ chartConfig: { ...cc, deltaAnnotation: { ...da, valueField: e.target.value || undefined } } })}
-                                className="input text-xs flex-1 py-0.5"
-                              >
-                                <option value="">{t('designer.chart_delta_field_first')}</option>
-                                {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                              </select>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.chart_delta_position')}:</span>
-                              <select
-                                value={da.position || 'top-right'}
-                                onChange={e => update({ chartConfig: { ...cc, deltaAnnotation: { ...da, position: e.target.value as DeltaAnnConfig['position'] } } })}
-                                className="input text-xs flex-1 py-0.5"
-                              >
-                                <option value="top-right">{t('designer.chart_delta_pos.top_right')}</option>
-                                <option value="top-left">{t('designer.chart_delta_pos.top_left')}</option>
-                                <option value="bottom-right">{t('designer.chart_delta_pos.bottom_right')}</option>
-                                <option value="bottom-left">{t('designer.chart_delta_pos.bottom_left')}</option>
-                              </select>
-                            </div>
-                          </div>
-                        )}
-                      </Field>
-                    )
-                  })()}
-
-                  {((cc.type as string) || 'bar') === 'pie' && (() => {
-                    const colorBy = (cc.categoryField as string) || availableCols[0]
-                    const colorsMap = (cc.colors as Record<string, string> | undefined) || {}
-                    const sampleDistinct = Array.from(new Set(
-                      (previewRows || [])
-                        .map(r => r[colorBy])
-                        .filter(v => v != null && String(v).trim() !== '')
-                        .map(v => String(v))
-                    ))
-                    const allValues = Array.from(new Set([...sampleDistinct, ...Object.keys(colorsMap)])).sort()
-                    const setSegColor = (val: string, hex: string) => {
-                      update({ chartConfig: { ...cc, colors: { ...colorsMap, [val]: hex } } })
-                    }
-                    const clearSegColor = (val: string) => {
-                      const next = { ...colorsMap }
-                      delete next[val]
-                      const hasAny = Object.keys(next).length > 0
-                      update({ chartConfig: { ...cc, colors: hasAny ? next : undefined } })
-                    }
-                    type CenterLabelCfg = { text?: string; valueField?: string; fontSize?: number; subtext?: string; color?: string }
-                    const cl = (cc.centerLabel as CenterLabelCfg | undefined)
-                    return (
-                      <>
-                        <Field label={t('designer.chart_pie_donut')}>
-                          <label className="inline-flex items-center gap-1.5 text-xs">
-                            <input
-                              type="checkbox"
-                              checked={!!cc.donut}
-                              onChange={e => update({ chartConfig: { ...cc, donut: e.target.checked || undefined } })}
-                              className="h-3.5 w-3.5"
-                            />
-                            <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_pie_donut_hint')}</span>
-                          </label>
-                        </Field>
-
-                        <Field label={t('designer.chart_pie_label_content')}>
-                          <select
-                            value={(cc.pieLabelContent as string) || (cc.showPercentages ? 'name-percent' : 'name')}
-                            onChange={e => {
-                              const v = e.target.value
-                              update({ chartConfig: { ...cc, pieLabelContent: v === 'name' ? undefined : v, showPercentages: undefined } })
-                            }}
-                            className="input text-sm"
-                          >
-                            <option value="name">{t('designer.chart_pie_label_content_name')}</option>
-                            <option value="value">{t('designer.chart_pie_label_content_value')}</option>
-                            <option value="percent">{t('designer.chart_pie_label_content_percent')}</option>
-                            <option value="name-value">{t('designer.chart_pie_label_content_name_value')}</option>
-                            <option value="name-percent">{t('designer.chart_pie_label_content_name_percent')}</option>
-                          </select>
-                          <p className="text-[10px] text-slate-400 mt-1">{t('designer.chart_pie_label_content_hint')}</p>
-                        </Field>
-
-                        <Field label={t('designer.chart_pie_segment_colors')}>
-                          <p className="text-[10px] text-slate-400 mb-1">{t('designer.chart_pie_segment_colors_hint')}</p>
-                          {allValues.length === 0 ? (
-                            <p className="text-[10px] text-slate-400 px-1">{t('designer.row_color_preview_needed')}</p>
-                          ) : (
-                            <div className="space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                              {allValues.map(val => {
-                                const hex = colorsMap[val] || ''
-                                return (
-                                  <div key={val} className="flex items-center gap-2 text-xs">
-                                    <span className="flex-1 truncate text-slate-600 dark:text-slate-300" title={val}>{val}</span>
-                                    <input
-                                      type="color"
-                                      value={hex || '#cccccc'}
-                                      onChange={e => setSegColor(val, e.target.value)}
-                                      className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                                    />
-                                    <input
-                                      type="text"
-                                      value={hex}
-                                      onChange={e => {
-                                        const v = e.target.value.trim()
-                                        if (v === '') { clearSegColor(val); return }
-                                        if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) setSegColor(val, v.toLowerCase())
-                                      }}
-                                      placeholder="#rrggbb"
-                                      maxLength={7}
-                                      className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                    />
-                                    {hex && (
-                                      <button
-                                        onClick={() => clearSegColor(val)}
-                                        title={t('common.clear')}
-                                        className="text-slate-400 hover:text-red-500"
-                                      >×</button>
-                                    )}
-                                  </div>
-                                )
-                              })}
-                              <AddColorValueRow
-                                existingValues={allValues}
-                                defaultColor="#cccccc"
-                                onAdd={(val, hex) => setSegColor(val, hex)}
-                                placeholder={t('designer.row_color_add_value')}
-                              />
-                            </div>
-                          )}
-                        </Field>
-
-                        {!!cc.donut && (
-                          <Field label={t('designer.chart_pie_center_label')}>
-                            <div className="space-y-1.5 text-xs">
-                              <input
-                                type="text"
-                                value={cl?.text || ''}
-                                onChange={e => update({ chartConfig: { ...cc, centerLabel: { ...(cl || {}), text: e.target.value || undefined } } })}
-                                placeholder={t('designer.chart_pie_center_text')}
-                                className="input text-xs"
-                              />
-                              <select
-                                value={cl?.valueField || ''}
-                                onChange={e => update({ chartConfig: { ...cc, centerLabel: { ...(cl || {}), valueField: e.target.value || undefined } } })}
-                                className="input text-xs"
-                              >
-                                <option value="">{t('designer.chart_pie_center_static')}</option>
-                                {availableCols.map(c => <option key={c} value={c}>{t('designer.chart_pie_center_sum_of', { col: c })}</option>)}
-                              </select>
-                              <input
-                                type="text"
-                                value={cl?.subtext || ''}
-                                onChange={e => update({ chartConfig: { ...cc, centerLabel: { ...(cl || {}), subtext: e.target.value || undefined } } })}
-                                placeholder={t('designer.chart_pie_center_subtext')}
-                                className="input text-xs"
-                              />
-                              <p className="text-[10px] text-slate-400">{t('designer.chart_pie_center_hint')}</p>
-                            </div>
-                          </Field>
-                        )}
-                      </>
-                    )
-                  })()}
-
-                  {((cc.type as string) || 'bar') === 'line' && (() => {
-                    type HighlightConfig = { size?: number; colorMode?: 'step' | 'gradient'; colorStops?: Array<{ at: number; color: string }> }
-                    const hl = cc.highlightLastPoint as HighlightConfig | undefined
-                    const enabled = !!hl
-                    return (
-                      <Field label={t('designer.chart_highlight_last_point')}>
-                        <label className="inline-flex items-center gap-1.5 text-xs mb-1">
-                          <input
-                            type="checkbox"
-                            checked={enabled}
-                            onChange={e => update({ chartConfig: { ...cc, highlightLastPoint: e.target.checked ? {} : undefined } })}
-                            className="h-3.5 w-3.5"
-                          />
-                          <span className="text-slate-500 dark:text-slate-400">{t('designer.chart_highlight_last_enable')}</span>
-                        </label>
-                        {enabled && hl && (
-                          <div className="space-y-1.5 pl-1 border-l-2 border-surface-200 dark:border-dark-surface-100">
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.chart_highlight_size')}:</span>
-                              <NumericInput
-                                value={hl.size || 12}
-                                onChange={v => update({ chartConfig: { ...cc, highlightLastPoint: { ...hl, size: v ?? 12 } } })}
-                                className="w-16 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.kpi_color_mode')}:</span>
-                              <select
-                                value={hl.colorMode || 'step'}
-                                onChange={e => update({ chartConfig: { ...cc, highlightLastPoint: { ...hl, colorMode: e.target.value as 'step' | 'gradient' } } })}
-                                className="input text-xs flex-1 py-0.5"
-                              >
-                                <option value="step">{t('designer.kpi_color_mode.step')}</option>
-                                <option value="gradient">{t('designer.kpi_color_mode.gradient')}</option>
-                              </select>
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1">{t('designer.kpi_color_stops')}:</span>
-                              <ColorStopsEditor
-                                stops={hl.colorStops || []}
-                                onChange={stops => update({
-                                  chartConfig: {
-                                    ...cc,
-                                    highlightLastPoint: { ...hl, colorStops: stops.length ? stops : undefined },
-                                  },
-                                })}
-                                addLabel={t('designer.kpi_add_stop')}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </Field>
-                    )
-                  })()}
-                </>
-              )
-            })()}
-
-            {/* ── TABLE Config ── */}
-            {widget.widgetType === 'TABLE' && availableCols.length > 0 && (() => {
-              const visibleCols = cc.visibleColumns as string[] | undefined
-              const isAllVisible = !Array.isArray(visibleCols)
-              const effectiveCols = isAllVisible ? availableCols : visibleCols
-
-              const handleToggleCol = (col: string) => {
-                const current = isAllVisible ? [...availableCols] : [...visibleCols]
-                const next = current.includes(col)
-                  ? current.filter(c => c !== col)
-                  : [...current, col]
-                if (next.length === availableCols.length) {
-                  const { visibleColumns: _, ...rest } = cc
-                  update({ chartConfig: rest })
-                } else {
-                  update({ chartConfig: { ...cc, visibleColumns: next } })
-                }
-              }
-
-              const moveCol = (col: string, dir: -1 | 1) => {
-                const cols = isAllVisible ? [...availableCols] : [...visibleCols]
-                const idx = cols.indexOf(col)
-                if (idx < 0) return
-                const newIdx = idx + dir
-                if (newIdx < 0 || newIdx >= cols.length) return
-                ;[cols[idx], cols[newIdx]] = [cols[newIdx], cols[idx]]
-                update({ chartConfig: { ...cc, visibleColumns: cols } })
-              }
-
-              return (
-                <>
-                  <Field label={t('designer.visible_columns')}>
-                    <div className="flex items-center gap-1 mb-1">
-                      <button
-                        onClick={() => { const { visibleColumns: _, ...rest } = cc; update({ chartConfig: rest }) }}
-                        className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5"
-                      >
-                        <CheckSquare className="w-3 h-3" /> {t('designer.select_all')}
-                      </button>
-                      <button
-                        onClick={() => update({ chartConfig: { ...cc, visibleColumns: [] } })}
-                        className="btn-ghost text-[10px] px-1.5 py-0.5 gap-0.5"
-                      >
-                        <Square className="w-3 h-3" /> {t('designer.deselect_all')}
-                      </button>
-                    </div>
-                    <div className="space-y-0.5 max-h-60 overflow-y-auto border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                      {(isAllVisible ? availableCols : [...visibleCols, ...availableCols.filter(c => !visibleCols.includes(c))]).map(col => {
-                        const perCol = (cc.totalsPerColumn as Record<string, string>) || {}
-                        const isVisible = isAllVisible || effectiveCols.includes(col)
-                        return (
-                          <div key={col} className="flex items-center gap-1 group">
-                            <input
-                              type="checkbox"
-                              checked={isVisible}
-                              onChange={() => handleToggleCol(col)}
-                              className="rounded border-slate-300 flex-shrink-0"
-                            />
-                            <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate" title={col}>{col}</span>
-                            {!!cc.showTotals && (
-                              <select
-                                value={perCol[col] || ''}
-                                onChange={e => {
-                                  const next = { ...perCol }
-                                  if (e.target.value) next[col] = e.target.value
-                                  else delete next[col]
-                                  update({ chartConfig: { ...cc, totalsPerColumn: next } })
-                                }}
-                                className="text-[10px] border border-surface-200 dark:border-dark-surface-100 rounded px-0.5 py-0 bg-white dark:bg-dark-surface-200 text-slate-500 dark:text-slate-400 w-16 flex-shrink-0"
-                                title={t('designer.show_totals')}
-                              >
-                                <option value="">SUM</option>
-                                <option value="SUM">SUM</option>
-                                <option value="COUNT">CNT</option>
-                                <option value="DISTINCT_COUNT">DST</option>
-                                <option value="AVG">AVG</option>
-                                <option value="MIN">MIN</option>
-                                <option value="MAX">MAX</option>
-                                <option value="NONE">--</option>
-                              </select>
-                            )}
-                            {!isAllVisible && isVisible && (
-                              <span className="opacity-0 group-hover:opacity-100 flex gap-0.5 flex-shrink-0">
-                                <button onClick={() => moveCol(col, -1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
-                                  <ArrowUp className="w-3 h-3 text-slate-400" />
-                                </button>
-                                <button onClick={() => moveCol(col, 1)} className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
-                                  <ArrowDown className="w-3 h-3 text-slate-400" />
-                                </button>
-                              </span>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_columns_hint')}</p>
-                  </Field>
-
-                  <Field label={t('designer.table_density')}>
-                    <select
-                      value={cc.tableDensity as string || 'default'}
-                      onChange={e => update({ chartConfig: { ...cc, tableDensity: e.target.value } })}
-                      className="input text-sm"
-                    >
-                      <option value="compact">{t('designer.table_density.compact')}</option>
-                      <option value="default">{t('designer.table_density.default')}</option>
-                      <option value="large">{t('designer.table_density.large')}</option>
-                    </select>
-                  </Field>
-
-                  <Field label={t('designer.table_page_size')}>
-                    <NumericInput
-                      value={cc.tablePageSize as number | undefined}
-                      onChange={v => update({ chartConfig: { ...cc, tablePageSize: v } })}
-                      className="input text-sm"
-                      placeholder={t('designer.table_page_size_auto')}
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_page_size_hint')}</p>
-                  </Field>
-
-                  <Field label={t('designer.show_totals')}>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!!cc.showTotals}
-                        onChange={e => update({ chartConfig: { ...cc, showTotals: e.target.checked, totalsAggregation: e.target.checked ? (cc.totalsAggregation || 'SUM') : undefined } })}
-                        className="rounded"
-                      />
-                      <span className="text-sm text-slate-600 dark:text-slate-400">{t('designer.show_totals_hint')}</span>
-                    </label>
-                  </Field>
-
-                  {/* Conditional row coloring: pick a column, map its values to colours */}
-                  {availableCols.length > 0 && (
-                    <Field label={t('designer.row_color_by')}>
-                      <select
-                        value={(cc.rowColorBy as string) || ''}
-                        onChange={e => {
-                          const val = e.target.value || undefined
-                          const next: Record<string, unknown> = { ...cc }
-                          if (val) next.rowColorBy = val
-                          else { delete next.rowColorBy; delete next.rowColors }
-                          update({ chartConfig: next })
-                        }}
-                        className="input text-sm"
-                      >
-                        <option value="">{t('common.none')}</option>
-                        {availableCols.map((c: string) => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      <p className="text-[10px] text-slate-400 mt-1">{t('designer.row_color_by_hint')}</p>
-
-                      {!!cc.rowColorBy && (() => {
-                        const colorBy = cc.rowColorBy as string
-                        const currentColors = (cc.rowColors as Record<string, string> | undefined) || {}
-                        // Values list: union of (sample distinct) + (already configured).
-                        // The preview sample may not cover all values (e.g. sort by
-                        // priority_rank means first 100 rows are all 'Высокий').
-                        // Users can type additional values in the input below.
-                        const sampleDistinct = Array.from(new Set(
-                          (previewRows || [])
-                            .map(r => r[colorBy])
-                            .filter(v => v != null && String(v).trim() !== '')
-                            .map(v => String(v))
-                        ))
-                        const allValues: string[] = Array.from(
-                          new Set([...sampleDistinct, ...Object.keys(currentColors)])
-                        ).sort()
-                        const setValueColor = (val: string, hex: string) => {
-                          const nextColors = { ...currentColors, [val]: hex }
-                          update({ chartConfig: { ...cc, rowColors: nextColors } })
-                        }
-                        const clearValueColor = (val: string) => {
-                          const nextColors = { ...currentColors }
-                          delete nextColors[val]
-                          update({ chartConfig: { ...cc, rowColors: nextColors } })
-                        }
-                        return (
-                          <div className="mt-2 space-y-1 border border-surface-200 dark:border-dark-surface-100 rounded-lg p-2">
-                            {/* Apply colour to whole row or just the reference cell */}
-                            <div className="flex items-center gap-3 text-[10px] text-slate-500 dark:text-slate-400 pb-1 border-b border-surface-100 dark:border-dark-surface-100">
-                              <span>{t('designer.row_color_apply_to')}:</span>
-                              <label className="inline-flex items-center gap-1 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`rcm_${widget.id}`}
-                                  checked={(cc.rowColorMode as string) !== 'cell'}
-                                  onChange={() => update({ chartConfig: { ...cc, rowColorMode: 'row' } })}
-                                />
-                                {t('designer.row_color_mode_row')}
-                              </label>
-                              <label className="inline-flex items-center gap-1 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`rcm_${widget.id}`}
-                                  checked={cc.rowColorMode === 'cell'}
-                                  onChange={() => update({ chartConfig: { ...cc, rowColorMode: 'cell' } })}
-                                />
-                                {t('designer.row_color_mode_cell')}
-                              </label>
-                            </div>
-                            {allValues.length === 0 && (
-                              <p className="text-[10px] text-slate-400 px-1">
-                                {t('designer.row_color_preview_needed')}
-                              </p>
-                            )}
-                            {allValues.map(val => {
-                              const hex = currentColors[val] || ''
-                              return (
-                                <div key={val} className="flex items-center gap-2 text-xs">
-                                  <span className="flex-1 truncate text-slate-600 dark:text-slate-300" title={val}>{val}</span>
-                                  <input
-                                    type="color"
-                                    value={hex || '#ffffff'}
-                                    onChange={e => setValueColor(val, e.target.value)}
-                                    className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={hex}
-                                    onChange={e => {
-                                      const v = e.target.value.trim()
-                                      // Accept "#rgb", "#rrggbb", or empty to clear
-                                      if (v === '') { clearValueColor(val); return }
-                                      if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) {
-                                        setValueColor(val, v.toLowerCase())
-                                      }
-                                    }}
-                                    placeholder="#rrggbb"
-                                    maxLength={7}
-                                    className="w-16 font-mono text-[10px] px-1 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                  />
-                                  {hex && (
-                                    <button
-                                      onClick={() => clearValueColor(val)}
-                                      title={t('common.clear')}
-                                      className="text-slate-400 hover:text-red-500"
-                                    >×</button>
-                                  )}
-                                </div>
-                              )
-                            })}
-                            {/* Add value manually - useful when preview sample doesn't
-                                surface all possible values (sorted/filtered queries). */}
-                            <AddColorValueRow
-                              existingValues={allValues}
-                              defaultColor="#fef3c7"
-                              onAdd={(val, hex) => setValueColor(val, hex)}
-                              placeholder={t('designer.row_color_add_value')}
-                            />
-                          </div>
-                        )
-                      })()}
-                    </Field>
-                  )}
-
-                  <Field label={t('designer.table_column_formatters')}>
-                    {(() => {
-                      type ColorStop = { at: number; color: string }
-                      type DeltaFmt = { type: 'delta'; showArrow?: boolean; colorMode?: 'sign' | 'none' }
-                      type HeatmapFmt = { type: 'heatmap'; colorMode?: 'step' | 'gradient'; colorStops: ColorStop[]; background?: boolean }
-                      type BarFmt = { type: 'bar'; max?: number | 'auto'; color?: string }
-                      type ColumnFormatter = DeltaFmt | HeatmapFmt | BarFmt
-
-                      const formatters = (cc.columnFormatters as Record<string, ColumnFormatter>) || {}
-                      const setFormatter = (col: string, fmt: ColumnFormatter | undefined) => {
-                        const next = { ...formatters }
-                        if (fmt === undefined) delete next[col]
-                        else next[col] = fmt
-                        const hasAny = Object.keys(next).length > 0
-                        update({ chartConfig: { ...cc, columnFormatters: hasAny ? next : undefined } })
-                      }
-                      const remainingCols = availableCols.filter(c => !(c in formatters))
-                      const defaultHeatmap: HeatmapFmt = {
-                        type: 'heatmap',
-                        colorMode: 'gradient',
-                        colorStops: [{ at: 0, color: '#ef4444' }, { at: 1, color: '#22c55e' }],
-                      }
-
-                      return (
-                        <div className="space-y-2">
-                          {Object.entries(formatters).map(([col, fmt]) => (
-                            <div key={col} className="border border-surface-200 dark:border-dark-surface-100 rounded p-2 space-y-1.5">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 flex-1 truncate" title={col}>{col}</span>
-                                <select
-                                  value={fmt.type}
-                                  onChange={e => {
-                                    const nextType = e.target.value as 'heatmap' | 'bar' | 'delta'
-                                    if (nextType === 'heatmap') setFormatter(col, defaultHeatmap)
-                                    else if (nextType === 'bar') setFormatter(col, { type: 'bar', max: 'auto', color: '#3b82f6' })
-                                    else setFormatter(col, { type: 'delta', colorMode: 'sign', showArrow: true })
-                                  }}
-                                  className="input text-xs py-0.5 w-24"
-                                >
-                                  <option value="heatmap">{t('designer.table_formatter.heatmap')}</option>
-                                  <option value="bar">{t('designer.table_formatter.bar')}</option>
-                                  <option value="delta">{t('designer.table_formatter.delta')}</option>
-                                </select>
-                                <button
-                                  onClick={() => setFormatter(col, undefined)}
-                                  className="text-red-500 hover:text-red-700 p-0.5"
-                                  title={t('common.delete')}
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </div>
-
-                              {fmt.type === 'heatmap' && (
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.kpi_color_mode')}:</span>
-                                    <select
-                                      value={fmt.colorMode || 'gradient'}
-                                      onChange={e => setFormatter(col, { ...fmt, colorMode: e.target.value as 'step' | 'gradient' })}
-                                      className="input text-xs flex-1 py-0.5"
-                                    >
-                                      <option value="step">{t('designer.kpi_color_mode.step')}</option>
-                                      <option value="gradient">{t('designer.kpi_color_mode.gradient')}</option>
-                                    </select>
-                                  </div>
-                                  <ColorStopsEditor
-                                    stops={fmt.colorStops}
-                                    onChange={stops => setFormatter(col, { ...fmt, colorStops: stops })}
-                                    addLabel={t('designer.kpi_add_stop')}
-                                  />
-                                  <label className="inline-flex items-center gap-1.5 text-xs">
-                                    <input
-                                      type="checkbox"
-                                      checked={!!fmt.background}
-                                      onChange={e => setFormatter(col, { ...fmt, background: e.target.checked || undefined })}
-                                      className="h-3.5 w-3.5"
-                                    />
-                                    <span className="text-slate-500 dark:text-slate-400">{t('designer.table_formatter_background')}</span>
-                                  </label>
-                                </div>
-                              )}
-
-                              {fmt.type === 'bar' && (
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.table_formatter_max')}:</span>
-                                    <input
-                                      type="text"
-                                      inputMode="decimal"
-                                      value={fmt.max === 'auto' || fmt.max === undefined ? 'auto' : String(fmt.max)}
-                                      onChange={e => {
-                                        const v = e.target.value.replace(/,/g, '.').trim()
-                                        if (v === '' || v === 'auto') setFormatter(col, { ...fmt, max: 'auto' })
-                                        else if (Number.isFinite(Number(v))) setFormatter(col, { ...fmt, max: Number(v) })
-                                      }}
-                                      placeholder="auto"
-                                      className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50"
-                                    />
-                                  </div>
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.table_formatter_color')}:</span>
-                                    <input
-                                      type="color"
-                                      value={fmt.color || '#3b82f6'}
-                                      onChange={e => setFormatter(col, { ...fmt, color: e.target.value })}
-                                      className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                                    />
-                                    <input
-                                      type="text"
-                                      value={fmt.color || ''}
-                                      onChange={e => setFormatter(col, { ...fmt, color: e.target.value || undefined })}
-                                      placeholder="#3b82f6"
-                                      className="flex-1 text-xs px-1.5 py-0.5 border border-surface-200 dark:border-dark-surface-100 rounded bg-white dark:bg-dark-surface-50 font-mono"
-                                    />
-                                  </div>
-                                </div>
-                              )}
-
-                              {fmt.type === 'delta' && (
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <span className="text-slate-500 dark:text-slate-400 w-20">{t('designer.kpi_color_mode')}:</span>
-                                    <select
-                                      value={fmt.colorMode || 'sign'}
-                                      onChange={e => setFormatter(col, { ...fmt, colorMode: e.target.value as 'sign' | 'none' })}
-                                      className="input text-xs flex-1 py-0.5"
-                                    >
-                                      <option value="sign">{t('designer.table_formatter_delta_color_mode.sign')}</option>
-                                      <option value="none">{t('designer.table_formatter_delta_color_mode.none')}</option>
-                                    </select>
-                                  </div>
-                                  <label className="inline-flex items-center gap-1.5 text-xs">
-                                    <input
-                                      type="checkbox"
-                                      checked={fmt.showArrow !== false}
-                                      onChange={e => setFormatter(col, { ...fmt, showArrow: e.target.checked })}
-                                      className="h-3.5 w-3.5"
-                                    />
-                                    <span className="text-slate-500 dark:text-slate-400">{t('designer.table_formatter_show_arrow')}</span>
-                                  </label>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-
-                          {remainingCols.length > 0 && (
-                            <select
-                              value=""
-                              onChange={e => {
-                                const col = e.target.value
-                                if (!col) return
-                                setFormatter(col, defaultHeatmap)
-                              }}
-                              className="input text-xs"
-                            >
-                              <option value="">{t('designer.table_add_formatter')}</option>
-                              {remainingCols.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                          )}
-                        </div>
-                      )
-                    })()}
-                  </Field>
-                </>
-              )
-            })()}
-
-            {/* ── KPI Config ── */}
-            {widget.widgetType === 'KPI' && (() => {
-              return (
-                <>
-                  {availableCols.length > 0 && (
-                    <>
-                      <Field label={t('designer.kpi_value_column')}>
-                        <select
-                          value={cc.valueColumn as string || ''}
-                          onChange={e => update({ chartConfig: { ...cc, valueColumn: e.target.value || undefined } })}
-                          className="input text-sm"
-                        >
-                          <option value="">{t('designer.auto_first_column')}</option>
-                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </Field>
-                      <Field label={t('designer.kpi_aggregation')}>
-                        <select
-                          value={cc.aggregation as string || 'first'}
-                          onChange={e => update({ chartConfig: { ...cc, aggregation: e.target.value } })}
-                          className="input text-sm"
-                        >
-                          <option value="first">{t('designer.agg.first')}</option>
-                          <option value="last">{t('designer.agg.last')}</option>
-                          <option value="sum">{t('designer.agg.sum')}</option>
-                          <option value="avg">{t('designer.agg.avg')}</option>
-                          <option value="min">{t('designer.agg.min')}</option>
-                          <option value="max">{t('designer.agg.max')}</option>
-                          <option value="count">{t('designer.agg.count')}</option>
-                        </select>
-                      </Field>
-                      <Field label={t('designer.kpi_label_column')}>
-                        <select
-                          value={cc.labelColumn as string || ''}
-                          onChange={e => update({ chartConfig: { ...cc, labelColumn: e.target.value || undefined } })}
-                          className="input text-sm"
-                        >
-                          <option value="">{t('common.none')}</option>
-                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </Field>
-                    </>
-                  )}
-                  <Field label={t('designer.number_format')}>
-                    <select
-                      value={cc.format as string || 'number'}
-                      onChange={e => update({ chartConfig: { ...cc, format: e.target.value } })}
-                      className="input text-sm"
-                    >
-                      <option value="number">{t('designer.format.number')}</option>
-                      <option value="thousands">{t('designer.format.thousands')}</option>
-                      <option value="millions">{t('designer.format.millions')}</option>
-                      <option value="billions">{t('designer.format.billions')}</option>
-                      <option value="currency">{t('designer.format.currency')}</option>
-                      <option value="percent">{t('designer.format.percent')}</option>
-                    </select>
-                  </Field>
-
-                  <Field label={t('designer.kpi_decimals')}>
-                    <NumericInput
-                      value={cc.decimals as number | undefined}
-                      onChange={v => update({
-                        chartConfig: {
-                          ...cc,
-                          decimals: v != null ? Math.max(0, Math.min(6, Math.floor(v))) : undefined,
-                        },
-                      })}
-                      className="input text-sm"
-                      placeholder={t('designer.kpi_decimals_placeholder')}
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.kpi_decimals_hint')}</p>
-                  </Field>
-
-                  {cc.format === 'currency' && (
-                    <Field label={t('designer.currency')}>
-                      <select
-                        value={cc.currency as string || 'USD'}
-                        onChange={e => update({ chartConfig: { ...cc, currency: e.target.value } })}
-                        className="input text-sm"
-                      >
-                        {CURRENCIES.map(c => (
-                          <option key={c.code} value={c.code}>{c.symbol} {c.code} - {c.name}</option>
-                        ))}
-                      </select>
-                    </Field>
-                  )}
-
-                  <Field label={t('designer.prefix_suffix')}>
-                    <div className="flex gap-2">
-                      <input
-                        value={cc.prefix as string || ''}
-                        onChange={e => update({ chartConfig: { ...cc, prefix: e.target.value } })}
-                        placeholder={t('designer.prefix')} className="input text-sm flex-1"
-                      />
-                      <input
-                        value={cc.suffix as string || ''}
-                        onChange={e => update({ chartConfig: { ...cc, suffix: e.target.value } })}
-                        placeholder={t('designer.suffix')} className="input text-sm flex-1"
-                      />
-                    </div>
-                  </Field>
-
-                  <Field label={t('designer.kpi_color_mode')}>
-                    <select
-                      value={cc.colorMode as string || 'step'}
-                      onChange={e => update({ chartConfig: { ...cc, colorMode: e.target.value } })}
-                      className="input text-sm"
-                    >
-                      <option value="step">{t('designer.kpi_color_mode.step')}</option>
-                      <option value="gradient">{t('designer.kpi_color_mode.gradient')}</option>
-                    </select>
-                  </Field>
-
-                  <Field label={t('designer.kpi_color_stops')}>
-                    <ColorStopsEditor
-                      stops={(cc.colorStops as Array<{ at: number; color: string }>) || []}
-                      onChange={next => update({ chartConfig: { ...cc, colorStops: next.length ? next : undefined } })}
-                      addLabel={t('designer.kpi_add_stop')}
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">{t('designer.kpi_color_stops_hint')}</p>
-                  </Field>
-
-                  <Field label={t('designer.kpi_tint_background')}>
-                    <label className="inline-flex items-center gap-1.5 text-xs">
-                      <input
-                        type="checkbox"
-                        checked={!!cc.tintBackground}
-                        onChange={e => update({ chartConfig: { ...cc, tintBackground: e.target.checked || undefined } })}
-                        className="h-3.5 w-3.5"
-                      />
-                      <span className="text-slate-500 dark:text-slate-400">{t('designer.kpi_tint_background')}</span>
-                    </label>
-                  </Field>
-
-                  {availableCols.length > 0 && (
-                    <>
-                      <Field label={t('designer.kpi_sparkline_field')}>
-                        <select
-                          value={cc.sparklineField as string || ''}
-                          onChange={e => update({ chartConfig: { ...cc, sparklineField: e.target.value || undefined } })}
-                          className="input text-sm"
-                        >
-                          <option value="">{t('common.none')}</option>
-                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </Field>
-                      {!!cc.sparklineField && (
-                        <>
-                          <Field label={t('designer.kpi_sparkline_color_from_stops')}>
-                            <label className="inline-flex items-center gap-1.5 text-xs">
-                              <input
-                                type="checkbox"
-                                checked={!!cc.sparklineColorFromStops}
-                                onChange={e => update({ chartConfig: { ...cc, sparklineColorFromStops: e.target.checked || undefined } })}
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className="text-slate-500 dark:text-slate-400">{t('designer.kpi_sparkline_color_from_stops')}</span>
-                            </label>
-                          </Field>
-                          {!cc.sparklineColorFromStops && (
-                            <Field label={t('designer.kpi_sparkline_color')}>
-                              <div className="flex items-center gap-1.5">
-                                <input
-                                  type="color"
-                                  value={cc.sparklineColor as string || '#3b82f6'}
-                                  onChange={e => update({ chartConfig: { ...cc, sparklineColor: e.target.value } })}
-                                  className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
-                                />
-                                <input
-                                  type="text"
-                                  value={cc.sparklineColor as string || ''}
-                                  onChange={e => update({ chartConfig: { ...cc, sparklineColor: e.target.value || undefined } })}
-                                  placeholder="#3b82f6"
-                                  className="input text-xs flex-1 font-mono"
-                                />
-                              </div>
-                            </Field>
-                          )}
-                        </>
-                      )}
-                      <Field label={t('designer.kpi_delta_column')}>
-                        <select
-                          value={cc.deltaColumn as string || ''}
-                          onChange={e => update({ chartConfig: { ...cc, deltaColumn: e.target.value || undefined } })}
-                          className="input text-sm"
-                        >
-                          <option value="">{t('common.none')}</option>
-                          {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </Field>
-                    </>
-                  )}
-                </>
-              )
-            })()}
-
-            {/* ── FILTER Config ── */}
-            {widget.widgetType === 'FILTER' && availableCols.length > 0 && (() => {
-              return (
-                <>
-                  <Field label={t('designer.filter_column')}>
-                    <select
-                      value={cc.filterColumn as string || ''}
-                      onChange={e => update({ chartConfig: { ...cc, filterColumn: e.target.value || undefined } })}
-                      className="input text-sm"
-                    >
-                      <option value="">{t('designer.auto_first_column')}</option>
-                      {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </Field>
-                  <Field label={t('designer.filter_type')}>
-                    <select
-                      value={cc.filterType as string || 'select'}
-                      onChange={e => update({ chartConfig: { ...cc, filterType: e.target.value } })}
-                      className="input text-sm"
-                    >
-                      <option value="select">{t('designer.filter_types.select')}</option>
-                      <option value="multi_select">{t('designer.filter_types.multi_select')}</option>
-                      <option value="text">{t('designer.filter_types.text')}</option>
-                      <option value="number_range">{t('designer.filter_types.number_range')}</option>
-                      <option value="date_range">{t('designer.filter_types.date_range')}</option>
-                    </select>
-                  </Field>
-                  <Field label={t('designer.filter_placeholder')}>
-                    <input
-                      value={cc.placeholder as string || ''}
-                      onChange={e => update({ chartConfig: { ...cc, placeholder: e.target.value } })}
-                      className="input text-sm"
-                      placeholder={t('designer.filter_placeholder_hint')}
-                    />
-                  </Field>
-                </>
-              )
-            })()}
-          </>
-        )
-      })()}
+      {/* Data-bound widget config (CHART/TABLE/KPI/FILTER) is driven by the
+          options registry above. The non-data widgets below (TEXT/IMAGE/
+          BUTTON/...) keep their own inline editors. */}
 
       {/* Text content - stored in widget.body (dedicated TEXT column on the
           backend, no length limit). Title stays in widget.title for the
@@ -2483,7 +1081,7 @@ function SqlEditorModal({ sql, datasourceId, parameters, onSave, onClose }: {
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+export function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{label}</label>
@@ -2497,7 +1095,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
  * Useful when the preview sample doesn't surface all possible values
  * (e.g. sort order hides some categories past the sample limit).
  */
-function AddColorValueRow({
+export function AddColorValueRow({
   existingValues,
   defaultColor,
   onAdd,
@@ -2561,7 +1159,7 @@ function AddColorValueRow({
  * table heatmap formatters. Hex is editable both via native color picker and
  * a free-form text input so users can paste exact brand colors.
  */
-function ColorStopsEditor({ stops, onChange, addLabel }: {
+export function ColorStopsEditor({ stops, onChange, addLabel }: {
   stops: Array<{ at: number; color: string }>
   onChange: (next: Array<{ at: number; color: string }>) => void
   addLabel: string
