@@ -5,11 +5,16 @@ import com.datorio.model.dto.*
 import com.datorio.service.ScriptService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/scripts")
+// Server-side JS is powerful even sandboxed; deny by default. CRUD and history require
+// SCRIPT_MANAGE; the execute endpoints below override this with SCRIPT_EXECUTE. Both
+// permissions are granted to ADMIN and EDITOR (migration V29); VIEWER has neither.
+@PreAuthorize("hasAuthority('SCRIPT_MANAGE')")
 class ScriptController(
     private val scriptService: ScriptService
 ) {
@@ -55,6 +60,7 @@ class ScriptController(
     // ── Execution ──
 
     @PostMapping("/execute")
+    @PreAuthorize("hasAuthority('SCRIPT_EXECUTE')")
     fun execute(
         @RequestBody request: ScriptExecuteRequest,
         auth: Authentication
@@ -63,6 +69,7 @@ class ScriptController(
     }
 
     @PostMapping("/{id}/execute")
+    @PreAuthorize("hasAuthority('SCRIPT_EXECUTE')")
     fun executeById(
         @PathVariable id: Long,
         @RequestBody(required = false) request: ScriptExecuteRequest?,

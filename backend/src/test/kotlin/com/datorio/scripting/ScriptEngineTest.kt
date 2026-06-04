@@ -25,13 +25,15 @@ class ScriptEngineTest {
         timeoutMs: Long = 1500,
         maxStatements: Long = 10_000_000,
         maxOutputBytes: Long = 50_000,
-        maxScriptLength: Int = 5_000
+        maxScriptLength: Int = 5_000,
+        maxConcurrent: Int = 8
     ) = ScriptEngine(
         timeoutMs = timeoutMs,
         maxStatements = maxStatements,
         maxMemoryMb = 64,
         maxOutputBytes = maxOutputBytes,
-        maxScriptLength = maxScriptLength
+        maxScriptLength = maxScriptLength,
+        maxConcurrent = maxConcurrent
     )
 
     private fun assertBlocked(code: String, msg: String = "expected script to be blocked") {
@@ -149,6 +151,26 @@ class ScriptEngineTest {
         assertTrue(
             r.error?.contains("maximum allowed size", ignoreCase = true) == true,
             "expected output-size rejection, got: ${r.error}"
+        )
+    }
+
+    @Test
+    @Timeout(value = 20, unit = TimeUnit.SECONDS)
+    fun `concurrency limit rejects extra executions`() {
+        // maxConcurrent=1: of two scripts fired at once, one takes the only slot (and is killed
+        // by its 2s timeout), the other must be rejected immediately as busy (tryAcquire fails).
+        val eng = engine(timeoutMs = 2000, maxConcurrent = 1)
+        val results = java.util.Collections.synchronizedList(mutableListOf<ScriptEngine.ExecutionResult>())
+        val threads = (1..2).map {
+            Thread { results.add(eng.execute("while (true) {}")) }.apply { isDaemon = true }
+        }
+        threads.forEach { it.start() }
+        threads.forEach { it.join(15_000) }
+
+        assertEquals(2, results.size, "both calls should have returned")
+        assertTrue(
+            results.any { !it.success && it.error?.contains("busy", ignoreCase = true) == true },
+            "with maxConcurrent=1 one of two concurrent runs must be rejected as busy; got ${results.map { it.error }}"
         )
     }
 
