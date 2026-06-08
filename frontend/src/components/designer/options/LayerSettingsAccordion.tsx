@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, Plus, X } from 'lucide-react'
+import { ChevronDown, Plus, X, Trash2 } from 'lucide-react'
 import NumericInput from '@/components/common/NumericInput'
 import { interactiveApi } from '@/api/interactive'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import type { DesignerWidget } from '@/store/useDesignerStore'
 import type { ChartLayerItem } from '@/types'
+import { createLayerFor, deleteLayerFor, layerColor } from './layerOps'
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$' }, { code: 'EUR', symbol: '€' }, { code: 'GBP', symbol: '£' },
@@ -19,20 +20,42 @@ const CURRENCIES = [
 // seriesConfig JSON (labels/smoothing/markers/thresholds). Y-axis format/min/
 // decimals/currency are per-axis (left = base chartConfig key, right = key +
 // "Right") because two layers sharing an axis share that axis' scale.
-export default function LayerSettingsAccordion({ widget, cc, update }: {
+export default function LayerSettingsAccordion({ widget, cc, update, availableCols, categoryField }: {
   widget: DesignerWidget
   cc: Record<string, unknown>
   update: (updates: Partial<DesignerWidget>) => void
+  availableCols: string[]
+  categoryField?: string
 }) {
   const { t } = useTranslation()
   const widgetLayersMap = useDesignerStore(s => s.widgetLayers)
   const updateWidgetLayer = useDesignerStore(s => s.updateWidgetLayer)
+  const addWidgetLayer = useDesignerStore(s => s.addWidgetLayer)
+  const removeWidgetLayer = useDesignerStore(s => s.removeWidgetLayer)
   const [expandedLayerIds, setExpandedLayerIds] = useState<Set<number>>(new Set())
   const toggleLayerExpand = (id: number) =>
     setExpandedLayerIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
 
   const layers = widgetLayersMap[widget.id] || []
-  if (layers.length === 0) return null
+
+  // Columns still available to add as a new series (excludes the category and
+  // any column already bound to a layer).
+  const usedFields = new Set(layers.map(l => l.valueField).filter(Boolean) as string[])
+  const addableCols = availableCols.filter(c => c !== categoryField && !usedFields.has(c))
+  const handleAddLayer = async (col: string) => {
+    if (!col) return
+    const layer = await createLayerFor(widget, {
+      name: col, valueField: col, categoryField,
+      chartType: 'line', axis: 'right',
+      color: layerColor(layers.length), sortOrder: layers.length,
+    })
+    addWidgetLayer(widget.id, layer)
+    toggleLayerExpand(layer.id)
+  }
+  const handleDeleteLayer = async (layer: ChartLayerItem) => {
+    await deleteLayerFor(widget, layer)
+    removeWidgetLayer(widget.id, layer.id)
+  }
 
   const axisKey = (axis: string, suffix: string) =>
     axis === 'right' ? `yAxis${suffix}Right` : `yAxis${suffix}`
@@ -42,7 +65,13 @@ export default function LayerSettingsAccordion({ widget, cc, update }: {
     update({ chartConfig: { ...cc, [axisKey(axis, suffix)]: val } })
 
   const patchLayer = async (layer: ChartLayerItem, patch: Partial<ChartLayerItem>) => {
-    try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
+    // Only push to the server for a saved widget. On an unsaved copy the layer
+    // ids still belong to the source chart, so a server update would mutate the
+    // source's layers; the store edit is enough and the copy's layers are
+    // created on save.
+    if (widget.serverId) {
+      try { await interactiveApi.updateLayer(layer.id, { ...layer, ...patch }) } catch { /* silent */ }
+    }
     updateWidgetLayer(widget.id, layer.id, patch)
   }
   const patchSeriesConfig = async (layer: ChartLayerItem, patch: Record<string, unknown>) => {
@@ -65,20 +94,50 @@ export default function LayerSettingsAccordion({ widget, cc, update }: {
         return (
           <div key={layer.id} className="border border-surface-200 dark:border-dark-surface-100 rounded-lg overflow-hidden">
             {/* Accordion header */}
-            <button
-              type="button"
-              onClick={() => toggleLayerExpand(layer.id)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-surface-50 dark:hover:bg-dark-surface-50 text-left"
-            >
-              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: layer.color || '#5470c6' }} />
-              <span className="text-xs flex-1 truncate text-slate-700 dark:text-slate-300">{layer.label || layer.name}</span>
-              <span className="text-[10px] text-slate-400">{layer.chartType} / {layer.axis}</span>
-              <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-            </button>
+            <div className="w-full flex items-center hover:bg-surface-50 dark:hover:bg-dark-surface-50">
+              <button
+                type="button"
+                onClick={() => toggleLayerExpand(layer.id)}
+                className="flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 text-left"
+              >
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: layer.color || '#5470c6' }} />
+                <span className="text-xs flex-1 truncate text-slate-700 dark:text-slate-300">{layer.label || layer.name}</span>
+                <span className="text-[10px] text-slate-400">{layer.chartType} / {layer.axis}</span>
+                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteLayer(layer)}
+                className="px-1.5 py-1.5 text-slate-400 hover:text-red-500 flex-shrink-0"
+                title={t('designer.layer_remove')}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
             {/* Accordion body */}
             {expanded && (
               <div className="px-2 pb-2 pt-1 space-y-2 border-t border-surface-200 dark:border-dark-surface-100 bg-surface-50/50 dark:bg-dark-surface-50/50">
+
+                {/* Data binding: value + category column (lets a 1:1 copy be repointed) */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.layer_value')}</span>
+                  <select value={layer.valueField || ''}
+                    onChange={e => patchLayer(layer, { valueField: e.target.value || undefined })}
+                    className="input text-xs flex-1">
+                    <option value="">{t('common.none')}</option>
+                    {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 w-24 flex-shrink-0">{t('designer.category_field')}</span>
+                  <select value={layer.categoryField || ''}
+                    onChange={e => patchLayer(layer, { categoryField: e.target.value || undefined })}
+                    className="input text-xs flex-1">
+                    <option value="">{t('designer.layer_category_inherit')}</option>
+                    {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
 
                 {/* Color */}
                 <div className="flex items-center gap-2">
@@ -345,6 +404,20 @@ export default function LayerSettingsAccordion({ widget, cc, update }: {
           </div>
         )
       })}
+
+      {/* Add a new series/layer from an unused value column */}
+      {addableCols.length > 0 ? (
+        <select
+          value=""
+          onChange={e => { handleAddLayer(e.target.value); e.target.value = '' }}
+          className="input text-xs w-full mt-1"
+        >
+          <option value="">+ {t('designer.layer_add')}</option>
+          {addableCols.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      ) : layers.length === 0 ? (
+        <p className="text-[10px] text-slate-400 px-1 py-1">{t('designer.layer_add_hint')}</p>
+      ) : null}
     </div>
   )
 }

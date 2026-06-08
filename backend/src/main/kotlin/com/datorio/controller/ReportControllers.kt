@@ -222,6 +222,16 @@ class ReportController(
         return ResponseEntity.noContent().build()
     }
 
+    @PostMapping("/widgets/{widgetId}/duplicate")
+    @PreAuthorize("hasAuthority('REPORT_EDIT')")
+    fun duplicateWidget(
+        @PathVariable widgetId: Long,
+        auth: Authentication
+    ): ResponseEntity<WidgetResponse> {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(reportService.duplicateWidget(widgetId, getUserId(auth)))
+    }
+
     // ── Render (server-side data fetch) ──
 
     @PostMapping("/{id}/render")

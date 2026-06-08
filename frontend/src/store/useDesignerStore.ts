@@ -52,6 +52,8 @@ interface DesignerState {
   widgetLayers: Record<string, ChartLayerItem[]>
   setWidgetLayers: (widgetId: string, layers: ChartLayerItem[]) => void
   updateWidgetLayer: (widgetId: string, layerId: number, patch: Partial<ChartLayerItem>) => void
+  addWidgetLayer: (widgetId: string, layer: ChartLayerItem) => void
+  removeWidgetLayer: (widgetId: string, layerId: number) => void
 
   // Actions
   setReportMeta: (name: string, description: string) => void
@@ -65,6 +67,9 @@ interface DesignerState {
   updateWidget: (id: string, updates: Partial<DesignerWidget>) => void
   removeWidget: (id: string) => void
   duplicateWidget: (id: string) => void
+  // Insert a widget returned by the backend duplicate endpoint (already saved,
+  // with its server-side elements copied). Returns the new client id.
+  addServerWidget: (w: Record<string, unknown>) => string
   selectWidget: (id: string | null) => void
   reorderWidget: (id: string, newOrder: number) => void
   moveWidget: (id: string, position: { x: number; y: number; w: number; h: number }) => void
@@ -146,6 +151,18 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
           l.id === layerId ? { ...l, ...patch } : l
         ),
       },
+    })),
+
+  addWidgetLayer: (widgetId, layer) =>
+    set(s => ({
+      widgetLayers: { ...s.widgetLayers, [widgetId]: [...(s.widgetLayers[widgetId] || []), layer] },
+      dirty: true,
+    })),
+
+  removeWidgetLayer: (widgetId, layerId) =>
+    set(s => ({
+      widgetLayers: { ...s.widgetLayers, [widgetId]: (s.widgetLayers[widgetId] || []).filter(l => l.id !== layerId) },
+      dirty: true,
     })),
 
   setReportMeta: (name, description) =>
@@ -313,12 +330,60 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       sortOrder: state.widgets.length,
     }
     const newWidgets = [...state.widgets, dup]
+    // Carry the source chart's layers to the copy so combined/mixed charts keep
+    // their per-series config. Layers are stored separately, keyed by widget id;
+    // they get fresh server rows on save (their stale ids/widgetId are ignored).
+    // Copy layers 1:1 (including their categoryField/valueField); the user
+    // repoints them afterwards via the per-layer category/value editors.
+    const srcLayers = state.widgetLayers[source.id]
+    const widgetLayers = srcLayers && srcLayers.length
+      ? { ...state.widgetLayers, [dup.id]: srcLayers.map(l => ({ ...l })) }
+      : state.widgetLayers
     return {
       widgets: newWidgets,
+      widgetLayers,
       selectedWidgetId: dup.id,
       ...pushHistory({ ...state, widgets: newWidgets }),
     }
   }),
+
+  addServerWidget: (w) => {
+    const parse = (v: unknown, d: unknown) => {
+      if (typeof v !== 'string') return v ?? d
+      try { return JSON.parse(v) } catch { return d }
+    }
+    const pos = parse(w.position, {}) as Record<string, unknown>
+    // A backend duplicate is always in modern shape (no legacy chart-type
+    // aliases / TEXT-in-title), so a thin mapping is enough here.
+    const dup: DesignerWidget = {
+      id: genId(),
+      serverId: (w.widgetId as number | undefined) ?? (w.id as number | undefined),
+      widgetType: w.widgetType as DesignerWidget['widgetType'],
+      title: (w.title as string) || '',
+      body: (w.body as string) || '',
+      queryId: (w.queryId as number | undefined) ?? null,
+      datasourceId: (w.datasourceId as number | undefined) ?? null,
+      rawSql: (w.rawSql as string) || '',
+      chartConfig: parse(w.chartConfig, {}) as Record<string, unknown>,
+      position: {
+        x: Number(pos.x ?? 0), y: Number(pos.y ?? 0),
+        w: Number(pos.w ?? 12), h: Number(pos.h ?? 4),
+      },
+      style: parse(w.style, {}) as Record<string, unknown>,
+      paramMapping: parse(w.paramMapping, {}) as Record<string, string>,
+      isVisible: w.isVisible !== false,
+      sortOrder: (w.sortOrder as number | undefined) ?? 0,
+    }
+    set(state => {
+      const newWidgets = [...state.widgets, dup]
+      return {
+        widgets: newWidgets,
+        selectedWidgetId: dup.id,
+        ...pushHistory({ ...state, widgets: newWidgets }),
+      }
+    })
+    return dup.id
+  },
 
   selectWidget: (id) => set({ selectedWidgetId: id }),
 
