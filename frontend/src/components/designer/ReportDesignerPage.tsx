@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
 import { vizApi } from '@/api/visualization'
+import { interactiveApi } from '@/api/interactive'
 import { log } from '@/utils/logger'
 import { useDesignerStore } from '@/store/useDesignerStore'
-import type { ReportParameter } from '@/types'
+import type { ReportParameter, ChartLayerItem } from '@/types'
 import ComponentPalette from './ComponentPalette'
 import DesignerCanvas from './DesignerCanvas'
 import PropertyPanel from './PropertyPanel'
@@ -298,6 +299,7 @@ export default function ReportDesignerPage() {
 
         const clientIdToServerId = new Map<string, number>()
         const usedServerIds = new Set<number>()
+        const createdClientIds = new Set<string>()
         for (let i = 0; i < widgets.length; i++) {
           const w = widgets[i]
           const wp = widgetPayloads[i]
@@ -309,7 +311,37 @@ export default function ReportDesignerPage() {
             const created = await reportApi.addWidget(reportId, wp) as { id: number }
             clientIdToServerId.set(w.id, created.id)
             usedServerIds.add(created.id)
+            createdClientIds.add(w.id)
           }
+        }
+
+        // Create chart layers for newly-inserted widgets (e.g. a duplicated
+        // combined chart). Existing widgets manage their layers live via
+        // interactiveApi, so we only persist layers for widgets created in this
+        // save. Refresh the store with the real server layers (new ids) so later
+        // edits target the copy's rows, not the source's.
+        const layerState = useDesignerStore.getState().widgetLayers
+        for (const cid of createdClientIds) {
+          const serverId = clientIdToServerId.get(cid)
+          const srcLayers = layerState[cid]
+          if (!serverId || !srcLayers || srcLayers.length === 0) continue
+          const createdLayers: ChartLayerItem[] = []
+          for (const l of srcLayers) {
+            try {
+              const c = await interactiveApi.createLayer({
+                widgetId: serverId,
+                name: l.name, label: l.label,
+                queryId: l.queryId, datasourceId: l.datasourceId, rawSql: l.rawSql,
+                chartType: l.chartType, axis: l.axis, color: l.color, opacity: l.opacity,
+                isVisible: l.isVisible, sortOrder: l.sortOrder,
+                seriesConfig: l.seriesConfig, categoryField: l.categoryField, valueField: l.valueField,
+              })
+              createdLayers.push(c)
+            } catch {
+              log.save('layer create failed', { clientId: cid, layer: l.name })
+            }
+          }
+          if (createdLayers.length) useDesignerStore.getState().setWidgetLayers(cid, createdLayers)
         }
 
         // Delete any server widgets that no longer exist in the store

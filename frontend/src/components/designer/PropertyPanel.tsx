@@ -6,6 +6,7 @@ import type { SavedQuery, DataSource } from '@/types'
 import { queryApi } from '@/api/queries'
 import { datasourceApi } from '@/api/datasources'
 import { interactiveApi } from '@/api/interactive'
+import { reportApi } from '@/api/reports'
 import { buildDesignerParameterValues, mergeSqlParameterKeys } from '@/utils/designerParameters'
 import { Trash2, Copy, Eye, EyeOff, RefreshCw, CheckSquare, Square, ToggleLeft, Plus, X, MoreVertical, Play } from 'lucide-react'
 import { createPortal } from 'react-dom'
@@ -15,6 +16,7 @@ import { CHART_TYPE_OPTIONS } from '@/components/charts/chartTypeBuilders'
 import OptionsPane from '@/components/designer/options/OptionsPane'
 import { COMMON_OPTIONS, COMMON_CATEGORIES } from '@/components/designer/options/commonOptions'
 import LayerSettingsAccordion from '@/components/designer/options/LayerSettingsAccordion'
+import { initLayersFromFields } from '@/components/designer/options/layerOps'
 import ChartMarkerOptions from '@/components/designer/options/ChartMarkerOptions'
 import ChartPieOptions from '@/components/designer/options/ChartPieOptions'
 import TableConfigOptions from '@/components/designer/options/TableConfigOptions'
@@ -61,6 +63,8 @@ export default function PropertyPanel() {
   const updateWidget = useDesignerStore(s => s.updateWidget)
   const removeWidget = useDesignerStore(s => s.removeWidget)
   const duplicateWidget = useDesignerStore(s => s.duplicateWidget)
+  const addServerWidget = useDesignerStore(s => s.addServerWidget)
+  const reportId = useDesignerStore(s => s.reportId)
   const widgetLayersMap = useDesignerStore(s => s.widgetLayers)
   const setWidgetLayers = useDesignerStore(s => s.setWidgetLayers)
 
@@ -377,6 +381,21 @@ export default function PropertyPanel() {
     const next = current.includes(col) ? current.filter(c => c !== col) : [...current, col]
     update({ chartConfig: { ...chartCc, regressionFields: next } })
   }
+  // Effective category column (falls back to the first column, like the chart).
+  const chartEffCat = chartCatField || availableCols[0] || ''
+  // Switching to a combined chart with no layers yet auto-seeds layers from the
+  // current value fields (first = bar/left, rest = line/right), so a combo can
+  // be built in the UI without importing a template.
+  const handleChartTypeChange = (newType: string) => {
+    update({ chartConfig: { ...chartCc, type: newType } })
+    if (newType === 'mixed'
+      && (widgetLayersMap[widget.id] || []).length === 0
+      && chartEffFields.length > 0) {
+      initLayersFromFields(widget, chartEffFields)
+        .then(layers => setWidgetLayers(widget.id, layers))
+        .catch(() => { /* layers can still be added manually */ })
+    }
+  }
   const chartOptions: OptionDef[] = isChart ? [
     {
       id: 'chart_type', category: 'chart', nameKey: 'charts.select_type',
@@ -384,7 +403,7 @@ export default function PropertyPanel() {
         <>
           <select
             value={chartCc.type as string || 'bar'}
-            onChange={e => update({ chartConfig: { ...chartCc, type: e.target.value } })}
+            onChange={e => handleChartTypeChange(e.target.value)}
             className="input text-sm"
           >
             {CHART_TYPES.map(ct => (
@@ -664,11 +683,12 @@ export default function PropertyPanel() {
     },
     {
       // Per-layer accordion (mixed / multi-series charts). Each layer carries
-      // its own color/type/axis/labels/markers; the section is hidden when the
-      // chart has no layers.
+      // its own color/type/axis/labels/markers. Shown when the chart has layers
+      // or is combined, so layers can be added from scratch.
       id: 'layers', category: 'layers', nameKey: '',
-      showIf: () => (widgetLayersMap[widget.id] || []).length > 0,
-      render: () => <LayerSettingsAccordion widget={widget} cc={chartCc} update={update} />,
+      showIf: () => chartHasLayers,
+      render: () => <LayerSettingsAccordion widget={widget} cc={chartCc} update={update}
+        availableCols={availableCols} categoryField={chartEffCat} />,
     },
     {
       // Threshold lines / min-max markers / conditional color / delta / last-
@@ -728,7 +748,23 @@ export default function PropertyPanel() {
     <div className="p-3 space-y-4 overflow-y-auto">
       {/* Actions */}
       <div className="flex items-center gap-1">
-        <button onClick={() => duplicateWidget(widget.id)} className="btn-ghost p-1.5" title={t('common.duplicate')}>
+        <button onClick={async () => {
+          // Saved widget: duplicate on the server so all per-widget elements
+          // (layers, annotations, tooltip, visibility rules) are copied. Unsaved
+          // widget: client-side clone (it has no server-side elements yet).
+          if (widget.serverId && reportId) {
+            try {
+              const w = await reportApi.duplicateWidget(widget.serverId)
+              const newId = addServerWidget(w)
+              const sid = (w.widgetId ?? w.id) as number
+              try { setWidgetLayers(newId, await interactiveApi.getLayersForWidget(sid)) } catch { /* no layers */ }
+            } catch {
+              toast.error(t('common.error'))
+            }
+          } else {
+            duplicateWidget(widget.id)
+          }
+        }} className="btn-ghost p-1.5" title={t('common.duplicate')}>
           <Copy className="w-4 h-4" />
         </button>
         <button
