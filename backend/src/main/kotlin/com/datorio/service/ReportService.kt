@@ -334,56 +334,7 @@ class ReportService(
 
         // Copy per-widget elements: annotations, tooltips, chart layers, visibility rules
         for ((oldId, newId) in widgetIdMap) {
-            try {
-                val annotations = vizService.getAnnotations(oldId)
-                for (a in annotations) {
-                    vizService.createAnnotation(AnnotationRequest(
-                        widgetId = newId, annotationType = a.annotationType,
-                        axis = a.axis, value = a.value, valueEnd = a.valueEnd,
-                        label = a.label, color = a.color, lineStyle = a.lineStyle,
-                        lineWidth = a.lineWidth, opacity = a.opacity, fillColor = a.fillColor,
-                        fillOpacity = a.fillOpacity, position = a.position, fontSize = a.fontSize,
-                        isVisible = a.isVisible, sortOrder = a.sortOrder, config = a.config
-                    ))
-                }
-            } catch (_: Exception) {}
-
-            try {
-                val tooltip = vizService.getTooltipConfig(oldId)
-                if (tooltip != null) {
-                    vizService.saveTooltipConfig(TooltipConfigRequest(
-                        widgetId = newId, isEnabled = tooltip.isEnabled, showTitle = tooltip.showTitle,
-                        titleField = tooltip.titleField, fields = tooltip.fields,
-                        showSparkline = tooltip.showSparkline, sparklineField = tooltip.sparklineField,
-                        htmlTemplate = tooltip.htmlTemplate, config = tooltip.config
-                    ))
-                }
-            } catch (_: Exception) {}
-
-            try {
-                val layers = interactiveService.getLayersForWidget(oldId)
-                for (l in layers) {
-                    interactiveService.createLayer(ChartLayerRequest(
-                        widgetId = newId, name = l.name, label = l.label,
-                        queryId = l.queryId, datasourceId = l.datasourceId,
-                        rawSql = l.rawSql, chartType = l.chartType, axis = l.axis,
-                        color = l.color, opacity = l.opacity, isVisible = l.isVisible,
-                        sortOrder = l.sortOrder, seriesConfig = l.seriesConfig,
-                        categoryField = l.categoryField, valueField = l.valueField
-                    ))
-                }
-            } catch (_: Exception) {}
-
-            try {
-                val rules = interactiveService.getRulesForWidget(oldId)
-                for (r in rules) {
-                    interactiveService.createVisibilityRule(VisibilityRuleRequest(
-                        widgetId = newId, ruleType = r.ruleType,
-                        parameterName = r.parameterName, operator = r.operator,
-                        expectedValue = r.expectedValue
-                    ))
-                }
-            } catch (_: Exception) {}
+            copyWidgetElements(oldId, newId)
         }
 
         // Copy overlays
@@ -485,6 +436,108 @@ class ReportService(
         reportRepo.save(report)
 
         log.info("Added widget '{}' (id={}) to report id={}", saved.title ?: saved.widgetType, saved.id, reportId)
+        return toWidgetResponse(saved)
+    }
+
+    // Copy a widget's server-side per-widget elements (annotations, tooltip,
+    // chart layers, visibility rules) from one widget to another. Shared by the
+    // report-level and single-widget duplicate so both stay in sync.
+    private fun copyWidgetElements(oldId: Long, newId: Long) {
+        try {
+            for (a in vizService.getAnnotations(oldId)) {
+                vizService.createAnnotation(AnnotationRequest(
+                    widgetId = newId, annotationType = a.annotationType,
+                    axis = a.axis, value = a.value, valueEnd = a.valueEnd,
+                    label = a.label, color = a.color, lineStyle = a.lineStyle,
+                    lineWidth = a.lineWidth, opacity = a.opacity, fillColor = a.fillColor,
+                    fillOpacity = a.fillOpacity, position = a.position, fontSize = a.fontSize,
+                    isVisible = a.isVisible, sortOrder = a.sortOrder, config = a.config
+                ))
+            }
+        } catch (_: Exception) {}
+
+        try {
+            val tooltip = vizService.getTooltipConfig(oldId)
+            if (tooltip != null) {
+                vizService.saveTooltipConfig(TooltipConfigRequest(
+                    widgetId = newId, isEnabled = tooltip.isEnabled, showTitle = tooltip.showTitle,
+                    titleField = tooltip.titleField, fields = tooltip.fields,
+                    showSparkline = tooltip.showSparkline, sparklineField = tooltip.sparklineField,
+                    htmlTemplate = tooltip.htmlTemplate, config = tooltip.config
+                ))
+            }
+        } catch (_: Exception) {}
+
+        try {
+            for (l in interactiveService.getLayersForWidget(oldId)) {
+                interactiveService.createLayer(ChartLayerRequest(
+                    widgetId = newId, name = l.name, label = l.label,
+                    queryId = l.queryId, datasourceId = l.datasourceId,
+                    rawSql = l.rawSql, chartType = l.chartType, axis = l.axis,
+                    color = l.color, opacity = l.opacity, isVisible = l.isVisible,
+                    sortOrder = l.sortOrder, seriesConfig = l.seriesConfig,
+                    categoryField = l.categoryField, valueField = l.valueField
+                ))
+            }
+        } catch (_: Exception) {}
+
+        try {
+            for (r in interactiveService.getRulesForWidget(oldId)) {
+                interactiveService.createVisibilityRule(VisibilityRuleRequest(
+                    widgetId = newId, ruleType = r.ruleType,
+                    parameterName = r.parameterName, operator = r.operator,
+                    expectedValue = r.expectedValue
+                ))
+            }
+        } catch (_: Exception) {}
+    }
+
+    // Shift a widget's grid position down by its own height so a duplicate does
+    // not sit exactly on top of the source. Falls back to the original position
+    // if it cannot be parsed.
+    private fun offsetPosition(position: String): String = try {
+        val node = objectMapper.readTree(position) as? com.fasterxml.jackson.databind.node.ObjectNode
+        if (node != null) {
+            val y = node.get("y")?.asInt() ?: 0
+            val h = node.get("h")?.asInt() ?: 0
+            node.put("y", y + h)
+            objectMapper.writeValueAsString(node)
+        } else position
+    } catch (_: Exception) { position }
+
+    @Transactional
+    fun duplicateWidget(widgetId: Long, userId: Long): WidgetResponse {
+        val src = widgetRepo.findById(widgetId)
+            .orElseThrow { IllegalArgumentException("Widget not found: $widgetId") }
+        val report = src.report
+            ?: throw IllegalStateException("Widget $widgetId has no report")
+
+        val siblings = widgetRepo.findByReportIdOrderBySortOrder(report.id)
+        val nextSort = (siblings.maxOfOrNull { it.sortOrder } ?: -1) + 1
+
+        val copy = ReportWidget(
+            report = report,
+            widgetType = src.widgetType,
+            title = src.title?.let { "$it (copy)" },
+            body = src.body,
+            queryId = src.queryId,
+            datasourceId = src.datasourceId,
+            rawSql = src.rawSql,
+            chartConfig = src.chartConfig,
+            position = offsetPosition(src.position),
+            style = src.style,
+            paramMapping = src.paramMapping,
+            sortOrder = nextSort,
+            isVisible = src.isVisible
+        )
+        val saved = widgetRepo.save(copy)
+        copyWidgetElements(src.id, saved.id)
+
+        report.updatedBy = userId
+        report.updatedAt = Instant.now()
+        reportRepo.save(report)
+
+        log.info("Duplicated widget id={} -> id={} in report id={}", src.id, saved.id, report.id)
         return toWidgetResponse(saved)
     }
 

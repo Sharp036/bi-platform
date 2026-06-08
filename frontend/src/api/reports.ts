@@ -48,6 +48,9 @@ export const reportApi = {
   updateWidget: (widgetId: number, data: Record<string, unknown>) =>
     api.put(`/reports/widgets/${widgetId}`, data).then(r => r.data),
 
+  duplicateWidget: (widgetId: number) =>
+    api.post(`/reports/widgets/${widgetId}/duplicate`).then(r => r.data as Record<string, unknown>),
+
   // Parameters
   getParameters: (reportId: number) =>
     api.get(`/reports/${reportId}/parameters`).then(r => r.data),
