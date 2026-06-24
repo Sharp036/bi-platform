@@ -125,7 +125,7 @@ export default function AlertsPage() {
                   </div>
 
                   <div className="flex items-center gap-1">
-                    <button onClick={() => handleCheck(alert.id)} className="btn-ghost p-2" title="Check now">
+                    <button onClick={() => handleCheck(alert.id)} className="btn-ghost p-2" title={t('alerts.check_now')}>
                       <Play className="w-4 h-4" />
                     </button>
                     <button onClick={() => handleDelete(alert.id)} className="btn-ghost p-2 text-red-500" title={t('common.delete')}>

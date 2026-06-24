@@ -499,14 +499,14 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
             onClick={() => setZoom(z => Math.max(50, z - 10))}
             disabled={zoom <= 50}
             className="p-0.5 rounded hover:bg-surface-100 dark:hover:bg-dark-surface-100 disabled:opacity-30 text-slate-500"
-            title="Zoom out"
+            title={t('charts.zoom_out')}
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
           <span
             className="text-[10px] text-slate-400 min-w-[32px] text-center cursor-pointer"
             onClick={() => setZoom(100)}
-            title="Reset zoom"
+            title={t('charts.zoom_reset')}
           >
             {zoom}%
           </span>
@@ -514,7 +514,7 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
             onClick={() => setZoom(z => Math.min(200, z + 10))}
             disabled={zoom >= 200}
             className="p-0.5 rounded hover:bg-surface-100 dark:hover:bg-dark-surface-100 disabled:opacity-30 text-slate-500"
-            title="Zoom in"
+            title={t('charts.zoom_in')}
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>

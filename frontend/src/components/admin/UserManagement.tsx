@@ -208,13 +208,13 @@ const UserManagement: React.FC = () => {
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td className="actions">
-                  <button className="btn btn-sm" onClick={() => handleEdit(user)} title="Edit">
+                  <button className="btn btn-sm" onClick={() => handleEdit(user)} title={t('common.edit')}>
                     ✏️
                   </button>
                   <button className="btn btn-sm" onClick={() => {
                     setResetUserId(user.id);
                     setNewPassword('');
-                  }} title="Reset password">
+                  }} title={t('admin.reset_password')}>
                     🔑
                   </button>
                   <button className="btn btn-sm" onClick={() => handleToggleActive(user)}
@@ -222,7 +222,7 @@ const UserManagement: React.FC = () => {
                     {user.isActive ? '🚫' : '✅'}
                   </button>
                   {user.username !== 'admin' && (
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(user)} title="Delete">
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(user)} title={t('common.delete')}>
                       🗑️
                     </button>
                   )}
