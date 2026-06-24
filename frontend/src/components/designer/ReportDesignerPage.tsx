@@ -635,7 +635,7 @@ export default function ReportDesignerPage() {
                     <button
                       onClick={() => setRightPanelCollapsed(true)}
                       className="px-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex-shrink-0"
-                      title="Collapse"
+                      title={t('designer.collapse_panel')}
                     >
                       <PanelRightClose className="w-3.5 h-3.5" />
                     </button>
