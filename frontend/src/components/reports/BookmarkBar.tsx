@@ -72,10 +72,10 @@ export default function BookmarkBar({ reportId, currentParameters, onApplyBookma
             {bm.isShared && <span className="text-[9px] text-slate-400">{t('bookmarks.shared')}</span>}
           </button>
           <div className="hidden group-hover:flex items-center gap-0.5">
-            <button onClick={() => handleSetDefault(bm.id)} className="p-0.5 text-slate-400 hover:text-amber-500" title="Set default">
+            <button onClick={() => handleSetDefault(bm.id)} className="p-0.5 text-slate-400 hover:text-amber-500" title={t('bookmarks.set_default')}>
               <Star className="w-3 h-3" />
             </button>
-            <button onClick={() => handleDelete(bm.id)} className="p-0.5 text-slate-400 hover:text-red-500" title="Delete">
+            <button onClick={() => handleDelete(bm.id)} className="p-0.5 text-slate-400 hover:text-red-500" title={t('common.delete')}>
               <Trash2 className="w-3 h-3" />
             </button>
           </div>

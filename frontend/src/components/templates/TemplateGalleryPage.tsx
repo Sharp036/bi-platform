@@ -214,7 +214,7 @@ export default function TemplateGalleryPage() {
                   <button onClick={() => handleUseTemplate(tmpl)} className="btn-primary text-xs flex-1">
                     <Copy className="w-3.5 h-3.5" /> {t('templates.use_template')}
                   </button>
-                  <button onClick={() => handleExportTemplate(tmpl)} className="btn-ghost text-xs p-2" title="Export JSON">
+                  <button onClick={() => handleExportTemplate(tmpl)} className="btn-ghost text-xs p-2" title={t('templates.export_json')}>
                     <Download className="w-3.5 h-3.5" />
                   </button>
                 </div>
