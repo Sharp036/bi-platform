@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
+import { useThemeStore } from '@/store/themeStore'
 
 // ═══════════════════════════════════════════
 //  Web Page Widget (iframe embed)
@@ -203,23 +204,78 @@ function interpolateContent(content: string, data?: WidgetData): string {
   })
 }
 
+// Parse a CSS color (#rgb, #rrggbb, rgb()/rgba()) to [r,g,b] in 0-255. Returns
+// null for anything else (named colors, hsl, ...) so the caller leaves those
+// declarations untouched.
+function parseCssColor(input: string): [number, number, number] | null {
+  const s = input.trim().toLowerCase()
+  const hex = s.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/)
+  if (hex) {
+    const h = hex[1].length === 3 ? hex[1].split('').map(c => c + c).join('') : hex[1]
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+  }
+  const rgb = s.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/)
+  if (rgb) return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])]
+  return null
+}
+
+function relLuminance([r, g, b]: [number, number, number]): number {
+  const lin = (c: number) => {
+    const x = c / 255
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+}
+
+function contrastRatio(a: [number, number, number], b: [number, number, number]): number {
+  const la = relLuminance(a)
+  const lb = relLuminance(b)
+  return la >= lb ? (la + 0.05) / (lb + 0.05) : (lb + 0.05) / (la + 0.05)
+}
+
+// Approximate dark-theme background behind a text widget, and the minimum
+// contrast below which a hardcoded color is treated as unreadable.
+const DARK_THEME_BG: [number, number, number] = [30, 30, 46]
+const MIN_CONTRAST = 2.5
+
+function readableOnDark(color: string): boolean {
+  const rgb = parseCssColor(color)
+  return rgb ? contrastRatio(rgb, DARK_THEME_BG) >= MIN_CONTRAST : true
+}
+
+// Widget HTML may hardcode an inline `color:` that overrides the theme-aware
+// `prose dark:prose-invert` color and turns unreadable in dark theme (dark text
+// on dark background). In dark theme, drop only those `color` declarations whose
+// contrast against the dark background is too low, so `prose` supplies a readable
+// color; accent colors (green/red/...) keep enough contrast and stay untouched.
+function dropUnreadableInlineColors(html: string): string {
+  return html.replace(/([;\s"'{])color\s*:\s*([^;"'}]+)/gi, (match, pre: string, value: string) =>
+    readableOnDark(value) ? match : pre
+  )
+}
+
 export function RichTextWidget({ content, style, data }: RichTextWidgetProps) {
+  const isDark = useThemeStore(s => s.isDark)
+  const widgetColor = style?.color as string | undefined
   const customStyle: React.CSSProperties = {
     fontSize: style?.fontSize ? `${style.fontSize}px` : undefined,
-    color: style?.color as string | undefined,
+    // Drop a widget-level color that is unreadable in dark theme so prose's
+    // theme color applies instead.
+    color: widgetColor && (!isDark || readableOnDark(widgetColor)) ? widgetColor : undefined,
     backgroundColor: style?.backgroundColor as string | undefined,
     textAlign: (style?.textAlign as 'left' | 'center' | 'right') || undefined,
     padding: style?.padding ? `${style.padding}px` : undefined,
   }
 
   const rendered = data ? interpolateContent(content, data) : content
+  const themedHtml = isDark ? dropUnreadableInlineColors(rendered) : rendered
 
   return (
     <div className="h-full flex items-center p-4">
       <div
         className="prose dark:prose-invert text-sm w-full max-w-none"
         style={customStyle}
-        dangerouslySetInnerHTML={{ __html: rendered }}
+        dangerouslySetInnerHTML={{ __html: themedHtml }}
       />
     </div>
   )
