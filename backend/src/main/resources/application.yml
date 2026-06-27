@@ -25,7 +25,8 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        # No dialect on purpose: keeps the app independent of the PostgreSQL
+        # major version. Do not re-add a dialect here.
         format_sql: true
 
   flyway:
