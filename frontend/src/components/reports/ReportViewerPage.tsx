@@ -476,8 +476,8 @@ export default function ReportViewerPage() {
   if (!report) return <div className="text-center py-12 text-slate-500">{t('reports.report_not_found')}</div>
 
   const parsePosition = (pos?: string) => {
-    if (!pos) return { x: 0, y: 0, w: 12, h: 4 }
-    try { return JSON.parse(pos) } catch { return { x: 0, y: 0, w: 12, h: 4 } }
+    if (!pos) return { x: 0, y: 0, w: 24, h: 4 }
+    try { return JSON.parse(pos) } catch { return { x: 0, y: 0, w: 24, h: 4 } }
   }
 
   const parseStyle = (style?: string) => {
@@ -622,12 +622,12 @@ export default function ReportViewerPage() {
                     onTabChange={(idx) => setActiveTabByContainer(prev => ({ ...prev, [container.id]: idx }))}
                   >
                     {tabGroups.map((group, tabIdx) => (
-                      <div key={tabIdx} className="grid grid-cols-12 gap-4 pt-2" style={{ gridAutoRows: '70px' }}>
+                      <div key={tabIdx} className="grid gap-4 pt-2" style={{ gridTemplateColumns: 'repeat(24, minmax(0, 1fr))', gridAutoRows: '70px' }}>
                         {group.map(w => {
                           const pos = parsePosition(w.position)
                           const x = Math.max(0, Number(pos.x) || 0)
                           const y = Math.max(0, Number(pos.y) || 0)
-                          const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+                          const wSpan = Math.min(24, Math.max(1, Number(pos.w) || 24))
                           const hSpan = Math.max(1, Number(pos.h) || 4)
                           const styleCfg = parseStyle(w.style)
                           const zIndex = Number(styleCfg.zIndex ?? 0)
@@ -653,14 +653,14 @@ export default function ReportViewerPage() {
             {renderResult.widgets.filter(w =>
               !isWidgetHidden(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId)
             ).length > 0 && (
-              <div className="grid grid-cols-12 gap-4" style={{ gridAutoRows: '70px' }}>
+              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(24, minmax(0, 1fr))', gridAutoRows: '70px' }}>
                 {renderResult.widgets
                   .filter(w => !isWidgetHidden(w.widgetId) && !widgetIdsInTabs.has(w.widgetId) && !autoHiddenFilterIds.has(w.widgetId))
                   .map((w) => {
                     const pos = parsePosition(w.position)
                     const x = Math.max(0, Number(pos.x) || 0)
                     const y = Math.max(0, Number(pos.y) || 0)
-                    const wSpan = Math.min(12, Math.max(1, Number(pos.w) || 12))
+                    const wSpan = Math.min(24, Math.max(1, Number(pos.w) || 24))
                     const hSpan = Math.max(1, Number(pos.h) || 4)
                     const styleCfg = parseStyle(w.style)
                     const zIndex = Number(styleCfg.zIndex ?? 0)
