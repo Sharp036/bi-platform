@@ -36,6 +36,10 @@ services:
       ADMIN_USER: ${ADMIN_USER:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@datorio.local}
+      AIRFLOW_API_URL: ${AIRFLOW_API_URL:-}
+      AIRFLOW_API_USER: ${AIRFLOW_API_USER:-}
+      AIRFLOW_API_PASSWORD: ${AIRFLOW_API_PASSWORD:-}
+      AIRFLOW_ALLOWED_DAGS: ${AIRFLOW_ALLOWED_DAGS:-}
     depends_on:
       postgres:
         condition: service_healthy

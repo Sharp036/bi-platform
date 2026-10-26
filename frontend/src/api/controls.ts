@@ -31,7 +31,7 @@ export interface ParameterControlConfig {
 }
 
 export interface ButtonConfig {
-  buttonType: string     // NAVIGATE, SHOW_HIDE, FILTER, EXPORT, URL
+  buttonType: string     // NAVIGATE, SHOW_HIDE, FILTER, EXPORT, URL, RUN_JOB
   label: string
   labelActive?: string   // Label when toggled on (SHOW_HIDE)
   icon?: string
@@ -45,6 +45,18 @@ export interface ButtonConfig {
   exportFormat?: string
   url?: string
   openInNewTab?: boolean
+  // RUN_JOB: the server starts the job (Airflow DAG) with the report parameters
+  jobId?: string
+  jobParams?: string[]   // report parameters sent to the job, all when empty
+  jobUserParam?: string  // job parameter that receives the user name
+  jobEmailParam?: string // job parameter that receives the user's email when empty
+  confirmText?: string   // question shown before the start
+}
+
+export interface RunJobResponse {
+  jobId: string
+  runId: string
+  state: string | null
 }
 
 // ═══════════════════════════════════════════
@@ -89,6 +101,10 @@ export const controlsApi = {
       `/controls/parameters/${reportId}/${parameterName}/options`,
       { params: parentValues }
     ).then(r => r.data),
+
+  // RUN_JOB buttons
+  runJob: (reportId: number, widgetId: number, parameters: Record<string, unknown>) =>
+    api.post<RunJobResponse>(`/reports/${reportId}/widgets/${widgetId}/run-job`, { parameters }).then(r => r.data),
 
   searchOptions: (reportId: number, parameterName: string, q: string, column: string, limit = 50, parentValues?: Record<string, string>) =>
     api.get<{ parameterName: string; options: string[]; hasMore: boolean; columnName: string | null }>(

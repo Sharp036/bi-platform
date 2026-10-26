@@ -842,6 +842,7 @@ export default function PropertyPanel() {
                 <option value="FILTER">{t('designer.button_filter')}</option>
                 <option value="URL">{t('designer.button_url')}</option>
                 <option value="EXPORT">{t('designer.button_export')}</option>
+                <option value="RUN_JOB">{t('designer.button_run_job')}</option>
               </select>
             </Field>
             <Field label={t('designer.button_label')}>
@@ -897,6 +898,31 @@ export default function PropertyPanel() {
               <Field label="URL">
                 <input value={bc.url as string || ''} onChange={e => updateBtn({ url: e.target.value })} className="input text-sm" placeholder="https://..." />
               </Field>
+            )}
+            {bc.buttonType === 'RUN_JOB' && (
+              <>
+                <Field label={t('designer.button_job_id')}>
+                  <input value={bc.jobId as string || ''} onChange={e => updateBtn({ jobId: e.target.value.trim() })} className="input text-sm" placeholder="dag_id" />
+                  <p className="text-[10px] text-slate-400 mt-1">{t('designer.button_job_id_hint')}</p>
+                </Field>
+                <Field label={t('designer.button_job_params')}>
+                  <input
+                    value={((bc.jobParams as string[] | undefined) || []).join(', ')}
+                    onChange={e => updateBtn({ jobParams: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                    className="input text-sm"
+                    placeholder={t('designer.button_job_params_all')}
+                  />
+                </Field>
+                <Field label={t('designer.button_job_user_param')}>
+                  <input value={bc.jobUserParam as string || ''} onChange={e => updateBtn({ jobUserParam: e.target.value.trim() })} className="input text-sm" placeholder="created_by" />
+                </Field>
+                <Field label={t('designer.button_job_email_param')}>
+                  <input value={bc.jobEmailParam as string || ''} onChange={e => updateBtn({ jobEmailParam: e.target.value.trim() })} className="input text-sm" placeholder="recipients" />
+                </Field>
+                <Field label={t('designer.button_confirm_text')}>
+                  <input value={bc.confirmText as string || ''} onChange={e => updateBtn({ confirmText: e.target.value })} className="input text-sm" placeholder={t('interactive.button.run_job_confirm')} />
+                </Field>
+              </>
             )}
             {bc.buttonType === 'FILTER' && (
               <>

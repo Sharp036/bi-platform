@@ -417,6 +417,17 @@ export default function ReportViewerPage() {
     return report.parameters.filter(p => usedParamNames.has(p.name))
   }, [report, usedParamNames])
 
+  // The side panel sends only the parameters of the current tab: keep the applied
+  // values of the other report parameters, so switching tabs does not reset them.
+  const handleApplyVisible = useCallback((params: Record<string, unknown>) => {
+    const visible = new Set(visibleParameters.map(p => p.name))
+    const reportNames = new Set((report?.parameters || []).map(p => p.name))
+    const kept = Object.fromEntries(
+      Object.entries(currentParams).filter(([k]) => reportNames.has(k) && !visible.has(k))
+    )
+    return handleRender({ ...kept, ...params })
+  }, [visibleParameters, report, currentParams, handleRender])
+
   // IDs of free FILTER widgets whose filterColumn is not used on the current tab
   const autoHiddenFilterIds = useMemo(() => {
     if (!report || !usedParamNames) return new Set<number>()
@@ -551,6 +562,7 @@ export default function ReportViewerPage() {
             useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
           }}
           onWidgetDisplay={handleWidgetDisplay}
+          reportParams={currentParams}
         />
       </div>
     )
@@ -716,7 +728,7 @@ export default function ReportViewerPage() {
             <EnhancedParameterPanel
               reportId={report?.id || 0}
               parameters={visibleParameters}
-              onApply={handleRender}
+              onApply={handleApplyVisible}
               loading={rendering}
               compact
               currentParameters={currentParams}

@@ -67,6 +67,14 @@ datorio:
     max-script-length: 100000  # max characters of user code + libraries combined
     max-concurrent: 4          # max scripts running at once; excess requests rejected, not queued
   
+  # ── Airflow (RUN_JOB buttons start DAG runs through the REST API) ──
+  airflow:
+    base-url: ${AIRFLOW_API_URL:}              # e.g. http://host:5080, empty = buttons disabled
+    username: ${AIRFLOW_API_USER:}
+    password: ${AIRFLOW_API_PASSWORD:}
+    allowed-dags: ${AIRFLOW_ALLOWED_DAGS:}     # comma-separated DAG ids the buttons may start
+    timeout-seconds: 30
+
   cache:
       enabled: true
       query-ttl-seconds: 300
