@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ButtonConfig } from '@/api/controls'
+import { ButtonConfig, controlsApi } from '@/api/controls'
 import { exportApi } from '@/api/export'
 import {
-  ArrowRight, Eye, EyeOff, Filter, Download, ExternalLink, MousePointerClick
+  ArrowRight, Eye, EyeOff, Filter, Download, ExternalLink, MousePointerClick, Play, Loader2
 } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
@@ -15,6 +15,7 @@ const iconMap: Record<string, typeof ArrowRight> = {
   filter: Filter,
   export: Download,
   url: ExternalLink,
+  run_job: Play,
 }
 
 const sizeClasses: Record<string, string> = {
@@ -26,16 +27,34 @@ const sizeClasses: Record<string, string> = {
 interface ButtonWidgetProps {
   config: ButtonConfig
   reportId: number
+  widgetId?: number
+  // Applied parameter values of the report, sent by RUN_JOB buttons
+  reportParams?: Record<string, unknown>
   onToggleWidgets?: (widgetIds: number[]) => void
   onApplyFilter?: (field: string, value: string) => void
 }
 
 export default function ButtonWidget({
-  config, reportId, onToggleWidgets, onApplyFilter
+  config, reportId, widgetId, reportParams, onToggleWidgets, onApplyFilter
 }: ButtonWidgetProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [toggled, setToggled] = useState(false)
+  const [running, setRunning] = useState(false)
+
+  const runJob = () => {
+    if (running) return
+    if (!reportId || !widgetId) {
+      toast.error(t('interactive.button.run_job_unavailable'))
+      return
+    }
+    if (!window.confirm(config.confirmText || t('interactive.button.run_job_confirm'))) return
+    setRunning(true)
+    controlsApi.runJob(reportId, widgetId, reportParams || {})
+      .then(res => toast.success(t('interactive.button.run_job_started', { runId: res.runId }), { duration: 8000 }))
+      .catch(e => toast.error(e?.response?.data?.message || t('interactive.button.run_job_failed'), { duration: 10000 }))
+      .finally(() => setRunning(false))
+  }
 
   const handleClick = () => {
     const btnType = config.buttonType || 'SHOW_HIDE'
@@ -70,6 +89,10 @@ export default function ButtonWidget({
         }
         break
 
+      case 'RUN_JOB':
+        runJob()
+        break
+
       case 'URL':
         if (config.url) {
           if (config.openInNewTab !== false) {
@@ -82,7 +105,7 @@ export default function ButtonWidget({
     }
   }
 
-  const Icon = iconMap[(config.buttonType || 'show_hide').toLowerCase()] || MousePointerClick
+  const Icon = running ? Loader2 : (iconMap[(config.buttonType || 'show_hide').toLowerCase()] || MousePointerClick)
   const size = sizeClasses[config.size || 'medium'] || sizeClasses.medium
   const colorClasses: Record<string, string> = {
     brand: 'bg-brand-500 hover:bg-brand-600 text-white',
@@ -97,14 +120,15 @@ export default function ButtonWidget({
     <div className="h-full flex items-center justify-center">
       <button
         onClick={handleClick}
+        disabled={running}
         className={clsx(
           'inline-flex items-center gap-2 rounded-lg font-medium transition-all',
-          'shadow-sm hover:shadow-md active:scale-[0.98]',
+          'shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait',
           size,
           colorClass
         )}
       >
-        <Icon className="w-4 h-4" />
+        <Icon className={clsx('w-4 h-4', running && 'animate-spin')} />
         {toggled && config.labelActive ? config.labelActive : (config.label || t('interactive.button.default_label'))}
       </button>
     </div>

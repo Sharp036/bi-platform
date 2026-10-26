@@ -26,6 +26,8 @@ interface Props {
   annotations?: AnnotationItem[]
   tooltipConfig?: TooltipConfigItem
   onWidgetDisplay?: (widgetId: number, state: { columns: string[]; rows: Record<string, unknown>[] }) => void
+  // Applied parameter values of the report, used by RUN_JOB buttons
+  reportParams?: Record<string, unknown>
 }
 
 // Placeholder syntax: {columnName} or {columnName:format} inside title strings.
@@ -69,6 +71,7 @@ export default function WidgetRenderer({
   reportId, onToggleWidgets, onApplyFilter,
   annotations, tooltipConfig,
   onWidgetDisplay,
+  reportParams,
 }: Props) {
   const { t } = useTranslation()
 
@@ -94,6 +97,8 @@ export default function WidgetRenderer({
       <ButtonWidget
         config={btnConfig}
         reportId={reportId || 0}
+        widgetId={widget.widgetId}
+        reportParams={reportParams}
         onToggleWidgets={onToggleWidgets}
         onApplyFilter={onApplyFilter}
       />

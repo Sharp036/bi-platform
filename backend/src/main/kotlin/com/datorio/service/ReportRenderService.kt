@@ -158,18 +158,7 @@ class ReportRenderService(
         return resolved
     }
 
-    private fun resolveDefaultValue(param: ReportParameter): Any? {
-        val raw = param.defaultValue ?: return null
-        val token = raw.trim().lowercase()
-        val today = LocalDate.now()
-        return when (token) {
-            "today", "__today__", "${'$'}{today}" -> today.toString()
-            "start_of_year", "__start_of_year__", "${'$'}{start_of_year}" -> today.withDayOfYear(1).toString()
-            "start_of_month", "__start_of_month__", "${'$'}{start_of_month}" -> today.withDayOfMonth(1).toString()
-            "end_of_year", "__end_of_year__", "${'$'}{end_of_year}" -> today.withMonth(12).withDayOfMonth(31).toString()
-            else -> raw
-        }
-    }
+    private fun resolveDefaultValue(param: ReportParameter): Any? = ParameterDefaults.resolve(param.defaultValue)
 
     companion object {
         // Widgets that never have a data source attached. TEXT used to be in

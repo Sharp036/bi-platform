@@ -70,7 +70,7 @@ data class ParameterOptionsResponse(
 // ═══════════════════════════════════════════
 
 data class ButtonConfig(
-    val buttonType: String = "NAVIGATE",    // NAVIGATE, SHOW_HIDE, FILTER, EXPORT, URL
+    val buttonType: String = "NAVIGATE",    // NAVIGATE, SHOW_HIDE, FILTER, EXPORT, URL, RUN_JOB
     val label: String = "Click",
     val icon: String? = null,
     val color: String? = null,
@@ -87,5 +87,11 @@ data class ButtonConfig(
     val exportFormat: String? = null,       // PDF, EXCEL, CSV
     // URL
     val url: String? = null,
-    val openInNewTab: Boolean = true
+    val openInNewTab: Boolean = true,
+    // RUN_JOB (see JobRunService)
+    val jobId: String? = null,               // Airflow DAG id, must be in datorio.airflow.allowed-dags
+    val jobParams: List<String> = emptyList(), // report parameters sent to the job, all when empty
+    val jobUserParam: String? = null,        // job parameter that receives the user name
+    val jobEmailParam: String? = null,       // job parameter that receives the user's email when empty
+    val confirmText: String? = null          // question shown before the start
 )
