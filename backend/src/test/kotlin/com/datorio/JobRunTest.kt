@@ -168,6 +168,81 @@ class JobRunTest {
             assertFalse(AirflowClient("", "", "", 5).isConfigured())
             assertThrows<IllegalStateException> { AirflowClient("", "", "", 5).triggerDagRun("build_x", emptyMap()) }
         }
+
+        @Test
+        fun `reads the run and its tasks with the run id encoded`() {
+            val paths = CopyOnWriteArrayList<String>()
+            val s = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+            s.createContext("/auth/token") { ex ->
+                val out = """{"access_token": "t1"}""".toByteArray()
+                ex.sendResponseHeaders(201, out.size.toLong())
+                ex.responseBody.use { it.write(out) }
+            }
+            s.createContext("/api/v2/dags/build_x/dagRuns/") { ex ->
+                paths.add(ex.requestURI.rawPath)
+                val body = if (ex.requestURI.rawPath.endsWith("/taskInstances")) {
+                    """{"task_instances": [
+                        {"task_id": "send_files", "task_display_name": "Files", "state": "running", "start_date": "2026-10-27T18:36:00Z", "end_date": null},
+                        {"task_id": "prepare_run", "task_display_name": "prepare_run", "state": "success", "start_date": "2026-10-27T18:35:00Z", "end_date": "2026-10-27T18:35:10Z"},
+                        {"task_id": "finish_run", "task_display_name": "", "state": null, "start_date": null, "end_date": null}
+                    ], "total_entries": 3}"""
+                } else {
+                    """{"dag_run_id": "manual__x", "state": "running", "queued_at": "2026-10-27T18:34:47Z", "start_date": "2026-10-27T18:34:50Z", "end_date": null}"""
+                }
+                val out = body.toByteArray()
+                ex.sendResponseHeaders(200, out.size.toLong())
+                ex.responseBody.use { it.write(out) }
+            }
+            s.start()
+            server = s
+            val status = AirflowClient("http://127.0.0.1:${s.address.port}", "svc", "secret", 5)
+                .getDagRunStatus("build_x", "manual__2026-10-27T18:34:47.579094+00:00")
+            assertEquals("running", status.state)
+            assertEquals(listOf("Files", "prepare_run", "finish_run"), status.tasks.map { it.label })
+            assertEquals(
+                "/api/v2/dags/build_x/dagRuns/manual__2026-10-27T18%3A34%3A47.579094%2B00%3A00",
+                paths[0]
+            )
+            assertTrue(paths[1].endsWith("%2B00%3A00/taskInstances"))
+        }
+    }
+
+    @Nested
+    inner class Progress {
+
+        private fun task(id: String, state: String?, start: String?) = TaskInstanceInfo(id, id, state, start, null)
+
+        @Test
+        fun `running run counts done steps and names the current one`() {
+            val run = DagRunStatus("r1", "running", null, "t0", null, listOf(
+                task("send_files", null, null),
+                task("build_audience", "running", "2026-10-27T18:35:10Z"),
+                task("prepare_run", "success", "2026-10-27T18:35:00Z"),
+                task("mark_failed", null, null)
+            ))
+            val s = JobRunService.toStatus("build_x", run)
+            assertEquals(listOf("prepare_run", "build_audience", "send_files", "mark_failed"), s.tasks.map { it.taskId })
+            assertEquals(1, s.doneTasks)
+            assertEquals(4, s.totalTasks)
+            assertEquals("build_audience", s.currentTask)
+            assertFalse(s.finished)
+        }
+
+        @Test
+        fun `finished runs report success or the failed step`() {
+            val ok = JobRunService.toStatus("build_x", DagRunStatus("r1", "success", null, null, null, listOf(
+                task("prepare_run", "success", "a"), task("mark_failed", "skipped", null)
+            )))
+            assertTrue(ok.finished && ok.succeeded)
+            assertEquals(2, ok.doneTasks)
+            val failed = JobRunService.toStatus("build_x", DagRunStatus("r2", "failed", null, null, null, listOf(
+                task("prepare_run", "failed", "a"), task("build_audience", "upstream_failed", null),
+                task("mark_failed", "success", "b")
+            )))
+            assertTrue(failed.finished && !failed.succeeded)
+            assertEquals("prepare_run", failed.failedTask)
+            assertEquals(3, failed.doneTasks)
+        }
     }
 
     @Nested
@@ -225,6 +300,10 @@ class JobRunTest {
 
             whenever(widgetRepo.findById(7)).thenReturn(Optional.of(widget(runJob)))
             assertThrows<IllegalArgumentException> { service(allowed = "other_dag").runJob(5, 7, emptyMap(), "ivanov") }
+            assertThrows<IllegalArgumentException> { service(allowed = "other_dag").getJobStatus(5, 7, "manual__1") }
+
+            whenever(widgetRepo.findById(7)).thenReturn(Optional.of(widget("""{"buttonType": "URL"}""")))
+            assertThrows<IllegalArgumentException> { service().getJobStatus(5, 7, "manual__1") }
 
             verifyNoInteractions(client)
         }

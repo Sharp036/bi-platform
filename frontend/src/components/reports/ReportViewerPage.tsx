@@ -563,6 +563,7 @@ export default function ReportViewerPage() {
           }}
           onWidgetDisplay={handleWidgetDisplay}
           reportParams={currentParams}
+          onJobFinished={() => { handleRender() }}
         />
       </div>
     )
