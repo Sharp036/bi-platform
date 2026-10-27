@@ -1,5 +1,6 @@
 package com.datorio.controller
 
+import com.datorio.model.dto.JobStatusResponse
 import com.datorio.model.dto.RunJobRequest
 import com.datorio.model.dto.RunJobResponse
 import com.datorio.repository.UserRepository
@@ -11,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
-/** RUN_JOB buttons: start the job of a button with the parameter values of the report. */
+/** RUN_JOB buttons: start the job of a button with the parameter values of the report, follow its progress. */
 @RestController
 @RequestMapping("/reports")
 class JobRunController(
@@ -28,16 +29,29 @@ class JobRunController(
         @RequestBody(required = false) request: RunJobRequest?,
         auth: Authentication
     ): ResponseEntity<RunJobResponse> {
-        // Same access rule as opening the report.
-        val canSeeAll = auth.authorities.any { it.authority in listOf("REPORT_EDIT", "SYSTEM_ADMIN") }
-        if (!canSeeAll) {
-            val userId = userRepository.findByUsername(auth.name).map { it.id }.orElse(0L)
-            if (!objectPermissionService.canAccess("REPORT", reportId, userId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-            }
-        }
+        if (!canOpen(reportId, auth)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         return ResponseEntity.ok(
             jobRunService.runJob(reportId, widgetId, request?.parameters ?: emptyMap(), auth.name)
         )
+    }
+
+    /** The run id goes as a query parameter: Airflow run ids contain ":" and "+". */
+    @GetMapping("/{reportId}/widgets/{widgetId}/run-job/status")
+    @PreAuthorize("hasAuthority('REPORT_VIEW')")
+    fun jobStatus(
+        @PathVariable reportId: Long,
+        @PathVariable widgetId: Long,
+        @RequestParam runId: String,
+        auth: Authentication
+    ): ResponseEntity<JobStatusResponse> {
+        if (!canOpen(reportId, auth)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        return ResponseEntity.ok(jobRunService.getJobStatus(reportId, widgetId, runId))
+    }
+
+    /** Same access rule as opening the report. */
+    private fun canOpen(reportId: Long, auth: Authentication): Boolean {
+        if (auth.authorities.any { it.authority in listOf("REPORT_EDIT", "SYSTEM_ADMIN") }) return true
+        val userId = userRepository.findByUsername(auth.name).map { it.id }.orElse(0L)
+        return objectPermissionService.canAccess("REPORT", reportId, userId)
     }
 }

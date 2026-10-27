@@ -28,6 +28,8 @@ interface Props {
   onWidgetDisplay?: (widgetId: number, state: { columns: string[]; rows: Record<string, unknown>[] }) => void
   // Applied parameter values of the report, used by RUN_JOB buttons
   reportParams?: Record<string, unknown>
+  // Called when the job of a RUN_JOB button is over
+  onJobFinished?: () => void
 }
 
 // Placeholder syntax: {columnName} or {columnName:format} inside title strings.
@@ -72,6 +74,7 @@ export default function WidgetRenderer({
   annotations, tooltipConfig,
   onWidgetDisplay,
   reportParams,
+  onJobFinished,
 }: Props) {
   const { t } = useTranslation()
 
@@ -99,6 +102,7 @@ export default function WidgetRenderer({
         reportId={reportId || 0}
         widgetId={widget.widgetId}
         reportParams={reportParams}
+        onJobFinished={onJobFinished}
         onToggleWidgets={onToggleWidgets}
         onApplyFilter={onApplyFilter}
       />

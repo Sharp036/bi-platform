@@ -17,6 +17,25 @@ import java.time.Duration
 /** A DAG run accepted by Airflow. */
 data class DagRunInfo(val runId: String, val state: String?)
 
+/** One task instance of a DAG run; label is the task display name, or the task id. */
+data class TaskInstanceInfo(
+    val taskId: String,
+    val label: String,
+    val state: String?,
+    val startDate: String?,
+    val endDate: String?
+)
+
+/** A DAG run with its task instances, as Airflow reports them. */
+data class DagRunStatus(
+    val runId: String,
+    val state: String?,
+    val queuedAt: String?,
+    val startDate: String?,
+    val endDate: String?,
+    val tasks: List<TaskInstanceInfo>
+)
+
 /**
  * Minimal client of the Airflow 3 REST API used by the RUN_JOB buttons: gets a JWT from
  * POST /auth/token with a service account and triggers DAG runs with
@@ -75,6 +94,55 @@ class AirflowClient(
         }
         throw IllegalStateException("Airflow error $status on the run of $dagId: $detail")
     }
+
+    /** State of a DAG run and of its task instances (GET dagRuns/{run_id} and .../taskInstances). */
+    fun getDagRunStatus(dagId: String, runId: String): DagRunStatus {
+        check(isConfigured()) { "Airflow connection is not configured: set datorio.airflow.base-url, username and password" }
+        val runPath = "/api/v2/dags/" + URLEncoder.encode(dagId, StandardCharsets.UTF_8) +
+            "/dagRuns/" + URLEncoder.encode(runId, StandardCharsets.UTF_8)
+        val run = getJson(runPath, "the run $runId of $dagId")
+        val instances = getJson("$runPath/taskInstances?limit=100", "the tasks of the run $runId of $dagId")
+        @Suppress("UNCHECKED_CAST")
+        val tasks = (instances["task_instances"] as? List<Map<String, Any?>>).orEmpty().map { ti ->
+            val taskId = ti["task_id"]?.toString().orEmpty()
+            TaskInstanceInfo(
+                taskId = taskId,
+                label = ti["task_display_name"]?.toString()?.ifBlank { null } ?: taskId,
+                state = ti["state"]?.toString(),
+                startDate = ti["start_date"]?.toString(),
+                endDate = ti["end_date"]?.toString()
+            )
+        }
+        return DagRunStatus(
+            runId = runId,
+            state = run["state"]?.toString(),
+            queuedAt = run["queued_at"]?.toString(),
+            startDate = run["start_date"]?.toString(),
+            endDate = run["end_date"]?.toString(),
+            tasks = tasks
+        )
+    }
+
+    private fun getJson(path: String, what: String): Map<String, Any?> {
+        var response = get(path, bearer(refresh = false))
+        if (response.statusCode() == 401) {
+            response = get(path, bearer(refresh = true))
+        }
+        val status = response.statusCode()
+        if (status in 200..299) return objectMapper.readValue(response.body())
+        val detail = detail(response.body())
+        if (status == 404) throw NoSuchElementException("Airflow does not know $what: $detail")
+        if (status in 400..499) throw IllegalArgumentException("Airflow refused to show $what ($status): $detail")
+        throw IllegalStateException("Airflow error $status on $what: $detail")
+    }
+
+    private fun get(path: String, bearer: String): HttpResponse<String> = send(
+        HttpRequest.newBuilder(URI.create(baseUrl + path))
+            .timeout(timeout)
+            .header("Authorization", "Bearer $bearer")
+            .GET()
+            .build()
+    )
 
     private fun bearer(refresh: Boolean): String {
         val current = token

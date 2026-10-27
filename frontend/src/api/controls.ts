@@ -59,6 +59,31 @@ export interface RunJobResponse {
   state: string | null
 }
 
+export interface JobTaskStatus {
+  taskId: string
+  label: string
+  state: string | null
+  startDate: string | null
+  endDate: string | null
+}
+
+// Progress of a RUN_JOB run: steps in start order, steps over, current and failed step
+export interface JobStatusResponse {
+  jobId: string
+  runId: string
+  state: string | null
+  queuedAt: string | null
+  startDate: string | null
+  endDate: string | null
+  tasks: JobTaskStatus[]
+  doneTasks: number
+  totalTasks: number
+  currentTask: string | null
+  failedTask: string | null
+  finished: boolean
+  succeeded: boolean
+}
+
 // ═══════════════════════════════════════════
 //  API
 // ═══════════════════════════════════════════
@@ -105,6 +130,10 @@ export const controlsApi = {
   // RUN_JOB buttons
   runJob: (reportId: number, widgetId: number, parameters: Record<string, unknown>) =>
     api.post<RunJobResponse>(`/reports/${reportId}/widgets/${widgetId}/run-job`, { parameters }).then(r => r.data),
+
+  // Run ids contain ':' and '+', so the id goes as a query parameter
+  getJobStatus: (reportId: number, widgetId: number, runId: string) =>
+    api.get<JobStatusResponse>(`/reports/${reportId}/widgets/${widgetId}/run-job/status`, { params: { runId } }).then(r => r.data),
 
   searchOptions: (reportId: number, parameterName: string, q: string, column: string, limit = 50, parentValues?: Record<string, string>) =>
     api.get<{ parameterName: string; options: string[]; hasMore: boolean; columnName: string | null }>(
