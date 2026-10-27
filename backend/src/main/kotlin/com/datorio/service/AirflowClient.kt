@@ -38,7 +38,12 @@ class AirflowClient(
     private val objectMapper = jacksonObjectMapper()
     private val baseUrl = baseUrl.trim().trimEnd('/')
     private val timeout = Duration.ofSeconds(timeoutSeconds)
-    private val http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
+    // HTTP/1.1 only: the default client asks for an h2c upgrade, and the uvicorn server of Airflow
+    // (httptools parser) then drops the request body and answers 400 "Invalid HTTP request received".
+    private val http = HttpClient.newBuilder()
+        .version(HttpClient.Version.HTTP_1_1)
+        .connectTimeout(Duration.ofSeconds(10))
+        .build()
 
     @Volatile
     private var token: String? = null
