@@ -184,6 +184,23 @@ export default function ReportViewerPage() {
     if (report && currentReportId) handleRender()
   }, [report, currentReportId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Table setting chartConfig.clickParams = [{ column, param }]: a row click puts the row values
+  // into report parameters and renders the report again with them.
+  const applyClickParams = useCallback((chartConfig: string | undefined, row: Record<string, unknown>) => {
+    let mappings: Array<{ column?: string; param?: string }> = []
+    try {
+      const cfg = JSON.parse(chartConfig || '{}') as { clickParams?: Array<{ column?: string; param?: string }> }
+      mappings = Array.isArray(cfg.clickParams) ? cfg.clickParams : []
+    } catch { return }
+    const overrides: Record<string, unknown> = {}
+    for (const m of mappings) {
+      if (!m?.column || !m?.param) continue
+      const value = row[m.column]
+      if (value !== undefined && value !== null && value !== '') overrides[m.param] = String(value)
+    }
+    if (Object.keys(overrides).length > 0) handleRender({ ...currentParams, ...overrides })
+  }, [currentParams, handleRender])
+
   useAutoRefresh(() => handleRender(), autoRefresh)
 
   const handleDrillDown = useCallback(async (
@@ -559,6 +576,7 @@ export default function ReportViewerPage() {
           onToggleWidgets={handleToggleWidgets}
           onApplyFilter={handleApplyFilter}
           onChartClick={(data) => {
+            applyClickParams(w.chartConfig, data)
             useActionStore.getState().triggerAction(w.widgetId, 'CLICK', data)
           }}
           onWidgetDisplay={handleWidgetDisplay}
