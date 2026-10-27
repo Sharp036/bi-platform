@@ -270,8 +270,11 @@ export function RichTextWidget({ content, style, data }: RichTextWidgetProps) {
   const rendered = data ? interpolateContent(content, data) : content
   const themedHtml = isDark ? dropUnreadableInlineColors(rendered) : rendered
 
+  // style.verticalAlign = 'top': long texts start at the top and scroll inside the widget.
+  const alignTop = style?.verticalAlign === 'top'
+
   return (
-    <div className="h-full flex items-center p-4">
+    <div className={alignTop ? 'h-full flex items-start overflow-auto p-4' : 'h-full flex items-center p-4'}>
       <div
         className="prose dark:prose-invert text-sm w-full max-w-none"
         style={customStyle}

@@ -32,6 +32,19 @@ export default function TableConfigOptions({ widget, cc, update, availableCols, 
     }
   }
 
+  // Row click -> report parameter (chartConfig.clickParams, one mapping in the designer).
+  const clickParams = (cc.clickParams as Array<{ column?: string; param?: string }> | undefined) || []
+  const clickColumn = clickParams[0]?.column || ''
+  const clickParam = clickParams[0]?.param || ''
+  const setClickParam = (column: string, param: string) => {
+    if (!column && !param) {
+      const { clickParams: _, ...rest } = cc
+      update({ chartConfig: rest })
+    } else {
+      update({ chartConfig: { ...cc, clickParams: [{ column, param }] } })
+    }
+  }
+
   const moveCol = (col: string, dir: -1 | 1) => {
     const cols = isAllVisible ? [...availableCols] : [...visibleCols]
     const idx = cols.indexOf(col)
@@ -430,6 +443,22 @@ export default function TableConfigOptions({ widget, cc, update, availableCols, 
             </div>
           )
         })()}
+      </Field>
+
+      <Field label={t('designer.table_click_param')}>
+        <div className="flex gap-1">
+          <select value={clickColumn} onChange={e => setClickParam(e.target.value, clickParam)} className="input text-xs flex-1">
+            <option value="">{t('designer.table_click_param_column')}</option>
+            {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <input
+            value={clickParam}
+            onChange={e => setClickParam(clickColumn, e.target.value.trim())}
+            className="input text-xs flex-1"
+            placeholder={t('designer.table_click_param_name')}
+          />
+        </div>
+        <p className="text-[10px] text-slate-400 mt-1">{t('designer.table_click_param_hint')}</p>
       </Field>
     </>
   )

@@ -142,6 +142,22 @@ export default function EnhancedParameterPanel({
     setValues(init)
   }, [paramKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Values applied outside the panel (a table row click) replace the shown ones.
+  useEffect(() => {
+    if (!currentParameters) return
+    setValues(prev => {
+      let changed = false
+      const next = { ...prev }
+      parameters.forEach(p => {
+        const v = currentParameters[p.name]
+        if (v === undefined || v === null) return
+        const s = String(v)
+        if (s !== prev[p.name]) { next[p.name] = s; changed = true }
+      })
+      return changed ? next : prev
+    })
+  }, [currentParameters]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Load dropdown options whenever controls are ready, visible parameters change,
   // or the parent bumps refreshKey (e.g. via the Refresh button after data changed).
   //
