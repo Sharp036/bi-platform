@@ -96,6 +96,7 @@ class JobRunTest {
         private var server: HttpServer? = null
         private val tokens = CopyOnWriteArrayList<String>()
         private val runs = CopyOnWriteArrayList<Pair<String?, String>>()
+        private val upgrades = CopyOnWriteArrayList<String?>()
 
         @AfterEach
         fun stop() {
@@ -105,6 +106,7 @@ class JobRunTest {
         private fun start(runStatus: () -> Int, runBody: String): String {
             val s = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
             s.createContext("/auth/token") { ex ->
+                upgrades.add(ex.requestHeaders.getFirst("Upgrade"))
                 val token = "t${tokens.size + 1}"
                 tokens.add(ex.requestBody.readBytes().decodeToString())
                 val out = """{"access_token": "$token"}""".toByteArray()
@@ -112,6 +114,7 @@ class JobRunTest {
                 ex.responseBody.use { it.write(out) }
             }
             s.createContext("/api/v2/dags/build_x/dagRuns") { ex ->
+                upgrades.add(ex.requestHeaders.getFirst("Upgrade"))
                 runs.add(ex.requestHeaders.getFirst("Authorization") to ex.requestBody.readBytes().decodeToString())
                 val status = runStatus()
                 val out = (if (status == 200) runBody else """{"detail": "bad conf"}""").toByteArray()
@@ -137,6 +140,8 @@ class JobRunTest {
             val sent: Map<String, Any?> = mapper.readValue(body)
             assertTrue(sent.containsKey("logical_date") && sent["logical_date"] == null)
             assertEquals(mapOf("networks" to listOf("RBT")), sent["conf"])
+            // No h2c upgrade: the uvicorn server of Airflow loses the body of such a request.
+            assertEquals(listOf<String?>(null, null, null), upgrades.toList())
         }
 
         @Test

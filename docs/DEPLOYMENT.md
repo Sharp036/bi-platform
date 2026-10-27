@@ -42,6 +42,11 @@ services:
       ADMIN_USER: ${ADMIN_USER}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
+      # Airflow REST API for the RUN_JOB buttons; leave empty to disable the buttons
+      AIRFLOW_API_URL: ${AIRFLOW_API_URL}
+      AIRFLOW_API_USER: ${AIRFLOW_API_USER}
+      AIRFLOW_API_PASSWORD: ${AIRFLOW_API_PASSWORD}
+      AIRFLOW_ALLOWED_DAGS: ${AIRFLOW_ALLOWED_DAGS}
     depends_on:
       datorio-postgres:
         condition: service_healthy
@@ -73,7 +78,25 @@ JWT_SECRET=your_random_secret_at_least_32_chars
 ADMIN_USER=admin
 ADMIN_PASSWORD=your_admin_password
 ADMIN_EMAIL=admin@example.com
+AIRFLOW_API_URL=http://airflow-host:5080
+AIRFLOW_API_USER=datorio_service
+AIRFLOW_API_PASSWORD=your_airflow_password
+AIRFLOW_ALLOWED_DAGS=build_sms_push_audience
 ```
+
+`AIRFLOW_*` configure the RUN_JOB report buttons, which start an Airflow DAG with the
+report parameters through the Airflow 3 REST API (`POST /auth/token`, then
+`POST /api/v2/dags/{dag_id}/dagRuns`):
+
+- `AIRFLOW_API_URL` - the Airflow API server address, the same as `AIRFLOW__API__BASE_URL`
+  of Airflow; it must be reachable from the `datorio` container.
+- `AIRFLOW_API_USER`, `AIRFLOW_API_PASSWORD` - a service account of Airflow whose role may
+  create DAG runs (the `User` role of the FAB auth manager is enough).
+- `AIRFLOW_ALLOWED_DAGS` - comma-separated DAG ids that the buttons may start; a button with
+  any other DAG id is refused before Airflow is called.
+
+The values are read at startup: after changing them, recreate the container
+(`docker-compose -f docker-compose.prod.yml up -d`, or rerun the CI deploy job).
 
 ### 2. Start the application
 
@@ -193,7 +216,7 @@ exposed to untrusted users without OS-level containment. Add the following to th
 
 Network egress: the script sandbox already blocks sockets, but as defense in
 depth the container should have **no outbound network access** except to its
-PostgreSQL and analytical data sources. Put `datorio` on an internal Docker
+PostgreSQL and analytical data sources, and to the Airflow API when RUN_JOB buttons are used. Put `datorio` on an internal Docker
 network and allow only the required egress, or enforce egress rules at the host
 firewall.
 
