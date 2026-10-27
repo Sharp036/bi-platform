@@ -86,19 +86,20 @@
 }
 
 /* ─── Table ─── */
+/* Scoped to the admin page: bare table selectors would restyle every table of the app (report tables included). */
 .table-container {
   overflow-x: auto;
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 8px;
 }
 
-table {
+.admin-page table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
 
-th {
+.admin-page th {
   text-align: left;
   padding: 10px 12px;
   background: var(--bg-secondary, #f8fafc);
@@ -110,17 +111,17 @@ th {
   border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
 
-td {
+.admin-page td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-color, #f1f5f9);
   color: var(--text-primary, #1e293b);
 }
 
-tr:hover td {
+.admin-page tr:hover td {
   background: var(--bg-hover, #f8fafc);
 }
 
-tr.row-inactive td {
+.admin-page tr.row-inactive td {
   opacity: 0.5;
 }
 

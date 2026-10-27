@@ -413,8 +413,10 @@ export default function TableWidget({ data, title, chartConfig, onRowClick, clic
                   key={safeePage * pageSize + i}
                   onClick={onRowClick ? () => onRowClick(row as Record<string, unknown>) : undefined}
                   style={rowBg ? { backgroundColor: rowBg } : undefined}
-                  className={`hover:bg-surface-50 dark:hover:bg-dark-surface-50/50 transition-colors ${
-                    clickable ? 'cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-900/20' : ''
+                  className={`transition-colors ${
+                    clickable
+                      ? 'cursor-pointer hover:bg-brand-100 dark:hover:bg-brand-900/40'
+                      : 'hover:bg-surface-50 dark:hover:bg-dark-surface-50/50'
                   }`}
                 >
                   {visibleCols.map((col) => {
