@@ -1,3 +1,4 @@
+import axios from 'axios'
 import api from './client'
 import type { Report, ReportListItem, PageResponse, RenderReportResponse, Schedule } from '@/types'
 
@@ -29,8 +30,14 @@ export const reportApi = {
   duplicate: (id: number, name?: string) =>
     api.post<Report>(`/reports/${id}/duplicate`, null, { params: { name } }).then(r => r.data),
 
-  render: (id: number, parameters?: Record<string, unknown>) =>
-    api.post<RenderReportResponse>(`/reports/${id}/render`, { parameters }).then(r => r.data),
+  render: (id: number, parameters?: Record<string, unknown>) => {
+    const send = () => api.post<RenderReportResponse>(`/reports/${id}/render`, { parameters }).then(r => r.data)
+    // A render only reads data: send it once more when the connection drops before the response arrives
+    return send().catch((err: unknown) => {
+      if (axios.isAxiosError(err) && err.code === 'ERR_NETWORK') return send()
+      throw err
+    })
+  },
 
   // Widgets
   getWidgets: (reportId: number) =>
