@@ -159,6 +159,7 @@
   "reports.drill_failed": "ניווט הקידוח נכשל",
   "reports.failed_to_navigate": "הניווט חזרה נכשל",
   "reports.failed_to_render": "עיבוד הדוח נכשל",
+  "reports.widget_failed_to_load": "טעינת נתוני הווידג'ט נכשלה",
   "reports.snapshot": "צילום מצב",
   "reports.snapshot_created": "צילום מצב נוצר",
   "reports.auto_refresh": "רענון אוטומטי",

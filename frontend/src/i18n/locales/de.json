@@ -159,6 +159,7 @@
   "reports.drill_failed": "Drill-Down-Navigation fehlgeschlagen",
   "reports.failed_to_navigate": "Navigation zurück fehlgeschlagen",
   "reports.failed_to_render": "Bericht konnte nicht gerendert werden",
+  "reports.widget_failed_to_load": "Widget-Daten konnten nicht geladen werden",
   "reports.snapshot": "Schnappschuss",
   "reports.snapshot_created": "Schnappschuss erstellt",
   "reports.auto_refresh": "Automatische Aktualisierung",

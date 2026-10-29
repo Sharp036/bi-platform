@@ -159,6 +159,7 @@
   "reports.drill_failed": "ड्रिल-डाउन नेविगेशन विफल",
   "reports.failed_to_navigate": "वापस नेविगेट करने में विफल",
   "reports.failed_to_render": "रिपोर्ट रेंडर करने में विफल",
+  "reports.widget_failed_to_load": "विजेट डेटा लोड करने में विफल",
   "reports.snapshot": "स्नैपशॉट",
   "reports.snapshot_created": "स्नैपशॉट बनाया गया",
   "reports.auto_refresh": "ऑटो रीफ़्रेश",

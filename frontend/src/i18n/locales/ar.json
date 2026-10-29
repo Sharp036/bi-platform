@@ -159,6 +159,7 @@
   "reports.drill_failed": "فشل التنقل التفصيلي",
   "reports.failed_to_navigate": "فشل الرجوع",
   "reports.failed_to_render": "فشل عرض التقرير",
+  "reports.widget_failed_to_load": "فشل تحميل بيانات عنصر الواجهة",
   "reports.snapshot": "لقطة",
   "reports.snapshot_created": "تم إنشاء اللقطة",
   "reports.auto_refresh": "تحديث تلقائي",

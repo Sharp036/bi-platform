@@ -159,6 +159,7 @@
   "reports.drill_failed": "Detay navigasyonu başarısız",
   "reports.failed_to_navigate": "Geri dönüş başarısız",
   "reports.failed_to_render": "Rapor işlenemedi",
+  "reports.widget_failed_to_load": "Bileşen verileri yüklenemedi",
   "reports.snapshot": "Anlık Görüntü",
   "reports.snapshot_created": "Anlık görüntü oluşturuldu",
   "reports.auto_refresh": "Otomatik yenileme",

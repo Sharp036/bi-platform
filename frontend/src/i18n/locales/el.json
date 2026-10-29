@@ -159,6 +159,7 @@
   "reports.drill_failed": "Η πλοήγηση ανάλυσης απέτυχε",
   "reports.failed_to_navigate": "Η πλοήγηση πίσω απέτυχε",
   "reports.failed_to_render": "Η απόδοση αναφοράς απέτυχε",
+  "reports.widget_failed_to_load": "Η φόρτωση δεδομένων στοιχείου απέτυχε",
   "reports.snapshot": "Στιγμιότυπο",
   "reports.snapshot_created": "Στιγμιότυπο δημιουργήθηκε",
   "reports.auto_refresh": "Αυτόματη ανανέωση",

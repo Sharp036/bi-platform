@@ -159,6 +159,7 @@
   "reports.drill_failed": "Điều hướng đi sâu thất bại",
   "reports.failed_to_navigate": "Không thể quay lại",
   "reports.failed_to_render": "Không thể hiển thị báo cáo",
+  "reports.widget_failed_to_load": "Không thể tải dữ liệu widget",
   "reports.snapshot": "Ảnh chụp nhanh",
   "reports.snapshot_created": "Đã tạo ảnh chụp nhanh",
   "reports.auto_refresh": "Tự động làm mới",

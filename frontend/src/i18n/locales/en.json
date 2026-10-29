@@ -176,6 +176,7 @@
   "reports.drill_failed": "Drill-down navigation failed",
   "reports.failed_to_navigate": "Failed to navigate back",
   "reports.failed_to_render": "Failed to render report",
+  "reports.widget_failed_to_load": "Failed to load widget data",
   "reports.snapshot": "Snapshot",
   "reports.snapshot_created": "Snapshot created",
   "reports.auto_refresh": "Auto refresh",

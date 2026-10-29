@@ -159,6 +159,7 @@
   "reports.drill_failed": "Nedboringsnavigasjon mislyktes",
   "reports.failed_to_navigate": "Navigering tilbake mislyktes",
   "reports.failed_to_render": "Rendering av rapport mislyktes",
+  "reports.widget_failed_to_load": "Lasting av widgetdata mislyktes",
   "reports.snapshot": "Øyeblikksbilde",
   "reports.snapshot_created": "Øyeblikksbilde opprettet",
   "reports.auto_refresh": "Automatisk oppdatering",

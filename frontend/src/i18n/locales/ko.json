@@ -159,6 +159,7 @@
   "reports.drill_failed": "드릴다운 탐색에 실패했습니다",
   "reports.failed_to_navigate": "뒤로 이동에 실패했습니다",
   "reports.failed_to_render": "리포트 렌더링에 실패했습니다",
+  "reports.widget_failed_to_load": "위젯 데이터 로드에 실패했습니다",
   "reports.snapshot": "스냅샷",
   "reports.snapshot_created": "스냅샷이 생성되었습니다",
   "reports.auto_refresh": "자동 새로고침",

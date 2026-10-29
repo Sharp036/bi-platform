@@ -159,6 +159,7 @@
   "reports.drill_failed": "Porautumisnavigaatio epäonnistui",
   "reports.failed_to_navigate": "Takaisin navigointi epäonnistui",
   "reports.failed_to_render": "Raportin renderöinti epäonnistui",
+  "reports.widget_failed_to_load": "Widgetin tietojen lataus epäonnistui",
   "reports.snapshot": "Tilannekuva",
   "reports.snapshot_created": "Tilannekuva luotu",
   "reports.auto_refresh": "Automaattinen päivitys",

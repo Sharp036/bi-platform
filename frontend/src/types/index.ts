@@ -56,7 +56,7 @@ export interface ReportParameter {
 export interface Widget {
   id?: number; widgetId?: number
   widgetType: 'CHART' | 'TABLE' | 'KPI' | 'TEXT' | 'FILTER' | 'IMAGE' | 'BUTTON' | 'WEBPAGE' | 'SPACER' | 'DIVIDER'
-  title?: string; chartConfig?: string; position?: string; style?: string
+  title?: string; body?: string; chartConfig?: string; position?: string; style?: string
   queryId?: number; datasourceId?: number; rawSql?: string
   paramMapping?: string; sortOrder?: number; isVisible?: boolean
 }

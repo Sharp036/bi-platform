@@ -159,6 +159,7 @@
   "reports.drill_failed": "A részletező navigáció sikertelen",
   "reports.failed_to_navigate": "A visszanavigálás sikertelen",
   "reports.failed_to_render": "A jelentés megjelenítése sikertelen",
+  "reports.widget_failed_to_load": "A widget adatainak betöltése sikertelen",
   "reports.snapshot": "Pillanatkép",
   "reports.snapshot_created": "Pillanatkép létrehozva",
   "reports.auto_refresh": "Automatikus frissítés",
