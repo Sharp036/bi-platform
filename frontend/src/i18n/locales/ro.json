@@ -159,6 +159,7 @@
   "reports.drill_failed": "Navigarea de detaliere a eșuat",
   "reports.failed_to_navigate": "Navigarea înapoi a eșuat",
   "reports.failed_to_render": "Randarea raportului a eșuat",
+  "reports.widget_failed_to_load": "Încărcarea datelor widgetului a eșuat",
   "reports.snapshot": "Captură",
   "reports.snapshot_created": "Captură creată",
   "reports.auto_refresh": "Reîmprospătare automată",

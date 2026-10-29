@@ -159,6 +159,7 @@
   "reports.drill_failed": "Navigazione drill-down non riuscita",
   "reports.failed_to_navigate": "Navigazione indietro non riuscita",
   "reports.failed_to_render": "Rendering del report non riuscito",
+  "reports.widget_failed_to_load": "Caricamento dati del widget non riuscito",
   "reports.snapshot": "Istantanea",
   "reports.snapshot_created": "Istantanea creata",
   "reports.auto_refresh": "Aggiornamento automatico",

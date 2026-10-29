@@ -54,15 +54,21 @@ class ReportRenderService(
         // Merge provided parameters with defaults
         val resolvedParams = resolveParameters(report, request.parameters)
 
-        // Execute each visible widget
+        // Execute each visible widget, or only the requested ones
+        val requestedIds = request.widgetIds?.toSet()
         val widgets = widgetRepo.findByReportIdOrderBySortOrder(reportId)
         val renderedWidgets = widgets
-            .filter { it.isVisible }
+            .filter { it.isVisible && (requestedIds == null || it.id in requestedIds) }
             .map { widget -> renderWidget(widget, resolvedParams, username) }
 
         val totalMs = System.currentTimeMillis() - startMs
-        log.info("Rendered report '{}' (id={}) with {} widgets in {}ms",
-            report.name, reportId, renderedWidgets.size, totalMs)
+        if (requestedIds == null) {
+            log.info("Rendered report '{}' (id={}) with {} widgets in {}ms",
+                report.name, reportId, renderedWidgets.size, totalMs)
+        } else {
+            log.info("Rendered report '{}' (id={}) widgets {} in {}ms",
+                report.name, reportId, renderedWidgets.map { it.widgetId }, totalMs)
+        }
 
         val response = RenderReportResponse(
             reportId = report.id,
@@ -72,8 +78,10 @@ class ReportRenderService(
             executionMs = totalMs
         )
 
-        // Push to live subscribers
-        try { liveDataService.notifyReportUpdate(reportId, response) } catch (_: Exception) {}
+        // Push to live subscribers on a full render only: a page rendering widget by widget would send one event per widget
+        if (requestedIds == null) {
+            try { liveDataService.notifyReportUpdate(reportId, response) } catch (_: Exception) {}
+        }
 
         return response
     }

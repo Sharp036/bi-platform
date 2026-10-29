@@ -159,6 +159,7 @@
   "reports.drill_failed": "ドリルダウンナビゲーションに失敗しました",
   "reports.failed_to_navigate": "戻るナビゲーションに失敗しました",
   "reports.failed_to_render": "レポートの描画に失敗しました",
+  "reports.widget_failed_to_load": "ウィジェットのデータの読み込みに失敗しました",
   "reports.snapshot": "スナップショット",
   "reports.snapshot_created": "スナップショットを作成しました",
   "reports.auto_refresh": "自動更新",

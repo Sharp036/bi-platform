@@ -171,6 +171,7 @@
   "reports.drill_failed": "Навигация с детализацией не удалась",
   "reports.failed_to_navigate": "Не удалось вернуться назад",
   "reports.failed_to_render": "Не удалось отрисовать отчёт",
+  "reports.widget_failed_to_load": "Не удалось загрузить данные виджета",
   "reports.snapshot": "Снимок",
   "reports.snapshot_created": "Снимок создан",
   "reports.auto_refresh": "Автообновление",

@@ -159,6 +159,7 @@
   "reports.drill_failed": "Navigasi penelusuran gagal",
   "reports.failed_to_navigate": "Gagal menavigasi kembali",
   "reports.failed_to_render": "Gagal merender laporan",
+  "reports.widget_failed_to_load": "Gagal memuat data widget",
   "reports.snapshot": "Cuplikan",
   "reports.snapshot_created": "Cuplikan dibuat",
   "reports.auto_refresh": "Segarkan otomatis",

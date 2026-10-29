@@ -159,6 +159,7 @@
   "reports.drill_failed": "Falló la navegación de desglose",
   "reports.failed_to_navigate": "Error al navegar hacia atrás",
   "reports.failed_to_render": "Error al renderizar el informe",
+  "reports.widget_failed_to_load": "Error al cargar los datos del widget",
   "reports.snapshot": "Instantánea",
   "reports.snapshot_created": "Instantánea creada",
   "reports.auto_refresh": "Actualización automática",

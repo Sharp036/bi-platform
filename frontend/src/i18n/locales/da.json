@@ -159,6 +159,7 @@
   "reports.drill_failed": "Nedboring mislykkedes",
   "reports.failed_to_navigate": "Navigation tilbage mislykkedes",
   "reports.failed_to_render": "Rendering af rapport mislykkedes",
+  "reports.widget_failed_to_load": "Indlæsning af widgetdata mislykkedes",
   "reports.snapshot": "Øjebliksbillede",
   "reports.snapshot_created": "Øjebliksbillede oprettet",
   "reports.auto_refresh": "Automatisk opdatering",

@@ -159,6 +159,7 @@
   "reports.drill_failed": "钻取导航失败",
   "reports.failed_to_navigate": "返回导航失败",
   "reports.failed_to_render": "报表渲染失败",
+  "reports.widget_failed_to_load": "组件数据加载失败",
   "reports.snapshot": "快照",
   "reports.snapshot_created": "快照已创建",
   "reports.auto_refresh": "自动刷新",

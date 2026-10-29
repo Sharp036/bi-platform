@@ -159,6 +159,7 @@
   "reports.drill_failed": "Навігація деталізації не вдалася",
   "reports.failed_to_navigate": "Не вдалося повернутися назад",
   "reports.failed_to_render": "Не вдалося відрендерити звіт",
+  "reports.widget_failed_to_load": "Не вдалося завантажити дані віджета",
   "reports.snapshot": "Знімок",
   "reports.snapshot_created": "Знімок створено",
   "reports.auto_refresh": "Автооновлення",

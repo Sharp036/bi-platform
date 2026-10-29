@@ -159,6 +159,7 @@
   "reports.drill_failed": "Detaljgranskning misslyckades",
   "reports.failed_to_navigate": "Kunde inte navigera tillbaka",
   "reports.failed_to_render": "Kunde inte rendera rapporten",
+  "reports.widget_failed_to_load": "Kunde inte ladda widgetdata",
   "reports.snapshot": "Ögonblicksbild",
   "reports.snapshot_created": "Ögonblicksbild skapad",
   "reports.auto_refresh": "Automatisk uppdatering",

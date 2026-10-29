@@ -139,7 +139,9 @@ data class WidgetResponse(
 // ═══════════════════════════════════════════════
 
 data class RenderReportRequest(
-    val parameters: Map<String, Any?> = emptyMap()
+    val parameters: Map<String, Any?> = emptyMap(),
+    // Only these widgets when set: the report page requests each widget separately
+    val widgetIds: List<Long>? = null
 )
 
 data class RenderReportResponse(

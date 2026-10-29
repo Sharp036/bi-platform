@@ -125,7 +125,10 @@ export default function ReportViewerPage() {
     log.render('renderWithParams', { reportId: rId, params: paramsToUse, drillTargetIds: opts?.drillTargetIds })
     setRendering(true)
     try {
-      const result = await reportApi.render(rId, paramsToUse)
+      // Widget by widget when the loaded report is the one rendered (not yet after a drill to another report)
+      const result = report && report.id === rId
+        ? await reportApi.renderByWidget(rId, paramsToUse, report.widgets, t('reports.widget_failed_to_load'))
+        : await reportApi.render(rId, paramsToUse)
       log.render('renderResult', { widgetCount: result.widgets.length, executionMs: result.executionMs })
       // When rendering for a drill activation, only apply NEW data for the
       // drill target widgets. Non-target widgets keep their previously-
@@ -161,7 +164,7 @@ export default function ReportViewerPage() {
     } finally {
       setRendering(false)
     }
-  }, [currentReportId, id, loadDrillActions, t])
+  }, [currentReportId, id, report, loadDrillActions, t])
 
   const handleRender = useCallback(async (params?: Record<string, unknown>) => {
     // Replace params entirely (not merge) so cleared filters don't persist

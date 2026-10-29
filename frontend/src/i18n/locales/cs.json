@@ -159,6 +159,7 @@
   "reports.drill_failed": "Navigace procházením se nezdařila",
   "reports.failed_to_navigate": "Nepodařilo se navigovat zpět",
   "reports.failed_to_render": "Nepodařilo se vykreslit sestavu",
+  "reports.widget_failed_to_load": "Nepodařilo se načíst data widgetu",
   "reports.snapshot": "Snímek",
   "reports.snapshot_created": "Snímek vytvořen",
   "reports.auto_refresh": "Automatické obnovení",

@@ -159,6 +159,7 @@
   "reports.drill_failed": "Échec de la navigation détaillée",
   "reports.failed_to_navigate": "Échec du retour en arrière",
   "reports.failed_to_render": "Échec du rendu du rapport",
+  "reports.widget_failed_to_load": "Échec du chargement des données du widget",
   "reports.snapshot": "Instantané",
   "reports.snapshot_created": "Instantané créé",
   "reports.auto_refresh": "Actualisation automatique",

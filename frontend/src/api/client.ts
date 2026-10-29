@@ -7,6 +7,23 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 const api = axios.create({ baseURL: BASE_URL })
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    // A request other than GET that only reads data and may be sent again
+    retryable?: boolean
+  }
+}
+
+// Reads are sent again up to 3 times, after 1-2, 2-4 and 4-8 s, when the connection drops or the proxy answers 502 or 503
+const RETRY_ATTEMPTS = 3
+const RETRY_STATUSES = new Set([502, 503])
+const RETRY_METHODS = new Set(['get', 'head', 'options'])
+
+function retryDelayMs(attempt: number) {
+  const delay = Math.min(1000 * 2 ** attempt, 10000)
+  return delay + Math.random() * delay
+}
+
 // Request: attach access token, request ID, and log
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken')
@@ -65,7 +82,16 @@ api.interceptors.response.use(
         return handleSessionExpired()
       }
     }
-    log.error(`API ${error.config?.method?.toUpperCase()} ${error.config?.url}`, { reqId: error.config?.headers?.['X-Request-Id'], status: error.response?.status, message: error.response?.data?.message || error.message })
+    const attempt: number = original?._retryCount ?? 0
+    const retry = !!original && attempt < RETRY_ATTEMPTS
+      && (RETRY_METHODS.has(original.method ?? 'get') || original.retryable === true)
+      && (error.response ? RETRY_STATUSES.has(status) : error.code === 'ERR_NETWORK')
+    log.error(`API ${error.config?.method?.toUpperCase()} ${error.config?.url}`, { reqId: error.config?.headers?.['X-Request-Id'], status: error.response?.status, message: error.response?.data?.message || error.message, ...(retry ? { retry: attempt + 1 } : {}) })
+    if (retry) {
+      original._retryCount = attempt + 1
+      await new Promise(resolve => setTimeout(resolve, retryDelayMs(attempt)))
+      return api(original)
+    }
     return Promise.reject(error)
   }
 )

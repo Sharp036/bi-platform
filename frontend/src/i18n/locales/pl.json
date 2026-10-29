@@ -159,6 +159,7 @@
   "reports.drill_failed": "Nawigacja drążenia nie powiodła się",
   "reports.failed_to_navigate": "Nie udało się nawigować wstecz",
   "reports.failed_to_render": "Nie udało się wyrenderować raportu",
+  "reports.widget_failed_to_load": "Nie udało się załadować danych widgetu",
   "reports.snapshot": "Migawka",
   "reports.snapshot_created": "Migawka utworzona",
   "reports.auto_refresh": "Automatyczne odświeżanie",

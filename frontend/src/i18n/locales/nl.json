@@ -159,6 +159,7 @@
   "reports.drill_failed": "Drill-down navigatie mislukt",
   "reports.failed_to_navigate": "Terug navigeren mislukt",
   "reports.failed_to_render": "Rapport weergeven mislukt",
+  "reports.widget_failed_to_load": "Widgetgegevens laden mislukt",
   "reports.snapshot": "Momentopname",
   "reports.snapshot_created": "Momentopname aangemaakt",
   "reports.auto_refresh": "Automatisch vernieuwen",

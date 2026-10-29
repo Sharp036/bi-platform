@@ -159,6 +159,7 @@
   "reports.drill_failed": "การนำทางเจาะลึกล้มเหลว",
   "reports.failed_to_navigate": "ย้อนกลับไม่สำเร็จ",
   "reports.failed_to_render": "เรนเดอร์รายงานไม่สำเร็จ",
+  "reports.widget_failed_to_load": "โหลดข้อมูลวิดเจ็ตไม่สำเร็จ",
   "reports.snapshot": "สแนปช็อต",
   "reports.snapshot_created": "สร้างสแนปช็อตแล้ว",
   "reports.auto_refresh": "รีเฟรชอัตโนมัติ",
