@@ -40,6 +40,15 @@ services:
       AIRFLOW_API_USER: ${AIRFLOW_API_USER:-}
       AIRFLOW_API_PASSWORD: ${AIRFLOW_API_PASSWORD:-}
       AIRFLOW_ALLOWED_DAGS: ${AIRFLOW_ALLOWED_DAGS:-}
+      EMAIL_ENABLED: ${EMAIL_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@datorio.local}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      EMBED_BASE_URL: ${EMBED_BASE_URL:-}
+      EXPORT_DIRECTORY: ${EXPORT_DIRECTORY:-/tmp/datorio-exports}
     depends_on:
       postgres:
         condition: service_healthy

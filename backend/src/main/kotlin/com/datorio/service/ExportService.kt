@@ -22,7 +22,7 @@ class ExportService(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    @Value("\${datorio.export.directory:/tmp/datalens-exports}")
+    @Value("\${datorio.export.directory:/tmp/datorio-exports}")
     private lateinit var exportDir: String
 
     /**

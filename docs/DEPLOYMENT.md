@@ -113,7 +113,6 @@ Flyway runs database migrations automatically on startup.
 ## Nginx Configuration
 
 Datorio must be proxied through nginx (or another reverse proxy) with SSL.
-The nginx container used in production is `superset_nginx`.
 
 Config file location inside the container: `/etc/nginx/nginx.conf`
 
@@ -150,7 +149,7 @@ Key settings:
 After editing the config, reload nginx without downtime:
 
 ```bash
-docker exec superset_nginx nginx -t && docker exec superset_nginx nginx -s reload
+docker exec <nginx_container> nginx -t && docker exec <nginx_container> nginx -s reload
 ```
 
 ### Spring Boot upload limit
@@ -261,6 +260,10 @@ Pipeline stages:
 
 The pipeline is defined in `.gitlab-ci.yml`.
 
+The image installs nginx from the Alpine package repository. If the build host cannot reach
+`dl-cdn.alpinelinux.org`, pass a mirror as a build argument:
+`docker build --build-arg ALPINE_MIRROR=https://<mirror>/alpine .` (the GitLab build job does this).
+
 ---
 
 ## Data Import API
@@ -349,3 +352,15 @@ if result["status"] == "error":
 | `ADMIN_USER` | Initial admin username | `admin` |
 | `ADMIN_PASSWORD` | Initial admin password | required |
 | `ADMIN_EMAIL` | Initial admin email | required |
+| `EXPORT_DIRECTORY` | Directory for saved export files; they are lost with the container unless a volume is mounted there | `/tmp/datorio-exports` |
+| `EMAIL_ENABLED` | Enables sending reports by email | `false` |
+| `SMTP_HOST` | SMTP server host | empty |
+| `SMTP_PORT` | SMTP server port | `587` |
+| `SMTP_USERNAME` | SMTP user | empty |
+| `SMTP_PASSWORD` | SMTP password | empty |
+| `EMAIL_FROM` | Sender address of report emails | `noreply@datorio.local` |
+| `SMTP_USE_TLS` | Use STARTTLS | `true` |
+| `EMBED_BASE_URL` | Public address put in front of embed links, e.g. `https://bi.example.com`; empty gives links relative to the current site | empty |
+
+A variable takes effect only when it reaches the `datorio` container: add the ones you set to the
+`environment` section of the service in your compose file (the bundled `docker-compose.yml` passes the Airflow, email, embed and export variables from `.env`).
