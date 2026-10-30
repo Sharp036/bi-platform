@@ -120,14 +120,28 @@ class ScriptEngineTest {
     @Test
     @Timeout(value = 15, unit = TimeUnit.SECONDS) // suite-level guard: the engine must kill it well before this
     fun `infinite loop is killed by the timeout`() {
+        // No statement limit: the default 10M statements run out in 0.3-1.8 s, which races the timeout.
         val start = System.currentTimeMillis()
-        val r = engine(timeoutMs = 1000).execute("while (true) {}")
+        val r = engine(timeoutMs = 1000, maxStatements = Long.MAX_VALUE).execute("while (true) {}")
         val elapsed = System.currentTimeMillis() - start
 
         assertFalse(r.success, "infinite loop should not succeed")
         assertTrue(r.timedOut, "infinite loop should be reported as timed out")
         // It must actually be cancelled, not merely time out the future while the CPU keeps spinning.
         assertTrue(elapsed < 10_000, "engine took too long ($elapsed ms) to cancel the loop")
+    }
+
+    @Test
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
+    fun `infinite loop is stopped by the statement limit`() {
+        val r = engine(timeoutMs = 10_000, maxStatements = 100_000).execute("while (true) {}")
+
+        assertFalse(r.success, "infinite loop should not succeed")
+        assertFalse(r.timedOut, "the statement limit should stop the loop before the timeout")
+        assertTrue(
+            r.error?.contains("resource limit", ignoreCase = true) == true,
+            "expected statement-limit rejection, got: ${r.error}"
+        )
     }
 
     @Test
@@ -159,7 +173,7 @@ class ScriptEngineTest {
     fun `concurrency limit rejects extra executions`() {
         // maxConcurrent=1: of two scripts fired at once, one takes the only slot (and is killed
         // by its 2s timeout), the other must be rejected immediately as busy (tryAcquire fails).
-        val eng = engine(timeoutMs = 2000, maxConcurrent = 1)
+        val eng = engine(timeoutMs = 2000, maxStatements = Long.MAX_VALUE, maxConcurrent = 1)
         val results = java.util.Collections.synchronizedList(mutableListOf<ScriptEngine.ExecutionResult>())
         val threads = (1..2).map {
             Thread { results.add(eng.execute("while (true) {}")) }.apply { isDaemon = true }

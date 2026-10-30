@@ -26,7 +26,7 @@ Create `/opt/bi-platform/docker-compose.prod.yml`:
 ```yaml
 services:
   datorio:
-    image: harbor-dev.rbtdigitalmobile.ru/data/bi-platform/main:latest
+    image: registry.example.com/your-project/bi-platform/main:latest
     container_name: datorio
     restart: unless-stopped
     ports:
@@ -79,9 +79,9 @@ ADMIN_USER=admin
 ADMIN_PASSWORD=your_admin_password
 ADMIN_EMAIL=admin@example.com
 AIRFLOW_API_URL=http://airflow-host:5080
-AIRFLOW_API_USER=datorio_service
+AIRFLOW_API_USER=bi_service_user
 AIRFLOW_API_PASSWORD=your_airflow_password
-AIRFLOW_ALLOWED_DAGS=build_sms_push_audience
+AIRFLOW_ALLOWED_DAGS=example_dag_id
 ```
 
 `AIRFLOW_*` configure the RUN_JOB report buttons, which start an Airflow DAG with the

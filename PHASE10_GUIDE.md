@@ -160,7 +160,7 @@ datalens:
   export:
     directory: /tmp/datalens-exports
   embed:
-    base-url: http://bobik1.rbt1.ru:8090
+    base-url: https://bi.example.com
 ```
 
 ## API Endpoints
@@ -188,7 +188,7 @@ datalens:
 
 ```html
 <iframe
-  src="http://bobik1.rbt1.ru:8090/embed/YOUR_TOKEN?region=Europe"
+  src="https://bi.example.com/embed/YOUR_TOKEN?region=Europe"
   width="100%" height="600" frameborder="0">
 </iframe>
 ```
