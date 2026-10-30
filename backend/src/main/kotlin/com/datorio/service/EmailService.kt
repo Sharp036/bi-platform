@@ -42,11 +42,11 @@ class EmailService(
      */
     fun sendReportEmail(request: EmailDeliveryRequest, username: String): EmailDeliveryResponse {
         if (!emailEnabled) {
-            log.warn("Email delivery is disabled. Enable with datalens.email.enabled=true")
+            log.warn("Email delivery is disabled. Enable with datorio.email.enabled=true")
             return EmailDeliveryResponse(
                 success = false,
                 recipientCount = 0,
-                message = "Email delivery is not configured. Set datalens.email.enabled=true and configure SMTP."
+                message = "Email delivery is not configured. Set datorio.email.enabled=true and configure SMTP."
             )
         }
 

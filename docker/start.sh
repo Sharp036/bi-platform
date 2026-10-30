@@ -1,6 +1,6 @@
 #!/bin/sh
 # ══════════════════════════════════════════════
-#  DataLens BI — Container Startup
+#  Datorio — Container Startup
 #  Runs nginx (frontend) + Java (backend)
 # ══════════════════════════════════════════════
 

@@ -27,15 +27,18 @@ FROM eclipse-temurin:21-jre-alpine
 LABEL maintainer="your-email@example.com"
 LABEL description="Datorio Platform"
 
-# Install nginx for serving frontend + reverse proxy
-# Yandex mirror: GitLab runner cannot reach dl-cdn.alpinelinux.org (TLS errors)
-RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.yandex.ru/mirrors/alpine|g' /etc/apk/repositories \
+# Install nginx for serving frontend + reverse proxy.
+# ALPINE_MIRROR replaces dl-cdn.alpinelinux.org when the build host cannot reach it.
+ARG ALPINE_MIRROR=
+RUN if [ -n "$ALPINE_MIRROR" ]; then \
+        sed -i "s|https://dl-cdn.alpinelinux.org/alpine|$ALPINE_MIRROR|g" /etc/apk/repositories; \
+    fi \
     && apk add --no-cache nginx \
     && mkdir -p /run/nginx
 
 WORKDIR /app
 
-# Stable layers first so Harbor can dedup them across builds.
+# Stable layers first so the registry can reuse them across builds.
 
 # Copy nginx config (overrides default)
 COPY docker/nginx/frontend.conf /etc/nginx/http.d/default.conf

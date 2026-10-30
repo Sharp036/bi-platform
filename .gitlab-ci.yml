@@ -19,10 +19,11 @@ build:
     DOCKER_HOST: tcp://dockerhost:2375/
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
+    ALPINE_MIRROR: https://mirror.yandex.ru/mirrors/alpine
   script:
     - echo $CI_BUILD_TOKEN | docker login -u $HARBOR_USER_CI --password-stdin $CI_REGISTRY_IMAGE
     - docker pull $TAG_LATEST || true
-    - docker build --cache-from $TAG_LATEST -t $TAG_LATEST .
+    - docker build --build-arg ALPINE_MIRROR=$ALPINE_MIRROR --cache-from $TAG_LATEST -t $TAG_LATEST .
     - docker push $TAG_LATEST
   only:
     refs:

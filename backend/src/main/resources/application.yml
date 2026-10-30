@@ -75,6 +75,24 @@ datorio:
     allowed-dags: ${AIRFLOW_ALLOWED_DAGS:}     # comma-separated DAG ids the buttons may start
     timeout-seconds: 30
 
+  # ── Saved exports (lost with the container unless a volume is mounted there) ──
+  export:
+    directory: ${EXPORT_DIRECTORY:/tmp/datorio-exports}
+
+  # ── Email delivery of reports (SMTP), off until EMAIL_ENABLED=true ──
+  email:
+    enabled: ${EMAIL_ENABLED:false}
+    smtp-host: ${SMTP_HOST:}
+    smtp-port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    from: ${EMAIL_FROM:noreply@datorio.local}
+    use-tls: ${SMTP_USE_TLS:true}
+
+  # ── Embedded reports: empty base URL = links relative to the current site ──
+  embed:
+    base-url: ${EMBED_BASE_URL:}
+
   cache:
       enabled: true
       query-ttl-seconds: 300
