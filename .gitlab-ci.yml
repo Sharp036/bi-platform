@@ -1,8 +1,6 @@
 variables:
   SERVER_IP: $PLAYGROUND_SERVER_IP
-  HARBOR_SERVER_DOMAIN: harbor-dev.rbtdigitalmobile.ru
   TAG_LATEST: $HARBOR_SERVER_DOMAIN/data/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME:latest
-  HARBOR_USER_CI: robot-data-ci
 
 stages:
   - build
