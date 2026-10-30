@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useDesignerStore } from '@/store/useDesignerStore'
 import NumberInput from '@/components/common/NumberInput'
 import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
+import { parseParamConfig, withParamGroup } from '@/utils/paramConfig'
 
 const PARAM_TYPES = ['STRING', 'NUMBER', 'DATE', 'DATE_RANGE', 'SELECT', 'MULTI_SELECT', 'BOOLEAN']
 const DATE_DEFAULTS = [
@@ -24,6 +25,7 @@ export default function ParameterDesigner() {
       defaultValue: '',
       isRequired: false,
       sortOrder: parameters.length,
+      config: '{}',
     }])
   }
 
@@ -69,6 +71,11 @@ export default function ParameterDesigner() {
                 <input
                   value={p.label} onChange={e => updateParam(i, { label: e.target.value })}
                   className="input text-xs py-1" placeholder={t('designer.param_label')}
+                />
+                <input
+                  value={String(parseParamConfig(p.config).group ?? '')}
+                  onChange={e => updateParam(i, { config: withParamGroup(p.config, e.target.value) })}
+                  className="input text-xs py-1" placeholder={t('designer.param_group')}
                 />
               </div>
 

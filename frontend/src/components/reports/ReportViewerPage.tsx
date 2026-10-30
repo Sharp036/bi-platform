@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { reportApi } from '@/api/reports'
+import type { ButtonConfig } from '@/api/controls'
 import { drillApi } from '@/api/drilldown'
 import { log } from '@/utils/logger'
 import type { Report, RenderReportResponse, DrillAction, DrillNavigateResponse } from '@/types'
@@ -516,6 +517,29 @@ export default function ReportViewerPage() {
     try { return JSON.parse(style) as Record<string, unknown> } catch { return {} }
   }
 
+  // A button with requiredParams or requireRowsIn is unavailable until those parameters have applied
+  // values (a missing one takes its report default, as the job does) and the named widget shows rows.
+  const buttonBlockedReason = (w: RenderReportResponse['widgets'][number]): string | undefined => {
+    if (w.widgetType !== 'BUTTON' || !w.chartConfig) return undefined
+    let cfg: ButtonConfig
+    try { cfg = JSON.parse(w.chartConfig) } catch { return undefined }
+    const missing = (cfg.requiredParams || [])
+      .map(name => report.parameters.find(p => p.name === name) || { name, label: undefined, defaultValue: undefined })
+      .filter(p => {
+        const v = p.name in currentParams ? currentParams[p.name] : p.defaultValue
+        return v === undefined || v === null || String(v).trim() === ''
+      })
+    if (missing.length > 0) {
+      return t('interactive.button.fill_required', { fields: missing.map(p => p.label || p.name).join(', ') })
+    }
+    const source = cfg.requireRowsIn?.trim()
+    if (source) {
+      const target = renderResult?.widgets.find(x => x.title === source)
+      if (!target || target.error || !target.data?.rows?.length) return t('interactive.button.no_rows', { widget: source })
+    }
+    return undefined
+  }
+
   const renderSingleWidget = (w: RenderReportResponse['widgets'][number]) => {
     const widgetDrillActions = drillActions[w.widgetId] || []
     const hasDrill = widgetDrillActions.length > 0
@@ -585,6 +609,7 @@ export default function ReportViewerPage() {
           onWidgetDisplay={handleWidgetDisplay}
           reportParams={currentParams}
           onJobFinished={() => { handleRender() }}
+          buttonBlockedReason={buttonBlockedReason(w)}
         />
       </div>
     )

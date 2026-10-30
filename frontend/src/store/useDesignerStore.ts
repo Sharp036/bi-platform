@@ -38,6 +38,8 @@ interface DesignerState {
     id?: number; name: string; label: string
     paramType: string; defaultValue: string
     isRequired: boolean; sortOrder: number
+    // Settings as the JSON string the server keeps, e.g. the filter group
+    config: string
   }>
 
   // Undo/redo
@@ -254,6 +256,7 @@ export const useDesignerStore = create<DesignerState>((set, get) => ({
       defaultValue: (p.defaultValue as string) || '',
       isRequired: p.isRequired !== false,
       sortOrder: (p.sortOrder as number) || 0,
+      config: typeof p.config === 'string' ? p.config : JSON.stringify(p.config ?? {}),
     }))
 
     set({

@@ -15,6 +15,7 @@ import ParameterControlConfigPanel from '@/components/interactive/ParameterContr
 import ContainerDesigner, { DesignerContainer, genContainerId } from './ContainerDesigner'
 import ActionConfigPanel from '@/components/interactive/ActionConfigPanel'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import { parseParamConfig } from '@/utils/paramConfig'
 import {
   Save, Undo2, Redo2, Eye, EyeOff, ArrowLeft,
   Upload, Download, Settings2, Layers, SlidersHorizontal, ExternalLink,
@@ -88,7 +89,8 @@ export default function ReportDesignerPage() {
     paramType: p.paramType as ReportParameter['paramType'],
     defaultValue: p.defaultValue,
     isRequired: p.isRequired,
-    config: {},
+    // The control panel saves every parameter with this config: keep the real one
+    config: parseParamConfig(p.config),
   }))
 
   // Load existing report

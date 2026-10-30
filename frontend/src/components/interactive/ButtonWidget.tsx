@@ -43,6 +43,8 @@ interface ButtonWidgetProps {
   reportParams?: Record<string, unknown>
   // Called when a job started by a RUN_JOB button is over, to refresh the report
   onJobFinished?: () => void
+  // Why the button is unavailable now (requiredParams, requireRowsIn), shown under it
+  blockedReason?: string
   onToggleWidgets?: (widgetIds: number[]) => void
   onApplyFilter?: (field: string, value: string) => void
 }
@@ -61,7 +63,7 @@ function parseTime(value?: string | null): number | undefined {
 }
 
 export default function ButtonWidget({
-  config, reportId, widgetId, reportParams, onJobFinished, onToggleWidgets, onApplyFilter
+  config, reportId, widgetId, reportParams, onJobFinished, blockedReason, onToggleWidgets, onApplyFilter
 }: ButtonWidgetProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -127,6 +129,7 @@ export default function ButtonWidget({
   }
 
   const handleClick = () => {
+    if (blockedReason) return
     const btnType = config.buttonType || 'SHOW_HIDE'
     if (btnType === 'SHOW_HIDE') setToggled(v => !v)
     switch (btnType) {
@@ -217,10 +220,12 @@ export default function ButtonWidget({
     <div className="h-full flex flex-col items-center justify-center gap-1.5">
       <button
         onClick={handleClick}
-        disabled={busy}
+        disabled={busy || !!blockedReason}
+        title={blockedReason}
         className={clsx(
           'inline-flex items-center gap-2 rounded-lg font-medium transition-all',
-          'shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait',
+          'shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-60',
+          busy ? 'disabled:cursor-wait' : 'disabled:cursor-not-allowed',
           size,
           colorClass
         )}
@@ -228,6 +233,9 @@ export default function ButtonWidget({
         <Icon className={clsx('w-4 h-4', busy && 'animate-spin')} />
         {toggled && config.labelActive ? config.labelActive : (config.label || t('interactive.button.default_label'))}
       </button>
+      {blockedReason && !busy && (
+        <p className="max-w-xs px-2 text-center text-[11px] leading-tight text-amber-600 dark:text-amber-400">{blockedReason}</p>
+      )}
       {progress && (
         <div className="w-full max-w-xs px-2">
           <div className="h-1.5 w-full rounded-full bg-surface-200 dark:bg-dark-surface-100 overflow-hidden">
