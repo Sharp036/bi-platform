@@ -52,7 +52,6 @@ deploy:
     - ssh-keyscan $SERVER_IP > ~/.ssh/known_hosts
   script:
     - sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.yandex.ru/mirrors/alpine|g' /etc/apk/repositories
-    - apk add --no-cache docker-compose
     - echo $CI_BUILD_TOKEN | docker login -u $HARBOR_USER_CI --password-stdin $CI_REGISTRY_IMAGE
     - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_LATEST"
     - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /opt/bi-platform && docker-compose -f docker-compose.prod.yml down"
