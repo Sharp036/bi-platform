@@ -26,7 +26,7 @@ Create `/opt/bi-platform/docker-compose.prod.yml`:
 ```yaml
 services:
   datorio:
-    image: harbor-dev.rbtdigitalmobile.ru/data/bi-platform/main:latest
+    image: registry.example.com/your-project/bi-platform/main:latest
     container_name: datorio
     restart: unless-stopped
     ports:

@@ -933,7 +933,7 @@ function ApiKeysTab() {
       <div className="card p-4 bg-slate-50 dark:bg-dark-surface-50">
         <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">{t('import.apikeys.usage_title')}</p>
         <code className="block text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
-          {`curl -X POST https://datorio.rbtdigitalmobile.ru/api/import/sources/{source_id}/upload \\
+          {`curl -X POST ${window.location.origin}/api/import/sources/{source_id}/upload \\
   -H "Authorization: Bearer dat_YOUR_API_KEY" \\
   -F "file=@/path/to/file.zip"`}
         </code>
