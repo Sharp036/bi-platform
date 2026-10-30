@@ -51,6 +51,10 @@ export interface ButtonConfig {
   jobUserParam?: string  // job parameter that receives the user name
   jobEmailParam?: string // job parameter that receives the user's email when empty
   confirmText?: string   // question shown before the start
+  // The button is unavailable while these report parameters have no applied value
+  requiredParams?: string[]
+  // The button is unavailable while the widget with this title shows no rows
+  requireRowsIn?: string
 }
 
 export interface RunJobResponse {

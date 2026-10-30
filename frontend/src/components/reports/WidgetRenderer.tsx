@@ -30,6 +30,8 @@ interface Props {
   reportParams?: Record<string, unknown>
   // Called when the job of a RUN_JOB button is over
   onJobFinished?: () => void
+  // Why a button is unavailable now
+  buttonBlockedReason?: string
 }
 
 // Placeholder syntax: {columnName} or {columnName:format} inside title strings.
@@ -75,6 +77,7 @@ export default function WidgetRenderer({
   onWidgetDisplay,
   reportParams,
   onJobFinished,
+  buttonBlockedReason,
 }: Props) {
   const { t } = useTranslation()
 
@@ -103,6 +106,7 @@ export default function WidgetRenderer({
         widgetId={widget.widgetId}
         reportParams={reportParams}
         onJobFinished={onJobFinished}
+        blockedReason={buttonBlockedReason}
         onToggleWidgets={onToggleWidgets}
         onApplyFilter={onApplyFilter}
       />

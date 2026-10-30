@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportParameter } from '@/types'
 import { controlsApi, ParameterControlConfig } from '@/api/controls'
 import NumberInput from '@/components/common/NumberInput'
-import { Play } from 'lucide-react'
+import { Play, ChevronDown, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
 import { log } from '@/utils/logger'
+import { groupParameters } from '@/utils/paramConfig'
 
 interface Props {
   reportId: number
@@ -70,6 +71,24 @@ export default function EnhancedParameterPanel({
 
   // Remember last non-empty user-selected value per parameter for smart cascade restore
   const lastKnownRef = useRef<Record<string, string>>({})
+
+  // Parameter groups collapsed by this viewer, kept per report in the browser
+  const groupsKey = `datorio.filterGroups.${reportId}`
+  const [collapsedGroups, setCollapsedGroups] = useState<string[]>(() => {
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem(groupsKey) || '[]')
+      return Array.isArray(saved) ? saved.filter((g): g is string => typeof g === 'string') : []
+    } catch {
+      return []
+    }
+  })
+  const toggleGroup = (title: string) => {
+    setCollapsedGroups(prev => {
+      const next = prev.includes(title) ? prev.filter(g => g !== title) : [...prev, title]
+      try { localStorage.setItem(groupsKey, JSON.stringify(next)) } catch { /* storage unavailable */ }
+      return next
+    })
+  }
 
   // Load control configs. Refetch when refreshKey bumps so users pick up
   // newly added controls without page reload.
@@ -292,113 +311,147 @@ export default function EnhancedParameterPanel({
 
   if (parameters.length === 0) return null
 
+  // Required parameters left empty: "Apply" is unavailable until they are filled
+  const missingRequired = parameters.filter(p => p.isRequired && !(values[p.name] || '').trim())
+
   const handleApply = () => {
+    if (missingRequired.length > 0) return
     onApply(toTyped(values))
   }
 
   const getControl = (paramName: string) => controls.find(c => c.parameterName === paramName)
 
+  const renderParam = (p: ReportParameter) => {
+    const ctrl = getControl(p.name)
+    const controlType = ctrl?.controlType || guessControlType(p)
+    const options = dynamicOptions[p.name] || (p.config?.options as string[] | undefined) || []
+
+    return (
+      <div key={p.name} className={compact ? 'w-full' : 'flex-1 min-w-[180px] max-w-[300px]'}>
+        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+          {p.label || p.name}
+          {p.isRequired && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+
+        {controlType === 'SLIDER' && ctrl ? (
+          <SliderControl
+            value={values[p.name] || ''}
+            min={ctrl.sliderMin ?? 0}
+            max={ctrl.sliderMax ?? 100}
+            step={ctrl.sliderStep ?? 1}
+            onChange={v => handleChange(p.name, v)}
+          />
+        ) : controlType === 'RADIO' ? (
+          <RadioControl
+            value={values[p.name] || ''}
+            options={options}
+            onChange={v => handleChange(p.name, v)}
+          />
+        ) : controlType === 'MULTI_CHECKBOX' ? (
+          <MultiCheckboxControl
+            value={values[p.name] || ''}
+            options={options}
+            onChange={v => handleChange(p.name, v)}
+          />
+        ) : (controlType === 'DROPDOWN' || p.paramType === 'SELECT') && hasMoreByParam[p.name] && columnByParam[p.name] ? (
+          <TypeaheadControl
+            value={values[p.name] || ''}
+            paramName={p.name}
+            reportId={reportId}
+            columnName={columnByParam[p.name]}
+            initialOptions={dynamicOptions[p.name] || []}
+            parentValues={collectParentValues(p.name, values)}
+            onChange={v => handleChange(p.name, v)}
+          />
+        ) : controlType === 'DROPDOWN' || p.paramType === 'SELECT' ? (
+          <select
+            value={values[p.name] || ''}
+            onChange={e => handleChange(p.name, e.target.value)}
+            className="input text-sm"
+          >
+            {!p.isRequired && <option value="">{t('common.all')}</option>}
+            {options.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        ) : p.paramType === 'DATE' || p.paramType === 'DATE_RANGE' || controlType === 'DATE_PICKER' ? (
+          <input
+            type="date"
+            value={values[p.name] || ''}
+            onChange={e => handleChange(p.name, e.target.value)}
+            className="input text-sm"
+          />
+        ) : p.paramType === 'BOOLEAN' ? (
+          <select
+            value={values[p.name] || ''}
+            onChange={e => handleChange(p.name, e.target.value)}
+            className="input text-sm"
+          >
+            <option value="">—</option>
+            <option value="true">{t('common.yes')}</option>
+            <option value="false">{t('common.no')}</option>
+          </select>
+        ) : p.paramType === 'NUMBER' ? (
+          <NumberInput
+            value={values[p.name] || ''}
+            onChange={v => handleChange(p.name, v)}
+            placeholder={p.defaultValue || ''}
+            className="input text-sm"
+          />
+        ) : (
+          <input
+            type="text"
+            value={values[p.name] || ''}
+            onChange={e => handleChange(p.name, e.target.value)}
+            placeholder={p.defaultValue || ''}
+            className="input text-sm"
+          />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className={`card ${compact ? 'p-3' : 'p-4'} ${className}`}>
       <div className={`flex ${compact ? 'flex-col items-stretch gap-3' : 'flex-wrap items-end gap-4'}`}>
-        {parameters.map(p => {
-          const ctrl = getControl(p.name)
-          const controlType = ctrl?.controlType || guessControlType(p)
-          const options = dynamicOptions[p.name] || (p.config?.options as string[] | undefined) || []
-
+        {groupParameters(parameters).map((section, si) => {
+          if (!section.title) return <Fragment key={si}>{section.items.map(renderParam)}</Fragment>
+          const collapsed = collapsedGroups.includes(section.title)
           return (
-            <div key={p.name} className={compact ? 'w-full' : 'flex-1 min-w-[180px] max-w-[300px]'}>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                {p.label || p.name}
-                {p.isRequired && <span className="text-red-500 ml-0.5">*</span>}
-              </label>
-
-              {controlType === 'SLIDER' && ctrl ? (
-                <SliderControl
-                  value={values[p.name] || ''}
-                  min={ctrl.sliderMin ?? 0}
-                  max={ctrl.sliderMax ?? 100}
-                  step={ctrl.sliderStep ?? 1}
-                  onChange={v => handleChange(p.name, v)}
-                />
-              ) : controlType === 'RADIO' ? (
-                <RadioControl
-                  value={values[p.name] || ''}
-                  options={options}
-                  onChange={v => handleChange(p.name, v)}
-                />
-              ) : controlType === 'MULTI_CHECKBOX' ? (
-                <MultiCheckboxControl
-                  value={values[p.name] || ''}
-                  options={options}
-                  onChange={v => handleChange(p.name, v)}
-                />
-              ) : (controlType === 'DROPDOWN' || p.paramType === 'SELECT') && hasMoreByParam[p.name] && columnByParam[p.name] ? (
-                <TypeaheadControl
-                  value={values[p.name] || ''}
-                  paramName={p.name}
-                  reportId={reportId}
-                  columnName={columnByParam[p.name]}
-                  initialOptions={dynamicOptions[p.name] || []}
-                  parentValues={collectParentValues(p.name, values)}
-                  onChange={v => handleChange(p.name, v)}
-                />
-              ) : controlType === 'DROPDOWN' || p.paramType === 'SELECT' ? (
-                <select
-                  value={values[p.name] || ''}
-                  onChange={e => handleChange(p.name, e.target.value)}
-                  className="input text-sm"
-                >
-                  {!p.isRequired && <option value="">{t('common.all')}</option>}
-                  {options.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              ) : p.paramType === 'DATE' || p.paramType === 'DATE_RANGE' || controlType === 'DATE_PICKER' ? (
-                <input
-                  type="date"
-                  value={values[p.name] || ''}
-                  onChange={e => handleChange(p.name, e.target.value)}
-                  className="input text-sm"
-                />
-              ) : p.paramType === 'BOOLEAN' ? (
-                <select
-                  value={values[p.name] || ''}
-                  onChange={e => handleChange(p.name, e.target.value)}
-                  className="input text-sm"
-                >
-                  <option value="">—</option>
-                  <option value="true">{t('common.yes')}</option>
-                  <option value="false">{t('common.no')}</option>
-                </select>
-              ) : p.paramType === 'NUMBER' ? (
-                <NumberInput
-                  value={values[p.name] || ''}
-                  onChange={v => handleChange(p.name, v)}
-                  placeholder={p.defaultValue || ''}
-                  className="input text-sm"
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={values[p.name] || ''}
-                  onChange={e => handleChange(p.name, e.target.value)}
-                  placeholder={p.defaultValue || ''}
-                  className="input text-sm"
-                />
-              )}
-            </div>
+            <Fragment key={si}>
+              <button
+                type="button"
+                onClick={() => toggleGroup(section.title)}
+                aria-expanded={!collapsed}
+                title={t('reports.filter_group_toggle')}
+                className={clsx(
+                  'flex items-center gap-1 text-left text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400',
+                  compact ? 'w-full' : 'basis-full',
+                  si > 0 && 'pt-2 border-t border-surface-200 dark:border-dark-surface-100',
+                )}
+              >
+                {collapsed ? <ChevronRight className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 flex-shrink-0" />}
+                <span className="min-w-0 break-words">{section.title}</span>
+                {collapsed && <span className="text-xs font-normal text-slate-400">({section.items.length})</span>}
+              </button>
+              {!collapsed && section.items.map(renderParam)}
+            </Fragment>
           )
         })}
 
         <button
           onClick={handleApply}
-          disabled={loading}
+          disabled={loading || missingRequired.length > 0}
           className={`btn-primary h-[38px] ${compact ? 'w-full justify-center' : ''}`}
         >
           <Play className="w-4 h-4" />
           {t('common.apply')}
         </button>
+        {missingRequired.length > 0 && (
+          <p className={clsx('text-xs text-amber-600 dark:text-amber-400', compact ? 'w-full' : 'basis-full')}>
+            {t('reports.fill_required', { fields: missingRequired.map(p => p.label || p.name).join(', ') })}
+          </p>
+        )}
       </div>
     </div>
   )

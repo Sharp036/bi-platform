@@ -922,6 +922,17 @@ export default function PropertyPanel() {
                 <Field label={t('designer.button_confirm_text')}>
                   <input value={bc.confirmText as string || ''} onChange={e => updateBtn({ confirmText: e.target.value })} className="input text-sm" placeholder={t('interactive.button.run_job_confirm')} />
                 </Field>
+                <Field label={t('designer.button_required_params')}>
+                  <input
+                    value={((bc.requiredParams as string[] | undefined) || []).join(', ')}
+                    onChange={e => updateBtn({ requiredParams: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                    className="input text-sm"
+                    placeholder="campaign_code"
+                  />
+                </Field>
+                <Field label={t('designer.button_require_rows_in')}>
+                  <input value={bc.requireRowsIn as string || ''} onChange={e => updateBtn({ requireRowsIn: e.target.value })} className="input text-sm" />
+                </Field>
               </>
             )}
             {bc.buttonType === 'FILTER' && (
